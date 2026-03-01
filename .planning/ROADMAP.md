@@ -33,11 +33,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Zustand store is structured with empty domain slice pattern (child profile, skill states, session, gamification slots)
   4. TypeScript strict mode compiles with zero errors via `npm run typecheck`
   5. Jest test suite runs successfully with at least one passing test
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — Theme constants, Zustand store skeleton with 4 domain slices, navigation types
+- [ ] 01-02-PLAN.md — App.tsx root component, AppNavigator, 3 styled placeholder screens, store tests
 
 ### Phase 2: Math Engine Core
 **Goal**: Engine programmatically generates addition and subtraction problems for grades 1-3 with correct answers, standards tags, and configurable difficulty
