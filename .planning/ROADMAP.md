@@ -52,8 +52,8 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — Types, standards, skill taxonomy, seeded PRNG, carry/borrow constraints
+- [ ] 02-02-PLAN.md — Addition/subtraction templates, generator function, Zod validation, barrel exports, tests
 
 ### Phase 3: Bug Library & Answer Formats
 **Goal**: Problems include misconception-based distractors and support both multiple choice and free text input answer formats
