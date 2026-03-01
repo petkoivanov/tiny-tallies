@@ -36,7 +36,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Theme constants, Zustand store skeleton with 4 domain slices, navigation types
+- [x] 01-01-PLAN.md — Theme constants, Zustand store skeleton with 4 domain slices, navigation types
 - [ ] 01-02-PLAN.md — App.tsx root component, AppNavigator, 3 styled placeholder screens, store tests
 
 ### Phase 2: Math Engine Core
@@ -160,7 +160,7 @@ Note: Phase 4 can begin in parallel with Phases 2-3 (no dependency on math engin
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Project Scaffolding & Navigation | 0/2 | Not started | - |
+| 1. Project Scaffolding & Navigation | 1/2 | In progress | - |
 | 2. Math Engine Core | 0/2 | Not started | - |
 | 3. Bug Library & Answer Formats | 0/2 | Not started | - |
 | 4. State Management & Persistence | 0/2 | Not started | - |

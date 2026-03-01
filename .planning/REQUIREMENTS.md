@@ -31,7 +31,7 @@ Requirements for v0.1 Foundation milestone. Each maps to roadmap phases.
 - [ ] **STOR-02**: Skill states track per-skill Elo rating and attempt/correct counts
 - [ ] **STOR-03**: Session state tracks current problem index, answers given, score, and XP earned
 - [ ] **STOR-04**: All state persists across app restarts via AsyncStorage
-- [ ] **STOR-05**: Zustand store uses domain slices pattern (child profile, skill states, session, gamification)
+- [x] **STOR-05**: Zustand store uses domain slices pattern (child profile, skill states, session, gamification)
 
 ### Session Flow
 
@@ -129,7 +129,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| STOR-05 | Phase 1: Project Scaffolding & Navigation | Pending |
+| STOR-05 | Phase 1: Project Scaffolding & Navigation | Complete |
 | NAV-01 | Phase 1: Project Scaffolding & Navigation | Pending |
 | MATH-01 | Phase 2: Math Engine Core | Pending |
 | MATH-02 | Phase 2: Math Engine Core | Pending |
