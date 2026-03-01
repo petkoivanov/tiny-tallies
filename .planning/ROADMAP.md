@@ -64,11 +64,11 @@ Plans:
   2. Multiple choice format presents exactly 1 correct answer and 3 plausible distractors in shuffled order
   3. Free text input format accepts numeric keyboard input and validates against the computed correct answer
   4. Both answer formats work for addition and subtraction problems across all difficulty levels
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md — Bug Library types, 11 misconception compute functions, distractor validation, three-phase assembly algorithm, tests
+- [ ] 03-02-PLAN.md — Answer format types, multiple choice formatter, free text parsing/validation, barrel exports, tests
 
 ### Phase 4: State Management & Persistence
 **Goal**: App stores and persists child profile, per-skill tracking, and session state across restarts
