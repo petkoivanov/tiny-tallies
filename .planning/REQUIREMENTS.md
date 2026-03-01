@@ -36,7 +36,7 @@ Requirements for v0.1 Foundation milestone. Each maps to roadmap phases.
 ### Session Flow
 
 - [ ] **SESS-01**: Child can start a practice session from the home screen
-- [ ] **SESS-02**: Session follows structured phases: warmup (easy) → practice (adaptive) → cooldown (easy)
+- [ ] **SESS-02**: Session follows structured phases: warmup (easy) -> practice (adaptive) -> cooldown (easy)
 - [ ] **SESS-03**: Session displays problems one at a time with immediate feedback (correct/incorrect)
 - [ ] **SESS-04**: Session ends with a summary showing correct/total, XP earned, and skills practiced
 - [ ] **SESS-05**: Parent can configure session length (number of problems or time limit)
@@ -52,14 +52,14 @@ Requirements for v0.1 Foundation milestone. Each maps to roadmap phases.
 
 ### Navigation
 
-- [ ] **NAV-01**: React Navigation native-stack with Home → Session → Results flow
+- [ ] **NAV-01**: React Navigation native-stack with Home -> Session -> Results flow
 - [ ] **NAV-02**: Back navigation is disabled during active session (prevents accidental exit)
 - [ ] **NAV-03**: Session can be exited via explicit "Quit" button with confirmation
 
 ### Gamification
 
 - [ ] **GAME-01**: Child earns XP for each correct answer (scaled by problem difficulty)
-- [ ] **GAME-02**: XP accumulates toward levels with formula: XP per level = 100 + (level × 20)
+- [ ] **GAME-02**: XP accumulates toward levels with formula: XP per level = 100 + (level x 20)
 - [ ] **GAME-03**: Level-up triggers celebration animation
 - [ ] **GAME-04**: Weekly streak tracks consecutive weeks with at least one completed session
 - [ ] **GAME-05**: Home screen displays current level, XP progress, and streak count
@@ -117,7 +117,7 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | Web or platform-specific features | Mobile-first with React Native |
 | Advanced analytics/reporting | Parent dashboard deferred to v0.7 |
 | Real-time multiplayer | COPPA complexity; cooperative challenges in v0.7 |
-| Chat or social features | COPPA compliance — no personal info exchange |
+| Chat or social features | COPPA compliance -- no personal info exchange |
 | Multiplication/division problems | Add in v0.2+ after addition/subtraction foundation |
 | Fraction problems | Add in v0.3 alongside fraction manipulatives |
 | Sound/audio/TTS | Deferred to v0.3+ with manipulatives |
@@ -129,13 +129,48 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated by roadmap) | | |
+| STOR-05 | Phase 1: Project Scaffolding & Navigation | Pending |
+| NAV-01 | Phase 1: Project Scaffolding & Navigation | Pending |
+| MATH-01 | Phase 2: Math Engine Core | Pending |
+| MATH-02 | Phase 2: Math Engine Core | Pending |
+| MATH-03 | Phase 2: Math Engine Core | Pending |
+| MATH-04 | Phase 2: Math Engine Core | Pending |
+| MATH-08 | Phase 2: Math Engine Core | Pending |
+| MATH-05 | Phase 3: Bug Library & Answer Formats | Pending |
+| MATH-06 | Phase 3: Bug Library & Answer Formats | Pending |
+| MATH-07 | Phase 3: Bug Library & Answer Formats | Pending |
+| STOR-01 | Phase 4: State Management & Persistence | Pending |
+| STOR-02 | Phase 4: State Management & Persistence | Pending |
+| STOR-03 | Phase 4: State Management & Persistence | Pending |
+| STOR-04 | Phase 4: State Management & Persistence | Pending |
+| ADPT-01 | Phase 5: Adaptive Difficulty | Pending |
+| ADPT-02 | Phase 5: Adaptive Difficulty | Pending |
+| ADPT-03 | Phase 5: Adaptive Difficulty | Pending |
+| ADPT-04 | Phase 5: Adaptive Difficulty | Pending |
+| SESS-01 | Phase 6: Session Flow & Navigation Control | Pending |
+| SESS-02 | Phase 6: Session Flow & Navigation Control | Pending |
+| SESS-03 | Phase 6: Session Flow & Navigation Control | Pending |
+| SESS-04 | Phase 6: Session Flow & Navigation Control | Pending |
+| SESS-05 | Phase 6: Session Flow & Navigation Control | Pending |
+| NAV-02 | Phase 6: Session Flow & Navigation Control | Pending |
+| NAV-03 | Phase 6: Session Flow & Navigation Control | Pending |
+| UI-01 | Phase 7: Core UI Screens | Pending |
+| UI-02 | Phase 7: Core UI Screens | Pending |
+| UI-03 | Phase 7: Core UI Screens | Pending |
+| UI-04 | Phase 7: Core UI Screens | Pending |
+| UI-05 | Phase 7: Core UI Screens | Pending |
+| GAME-01 | Phase 8: Gamification & Feedback | Pending |
+| GAME-02 | Phase 8: Gamification & Feedback | Pending |
+| GAME-03 | Phase 8: Gamification & Feedback | Pending |
+| GAME-04 | Phase 8: Gamification & Feedback | Pending |
+| GAME-05 | Phase 8: Gamification & Feedback | Pending |
+| UI-06 | Phase 8: Gamification & Feedback | Pending |
 
 **Coverage:**
-- v1 requirements: 30 total
-- Mapped to phases: 0
-- Unmapped: 30
+- v1 requirements: 36 total
+- Mapped to phases: 36
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 after initial definition*
+*Last updated: 2026-03-01 after roadmap creation*
