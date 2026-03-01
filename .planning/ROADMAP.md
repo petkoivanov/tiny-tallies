@@ -12,7 +12,7 @@ Tiny Tallies v0.1 Foundation delivers a working math practice app for children a
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Project Scaffolding & Navigation** - Expo 54 project setup, TypeScript strict, navigation shell, Zustand store skeleton
+- [x] **Phase 1: Project Scaffolding & Navigation** - Expo 54 project setup, TypeScript strict, navigation shell, Zustand store skeleton (completed 2026-03-01)
 - [ ] **Phase 2: Math Engine Core** - Programmatic addition/subtraction generation with standards tagging and difficulty templates
 - [ ] **Phase 3: Bug Library & Answer Formats** - Misconception-based distractor generation, multiple choice, and free input formats
 - [ ] **Phase 4: State Management & Persistence** - Child profile, skill states, session state, and AsyncStorage persistence
@@ -160,7 +160,7 @@ Note: Phase 4 can begin in parallel with Phases 2-3 (no dependency on math engin
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Project Scaffolding & Navigation | 1/2 | In progress | - |
+| 1. Project Scaffolding & Navigation | 1/2 | Complete    | 2026-03-01 |
 | 2. Math Engine Core | 0/2 | Not started | - |
 | 3. Bug Library & Answer Formats | 0/2 | Not started | - |
 | 4. State Management & Persistence | 0/2 | Not started | - |
