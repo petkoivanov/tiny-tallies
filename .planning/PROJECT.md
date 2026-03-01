@@ -118,6 +118,12 @@ All research is saved in `.planning/`:
 - [05-misconception-detection.md](.planning/05-misconception-detection.md) — Bug library, confirmation rules
 - [06-spaced-repetition.md](.planning/06-spaced-repetition.md) — Leitner, BKT, Elo, session design
 - [07-gamification.md](.planning/07-gamification.md) — XP, coins, streaks, badges, COPPA compliance
+- [08-onboarding-placement.md](.planning/08-onboarding-placement.md) — Onboarding flow, CAT-based diagnostic placement, cold start calibration
+- [09-child-ux-design.md](.planning/09-child-ux-design.md) — Touch targets, visual design, cognitive development, accessibility
+- [10-sound-audio-design.md](.planning/10-sound-audio-design.md) — Audio categories, feedback sounds, background music, TTS, haptics
+- [11-math-anxiety.md](.planning/11-math-anxiety.md) — Detection signals, mitigation strategies, growth mindset integration
+- [12-coppa-privacy.md](.planning/12-coppa-privacy.md) — COPPA 2025 amendments, VPC methods, data minimization, GDPR-K overlap
+- [13-problem-generation.md](.planning/13-problem-generation.md) — Template system, difficulty calibration, distractor generation, session composition
 
 ## Constraints
 
