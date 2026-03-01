@@ -52,7 +52,7 @@ Requirements for v0.1 Foundation milestone. Each maps to roadmap phases.
 
 ### Navigation
 
-- [ ] **NAV-01**: React Navigation native-stack with Home -> Session -> Results flow
+- [x] **NAV-01**: React Navigation native-stack with Home -> Session -> Results flow
 - [ ] **NAV-02**: Back navigation is disabled during active session (prevents accidental exit)
 - [ ] **NAV-03**: Session can be exited via explicit "Quit" button with confirmation
 
@@ -130,7 +130,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | STOR-05 | Phase 1: Project Scaffolding & Navigation | Complete |
-| NAV-01 | Phase 1: Project Scaffolding & Navigation | Pending |
+| NAV-01 | Phase 1: Project Scaffolding & Navigation | Complete |
 | MATH-01 | Phase 2: Math Engine Core | Pending |
 | MATH-02 | Phase 2: Math Engine Core | Pending |
 | MATH-03 | Phase 2: Math Engine Core | Pending |
