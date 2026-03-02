@@ -124,5 +124,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 05-02-PLAN.md
-Resume file: .planning/phases/05-adaptive-difficulty/05-02-SUMMARY.md
+Stopped at: Phase 6 context gathered
+Resume file: .planning/phases/06-session-flow-navigation-control/06-CONTEXT.md
