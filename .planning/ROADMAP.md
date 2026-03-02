@@ -79,11 +79,11 @@ Plans:
   2. Skill states track per-skill Elo rating and attempt/correct counts
   3. Session state tracks current problem index, answers given, score, and XP earned during an active session
   4. All state survives app restart (kill and relaunch) via AsyncStorage
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md — Enrich slice types, avatar constants, lazy skill state helpers, profile completeness checker, tests
+- [ ] 04-02-PLAN.md — Persist middleware with AsyncStorage, versioned migrations (v1->v2), partialize config, persistence integration tests
 
 ### Phase 5: Adaptive Difficulty
 **Goal**: Problem selection adapts to the child's skill level using Elo ratings, converging on 85% success rate with a frustration safety net
