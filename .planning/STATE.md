@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v0.1
 milestone_name: milestone
 status: in-progress
-last_updated: "2026-03-02T23:05:00.000Z"
+last_updated: "2026-03-02T23:11:45.000Z"
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-01)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** Phase 5 in progress -- Adaptive difficulty foundation modules.
+**Current focus:** Phase 5 complete -- Adaptive difficulty service fully built. Ready for Phase 6.
 
 ## Current Position
 
 Phase: 5 of 8 (Adaptive Difficulty)
-Plan: 1 of 2 in current phase (05-01 complete)
-Status: In Progress
-Last activity: 2026-03-02 -- Completed 05-01-PLAN.md (Elo Rating & Adaptive Foundations)
+Plan: 2 of 2 in current phase (phase complete)
+Status: Phase Complete
+Last activity: 2026-03-02 -- Completed 05-02-PLAN.md (Problem Selector, Skill Selector & XP Calculator)
 
-Progress: [█████████░] 90%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: 2.6min
-- Total execution time: 0.40 hours
+- Total plans completed: 10
+- Average duration: 2.8min
+- Total execution time: 0.47 hours
 
 **By Phase:**
 
@@ -44,10 +44,10 @@ Progress: [█████████░] 90%
 | 2 - Math Engine Core | 2 | 5min | 2.5min |
 | 3 - Bug Library & Answer Formats | 2 | 6min | 3min |
 | 4 - State Management & Persistence | 2 | 5min | 2.5min |
-| 5 - Adaptive Difficulty | 1 | 3min | 3min |
+| 5 - Adaptive Difficulty | 2 | 7min | 3.5min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (2min), 04-01 (2min), 04-02 (3min), 05-01 (3min)
+- Last 5 plans: 04-01 (2min), 04-02 (3min), 05-01 (3min), 05-02 (4min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -94,6 +94,11 @@ Recent decisions affecting current work:
 - [05-01]: Frustration state is session-scoped ephemeral data, never persisted to store
 - [05-01]: K-factor formula K=16+24/(1+0.05*attempts) gives K=40 at start, decaying toward K=16
 - [05-01]: UNLOCK_THRESHOLD=950 set below DEFAULT_ELO=1000 so new skills are accessible by default
+- [05-02]: Gaussian weight sigma=0.10 provides sharp selectivity around 85% target while still allowing variety
+- [05-02]: WEAKNESS_BASELINE=50 ensures all skills get non-zero selection probability
+- [05-02]: XP SCALE_FACTOR=0.01 gives moderate bonus (3 XP per 250 Elo above reference)
+- [05-02]: Frustration override filters templates but still applies gaussian weighted selection
+- [05-02]: Integration tests use real functions (no mocking) to validate module composition
 
 ### Pending Todos
 
@@ -106,5 +111,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 05-01-PLAN.md
-Resume file: .planning/phases/05-adaptive-difficulty/05-01-SUMMARY.md
+Stopped at: Completed 05-02-PLAN.md
+Resume file: .planning/phases/05-adaptive-difficulty/05-02-SUMMARY.md
