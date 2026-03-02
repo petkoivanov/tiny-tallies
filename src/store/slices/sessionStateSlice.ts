@@ -5,6 +5,12 @@ export interface SessionAnswer {
   problemId: string;
   answer: number;
   correct: boolean;
+  /** Time in milliseconds to answer (for analytics). */
+  timeMs?: number;
+  /** Answer format used: multiple choice or free text input. */
+  format?: 'mc' | 'free';
+  /** Matched misconception bugId from distractor (for misconception tracking). */
+  bugId?: string;
 }
 
 export interface SessionStateSlice {
@@ -13,6 +19,7 @@ export interface SessionStateSlice {
   sessionScore: number;
   sessionXpEarned: number;
   sessionAnswers: SessionAnswer[];
+  sessionStartTime: number | null;
   startSession: () => void;
   endSession: () => void;
   recordAnswer: (answer: SessionAnswer) => void;
@@ -29,6 +36,7 @@ export const createSessionStateSlice: StateCreator<
   sessionScore: 0,
   sessionXpEarned: 0,
   sessionAnswers: [],
+  sessionStartTime: null,
   startSession: () =>
     set({
       isSessionActive: true,
@@ -36,8 +44,9 @@ export const createSessionStateSlice: StateCreator<
       sessionScore: 0,
       sessionXpEarned: 0,
       sessionAnswers: [],
+      sessionStartTime: Date.now(),
     }),
-  endSession: () => set({ isSessionActive: false }),
+  endSession: () => set({ isSessionActive: false, sessionStartTime: null }),
   recordAnswer: (answer) =>
     set((state) => ({
       sessionAnswers: [...state.sessionAnswers, answer],

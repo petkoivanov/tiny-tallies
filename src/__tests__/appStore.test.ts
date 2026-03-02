@@ -173,3 +173,82 @@ describe('skill state helpers', () => {
     ).toBe(true);
   });
 });
+
+describe('enriched slice behaviors', () => {
+  beforeEach(() => {
+    useAppStore.setState(useAppStore.getInitialState());
+  });
+
+  it('updateSkillState with non-existent skillId creates entry with DEFAULT_ELO', () => {
+    useAppStore.getState().updateSkillState('add.single', { attempts: 1 });
+
+    const state = useAppStore.getState();
+    expect(state.skillStates['add.single']).toEqual({
+      eloRating: 1000,
+      attempts: 1,
+      correct: 0,
+    });
+  });
+
+  it('updateSkillState with existing skillId preserves non-updated fields', () => {
+    useAppStore.getState().updateSkillState('add.single', {
+      eloRating: 1050,
+      attempts: 5,
+      correct: 4,
+    });
+
+    useAppStore.getState().updateSkillState('add.single', { attempts: 6 });
+
+    const state = useAppStore.getState();
+    expect(state.skillStates['add.single']).toEqual({
+      eloRating: 1050,
+      attempts: 6,
+      correct: 4,
+    });
+  });
+
+  it('startSession sets sessionStartTime to a number', () => {
+    useAppStore.getState().startSession();
+
+    const state = useAppStore.getState();
+    expect(typeof state.sessionStartTime).toBe('number');
+    expect(state.sessionStartTime).toBeGreaterThan(0);
+  });
+
+  it('endSession resets sessionStartTime to null', () => {
+    useAppStore.getState().startSession();
+    expect(useAppStore.getState().sessionStartTime).not.toBeNull();
+
+    useAppStore.getState().endSession();
+    expect(useAppStore.getState().sessionStartTime).toBeNull();
+  });
+
+  it('recordAnswer with optional metadata fields preserves them', () => {
+    useAppStore.getState().startSession();
+
+    useAppStore.getState().recordAnswer({
+      problemId: 'p1',
+      answer: 7,
+      correct: false,
+      timeMs: 3200,
+      format: 'mc',
+      bugId: 'add_carry_ignore',
+    });
+
+    const state = useAppStore.getState();
+    expect(state.sessionAnswers).toHaveLength(1);
+    expect(state.sessionAnswers[0]).toEqual({
+      problemId: 'p1',
+      answer: 7,
+      correct: false,
+      timeMs: 3200,
+      format: 'mc',
+      bugId: 'add_carry_ignore',
+    });
+  });
+
+  it('sessionStartTime initializes as null', () => {
+    const state = useAppStore.getState();
+    expect(state.sessionStartTime).toBeNull();
+  });
+});
