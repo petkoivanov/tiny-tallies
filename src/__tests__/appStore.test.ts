@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppStore, STORE_VERSION } from '@/store/appStore';
+import { migrateStore } from '@/store/migrations';
 import { AVATARS, DEFAULT_AVATAR_ID } from '@/store/constants/avatars';
 import {
   DEFAULT_ELO,
@@ -253,5 +254,134 @@ describe('enriched slice behaviors', () => {
   it('sessionStartTime initializes as null', () => {
     const state = useAppStore.getState();
     expect(state.sessionStartTime).toBeNull();
+  });
+});
+
+describe('appStore persistence', () => {
+  beforeEach(async () => {
+    await AsyncStorage.clear();
+    useAppStore.setState(useAppStore.getInitialState(), true);
+  });
+
+  it('persists child profile to AsyncStorage', async () => {
+    useAppStore.getState().setChildProfile({
+      childName: 'Luna',
+      childAge: 7,
+      childGrade: 2,
+      avatarId: 'owl',
+    });
+
+    // Flush async persist write
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const stored = await AsyncStorage.getItem('tiny-tallies-store');
+    expect(stored).not.toBeNull();
+    const parsed = JSON.parse(stored!);
+    expect(parsed.state.childName).toBe('Luna');
+    expect(parsed.state.childAge).toBe(7);
+    expect(parsed.state.childGrade).toBe(2);
+    expect(parsed.state.avatarId).toBe('owl');
+  });
+
+  it('persists skill states to AsyncStorage', async () => {
+    useAppStore
+      .getState()
+      .updateSkillState('addition.single-digit.no-carry', {
+        eloRating: 1050,
+        attempts: 5,
+        correct: 4,
+      });
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const stored = await AsyncStorage.getItem('tiny-tallies-store');
+    expect(stored).not.toBeNull();
+    const parsed = JSON.parse(stored!);
+    const skill =
+      parsed.state.skillStates['addition.single-digit.no-carry'];
+    expect(skill).toBeDefined();
+    expect(skill.eloRating).toBe(1050);
+    expect(skill.attempts).toBe(5);
+    expect(skill.correct).toBe(4);
+  });
+
+  it('persists gamification data to AsyncStorage', async () => {
+    useAppStore.getState().addXp(50);
+    useAppStore.getState().setLevel(3);
+    useAppStore.getState().incrementStreak();
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const stored = await AsyncStorage.getItem('tiny-tallies-store');
+    expect(stored).not.toBeNull();
+    const parsed = JSON.parse(stored!);
+    expect(parsed.state.xp).toBe(50);
+    expect(parsed.state.level).toBe(3);
+    expect(parsed.state.weeklyStreak).toBe(1);
+  });
+
+  it('does NOT persist session state', async () => {
+    useAppStore.getState().startSession();
+    useAppStore.getState().recordAnswer({
+      problemId: 'p1',
+      answer: 5,
+      correct: true,
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const stored = await AsyncStorage.getItem('tiny-tallies-store');
+    expect(stored).not.toBeNull();
+    const parsed = JSON.parse(stored!);
+    expect(parsed.state.isSessionActive).toBeUndefined();
+    expect(parsed.state.sessionAnswers).toBeUndefined();
+    expect(parsed.state.sessionScore).toBeUndefined();
+    expect(parsed.state.sessionStartTime).toBeUndefined();
+  });
+
+  it('does NOT persist action functions', async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const stored = await AsyncStorage.getItem('tiny-tallies-store');
+    expect(stored).not.toBeNull();
+    const parsed = JSON.parse(stored!);
+    expect(parsed.state.setChildProfile).toBeUndefined();
+    expect(parsed.state.updateSkillState).toBeUndefined();
+    expect(parsed.state.startSession).toBeUndefined();
+    expect(parsed.state.addXp).toBeUndefined();
+  });
+});
+
+describe('store migrations', () => {
+  it('migrateStore from version 1 fills defaults', () => {
+    const result = migrateStore({}, 1);
+    expect(result.childName).toBeNull();
+    expect(result.childAge).toBeNull();
+    expect(result.childGrade).toBeNull();
+    expect(result.avatarId).toBeNull();
+    expect(result.skillStates).toEqual({});
+    expect(result.xp).toBe(0);
+    expect(result.level).toBe(1);
+    expect(result.weeklyStreak).toBe(0);
+    expect(result.lastSessionDate).toBeNull();
+  });
+
+  it('migrateStore from version 2 returns state unchanged', () => {
+    const input = { childName: 'Luna', xp: 100, skillStates: {} };
+    const result = migrateStore(input, 2);
+    expect(result).toEqual(input);
+  });
+
+  it('migrateStore handles null persistedState', () => {
+    const result = migrateStore(null, 0);
+    expect(result.childName).toBeNull();
+    expect(result.childAge).toBeNull();
+    expect(result.childGrade).toBeNull();
+    expect(result.avatarId).toBeNull();
+    expect(result.skillStates).toEqual({});
+    expect(result.xp).toBe(0);
+    expect(result.level).toBe(1);
+    expect(result.weeklyStreak).toBe(0);
+    expect(result.lastSessionDate).toBeNull();
   });
 });
