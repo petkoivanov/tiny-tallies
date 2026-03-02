@@ -43,3 +43,22 @@ export type { StandardCode } from './standards';
 export { requiresCarry, requiresBorrow } from './constraints';
 export { createRng } from './seededRng';
 export type { SeededRng } from './seededRng';
+
+// Bug Library (Phase 3)
+export { generateDistractors } from './bugLibrary';
+export type { DistractorResult, DistractorSource, BugPattern } from './bugLibrary';
+
+// Answer Formats (Phase 3)
+export {
+  formatAsMultipleChoice,
+  formatAsFreeText,
+  parseIntegerInput,
+  validateFreeTextAnswer,
+} from './answerFormats';
+export type {
+  AnswerFormat,
+  ChoiceOption,
+  MultipleChoicePresentation,
+  FreeTextPresentation,
+  FormattedProblem,
+} from './answerFormats';
