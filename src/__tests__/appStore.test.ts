@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppStore, STORE_VERSION } from '@/store/appStore';
 import { AVATARS, DEFAULT_AVATAR_ID } from '@/store/constants/avatars';
 import {
@@ -7,8 +8,9 @@ import {
 } from '@/store/helpers/skillStateHelpers';
 
 describe('appStore composition', () => {
-  beforeEach(() => {
-    useAppStore.setState(useAppStore.getInitialState());
+  beforeEach(async () => {
+    await AsyncStorage.clear();
+    useAppStore.setState(useAppStore.getInitialState(), true);
   });
 
   it('initializes with all four domain slices', () => {
@@ -79,8 +81,8 @@ describe('appStore composition', () => {
     expect(useAppStore.getState().xp).toBe(35);
   });
 
-  it('STORE_VERSION equals 1', () => {
-    expect(STORE_VERSION).toBe(1);
+  it('STORE_VERSION equals 2', () => {
+    expect(STORE_VERSION).toBe(2);
   });
 });
 
@@ -175,8 +177,9 @@ describe('skill state helpers', () => {
 });
 
 describe('enriched slice behaviors', () => {
-  beforeEach(() => {
-    useAppStore.setState(useAppStore.getInitialState());
+  beforeEach(async () => {
+    await AsyncStorage.clear();
+    useAppStore.setState(useAppStore.getInitialState(), true);
   });
 
   it('updateSkillState with non-existent skillId creates entry with DEFAULT_ELO', () => {
