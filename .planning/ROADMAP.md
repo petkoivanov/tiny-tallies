@@ -13,9 +13,9 @@ Tiny Tallies v0.1 Foundation delivers a working math practice app for children a
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Project Scaffolding & Navigation** - Expo 54 project setup, TypeScript strict, navigation shell, Zustand store skeleton (completed 2026-03-01)
-- [ ] **Phase 2: Math Engine Core** - Programmatic addition/subtraction generation with standards tagging and difficulty templates
-- [ ] **Phase 3: Bug Library & Answer Formats** - Misconception-based distractor generation, multiple choice, and free input formats
-- [ ] **Phase 4: State Management & Persistence** - Child profile, skill states, session state, and AsyncStorage persistence
+- [x] **Phase 2: Math Engine Core** - Programmatic addition/subtraction generation with standards tagging and difficulty templates (completed 2026-03-02)
+- [x] **Phase 3: Bug Library & Answer Formats** - Misconception-based distractor generation, multiple choice, and free input formats (completed 2026-03-02)
+- [x] **Phase 4: State Management & Persistence** - Child profile, skill states, session state, and AsyncStorage persistence (completed 2026-03-02)
 - [ ] **Phase 5: Adaptive Difficulty** - Elo rating system per skill targeting 85% success rate with frustration guard
 - [ ] **Phase 6: Session Flow & Navigation Control** - Full session lifecycle (warmup/practice/cooldown) with navigation guards
 - [ ] **Phase 7: Core UI Screens** - Home, session, and results screens with child-friendly design (48dp targets, dark theme)
@@ -160,10 +160,10 @@ Note: Phase 4 can begin in parallel with Phases 2-3 (no dependency on math engin
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Project Scaffolding & Navigation | 1/2 | Complete    | 2026-03-01 |
-| 2. Math Engine Core | 0/2 | Not started | - |
-| 3. Bug Library & Answer Formats | 0/2 | Not started | - |
-| 4. State Management & Persistence | 0/2 | Not started | - |
+| 1. Project Scaffolding & Navigation | 2/2 | Complete | 2026-03-01 |
+| 2. Math Engine Core | 2/2 | Complete | 2026-03-02 |
+| 3. Bug Library & Answer Formats | 2/2 | Complete | 2026-03-02 |
+| 4. State Management & Persistence | 2/2 | Complete | 2026-03-02 |
 | 5. Adaptive Difficulty | 0/2 | Not started | - |
 | 6. Session Flow & Navigation Control | 0/3 | Not started | - |
 | 7. Core UI Screens | 0/3 | Not started | - |
