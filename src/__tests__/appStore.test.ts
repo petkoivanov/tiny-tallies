@@ -1,4 +1,10 @@
 import { useAppStore, STORE_VERSION } from '@/store/appStore';
+import { AVATARS, DEFAULT_AVATAR_ID } from '@/store/constants/avatars';
+import {
+  DEFAULT_ELO,
+  getOrCreateSkillState,
+  isProfileComplete,
+} from '@/store/helpers/skillStateHelpers';
 
 describe('appStore composition', () => {
   beforeEach(() => {
@@ -75,5 +81,95 @@ describe('appStore composition', () => {
 
   it('STORE_VERSION equals 1', () => {
     expect(STORE_VERSION).toBe(1);
+  });
+});
+
+describe('avatar constants', () => {
+  it('AVATARS has exactly 8 entries with required fields', () => {
+    expect(AVATARS).toHaveLength(8);
+    for (const avatar of AVATARS) {
+      expect(avatar).toHaveProperty('id');
+      expect(avatar).toHaveProperty('label');
+      expect(avatar).toHaveProperty('emoji');
+      expect(typeof avatar.id).toBe('string');
+      expect(typeof avatar.label).toBe('string');
+      expect(typeof avatar.emoji).toBe('string');
+    }
+  });
+
+  it('DEFAULT_AVATAR_ID is fox', () => {
+    expect(DEFAULT_AVATAR_ID).toBe('fox');
+  });
+});
+
+describe('skill state helpers', () => {
+  it('DEFAULT_ELO is 1000', () => {
+    expect(DEFAULT_ELO).toBe(1000);
+  });
+
+  it('getOrCreateSkillState returns existing state when skillId exists', () => {
+    const existing = { eloRating: 1200, attempts: 10, correct: 8 };
+    const states = { 'add.single': existing };
+    const result = getOrCreateSkillState(states, 'add.single');
+    expect(result).toEqual(existing);
+  });
+
+  it('getOrCreateSkillState returns default when skillId not found', () => {
+    const result = getOrCreateSkillState({}, 'add.single');
+    expect(result).toEqual({ eloRating: 1000, attempts: 0, correct: 0 });
+  });
+
+  it('getOrCreateSkillState accepts optional defaultElo parameter', () => {
+    const result = getOrCreateSkillState({}, 'add.single', 800);
+    expect(result).toEqual({ eloRating: 800, attempts: 0, correct: 0 });
+  });
+
+  it('isProfileComplete returns false when any field is null', () => {
+    expect(
+      isProfileComplete({
+        childName: 'Luna',
+        childAge: 7,
+        childGrade: 2,
+        avatarId: null,
+      }),
+    ).toBe(false);
+
+    expect(
+      isProfileComplete({
+        childName: null,
+        childAge: 7,
+        childGrade: 2,
+        avatarId: 'fox',
+      }),
+    ).toBe(false);
+
+    expect(
+      isProfileComplete({
+        childName: 'Luna',
+        childAge: null,
+        childGrade: 2,
+        avatarId: 'fox',
+      }),
+    ).toBe(false);
+
+    expect(
+      isProfileComplete({
+        childName: 'Luna',
+        childAge: 7,
+        childGrade: null,
+        avatarId: 'fox',
+      }),
+    ).toBe(false);
+  });
+
+  it('isProfileComplete returns true when all fields are set', () => {
+    expect(
+      isProfileComplete({
+        childName: 'Luna',
+        childAge: 7,
+        childGrade: 2,
+        avatarId: 'fox',
+      }),
+    ).toBe(true);
   });
 });
