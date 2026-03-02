@@ -27,9 +27,9 @@ Requirements for v0.1 Foundation milestone. Each maps to roadmap phases.
 
 ### State Management
 
-- [ ] **STOR-01**: Child profile stores name, age, grade, and avatar selection
-- [ ] **STOR-02**: Skill states track per-skill Elo rating and attempt/correct counts
-- [ ] **STOR-03**: Session state tracks current problem index, answers given, score, and XP earned
+- [x] **STOR-01**: Child profile stores name, age, grade, and avatar selection
+- [x] **STOR-02**: Skill states track per-skill Elo rating and attempt/correct counts
+- [x] **STOR-03**: Session state tracks current problem index, answers given, score, and XP earned
 - [ ] **STOR-04**: All state persists across app restarts via AsyncStorage
 - [x] **STOR-05**: Zustand store uses domain slices pattern (child profile, skill states, session, gamification)
 
@@ -139,9 +139,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MATH-05 | Phase 3: Bug Library & Answer Formats | Complete |
 | MATH-06 | Phase 3: Bug Library & Answer Formats | Complete |
 | MATH-07 | Phase 3: Bug Library & Answer Formats | Complete |
-| STOR-01 | Phase 4: State Management & Persistence | Pending |
-| STOR-02 | Phase 4: State Management & Persistence | Pending |
-| STOR-03 | Phase 4: State Management & Persistence | Pending |
+| STOR-01 | Phase 4: State Management & Persistence | Complete |
+| STOR-02 | Phase 4: State Management & Persistence | Complete |
+| STOR-03 | Phase 4: State Management & Persistence | Complete |
 | STOR-04 | Phase 4: State Management & Persistence | Pending |
 | ADPT-01 | Phase 5: Adaptive Difficulty | Pending |
 | ADPT-02 | Phase 5: Adaptive Difficulty | Pending |
