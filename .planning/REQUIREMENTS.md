@@ -13,7 +13,7 @@ Requirements for v0.1 Foundation milestone. Each maps to roadmap phases.
 - [x] **MATH-02**: Engine programmatically generates subtraction problems for grades 1-3 with configurable operand ranges
 - [x] **MATH-03**: Engine computes correct answers (never LLM) and validates user responses
 - [x] **MATH-04**: Each problem is tagged to a Common Core standard (e.g., 1.OA.A.1, 2.NBT.B.5)
-- [ ] **MATH-05**: Engine generates distractor answers using Bug Library misconception patterns (e.g., no-carry error, smaller-from-larger)
+- [x] **MATH-05**: Engine generates distractor answers using Bug Library misconception patterns (e.g., no-carry error, smaller-from-larger)
 - [ ] **MATH-06**: Problems support multiple choice format (1 correct + 3 distractors)
 - [ ] **MATH-07**: Problems support free text input format with numeric keyboard
 - [x] **MATH-08**: Problem templates define difficulty via operand ranges, carry/borrow requirements, and number of digits
@@ -136,7 +136,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MATH-03 | Phase 2: Math Engine Core | Complete |
 | MATH-04 | Phase 2: Math Engine Core | Complete |
 | MATH-08 | Phase 2: Math Engine Core | Complete |
-| MATH-05 | Phase 3: Bug Library & Answer Formats | Pending |
+| MATH-05 | Phase 3: Bug Library & Answer Formats | Complete |
 | MATH-06 | Phase 3: Bug Library & Answer Formats | Pending |
 | MATH-07 | Phase 3: Bug Library & Answer Formats | Pending |
 | STOR-01 | Phase 4: State Management & Persistence | Pending |

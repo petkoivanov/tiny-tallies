@@ -2,26 +2,13 @@
 gsd_state_version: 1.0
 milestone: v0.1
 milestone_name: milestone
-status: unknown
-last_updated: "2026-03-01T19:08:26.014Z"
-progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
----
-
----
-gsd_state_version: 1.0
-milestone: v0.1
-milestone_name: milestone
 status: in-progress
-last_updated: "2026-03-01T19:04:05.000Z"
+last_updated: "2026-03-02T02:33:17.000Z"
 progress:
-  total_phases: 2
+  total_phases: 8
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 6
+  completed_plans: 5
 ---
 
 # Project State
@@ -31,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-01)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** Phase 2: Math Engine Core (Complete)
+**Current focus:** Phase 3: Bug Library & Answer Formats (In Progress)
 
 ## Current Position
 
-Phase: 2 of 8 (Math Engine Core)
-Plan: 2 of 2 in current phase (phase complete)
-Status: Phase Complete
-Last activity: 2026-03-01 -- Completed 02-02-PLAN.md (Problem Templates & Generator)
+Phase: 3 of 8 (Bug Library & Answer Formats)
+Plan: 1 of 2 in current phase (plan 1 complete)
+Status: In Progress
+Last activity: 2026-03-02 -- Completed 03-01-PLAN.md (Bug Library & Distractor Generator)
 
-Progress: [████░░░░░░] 20%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 2.5min
-- Total execution time: 0.17 hours
+- Total plans completed: 5
+- Average duration: 2.8min
+- Total execution time: 0.23 hours
 
 **By Phase:**
 
@@ -55,9 +42,10 @@ Progress: [████░░░░░░] 20%
 |-------|-------|-------|----------|
 | 1 - Scaffolding & Nav | 2 | 5min | 2.5min |
 | 2 - Math Engine Core | 2 | 5min | 2.5min |
+| 3 - Bug Library & Answer Formats | 1 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (3min), 01-02 (2min), 02-01 (2min), 02-02 (3min)
+- Last 5 plans: 01-02 (2min), 02-01 (2min), 02-02 (3min), 03-01 (4min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -86,6 +74,9 @@ Recent decisions affecting current work:
 - [02-02]: Subtraction constrains b upper bound to a-1 inline rather than post-filtering
 - [02-02]: Zod v4 schemas validate at API boundary only -- internal helpers use typed params
 - [02-02]: Problem ID format is templateId_seed for deterministic uniqueness
+- [03-01]: Merged sub_no_borrow into sub_smaller_from_larger (identical computation), replaced with sub_zero_confusion
+- [03-01]: Off-by-one patterns excluded from Phase 1 bug-library, reserved for Phase 2 adjacent slot
+- [03-01]: Deterministic fallback after 50 random iterations using offset increments from correctAnswer
 
 ### Pending Todos
 
@@ -97,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-01
-Stopped at: Completed 02-02-PLAN.md (Problem Templates & Generator) -- Phase 2 complete
+Last session: 2026-03-02
+Stopped at: Completed 03-01-PLAN.md (Bug Library & Distractor Generator)
 Resume file: None
