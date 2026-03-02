@@ -20,10 +20,10 @@ Requirements for v0.1 Foundation milestone. Each maps to roadmap phases.
 
 ### Adaptive Difficulty
 
-- [ ] **ADPT-01**: Each child has an Elo rating that updates after each problem attempt
-- [ ] **ADPT-02**: Elo is tracked per skill (e.g., addition-no-carry, subtraction-with-borrow) not just globally
+- [x] **ADPT-01**: Each child has an Elo rating that updates after each problem attempt
+- [x] **ADPT-02**: Elo is tracked per skill (e.g., addition-no-carry, subtraction-with-borrow) not just globally
 - [ ] **ADPT-03**: Problem selection targets problems within the child's Elo range to converge on 85% success rate
-- [ ] **ADPT-04**: Frustration guard triggers an easier problem after 3 consecutive wrong answers
+- [x] **ADPT-04**: Frustration guard triggers an easier problem after 3 consecutive wrong answers
 
 ### State Management
 
@@ -143,10 +143,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STOR-02 | Phase 4: State Management & Persistence | Complete |
 | STOR-03 | Phase 4: State Management & Persistence | Complete |
 | STOR-04 | Phase 4: State Management & Persistence | Complete |
-| ADPT-01 | Phase 5: Adaptive Difficulty | Pending |
-| ADPT-02 | Phase 5: Adaptive Difficulty | Pending |
+| ADPT-01 | Phase 5: Adaptive Difficulty | Complete |
+| ADPT-02 | Phase 5: Adaptive Difficulty | Complete |
 | ADPT-03 | Phase 5: Adaptive Difficulty | Pending |
-| ADPT-04 | Phase 5: Adaptive Difficulty | Pending |
+| ADPT-04 | Phase 5: Adaptive Difficulty | Complete |
 | SESS-01 | Phase 6: Session Flow & Navigation Control | Pending |
 | SESS-02 | Phase 6: Session Flow & Navigation Control | Pending |
 | SESS-03 | Phase 6: Session Flow & Navigation Control | Pending |

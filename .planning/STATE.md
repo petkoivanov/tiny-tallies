@@ -2,26 +2,13 @@
 gsd_state_version: 1.0
 milestone: v0.1
 milestone_name: milestone
-status: unknown
-last_updated: "2026-03-02T22:24:54.046Z"
-progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
----
-
----
-gsd_state_version: 1.0
-milestone: v0.1
-milestone_name: milestone
 status: in-progress
-last_updated: "2026-03-02T22:19:24.000Z"
+last_updated: "2026-03-02T23:05:00.000Z"
 progress:
   total_phases: 8
   completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 10
+  completed_plans: 9
 ---
 
 # Project State
@@ -31,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-01)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** Phase 4 complete. Ready for Phase 5.
+**Current focus:** Phase 5 in progress -- Adaptive difficulty foundation modules.
 
 ## Current Position
 
-Phase: 4 of 8 (State Management & Persistence) -- COMPLETE
-Plan: 2 of 2 in current phase (04-02 complete)
-Status: Phase Complete
-Last activity: 2026-03-02 -- Completed 04-02-PLAN.md (Store Persistence & Migrations)
+Phase: 5 of 8 (Adaptive Difficulty)
+Plan: 1 of 2 in current phase (05-01 complete)
+Status: In Progress
+Last activity: 2026-03-02 -- Completed 05-01-PLAN.md (Elo Rating & Adaptive Foundations)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 2.6min
-- Total execution time: 0.35 hours
+- Total execution time: 0.40 hours
 
 **By Phase:**
 
@@ -57,9 +44,10 @@ Progress: [██████████] 100%
 | 2 - Math Engine Core | 2 | 5min | 2.5min |
 | 3 - Bug Library & Answer Formats | 2 | 6min | 3min |
 | 4 - State Management & Persistence | 2 | 5min | 2.5min |
+| 5 - Adaptive Difficulty | 1 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (4min), 03-02 (2min), 04-01 (2min), 04-02 (3min)
+- Last 5 plans: 03-02 (2min), 04-01 (2min), 04-02 (3min), 05-01 (3min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -102,6 +90,10 @@ Recent decisions affecting current work:
 - [04-02]: STORE_VERSION bumped from 1 to 2 with migration function (CLAUDE.md guardrail satisfied)
 - [04-02]: Partialize excludes all session state and action functions -- only data fields persist
 - [04-02]: Migration uses ??= (nullish coalescing assignment) for clean default filling
+- [05-01]: All adaptive modules are pure functions with zero store coupling -- state passed as parameters
+- [05-01]: Frustration state is session-scoped ephemeral data, never persisted to store
+- [05-01]: K-factor formula K=16+24/(1+0.05*attempts) gives K=40 at start, decaying toward K=16
+- [05-01]: UNLOCK_THRESHOLD=950 set below DEFAULT_ELO=1000 so new skills are accessible by default
 
 ### Pending Todos
 
@@ -114,5 +106,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-adaptive-difficulty/05-CONTEXT.md
+Stopped at: Completed 05-01-PLAN.md
+Resume file: .planning/phases/05-adaptive-difficulty/05-01-SUMMARY.md
