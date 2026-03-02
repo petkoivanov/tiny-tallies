@@ -42,12 +42,12 @@ describe('problemSelector', () => {
     });
 
     it('templates far from target get near-zero weight', () => {
-      // Student at Elo 1400 with template at baseElo 800
-      // Expected success is very high (~99%), way above 85%
+      // Student at Elo 600 with template at baseElo 800
+      // Expected success is ~24% (way below 85%) -> deviation ~0.61 -> near-zero weight
       const templates = getTemplatesBySkill('addition.single-digit.no-carry');
-      const weighted = weightBySuccessProbability(1400, templates);
+      const weighted = weightBySuccessProbability(600, templates);
 
-      // Very high expected success -> very far from 85% -> near-zero weight
+      // Very low expected success -> very far from 85% -> near-zero weight
       for (const w of weighted) {
         expect(w.weight).toBeLessThan(0.01);
       }
