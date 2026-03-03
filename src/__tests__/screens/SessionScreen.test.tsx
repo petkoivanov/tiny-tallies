@@ -3,6 +3,33 @@ import { Alert } from 'react-native';
 import { render, fireEvent } from '@testing-library/react-native';
 import type { UseSessionReturn } from '@/hooks/useSession';
 
+// Mock react-native-reanimated
+jest.mock('react-native-reanimated', () => {
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: {
+      View,
+      Text: require('react-native').Text,
+      createAnimatedComponent: (c: any) => c,
+      call: jest.fn(),
+    },
+    useSharedValue: (init: any) => ({ value: init }),
+    useAnimatedStyle: (fn: () => any) => fn(),
+    withTiming: (v: any) => v,
+    withSpring: (v: any) => v,
+    withDelay: (_d: number, v: any) => v,
+    withSequence: (...args: any[]) => args[args.length - 1],
+    withRepeat: (v: any) => v,
+    Easing: {
+      in: (e: any) => e,
+      quad: (v: any) => v,
+      linear: (v: any) => v,
+    },
+    useReducedMotion: jest.fn(() => false),
+  };
+});
+
 // Mock useSession hook
 const mockHandleAnswer = jest.fn();
 const mockHandleQuit = jest.fn();
@@ -61,6 +88,74 @@ jest.mock('@/hooks/useSession', () => ({
   FEEDBACK_DURATION_MS: 1500,
 }));
 
+// Mock useCpaMode hook (default to abstract -- unchanged behavior)
+jest.mock('@/hooks/useCpaMode', () => ({
+  useCpaMode: () => ({ stage: 'abstract', manipulativeType: null }),
+}));
+
+// Mock CpaModeIcon
+jest.mock('@/components/session/CpaModeIcon', () => {
+  const { View } = require('react-native');
+  return {
+    CpaModeIcon: () => <View testID="cpa-mode-icon" />,
+  };
+});
+
+// Mock manipulative components (needed by CpaSessionContent)
+jest.mock('@/components/manipulatives', () => {
+  const { View } = require('react-native');
+  const makeMock = (name: string) => (props: any) => (
+    <View testID={props.testID ?? name} />
+  );
+  return {
+    Counters: makeMock('counters'),
+    TenFrame: makeMock('ten-frame'),
+    BaseTenBlocks: makeMock('base-ten-blocks'),
+    NumberLine: makeMock('number-line'),
+    FractionStrips: makeMock('fraction-strips'),
+    BarModel: makeMock('bar-model'),
+    ManipulativeShell: ({ children, testID }: any) => (
+      <View testID={testID ?? 'manipulative-shell'}>{children}</View>
+    ),
+  };
+});
+
+// Mock ManipulativePanel
+jest.mock('@/components/session/ManipulativePanel', () => {
+  const { View } = require('react-native');
+  return {
+    ManipulativePanel: ({ children, testID }: any) => (
+      <View testID={testID ?? 'manipulative-panel'}>{children}</View>
+    ),
+  };
+});
+
+// Mock CompactAnswerRow
+jest.mock('@/components/session/CompactAnswerRow', () => {
+  const { View } = require('react-native');
+  return {
+    CompactAnswerRow: () => <View testID="compact-answer-row" />,
+  };
+});
+
+// Mock PictorialDiagram
+jest.mock('@/components/session/pictorial/PictorialDiagram', () => {
+  const { View } = require('react-native');
+  return {
+    PictorialDiagram: ({ testID }: any) => (
+      <View testID={testID ?? 'pictorial-diagram'} />
+    ),
+  };
+});
+
+// Mock AnswerFeedbackAnimation
+jest.mock('@/components/animations/AnswerFeedbackAnimation', () => {
+  const { View } = require('react-native');
+  return {
+    AnswerFeedbackAnimation: ({ children }: any) => <View>{children}</View>,
+  };
+});
+
 // Mock navigation
 const mockNavigate = jest.fn();
 const mockGoBack = jest.fn();
@@ -90,6 +185,19 @@ jest.mock('@react-navigation/native', () => ({
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
+
+// Mock lucide icons
+jest.mock('lucide-react-native', () => {
+  const { View } = require('react-native');
+  return {
+    X: () => <View />,
+    Blocks: () => <View />,
+    Image: () => <View />,
+    Hash: () => <View />,
+    ChevronUp: () => <View />,
+    ChevronDown: () => <View />,
+  };
+});
 
 // Alert.alert spy
 jest.spyOn(Alert, 'alert');
@@ -291,6 +399,7 @@ describe('SessionScreen', () => {
         leveledUp: true,
         newLevel: 3,
         streakCount: 2,
+        cpaAdvances: [],
       }),
     );
   });
@@ -318,6 +427,7 @@ describe('SessionScreen', () => {
         leveledUp: false,
         newLevel: 1,
         streakCount: 0,
+        cpaAdvances: [],
       }),
     );
   });

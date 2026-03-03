@@ -5,6 +5,8 @@
  * Global augmentation enables automatic typing for useNavigation/useRoute.
  */
 
+import type { CpaStage } from '@/services/cpa/cpaTypes';
+
 export type RootStackParamList = {
   Home: undefined;
   Session: { sessionId: string };
@@ -17,6 +19,7 @@ export type RootStackParamList = {
     leveledUp: boolean;
     newLevel: number;
     streakCount: number;
+    cpaAdvances: Array<{ skillId: string; from: CpaStage; to: CpaStage }>;
   };
 };
 

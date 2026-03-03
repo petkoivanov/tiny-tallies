@@ -59,6 +59,8 @@ export interface SessionFeedback {
   levelsGained: number;
   streakCount: number;
   practicedThisWeek: boolean;
+  /** CPA stage advances detected during the session (computed by useSession, not commitSessionResults) */
+  cpaAdvances?: Array<{ skillId: string; from: CpaStage; to: CpaStage }>;
 }
 
 /** Category tag for practice problems in the 60/30/10 mix */

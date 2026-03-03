@@ -5,8 +5,9 @@ import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { X } from 'lucide-react-native';
 import { colors, spacing, typography, layout } from '@/theme';
-import { AnswerFeedbackAnimation } from '@/components/animations/AnswerFeedbackAnimation';
 import { useSession } from '@/hooks/useSession';
+import { useCpaMode } from '@/hooks/useCpaMode';
+import { CpaSessionContent, CpaModeIcon } from '@/components/session';
 import type { RootStackParamList } from '@/navigation/types';
 import type { SessionPhase } from '@/services/session';
 
@@ -26,27 +27,15 @@ function formatPhaseLabel(phase: SessionPhase): string {
   }
 }
 
-/** Format operator symbol from operation type */
-function formatOperator(operation: string): string {
-  switch (operation) {
-    case 'addition':
-      return '+';
-    case 'subtraction':
-      return '\u2212';
-    default:
-      return operation;
-  }
-}
-
 /** Get progress bar fill color based on session phase */
 function getPhaseColor(phase: SessionPhase): string {
   switch (phase) {
     case 'warmup':
-      return colors.primaryLight; // #818cf8, soft indigo
+      return colors.primaryLight;
     case 'practice':
-      return colors.primary; // #6366f1, full indigo
+      return colors.primary;
     case 'cooldown':
-      return colors.correct; // #84cc16, lime green
+      return colors.correct;
     case 'complete':
       return colors.correct;
   }
@@ -70,6 +59,8 @@ export default function SessionScreen() {
     handleQuit,
     sessionResult,
   } = useSession();
+
+  const { stage } = useCpaMode(currentProblem?.skillId ?? null);
 
   // Track whether to reveal the correct answer after wrong tap
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
@@ -118,6 +109,7 @@ export default function SessionScreen() {
         leveledUp: sessionResult.feedback?.leveledUp ?? false,
         newLevel: sessionResult.feedback?.newLevel ?? 1,
         streakCount: sessionResult.feedback?.streakCount ?? 0,
+        cpaAdvances: sessionResult.feedback?.cpaAdvances ?? [],
       });
     }
   }, [isComplete, sessionResult, navigation]);
@@ -147,28 +139,6 @@ export default function SessionScreen() {
   const problem = currentProblem?.problem;
   const options = currentProblem?.presentation.options ?? [];
 
-  /** Compute the style for an answer button based on feedback state */
-  function getOptionFeedbackStyle(
-    optionValue: number,
-  ): object | undefined {
-    if (!isFeedbackActive) return undefined;
-
-    // The button the child tapped
-    if (optionValue === selectedAnswer) {
-      if (feedbackState!.correct) {
-        return styles.optionButtonCorrect;
-      }
-      return styles.optionButtonIncorrect;
-    }
-
-    // Reveal the correct answer after delay (only on wrong answers)
-    if (showCorrectAnswer && optionValue === correctAnswer) {
-      return styles.optionButtonRevealCorrect;
-    }
-
-    return undefined;
-  }
-
   return (
     <View
       style={[
@@ -179,6 +149,7 @@ export default function SessionScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.phaseLabel}>{formatPhaseLabel(sessionPhase)}</Text>
+        <CpaModeIcon stage={stage} />
         <Text style={styles.progressText}>
           {currentIndex + 1} / {totalProblems}
         </Text>
@@ -209,48 +180,20 @@ export default function SessionScreen() {
         </View>
       </View>
 
-      {/* Problem Display */}
-      <View style={styles.content}>
-        {problem && (
-          <Text style={styles.problemText}>
-            {problem.operands[0]} {formatOperator(problem.operation)}{' '}
-            {problem.operands[1]} = ?
-          </Text>
-        )}
-
-        {/* Answer Options (2x2 grid) */}
-        <View style={styles.optionsGrid}>
-          {options.map((option, index) => (
-            <AnswerFeedbackAnimation
-              key={`option-${index}`}
-              feedbackType={
-                isFeedbackActive && option.value === selectedAnswer
-                  ? feedbackState!.correct
-                    ? 'correct'
-                    : 'incorrect'
-                  : null
-              }
-            >
-              <Pressable
-                onPress={() => handleAnswer(option.value)}
-                disabled={isFeedbackActive}
-                style={({ pressed }) => [
-                  styles.optionButton,
-                  pressed && !isFeedbackActive && styles.optionButtonPressed,
-                  pressed && !isFeedbackActive && styles.optionButtonScaled,
-                  isFeedbackActive && styles.optionButtonDisabled,
-                  getOptionFeedbackStyle(option.value),
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel={`Answer ${option.value}`}
-                testID={`answer-option-${index}`}
-              >
-                <Text style={styles.optionText}>{option.value}</Text>
-              </Pressable>
-            </AnswerFeedbackAnimation>
-          ))}
-        </View>
-      </View>
+      {/* CPA-aware Problem Display + Answer Options */}
+      {problem && currentProblem && (
+        <CpaSessionContent
+          problem={problem}
+          skillId={currentProblem.skillId}
+          options={options}
+          currentIndex={currentIndex}
+          onAnswer={handleAnswer}
+          feedbackActive={isFeedbackActive}
+          selectedAnswer={selectedAnswer}
+          correctAnswer={correctAnswer}
+          showCorrectAnswer={showCorrectAnswer}
+        />
+      )}
     </View>
   );
 }
@@ -310,53 +253,5 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     marginBottom: spacing.xl,
     textAlign: 'center',
-  },
-  optionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: spacing.md,
-    width: '100%',
-    maxWidth: 320,
-  },
-  optionButton: {
-    backgroundColor: colors.surface,
-    borderRadius: layout.borderRadius.lg,
-    minHeight: layout.minTouchTarget + 16,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.md,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  optionButtonPressed: {
-    backgroundColor: colors.surfaceLight,
-  },
-  optionButtonScaled: {
-    transform: [{ scale: 0.95 }],
-  },
-  optionButtonDisabled: {
-    opacity: 0.6,
-  },
-  optionButtonCorrect: {
-    borderColor: colors.correct,
-    backgroundColor: '#84cc1620',
-    opacity: 1,
-  },
-  optionButtonIncorrect: {
-    borderColor: colors.incorrect,
-    backgroundColor: '#f8717120',
-    opacity: 1,
-  },
-  optionButtonRevealCorrect: {
-    borderColor: colors.correct,
-    backgroundColor: '#84cc1620',
-    opacity: 1,
-  },
-  optionText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.xxl,
-    color: colors.textPrimary,
   },
 });
