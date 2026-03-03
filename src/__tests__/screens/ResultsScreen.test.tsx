@@ -1,6 +1,28 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 
+// Mock react-native-reanimated (manual mock — avoids native worklets import)
+jest.mock('react-native-reanimated', () => {
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: {
+      View,
+      Text: require('react-native').Text,
+      createAnimatedComponent: (c: any) => c,
+      call: jest.fn(),
+    },
+    useSharedValue: (init: any) => ({ value: init }),
+    useAnimatedStyle: (fn: () => any) => fn(),
+    withTiming: (v: any) => v,
+    withSpring: (v: any) => v,
+    withDelay: (_d: number, v: any) => v,
+    withRepeat: (v: any) => v,
+    Easing: { in: (e: any) => e, quad: (v: any) => v, linear: (v: any) => v },
+    useReducedMotion: jest.fn(() => false),
+  };
+});
+
 // Mock navigation
 const mockDispatch = jest.fn();
 let mockRouteParams: Record<string, unknown> = {

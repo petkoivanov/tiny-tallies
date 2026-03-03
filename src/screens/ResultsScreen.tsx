@@ -1,5 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withDelay,
+  withSpring,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   useNavigation,
@@ -11,6 +17,7 @@ import { Flame, Check } from 'lucide-react-native';
 import { colors, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { calculateLevelFromXp } from '@/services/gamification/levelProgression';
+import { ConfettiCelebration } from '@/components/animations/ConfettiCelebration';
 import type { RootStackParamList } from '@/navigation/types';
 
 type ResultsRouteProp = RouteProp<RootStackParamList, 'Results'>;
@@ -63,6 +70,21 @@ export default function ResultsScreen() {
       ? xpIntoCurrentLevel / xpNeededForNextLevel
       : 0;
   const progressPercent = Math.min(progressFraction * 100, 100);
+
+  const levelUpScale = useSharedValue(leveledUp ? 0.5 : 1);
+
+  useEffect(() => {
+    if (leveledUp) {
+      levelUpScale.value = withDelay(
+        300,
+        withSpring(1, { damping: 6, stiffness: 150 }),
+      );
+    }
+  }, [leveledUp, levelUpScale]);
+
+  const levelUpAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: levelUpScale.value }],
+  }));
 
   const handleDone = () => {
     navigation.dispatch(
@@ -155,9 +177,11 @@ export default function ResultsScreen() {
             <>
               <View style={styles.divider} />
               <View style={styles.levelUpRow} testID="level-up-callout">
-                <Text style={styles.levelUpText}>
-                  Level Up! {'\u2192'} Level {newLevel}
-                </Text>
+                <Animated.View style={levelUpAnimatedStyle}>
+                  <Text style={styles.levelUpText}>
+                    Level Up! {'\u2192'} Level {newLevel}
+                  </Text>
+                </Animated.View>
               </View>
             </>
           )}
@@ -185,6 +209,8 @@ export default function ResultsScreen() {
           <Text style={styles.buttonText}>Done</Text>
         </Pressable>
       </View>
+
+      {leveledUp && <ConfettiCelebration />}
     </View>
   );
 }
