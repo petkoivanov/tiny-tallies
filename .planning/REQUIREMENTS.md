@@ -9,7 +9,7 @@ Requirements for v0.2 UI Polish & Gamification milestone. Each maps to roadmap p
 
 ### UI Polish
 
-- [ ] **UI-01**: Home screen shows child's name, level, XP progress bar, and a "Start Practice" button
+- [x] **UI-01**: Home screen shows child's name, level, XP progress bar, and a "Start Practice" button
 - [ ] **UI-02**: Session screen displays the problem, answer options (multiple choice or free input), and progress indicator
 - [ ] **UI-03**: Results screen shows session summary with correct/total, XP earned, and a "Done" button
 - [ ] **UI-04**: All touch targets are minimum 48dp for ages 6-9 motor skills
@@ -22,7 +22,7 @@ Requirements for v0.2 UI Polish & Gamification milestone. Each maps to roadmap p
 - [x] **GAME-02**: XP accumulates toward levels with formula: XP per level = 100 + (level x 20)
 - [ ] **GAME-03**: Level-up triggers celebration animation
 - [x] **GAME-04**: Weekly streak tracks consecutive weeks with at least one completed session
-- [ ] **GAME-05**: Home screen displays current level, XP progress, and streak count
+- [x] **GAME-05**: Home screen displays current level, XP progress, and streak count
 
 ## Future Requirements
 
@@ -64,7 +64,7 @@ Deferred to later milestones. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| UI-01 | Phase 8 | Pending |
+| UI-01 | Phase 8 | Complete |
 | UI-02 | Phase 9 | Pending |
 | UI-03 | Phase 9 | Pending |
 | UI-04 | Phase 9 | Pending |
@@ -74,7 +74,7 @@ Deferred to later milestones. Tracked but not in current roadmap.
 | GAME-02 | Phase 7 | Complete |
 | GAME-03 | Phase 10 | Pending |
 | GAME-04 | Phase 7 | Complete |
-| GAME-05 | Phase 8 | Pending |
+| GAME-05 | Phase 8 | Complete |
 
 **Coverage:**
 - v0.2 requirements: 11 total

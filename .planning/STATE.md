@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: UI Polish & Gamification
 status: active
-last_updated: "2026-03-02T00:00:00.000Z"
+last_updated: "2026-03-03T02:13:06Z"
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 7
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 
 ## Current Position
 
-Phase: 8 of 10 (Home Screen Dashboard) — next up
-Plan: Not started
-Status: Phase 7 complete, ready for Phase 8
-Last activity: 2026-03-02 — Completed Phase 7 Gamification Engine
+Phase: 8 of 10 (Home Screen Dashboard) — complete
+Plan: 1 of 1 complete
+Status: Phase 8 complete
+Last activity: 2026-03-03 — Completed Phase 8 Home Screen Dashboard
 
-Progress: [██░░░░░░░░] 29% (2/7 plans)
+Progress: [████░░░░░░] 43% (3/7 plans)
 
 ## Performance Metrics
 
@@ -39,6 +39,7 @@ Progress: [██░░░░░░░░] 29% (2/7 plans)
 |-------|------|----------|-------|-------|
 | 07    | 01   | 4min     | 2     | 10    |
 | 07    | 02   | 5min     | 2     | 8     |
+| 08    | 01   | 2min     | 2     | 2     |
 
 ## Accumulated Context
 
@@ -55,6 +56,9 @@ Key context for v0.2:
 - Theme system (Lexend font, dark navy, 48dp touch targets) already established in src/theme/index.ts
 - All three screens (Home, Session, Results) are functional but need polish
 - react-native-reanimated available for animations (already in deps for future manipulatives)
+- HomeScreen redesigned as personal dashboard: avatar greeting, level badge, XP progress bar, streak display, bottom Start Practice CTA
+- Atomic Zustand selectors pattern established: useAppStore(s => s.field) per field for minimal re-renders
+- Screen tests follow src/__tests__/screens/ convention (not co-located with screen files)
 
 ### Pending Todos
 
@@ -66,6 +70,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-02
-Stopped at: Phase 7 complete — ready for Phase 8
+Last session: 2026-03-03
+Stopped at: Phase 8 complete — completed 08-01-PLAN.md (Home Screen Dashboard)
 Resume file: N/A
