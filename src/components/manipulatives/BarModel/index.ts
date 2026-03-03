@@ -1,0 +1,1 @@
+export { BarModel } from './BarModel';
