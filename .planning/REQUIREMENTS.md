@@ -37,8 +37,8 @@ Requirements for v0.1 Foundation milestone. Each maps to roadmap phases.
 
 - [x] **SESS-01**: Child can start a practice session from the home screen
 - [x] **SESS-02**: Session follows structured phases: warmup (easy) -> practice (adaptive) -> cooldown (easy)
-- [ ] **SESS-03**: Session displays problems one at a time with immediate feedback (correct/incorrect)
-- [ ] **SESS-04**: Session ends with a summary showing correct/total, XP earned, and skills practiced
+- [x] **SESS-03**: Session displays problems one at a time with immediate feedback (correct/incorrect)
+- [x] **SESS-04**: Session ends with a summary showing correct/total, XP earned, and skills practiced
 - [x] **SESS-05**: Parent can configure session length (number of problems or time limit)
 
 ### UI / Screens
@@ -53,8 +53,8 @@ Requirements for v0.1 Foundation milestone. Each maps to roadmap phases.
 ### Navigation
 
 - [x] **NAV-01**: React Navigation native-stack with Home -> Session -> Results flow
-- [ ] **NAV-02**: Back navigation is disabled during active session (prevents accidental exit)
-- [ ] **NAV-03**: Session can be exited via explicit "Quit" button with confirmation
+- [x] **NAV-02**: Back navigation is disabled during active session (prevents accidental exit)
+- [x] **NAV-03**: Session can be exited via explicit "Quit" button with confirmation
 
 ### Gamification
 
@@ -149,11 +149,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ADPT-04 | Phase 5: Adaptive Difficulty | Complete |
 | SESS-01 | Phase 6: Session Flow & Navigation Control | Complete |
 | SESS-02 | Phase 6: Session Flow & Navigation Control | Complete |
-| SESS-03 | Phase 6: Session Flow & Navigation Control | Pending |
-| SESS-04 | Phase 6: Session Flow & Navigation Control | Pending |
+| SESS-03 | Phase 6: Session Flow & Navigation Control | Complete |
+| SESS-04 | Phase 6: Session Flow & Navigation Control | Complete |
 | SESS-05 | Phase 6: Session Flow & Navigation Control | Complete |
-| NAV-02 | Phase 6: Session Flow & Navigation Control | Pending |
-| NAV-03 | Phase 6: Session Flow & Navigation Control | Pending |
+| NAV-02 | Phase 6: Session Flow & Navigation Control | Complete |
+| NAV-03 | Phase 6: Session Flow & Navigation Control | Complete |
 | UI-01 | Phase 7: Core UI Screens | Pending |
 | UI-02 | Phase 7: Core UI Screens | Pending |
 | UI-03 | Phase 7: Core UI Screens | Pending |
