@@ -1,2 +1,3 @@
 export { Counters } from './Counters';
-export type { CountersProps, CounterState, CounterColor } from './CountersTypes';
+export { CountersGrid, computeGridPositions } from './CountersGrid';
+export type { CountersProps, CounterState, CounterColor, CountersGridState } from './CountersTypes';

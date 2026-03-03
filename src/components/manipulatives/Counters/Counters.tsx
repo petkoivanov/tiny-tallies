@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -9,7 +9,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { ManipulativeShell } from '../ManipulativeShell';
-import { triggerSnapHaptic, MAX_OBJECTS, DRAG_SCALE } from '../shared';
+import { triggerSnapHaptic, MAX_OBJECTS, DRAG_SCALE, useActionHistory, GuidedHighlight } from '../shared';
 import { colors, spacing } from '@/theme';
 
 import {
@@ -17,10 +17,14 @@ import {
   COUNTER_BORDER_COLORS,
   COUNTER_SIZE,
   STAGGER_OFFSET,
+  GRID_COUNTER_SPACING,
   type CounterState,
   type CounterColor,
   type CountersProps,
+  type CountersGridState,
 } from './CountersTypes';
+import { CountersGrid, computeGridPositions } from './CountersGrid';
+import { DualCountDisplay, DimensionStepper } from './CountersParts';
 
 // ---- Individual draggable counter ----
 
@@ -105,52 +109,81 @@ function DraggableCounter({ counter, onFlip, onMove }: DraggableCounterProps) {
   );
 }
 
-// ---- Custom dual-color counter display ----
+// ---- Helper: build grid-mode counters ----
 
-interface DualCountDisplayProps {
-  redCount: number;
-  yellowCount: number;
-}
+function buildGridCounters(
+  rows: number,
+  cols: number,
+  existing: CounterState[],
+  nextIdRef: React.MutableRefObject<number>,
+): CounterState[] {
+  const cellSize = COUNTER_SIZE + GRID_COUNTER_SPACING;
+  const positions = computeGridPositions({
+    rows,
+    cols,
+    cellSize,
+    originX: spacing.md,
+    originY: spacing.md,
+  });
 
-function DualCountDisplay({ redCount, yellowCount }: DualCountDisplayProps) {
-  return (
-    <View
-      style={styles.dualCount}
-      testID="dual-count"
-      accessible
-      accessibilityRole="text"
-      accessibilityLabel={`Red: ${redCount}, Yellow: ${yellowCount}`}
-    >
-      <View style={styles.countRow}>
-        <View style={[styles.colorDot, { backgroundColor: COUNTER_COLORS.red }]} />
-        <Text style={styles.countText}>{redCount}</Text>
-      </View>
-      <Text style={styles.countSeparator}>|</Text>
-      <View style={styles.countRow}>
-        <View style={[styles.colorDot, { backgroundColor: COUNTER_COLORS.yellow }]} />
-        <Text style={styles.countText}>{yellowCount}</Text>
-      </View>
-    </View>
-  );
+  const total = rows * cols;
+  const result: CounterState[] = [];
+
+  for (let i = 0; i < total; i++) {
+    if (i < existing.length) {
+      // Reposition existing counter
+      result.push({ ...existing[i], x: positions[i].x, y: positions[i].y });
+    } else {
+      // Create new counter to fill grid
+      const id = `c-${nextIdRef.current++}`;
+      result.push({ id, color: 'red' as CounterColor, x: positions[i].x, y: positions[i].y });
+    }
+  }
+
+  return result;
 }
 
 // ---- Main Counters component ----
 
 /**
- * Two-color counter manipulative with free-placement drag and tap-to-flip.
+ * Two-color counter manipulative with free-placement drag, tap-to-flip,
+ * and grid array mode for multiplication visualization.
  *
  * Children can add counters from a tray, drag them freely on the workspace,
- * and tap to flip between red and yellow. The running count shows both colors.
- * Capped at MAX_OBJECTS (30) with a gentle nudge message.
+ * and tap to flip between red and yellow. Grid mode arranges counters in a
+ * rows x columns layout. Capped at MAX_OBJECTS (30) with a gentle nudge.
  */
-export function Counters({ maxCounters = MAX_OBJECTS, testID }: CountersProps) {
-  const [counters, setCounters] = useState<CounterState[]>([]);
+export function Counters({
+  maxCounters = MAX_OBJECTS,
+  guidedTargetId,
+  gridRows,
+  gridCols,
+  testID,
+}: CountersProps) {
+  const { state: counters, canUndo, pushState, undo, reset } = useActionHistory<CounterState[]>([]);
   const nextId = useRef(0);
+
+  // Grid state
+  const [gridState, setGridState] = useState<CountersGridState>(() => ({
+    mode: gridRows != null && gridCols != null ? 'grid' : 'free',
+    rows: gridRows ?? 3,
+    cols: gridCols ?? 4,
+  }));
+
+  // Auto-configure grid mode from session props on mount
+  useEffect(() => {
+    if (gridRows != null && gridCols != null) {
+      setGridState({ mode: 'grid', rows: gridRows, cols: gridCols });
+      const gridCounters = buildGridCounters(gridRows, gridCols, [], nextId);
+      pushState(gridCounters);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const redCount = counters.filter((c) => c.color === 'red').length;
   const yellowCount = counters.filter((c) => c.color === 'yellow').length;
   const totalCount = counters.length;
   const atCap = totalCount >= maxCounters;
+  const isGridMode = gridState.mode === 'grid';
 
   const handleAdd = useCallback(() => {
     if (atCap) return;
@@ -160,83 +193,173 @@ export function Counters({ maxCounters = MAX_OBJECTS, testID }: CountersProps) {
     const row = Math.floor(totalCount / 5) % 4;
     const x = spacing.md + col * STAGGER_OFFSET;
     const y = spacing.md + row * STAGGER_OFFSET;
-    setCounters((prev) => [...prev, { id, color: 'red' as CounterColor, x, y }]);
-  }, [atCap, totalCount]);
+    pushState([...counters, { id, color: 'red' as CounterColor, x, y }]);
+  }, [atCap, totalCount, counters, pushState]);
 
   const handleFlip = useCallback((id: string) => {
     triggerSnapHaptic();
-    setCounters((prev) =>
-      prev.map((c) =>
+    pushState(
+      counters.map((c) =>
         c.id === id
           ? { ...c, color: c.color === 'red' ? 'yellow' : 'red' }
           : c,
       ),
     );
-  }, []);
+  }, [counters, pushState]);
 
   const handleMove = useCallback((id: string, x: number, y: number) => {
-    setCounters((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, x, y } : c)),
+    pushState(
+      counters.map((c) => (c.id === id ? { ...c, x, y } : c)),
     );
-  }, []);
+  }, [counters, pushState]);
 
   const handleReset = useCallback(() => {
-    setCounters([]);
+    reset([]);
     nextId.current = 0;
-  }, []);
+    if (gridRows != null && gridCols != null) {
+      // Session mode: reset back to session config
+      setGridState({ mode: 'grid', rows: gridRows, cols: gridCols });
+    } else {
+      setGridState((prev) => ({ ...prev, mode: 'free' }));
+    }
+  }, [reset, gridRows, gridCols]);
+
+  const handleUndo = useCallback(() => {
+    undo();
+  }, [undo]);
+
+  // Grid toggle handler
+  const handleGridToggle = useCallback(() => {
+    if (isGridMode) {
+      // Switch grid -> free: positions stay, drag re-enabled
+      setGridState((prev) => ({ ...prev, mode: 'free' }));
+    } else {
+      // Switch free -> grid: arrange counters into grid
+      const { rows, cols } = gridState;
+      const gridCounters = buildGridCounters(rows, cols, counters, nextId);
+      pushState(gridCounters);
+      setGridState((prev) => ({ ...prev, mode: 'grid' }));
+    }
+  }, [isGridMode, gridState, counters, pushState]);
+
+  // Handle dimension changes in sandbox grid mode
+  const handleRowsChange = useCallback((newRows: number) => {
+    setGridState((prev) => {
+      const updated = { ...prev, rows: newRows };
+      if (prev.mode === 'grid') {
+        const gridCounters = buildGridCounters(newRows, prev.cols, counters, nextId);
+        pushState(gridCounters);
+      }
+      return updated;
+    });
+  }, [counters, pushState]);
+
+  const handleColsChange = useCallback((newCols: number) => {
+    setGridState((prev) => {
+      const updated = { ...prev, cols: newCols };
+      if (prev.mode === 'grid') {
+        const gridCounters = buildGridCounters(prev.rows, newCols, counters, nextId);
+        pushState(gridCounters);
+      }
+      return updated;
+    });
+  }, [counters, pushState]);
 
   const renderCounter = useCallback(
     () => <DualCountDisplay redCount={redCount} yellowCount={yellowCount} />,
     [redCount, yellowCount],
   );
 
+  // Show dimension pickers only in sandbox mode (no gridRows/gridCols props) when grid mode is on
+  const showDimensionPickers = isGridMode && gridRows == null && gridCols == null;
+
   return (
     <ManipulativeShell
       count={totalCount}
       onReset={handleReset}
+      onUndo={handleUndo}
+      canUndo={canUndo}
+      onGridToggle={handleGridToggle}
+      isGridMode={isGridMode}
       renderCounter={renderCounter}
       testID={testID}
     >
-      {/* Workspace -- free placement area */}
-      <View style={styles.workspace}>
-        {counters.map((counter) => (
-          <DraggableCounter
-            key={counter.id}
-            counter={counter}
+      {/* Workspace */}
+      {isGridMode ? (
+        <View style={styles.gridWorkspace}>
+          <CountersGrid
+            counters={counters}
+            rows={gridState.rows}
+            cols={gridState.cols}
             onFlip={handleFlip}
-            onMove={handleMove}
           />
-        ))}
-      </View>
+          {showDimensionPickers && (
+            <View style={styles.dimensionPickers} testID="grid-dimension-pickers">
+              <DimensionStepper
+                label="Rows"
+                value={gridState.rows}
+                onChange={handleRowsChange}
+                testID="rows-stepper"
+              />
+              <DimensionStepper
+                label="Cols"
+                value={gridState.cols}
+                onChange={handleColsChange}
+                testID="cols-stepper"
+              />
+            </View>
+          )}
+        </View>
+      ) : (
+        <>
+          {/* Free placement area */}
+          <View style={styles.workspace}>
+            {counters.map((counter) => (
+              <GuidedHighlight
+                key={counter.id}
+                active={guidedTargetId === counter.id}
+              >
+                <DraggableCounter
+                  counter={counter}
+                  onFlip={handleFlip}
+                  onMove={handleMove}
+                />
+              </GuidedHighlight>
+            ))}
+          </View>
 
-      {/* Tray -- counter source at bottom */}
-      <View style={styles.tray}>
-        {atCap ? (
-          <Text style={styles.nudgeText} testID="cap-nudge">
-            Try grouping your counters!
-          </Text>
-        ) : (
-          <Pressable
-            onPress={handleAdd}
-            accessibilityLabel="Add counter"
-            accessibilityRole="button"
-            testID="add-counter-button"
-            style={styles.addButton}
-          >
-            <View
-              style={[
-                styles.counter,
-                styles.trayCounter,
-                {
-                  backgroundColor: COUNTER_COLORS.red,
-                  borderColor: COUNTER_BORDER_COLORS.red,
-                },
-              ]}
-            />
-            <Text style={styles.addLabel}>+ Add</Text>
-          </Pressable>
-        )}
-      </View>
+          {/* Tray -- counter source at bottom */}
+          <View style={styles.tray}>
+            {atCap ? (
+              <Text style={styles.nudgeText} testID="cap-nudge">
+                Try grouping your counters!
+              </Text>
+            ) : (
+              <GuidedHighlight active={guidedTargetId === 'add-counter-button'}>
+                <Pressable
+                  onPress={handleAdd}
+                  accessibilityLabel="Add counter"
+                  accessibilityRole="button"
+                  testID="add-counter-button"
+                  style={styles.addButton}
+                >
+                  <View
+                    style={[
+                      styles.counter,
+                      styles.trayCounter,
+                      {
+                        backgroundColor: COUNTER_COLORS.red,
+                        borderColor: COUNTER_BORDER_COLORS.red,
+                      },
+                    ]}
+                  />
+                  <Text style={styles.addLabel}>+ Add</Text>
+                </Pressable>
+              </GuidedHighlight>
+            )}
+          </View>
+        </>
+      )}
     </ManipulativeShell>
   );
 }
@@ -245,6 +368,9 @@ const styles = StyleSheet.create({
   workspace: {
     flex: 1,
     position: 'relative',
+  },
+  gridWorkspace: {
+    flex: 1,
   },
   counter: {
     position: 'absolute',
@@ -286,33 +412,12 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontStyle: 'italic',
   },
-  dualCount: {
+  dimensionPickers: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 12,
-    backgroundColor: 'rgba(90, 127, 255, 0.12)',
-  },
-  countRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  colorDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  countText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  countSeparator: {
-    fontSize: 20,
-    fontWeight: '400',
-    color: colors.textMuted,
+    justifyContent: 'center',
+    gap: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.surfaceLight,
   },
 });
