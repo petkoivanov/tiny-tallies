@@ -84,6 +84,9 @@ export function useSession(): UseSessionReturn {
   const level = useAppStore((s) => s.level);
   const setLevel = useAppStore((s) => s.setLevel);
   const setLastSessionDate = useAppStore((s) => s.setLastSessionDate);
+  const weeklyStreak = useAppStore((s) => s.weeklyStreak);
+  const lastSessionDate = useAppStore((s) => s.lastSessionDate);
+  const setWeeklyStreak = useAppStore((s) => s.setWeeklyStreak);
 
   // Synchronous initialization: generate queue on first render, not in useEffect.
   // This ensures currentProblem is available immediately.
@@ -209,6 +212,9 @@ export function useSession(): UseSessionReturn {
             level,
             setLevel,
             setLastSessionDate,
+            weeklyStreak,
+            lastSessionDate,
+            setWeeklyStreak,
           );
           endSession();
 
@@ -239,6 +245,9 @@ export function useSession(): UseSessionReturn {
       level,
       setLevel,
       setLastSessionDate,
+      weeklyStreak,
+      lastSessionDate,
+      setWeeklyStreak,
       endSession,
     ],
   );

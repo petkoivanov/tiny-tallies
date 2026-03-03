@@ -227,6 +227,7 @@ describe('sessionOrchestrator', () => {
       addXp: jest.fn(),
       setLevel: jest.fn(),
       setLastSessionDate: jest.fn(),
+      setWeeklyStreak: jest.fn(),
     });
 
     it('calls updateSkillState for each pending update', () => {
@@ -240,6 +241,7 @@ describe('sessionOrchestrator', () => {
       commitSessionResults(
         pendingUpdates, 120, mocks.updateSkillState, mocks.addXp,
         0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
       );
 
       expect(mocks.updateSkillState).toHaveBeenCalledTimes(2);
@@ -262,6 +264,7 @@ describe('sessionOrchestrator', () => {
       commitSessionResults(
         pendingUpdates, 150, mocks.updateSkillState, mocks.addXp,
         0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
       );
 
       expect(mocks.addXp).toHaveBeenCalledTimes(1);
@@ -274,18 +277,20 @@ describe('sessionOrchestrator', () => {
       commitSessionResults(
         new Map(), 0, mocks.updateSkillState, mocks.addXp,
         0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
       );
 
       expect(mocks.updateSkillState).not.toHaveBeenCalled();
       expect(mocks.addXp).toHaveBeenCalledWith(0);
     });
 
-    it('returns a SessionFeedback object', () => {
+    it('returns a SessionFeedback object with level and streak data', () => {
       const mocks = createMocks();
 
       const feedback = commitSessionResults(
         new Map(), 50, mocks.updateSkillState, mocks.addXp,
         0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
       );
 
       expect(feedback).toEqual(expect.objectContaining({
@@ -294,6 +299,8 @@ describe('sessionOrchestrator', () => {
         newLevel: 1,
         leveledUp: false,
         levelsGained: 0,
+        streakCount: 1,
+        practicedThisWeek: true,
       }));
     });
 
@@ -304,6 +311,7 @@ describe('sessionOrchestrator', () => {
       const feedback = commitSessionResults(
         new Map(), 50, mocks.updateSkillState, mocks.addXp,
         100, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
       );
 
       expect(feedback.leveledUp).toBe(true);
@@ -320,6 +328,7 @@ describe('sessionOrchestrator', () => {
       const feedback = commitSessionResults(
         new Map(), 50, mocks.updateSkillState, mocks.addXp,
         0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
       );
 
       expect(feedback.leveledUp).toBe(false);
@@ -332,6 +341,7 @@ describe('sessionOrchestrator', () => {
       commitSessionResults(
         new Map(), 50, mocks.updateSkillState, mocks.addXp,
         0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
       );
 
       expect(mocks.setLastSessionDate).toHaveBeenCalledTimes(1);
@@ -347,12 +357,107 @@ describe('sessionOrchestrator', () => {
       const feedback = commitSessionResults(
         new Map(), 300, mocks.updateSkillState, mocks.addXp,
         0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
       );
 
       expect(feedback.leveledUp).toBe(true);
       expect(feedback.newLevel).toBe(3);
       expect(feedback.levelsGained).toBe(2);
       expect(mocks.setLevel).toHaveBeenCalledWith(3);
+    });
+
+    // Streak integration tests
+    it('with null lastSessionDate returns streakCount: 1', () => {
+      const mocks = createMocks();
+
+      const feedback = commitSessionResults(
+        new Map(), 50, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
+      );
+
+      expect(feedback.streakCount).toBe(1);
+      expect(feedback.practicedThisWeek).toBe(true);
+    });
+
+    it('in same week returns current streak unchanged', () => {
+      const mocks = createMocks();
+
+      // Last session was earlier today (same week)
+      const lastSessionDate = new Date().toISOString();
+
+      const feedback = commitSessionResults(
+        new Map(), 50, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        3, lastSessionDate, mocks.setWeeklyStreak,
+      );
+
+      expect(feedback.streakCount).toBe(3);
+      expect(feedback.practicedThisWeek).toBe(true);
+    });
+
+    it('in consecutive week returns streak + 1', () => {
+      const mocks = createMocks();
+
+      // Create a date from last week (7 days ago, but same day-of-week pattern)
+      const now = new Date();
+      const lastWeek = new Date(now);
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      const lastSessionDate = lastWeek.toISOString();
+
+      const feedback = commitSessionResults(
+        new Map(), 50, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        3, lastSessionDate, mocks.setWeeklyStreak,
+      );
+
+      expect(feedback.streakCount).toBe(4);
+      expect(feedback.practicedThisWeek).toBe(true);
+    });
+
+    it('after gap returns streakCount: 1', () => {
+      const mocks = createMocks();
+
+      // Last session was 3 weeks ago
+      const threeWeeksAgo = new Date();
+      threeWeeksAgo.setDate(threeWeeksAgo.getDate() - 21);
+      const lastSessionDate = threeWeeksAgo.toISOString();
+
+      const feedback = commitSessionResults(
+        new Map(), 50, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        5, lastSessionDate, mocks.setWeeklyStreak,
+      );
+
+      expect(feedback.streakCount).toBe(1);
+      expect(feedback.practicedThisWeek).toBe(true);
+    });
+
+    it('setWeeklyStreak is called with computed value', () => {
+      const mocks = createMocks();
+
+      commitSessionResults(
+        new Map(), 50, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
+      );
+
+      expect(mocks.setWeeklyStreak).toHaveBeenCalledTimes(1);
+      expect(mocks.setWeeklyStreak).toHaveBeenCalledWith(1);
+    });
+
+    it('setLastSessionDate is still called after streak update', () => {
+      const mocks = createMocks();
+
+      commitSessionResults(
+        new Map(), 50, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
+      );
+
+      expect(mocks.setLastSessionDate).toHaveBeenCalledTimes(1);
+      const dateArg = mocks.setLastSessionDate.mock.calls[0][0];
+      expect(new Date(dateArg).toISOString()).toBe(dateArg);
     });
   });
 });

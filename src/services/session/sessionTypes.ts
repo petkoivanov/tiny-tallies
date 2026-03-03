@@ -42,7 +42,8 @@ export interface SessionFeedback {
   previousLevel: number;
   leveledUp: boolean;
   levelsGained: number;
-  // Streak fields will be added by Plan 02
+  streakCount: number;
+  practicedThisWeek: boolean;
 }
 
 /** Final result of a completed session */

@@ -7,7 +7,7 @@ import { selectTemplateForSkill } from '../adaptive/problemSelector';
 import { getUnlockedSkills } from '../adaptive/prerequisiteGating';
 import { getOrCreateSkillState } from '../../store/helpers/skillStateHelpers';
 import { generateProblem, formatAsMultipleChoice, createRng, getTemplatesBySkill } from '../mathEngine';
-import { detectLevelUp } from '../gamification';
+import { detectLevelUp, computeStreakUpdate } from '../gamification';
 
 /**
  * Baseline floor weight added to all skills in strength-weighted selection,
@@ -161,17 +161,20 @@ export function generateSessionQueue(
  *
  * Iterates pending Elo updates and applies them via updateSkillState,
  * adds total XP via addXp, detects level-ups, updates level if needed,
- * and records the session date.
+ * computes weekly streak update, and records the session date.
  *
- * @param pendingUpdates    - Map of skillId -> accumulated Elo/attempt/correct updates
- * @param totalXp           - Total XP earned during the session
- * @param updateSkillState  - Store action to update a single skill's state
- * @param addXp             - Store action to add XP to gamification state
- * @param currentTotalXp    - Total XP before this session
- * @param currentLevel      - Current level before this session
- * @param setLevel          - Store action to set the player's level
+ * @param pendingUpdates     - Map of skillId -> accumulated Elo/attempt/correct updates
+ * @param totalXp            - Total XP earned during the session
+ * @param updateSkillState   - Store action to update a single skill's state
+ * @param addXp              - Store action to add XP to gamification state
+ * @param currentTotalXp     - Total XP before this session
+ * @param currentLevel       - Current level before this session
+ * @param setLevel           - Store action to set the player's level
  * @param setLastSessionDate - Store action to record when the session happened
- * @returns SessionFeedback with XP earned, level info, and level-up detection
+ * @param currentStreak      - Weekly streak count before this session
+ * @param lastSessionDate    - ISO date string of the last session, or null if first
+ * @param setWeeklyStreak    - Store action to set the weekly streak value
+ * @returns SessionFeedback with XP earned, level info, level-up detection, and streak data
  */
 export function commitSessionResults(
   pendingUpdates: Map<string, PendingSkillUpdate>,
@@ -182,6 +185,9 @@ export function commitSessionResults(
   currentLevel: number,
   setLevel: (level: number) => void,
   setLastSessionDate: (date: string) => void,
+  currentStreak: number,
+  lastSessionDate: string | null,
+  setWeeklyStreak: (streak: number) => void,
 ): SessionFeedback {
   for (const [skillId, update] of pendingUpdates) {
     updateSkillState(skillId, {
@@ -200,6 +206,13 @@ export function commitSessionResults(
     setLevel(levelResult.newLevel);
   }
 
+  const streakResult = computeStreakUpdate(
+    lastSessionDate,
+    new Date(),
+    currentStreak,
+  );
+  setWeeklyStreak(streakResult.newStreak);
+
   setLastSessionDate(new Date().toISOString());
 
   return {
@@ -208,5 +221,7 @@ export function commitSessionResults(
     previousLevel: levelResult.previousLevel,
     leveledUp: levelResult.leveledUp,
     levelsGained: levelResult.levelsGained,
+    streakCount: streakResult.newStreak,
+    practicedThisWeek: streakResult.practicedThisWeek,
   };
 }
