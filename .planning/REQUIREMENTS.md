@@ -30,11 +30,11 @@ Requirements for v0.3 Adaptive Learning Engine milestone. Each maps to roadmap p
 
 ### Session Orchestration
 
-- [ ] **SESS-01**: Session problems follow 60% review / 30% new / 10% challenge composition
-- [ ] **SESS-02**: Review problems are sourced from the Leitner queue (skills due for review)
-- [ ] **SESS-03**: New problems are sourced from the prerequisite outer fringe
-- [ ] **SESS-04**: Challenge problems are selected slightly above the child's current Elo rating
-- [ ] **SESS-05**: BKT mastery probabilities inform problem selection (deprioritize mastered skills, prioritize weak ones)
+- [x] **SESS-01**: Session problems follow 60% review / 30% new / 10% challenge composition
+- [x] **SESS-02**: Review problems are sourced from the Leitner queue (skills due for review)
+- [x] **SESS-03**: New problems are sourced from the prerequisite outer fringe
+- [x] **SESS-04**: Challenge problems are selected slightly above the child's current Elo rating
+- [x] **SESS-05**: BKT mastery probabilities inform problem selection (deprioritize mastered skills, prioritize weak ones)
 
 ## Previous Milestones (Shipped)
 
@@ -99,11 +99,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PREG-01 | Phase 13 | Complete |
 | PREG-02 | Phase 13 | Complete |
 | PREG-03 | Phase 13 | Complete |
-| SESS-01 | Phase 14 | Pending |
-| SESS-02 | Phase 14 | Pending |
-| SESS-03 | Phase 14 | Pending |
-| SESS-04 | Phase 14 | Pending |
-| SESS-05 | Phase 14 | Pending |
+| SESS-01 | Phase 14 | Complete |
+| SESS-02 | Phase 14 | Complete |
+| SESS-03 | Phase 14 | Complete |
+| SESS-04 | Phase 14 | Complete |
+| SESS-05 | Phase 14 | Complete |
 
 **Coverage:**
 - v0.3 requirements: 17 total

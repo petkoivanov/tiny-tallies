@@ -2,26 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: Adaptive Learning Engine
-status: unknown
-last_updated: "2026-03-03T14:51:37.335Z"
-progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 13
-  completed_plans: 13
----
-
----
-gsd_state_version: 1.0
-milestone: v0.3
-milestone_name: Adaptive Learning Engine
 status: executing
-last_updated: "2026-03-03T14:49:00.000Z"
+stopped_at: Completed 14-01-PLAN.md (Practice Mix Algorithm)
+last_updated: "2026-03-03T15:33:09.809Z"
+last_activity: 2026-03-03 -- Completed 14-01 (Practice Mix Algorithm)
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 12
-  completed_plans: 12
+  total_phases: 14
+  completed_phases: 7
+  total_plans: 15
+  completed_plans: 14
 ---
 
 # Project State
@@ -31,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.3 Adaptive Learning Engine -- Phase 13 (Prerequisite Graph & Outer Fringe)
+**Current focus:** v0.3 Adaptive Learning Engine -- Phase 14 (Smart Session Orchestration)
 
 ## Current Position
 
-Phase: 13 of 14 (Prerequisite Graph & Outer Fringe) -- COMPLETE
-Plan: 2 of 2 in current phase (all plans complete)
-Status: Phase 13 complete
-Last activity: 2026-03-03 -- Completed 13-02 (Integration Wiring & Full Regression)
+Phase: 14 of 14 (Smart Session Orchestration) -- IN PROGRESS
+Plan: 1 of 2 in current phase (14-01 complete)
+Status: Executing Phase 14
+Last activity: 2026-03-03 -- Completed 14-01 (Practice Mix Algorithm)
 
-Progress: [████████░░] 80%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -91,6 +80,14 @@ Phase 13 decisions (plan 2):
 - Integration tests validate cross-operation prerequisite gating (subtraction depends on addition at same level)
 - 521 tests passing, TypeScript clean
 
+Phase 14 decisions (plan 1):
+- Slot rounding: challenge=round(0.1*n), new=round(0.3*n), review=remainder -- sum always equals practiceCount
+- BKT inverse weighting: weight=(1-P(L))+0.05 floor for selection probability
+- Challenge pool filter: P(L) in [0.40, 0.80] AND attempts>0 AND not masteryLocked
+- Unique-skill preference: try unused first, fall back to repeats when exhausted
+- Fallback cascade: challenge->review->new->unlocked weakness-weighted->root skills
+- 548 tests passing, TypeScript clean
+
 ### Pending Todos
 
 None.
@@ -101,7 +98,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03
-Stopped at: Completed 13-02-PLAN.md (Integration Wiring & Full Regression) -- Phase 13 complete
-Resume file: .planning/phases/14-*/14-01-PLAN.md
+Last session: 2026-03-03T15:33:09.807Z
+Stopped at: Completed 14-01-PLAN.md (Practice Mix Algorithm)
+Resume file: .planning/phases/14-*/14-02-PLAN.md
 Resume command: /gsd:execute-phase 14
