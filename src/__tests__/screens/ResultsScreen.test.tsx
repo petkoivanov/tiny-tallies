@@ -34,6 +34,7 @@ let mockRouteParams: Record<string, unknown> = {
   leveledUp: false,
   newLevel: 3,
   streakCount: 2,
+  cpaAdvances: [],
 };
 
 jest.mock('@react-navigation/native', () => ({
@@ -78,6 +79,7 @@ describe('ResultsScreen', () => {
       leveledUp: false,
       newLevel: 3,
       streakCount: 2,
+      cpaAdvances: [],
     };
   });
 
@@ -230,5 +232,69 @@ describe('ResultsScreen', () => {
     // xpNeededForNextLevel = 600 - 420 = 180
     const { getByText } = render(<ResultsScreen />);
     expect(getByText('80 / 180 XP to Level 5')).toBeTruthy();
+  });
+
+  // CPA advance tests
+  it('shows CPA advance callout when cpaAdvances is non-empty', () => {
+    mockRouteParams = {
+      ...mockRouteParams,
+      cpaAdvances: [
+        { skillId: 'addition.single', from: 'concrete', to: 'pictorial' },
+      ],
+    };
+
+    const { getByTestId } = render(<ResultsScreen />);
+    expect(getByTestId('cpa-advance-callout')).toBeTruthy();
+  });
+
+  it('does NOT show CPA advance callout when cpaAdvances is empty', () => {
+    mockRouteParams = { ...mockRouteParams, cpaAdvances: [] };
+
+    const { queryByTestId } = render(<ResultsScreen />);
+    expect(queryByTestId('cpa-advance-callout')).toBeNull();
+  });
+
+  it('shows correct message for pictorial advance', () => {
+    mockRouteParams = {
+      ...mockRouteParams,
+      cpaAdvances: [
+        { skillId: 'addition.single', from: 'concrete', to: 'pictorial' },
+      ],
+    };
+
+    const { getByText } = render(<ResultsScreen />);
+    expect(
+      getByText('You leveled up! Now you can solve with pictures!'),
+    ).toBeTruthy();
+  });
+
+  it('shows correct message for abstract advance', () => {
+    mockRouteParams = {
+      ...mockRouteParams,
+      cpaAdvances: [
+        { skillId: 'addition.single', from: 'pictorial', to: 'abstract' },
+      ],
+    };
+
+    const { getByText } = render(<ResultsScreen />);
+    expect(
+      getByText('Amazing! You can solve with just numbers now!'),
+    ).toBeTruthy();
+  });
+
+  it('uses highest stage when multiple advances present', () => {
+    mockRouteParams = {
+      ...mockRouteParams,
+      cpaAdvances: [
+        { skillId: 'addition.single', from: 'concrete', to: 'pictorial' },
+        { skillId: 'subtraction.single', from: 'pictorial', to: 'abstract' },
+      ],
+    };
+
+    const { getByText } = render(<ResultsScreen />);
+    // Abstract is highest, so should show abstract message
+    expect(
+      getByText('Amazing! You can solve with just numbers now!'),
+    ).toBeTruthy();
   });
 });

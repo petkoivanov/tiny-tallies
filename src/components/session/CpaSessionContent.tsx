@@ -43,14 +43,14 @@ const MANIPULATIVE_LABELS: Record<ManipulativeType, string> = {
 };
 
 interface AnswerOption {
-  value: number;
-  bugId?: string;
+  readonly value: number;
+  readonly bugId?: string;
 }
 
 interface CpaSessionContentProps {
   problem: Problem;
   skillId: string;
-  options: AnswerOption[];
+  options: readonly AnswerOption[];
   currentIndex: number;
   onAnswer: (value: number) => void;
   feedbackActive: boolean;

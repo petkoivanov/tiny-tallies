@@ -19,8 +19,21 @@ import { useAppStore } from '@/store/appStore';
 import { calculateLevelFromXp } from '@/services/gamification/levelProgression';
 import { ConfettiCelebration } from '@/components/animations/ConfettiCelebration';
 import type { RootStackParamList } from '@/navigation/types';
+import type { CpaStage } from '@/services/cpa/cpaTypes';
 
 type ResultsRouteProp = RouteProp<RootStackParamList, 'Results'>;
+
+/** Get celebration message for CPA stage advances */
+function getCpaAdvanceMessage(
+  advances: Array<{ skillId: string; from: CpaStage; to: CpaStage }>,
+): string {
+  // Use highest stage advance for the message
+  const hasAbstract = advances.some((a) => a.to === 'abstract');
+  if (hasAbstract) {
+    return 'Amazing! You can solve with just numbers now!';
+  }
+  return 'You leveled up! Now you can solve with pictures!';
+}
 
 /** Format duration in milliseconds to "Xm Ys" display */
 function formatDuration(durationMs: number): string {
@@ -53,8 +66,16 @@ export default function ResultsScreen() {
   const navigation = useNavigation();
   const route = useRoute<ResultsRouteProp>();
 
-  const { score, total, xpEarned, durationMs, leveledUp, newLevel, streakCount } =
-    route.params;
+  const {
+    score,
+    total,
+    xpEarned,
+    durationMs,
+    leveledUp,
+    newLevel,
+    streakCount,
+    cpaAdvances = [],
+  } = route.params;
 
   const xp = useAppStore((state) => state.xp);
 
@@ -84,6 +105,22 @@ export default function ResultsScreen() {
 
   const levelUpAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: levelUpScale.value }],
+  }));
+
+  // CPA advance bounce animation
+  const cpaScale = useSharedValue(cpaAdvances.length > 0 ? 0.5 : 1);
+
+  useEffect(() => {
+    if (cpaAdvances.length > 0) {
+      cpaScale.value = withDelay(
+        400,
+        withSpring(1, { damping: 6, stiffness: 150 }),
+      );
+    }
+  }, [cpaAdvances, cpaScale]);
+
+  const cpaAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: cpaScale.value }],
   }));
 
   const handleDone = () => {
@@ -171,6 +208,20 @@ export default function ResultsScreen() {
             </Text>
             <Check size={18} color={colors.correct} strokeWidth={3} />
           </View>
+
+          {/* CPA Advance Callout (conditional) */}
+          {cpaAdvances.length > 0 && (
+            <>
+              <View style={styles.divider} />
+              <View style={styles.cpaRow} testID="cpa-advance-callout">
+                <Animated.View style={cpaAnimatedStyle}>
+                  <Text style={styles.cpaText}>
+                    {getCpaAdvanceMessage(cpaAdvances)}
+                  </Text>
+                </Animated.View>
+              </View>
+            </>
+          )}
 
           {/* Level Up Callout (conditional) */}
           {leveledUp && (
@@ -308,6 +359,16 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.md,
     color: colors.textPrimary,
     flex: 1,
+  },
+  cpaRow: {
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+  },
+  cpaText: {
+    fontFamily: typography.fontFamily.bold,
+    fontSize: typography.fontSize.md,
+    color: colors.primaryLight,
+    textAlign: 'center',
   },
   levelUpRow: {
     paddingVertical: spacing.md,

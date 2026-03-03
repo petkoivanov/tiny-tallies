@@ -27,6 +27,7 @@ import type {
   SessionFeedback,
   PendingSkillUpdate,
 } from '../services/session';
+import type { CpaStage } from '../services/cpa/cpaTypes';
 import { getOrCreateSkillState } from '../store/helpers/skillStateHelpers';
 
 /** Duration in ms to show correct/incorrect feedback before auto-advancing */
@@ -263,7 +264,13 @@ export function useSession(): UseSessionReturn {
 
         const nextIndex = currentIndex + 1;
         if (nextIndex >= totalProblems) {
-          // Session complete -- commit results
+          // Session complete -- snapshot pre-session CPA levels before commit
+          const preSessionCpaLevels = new Map<string, CpaStage>();
+          pendingUpdatesRef.current.forEach((_update, skillId) => {
+            const original = getOrCreateSkillState(skillStates, skillId);
+            preSessionCpaLevels.set(skillId, original.cpaLevel ?? 'concrete');
+          });
+
           setIsComplete(true);
           const feedback = commitSessionResults(
             pendingUpdatesRef.current,
@@ -280,6 +287,20 @@ export function useSession(): UseSessionReturn {
           );
           endSession();
 
+          // Compute CPA advances by comparing snapshot with pending updates
+          const cpaAdvances: Array<{ skillId: string; from: CpaStage; to: CpaStage }> = [];
+          pendingUpdatesRef.current.forEach((update, skillId) => {
+            const originalCpa = preSessionCpaLevels.get(skillId) ?? 'concrete';
+            if (update.newCpaLevel && update.newCpaLevel !== originalCpa) {
+              cpaAdvances.push({ skillId, from: originalCpa, to: update.newCpaLevel });
+            }
+          });
+
+          // Merge cpaAdvances into feedback
+          const feedbackWithCpa: SessionFeedback | null = feedback
+            ? { ...feedback, cpaAdvances }
+            : null;
+
           const durationMs = Date.now() - sessionStartTimeRef.current;
           setSessionResult({
             score: isCorrect ? score + 1 : score,
@@ -287,7 +308,7 @@ export function useSession(): UseSessionReturn {
             xpEarned: totalXpEarnedRef.current,
             durationMs,
             pendingUpdates: new Map(pendingUpdatesRef.current),
-            feedback,
+            feedback: feedbackWithCpa,
           });
         } else {
           setCurrentIndex(nextIndex);

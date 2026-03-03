@@ -11,12 +11,12 @@ import Animated, {
 import { colors, spacing, typography, layout } from '@/theme';
 
 interface AnswerOption {
-  value: number;
-  bugId?: string;
+  readonly value: number;
+  readonly bugId?: string;
 }
 
 interface CompactAnswerRowProps {
-  options: AnswerOption[];
+  options: readonly AnswerOption[];
   onAnswer: (value: number) => void;
   feedbackActive: boolean;
   selectedAnswer: number | null;
