@@ -2,11 +2,11 @@ import type { SkillState } from '../../store/slices/skillStatesSlice';
 import type { SeededRng } from '../mathEngine/seededRng';
 import type { PendingSkillUpdate, SessionConfig, SessionFeedback, SessionPhase, SessionProblem } from './sessionTypes';
 import { DEFAULT_SESSION_CONFIG } from './sessionTypes';
-import { selectSkill } from '../adaptive/skillSelector';
-import { selectTemplateForSkill } from '../adaptive/problemSelector';
+import { selectTemplateForSkill, weightBySuccessProbability, weightedRandomSelect } from '../adaptive/problemSelector';
 import { getUnlockedSkills } from '../adaptive/prerequisiteGating';
 import { getOrCreateSkillState } from '../../store/helpers/skillStateHelpers';
 import { generateProblem, formatAsMultipleChoice, createRng, getTemplatesBySkill } from '../mathEngine';
+import { generatePracticeMix, constrainedShuffle } from './practiceMix';
 import { detectLevelUp, computeStreakUpdate } from '../gamification';
 
 /**
@@ -97,11 +97,43 @@ export function selectEasiestTemplate(skillId: string) {
 }
 
 /**
+ * Selects a template above the student's Elo for challenge problems.
+ * Falls back to standard gaussian-targeted selection if no harder templates exist.
+ *
+ * @param skillId    - The skill to select a template for
+ * @param studentElo - The student's current Elo rating
+ * @param rng        - Seeded random number generator
+ * @returns A problem template, preferring those above the student's Elo
+ */
+function selectChallengeTemplate(
+  skillId: string,
+  studentElo: number,
+  rng: SeededRng,
+) {
+  const templates = getTemplatesBySkill(skillId);
+  const harder = templates.filter((t) => t.baseElo > studentElo);
+
+  if (harder.length === 0) {
+    // No harder templates -- fall back to standard selection
+    return selectTemplateForSkill(skillId, studentElo, rng);
+  }
+
+  // Use gaussian weighting centered above student Elo
+  const weighted = weightBySuccessProbability(studentElo, harder);
+  return weightedRandomSelect(weighted, rng);
+}
+
+/**
  * Generates the full 15-problem session queue.
  *
  * - Warmup (3 problems): strongest skill + easiest template
- * - Practice (9 problems): weakness-weighted skill + gaussian-targeted template
+ * - Practice (9 problems): 60% review + 30% new + 10% challenge via practice mix
  * - Cooldown (3 problems): strongest skill + easiest template
+ *
+ * Practice problems are sourced from the practice mix algorithm which pulls from:
+ *   - Review pool: Leitner-due skills (spaced repetition)
+ *   - New pool: Outer fringe skills (next to learn)
+ *   - Challenge pool: Mid-range P(L) skills (stretch problems above Elo)
  *
  * All 15 problems are pre-generated for simplicity. The minor Elo drift from
  * warmup answers (~5-15 points) barely shifts template selection.
@@ -109,18 +141,26 @@ export function selectEasiestTemplate(skillId: string) {
  * @param skillStates - Map of skillId -> SkillState with Elo ratings
  * @param config      - Session configuration (problem counts per phase)
  * @param seed        - Seed for deterministic random generation
+ * @param childAge    - Child's age (6-9) for age-adjusted intervals, or null for defaults
  * @returns Array of 15 SessionProblem objects
  */
 export function generateSessionQueue(
   skillStates: Record<string, SkillState>,
   config: SessionConfig = DEFAULT_SESSION_CONFIG,
   seed: number = Date.now(),
+  childAge: number | null = null,
 ): SessionProblem[] {
   const rng = createRng(seed);
   const unlockedSkillIds = getUnlockedSkills(skillStates);
   const { warmupCount, practiceCount, cooldownCount } = config;
   const total = warmupCount + practiceCount + cooldownCount;
   const queue: SessionProblem[] = [];
+
+  // Generate the practice mix using the 60/30/10 algorithm
+  const practiceMix = generatePracticeMix(skillStates, childAge, rng, practiceCount);
+  const orderedMix = constrainedShuffle(practiceMix, rng);
+
+  let practiceIdx = 0;
 
   for (let i = 0; i < total; i++) {
     const phase = getSessionPhase(i, config);
@@ -132,10 +172,18 @@ export function generateSessionQueue(
       skillId = selectStrongestSkill(unlockedSkillIds, skillStates, rng);
       template = selectEasiestTemplate(skillId);
     } else {
-      // Practice: weakness-weighted skill + gaussian-targeted template
-      skillId = selectSkill(unlockedSkillIds, skillStates, rng);
+      // Practice: sourced from practice mix with category-appropriate template selection
+      const mixItem = orderedMix[practiceIdx++];
+      skillId = mixItem.skillId;
       const skillState = getOrCreateSkillState(skillStates, skillId);
-      template = selectTemplateForSkill(skillId, skillState.eloRating, rng);
+
+      if (mixItem.category === 'challenge') {
+        // Challenge: prefer templates above student Elo
+        template = selectChallengeTemplate(skillId, skillState.eloRating, rng);
+      } else {
+        // Review and new: standard gaussian-targeted selection
+        template = selectTemplateForSkill(skillId, skillState.eloRating, rng);
+      }
     }
 
     // Generate the problem using a derived seed to avoid RNG state leaking
