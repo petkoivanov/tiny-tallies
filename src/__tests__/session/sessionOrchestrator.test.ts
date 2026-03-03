@@ -237,8 +237,8 @@ describe('sessionOrchestrator', () => {
       const mocks = createMocks();
 
       const pendingUpdates = new Map<string, PendingSkillUpdate>([
-        ['skill-a', { skillId: 'skill-a', newElo: 1050, attempts: 5, correct: 4 }],
-        ['skill-b', { skillId: 'skill-b', newElo: 980, attempts: 3, correct: 1 }],
+        ['skill-a', { skillId: 'skill-a', newElo: 1050, attempts: 5, correct: 4, newMasteryPL: 0.5, newConsecutiveWrong: 0, newMasteryLocked: false }],
+        ['skill-b', { skillId: 'skill-b', newElo: 980, attempts: 3, correct: 1, newMasteryPL: 0.3, newConsecutiveWrong: 1, newMasteryLocked: false }],
       ]);
 
       commitSessionResults(
@@ -461,6 +461,34 @@ describe('sessionOrchestrator', () => {
       expect(mocks.setLastSessionDate).toHaveBeenCalledTimes(1);
       const dateArg = mocks.setLastSessionDate.mock.calls[0][0];
       expect(new Date(dateArg).toISOString()).toBe(dateArg);
+    });
+
+    it('passes BKT fields through to updateSkillState', () => {
+      const mocks = createMocks();
+
+      const pendingUpdates = new Map<string, PendingSkillUpdate>([
+        ['skill-bkt', {
+          skillId: 'skill-bkt',
+          newElo: 1100,
+          attempts: 10,
+          correct: 8,
+          newMasteryPL: 0.96,
+          newConsecutiveWrong: 0,
+          newMasteryLocked: true,
+        }],
+      ]);
+
+      commitSessionResults(
+        pendingUpdates, 50, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
+      );
+
+      expect(mocks.updateSkillState).toHaveBeenCalledWith('skill-bkt', expect.objectContaining({
+        masteryProbability: 0.96,
+        consecutiveWrong: 0,
+        masteryLocked: true,
+      }));
     });
   });
 });

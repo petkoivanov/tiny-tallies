@@ -195,6 +195,9 @@ export function commitSessionResults(
       attempts: update.attempts,
       correct: update.correct,
       lastPracticed: new Date().toISOString(),
+      masteryProbability: update.newMasteryPL,
+      consecutiveWrong: update.newConsecutiveWrong,
+      masteryLocked: update.newMasteryLocked,
     });
   }
   addXp(totalXp);

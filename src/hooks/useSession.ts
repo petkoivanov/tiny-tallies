@@ -7,6 +7,9 @@ import {
   updateFrustrationState,
   calculateEloUpdate,
   calculateXp,
+  updateBktMastery,
+  getBktParams,
+  applySoftMasteryLock,
 } from '../services/adaptive';
 import {
   generateSessionQueue,
@@ -89,6 +92,7 @@ export function useSession(): UseSessionReturn {
   const weeklyStreak = useAppStore((s) => s.weeklyStreak);
   const lastSessionDate = useAppStore((s) => s.lastSessionDate);
   const setWeeklyStreak = useAppStore((s) => s.setWeeklyStreak);
+  const childAge = useAppStore((s) => s.childAge);
 
   // Synchronous initialization: generate queue on first render, not in useEffect.
   // This ensures currentProblem is available immediately.
@@ -181,11 +185,28 @@ export function useSession(): UseSessionReturn {
         currentAttempts,
       );
 
+      // BKT mastery update (independent of Elo, per user decision)
+      const bktParams = getBktParams(childAge);
+      const currentPL = existing?.newMasteryPL ?? skillState.masteryProbability;
+      const currentConsecutiveWrong = existing?.newConsecutiveWrong ?? skillState.consecutiveWrong;
+      const currentMasteryLocked = existing?.newMasteryLocked ?? skillState.masteryLocked;
+
+      const bktResult = updateBktMastery(currentPL, isCorrect, bktParams);
+      const masteryResult = applySoftMasteryLock(
+        bktResult,
+        currentMasteryLocked,
+        currentConsecutiveWrong,
+        isCorrect,
+      );
+
       pendingUpdatesRef.current.set(problem.skillId, {
         skillId: problem.skillId,
         newElo: eloResult.newElo,
         attempts: currentAttempts + 1,
         correct: currentCorrect + (isCorrect ? 1 : 0),
+        newMasteryPL: masteryResult.masteryProbability,
+        newConsecutiveWrong: masteryResult.consecutiveWrong,
+        newMasteryLocked: masteryResult.masteryLocked,
       });
 
       // Calculate XP if correct
@@ -257,6 +278,7 @@ export function useSession(): UseSessionReturn {
       lastSessionDate,
       setWeeklyStreak,
       endSession,
+      childAge,
     ],
   );
 
