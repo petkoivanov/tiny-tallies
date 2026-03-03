@@ -81,11 +81,11 @@ Plans:
   1. Correct answers trigger a celebration animation (e.g., bounce, sparkle, or confetti burst) with a positive color flash
   2. Incorrect answers trigger a gentle encouragement animation (e.g., soft shake or fade) without punitive tone
   3. Leveling up triggers a distinct, more prominent celebration animation visible to the child
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 10-01: Correct/incorrect answer feedback animations
-- [ ] 10-02: Level-up celebration animation
+- [ ] 10-01-PLAN.md — Correct/incorrect answer feedback animations (bounce on correct, shake on incorrect)
+- [ ] 10-02-PLAN.md — Level-up celebration animation (confetti overlay + animated Level Up text)
 
 ## Progress
 
