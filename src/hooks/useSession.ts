@@ -10,6 +10,8 @@ import {
   updateBktMastery,
   getBktParams,
   applySoftMasteryLock,
+  transitionBox,
+  computeNextReviewDue,
 } from '../services/adaptive';
 import {
   generateSessionQueue,
@@ -199,10 +201,27 @@ export function useSession(): UseSessionReturn {
         isCorrect,
       );
 
-      // Leitner fields: carry forward current values until session integration (Phase 12-02)
+      // Leitner box transition
       const currentLeitnerBox = existing?.newLeitnerBox ?? skillState.leitnerBox;
-      const currentNextReviewDue = existing?.newNextReviewDue ?? skillState.nextReviewDue;
       const currentConsecutiveCorrectInBox6 = existing?.newConsecutiveCorrectInBox6 ?? skillState.consecutiveCorrectInBox6;
+
+      const leitnerResult = transitionBox(
+        currentLeitnerBox,
+        isCorrect,
+        currentConsecutiveCorrectInBox6,
+        childAge,
+      );
+
+      // BKT mastery auto-advance: if BKT declares mastery and box < 6, sync to Box 6
+      let finalLeitnerBox = leitnerResult.newBox;
+      let finalNextReviewDue = leitnerResult.nextReviewDue;
+      let finalConsecutiveCorrectInBox6 = leitnerResult.consecutiveCorrectInBox6;
+
+      if (masteryResult.masteryLocked && leitnerResult.newBox < 6) {
+        finalLeitnerBox = 6;
+        finalNextReviewDue = computeNextReviewDue(6, childAge);
+        finalConsecutiveCorrectInBox6 = 0; // reset: didn't earn it via Box 6 streak
+      }
 
       pendingUpdatesRef.current.set(problem.skillId, {
         skillId: problem.skillId,
@@ -212,9 +231,9 @@ export function useSession(): UseSessionReturn {
         newMasteryPL: masteryResult.masteryProbability,
         newConsecutiveWrong: masteryResult.consecutiveWrong,
         newMasteryLocked: masteryResult.masteryLocked,
-        newLeitnerBox: currentLeitnerBox,
-        newNextReviewDue: currentNextReviewDue,
-        newConsecutiveCorrectInBox6: currentConsecutiveCorrectInBox6,
+        newLeitnerBox: finalLeitnerBox,
+        newNextReviewDue: finalNextReviewDue,
+        newConsecutiveCorrectInBox6: finalConsecutiveCorrectInBox6,
       });
 
       // Calculate XP if correct
