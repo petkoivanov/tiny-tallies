@@ -14,6 +14,9 @@ export type RootStackParamList = {
     total: number;
     xpEarned: number;
     durationMs: number;
+    leveledUp: boolean;
+    newLevel: number;
+    streakCount: number;
   };
 };
 

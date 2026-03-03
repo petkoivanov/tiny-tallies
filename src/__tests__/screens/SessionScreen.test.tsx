@@ -46,6 +46,8 @@ const defaultUseSessionReturn: UseSessionReturn = {
   sessionPhase: 'warmup',
   feedbackState: null,
   isComplete: false,
+  selectedAnswer: null,
+  correctAnswer: 68,
   score: 0,
   handleAnswer: mockHandleAnswer,
   handleQuit: mockHandleQuit,

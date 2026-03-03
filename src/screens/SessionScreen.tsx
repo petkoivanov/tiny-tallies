@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Check, X } from 'lucide-react-native';
+import { X } from 'lucide-react-native';
 import { colors, spacing, typography, layout } from '@/theme';
 import { useSession } from '@/hooks/useSession';
 import type { RootStackParamList } from '@/navigation/types';
@@ -37,6 +37,20 @@ function formatOperator(operation: string): string {
   }
 }
 
+/** Get progress bar fill color based on session phase */
+function getPhaseColor(phase: SessionPhase): string {
+  switch (phase) {
+    case 'warmup':
+      return colors.primaryLight; // #818cf8, soft indigo
+    case 'practice':
+      return colors.primary; // #6366f1, full indigo
+    case 'cooldown':
+      return colors.correct; // #84cc16, lime green
+    case 'complete':
+      return colors.correct;
+  }
+}
+
 export default function SessionScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<SessionNavProp>();
@@ -47,12 +61,29 @@ export default function SessionScreen() {
     totalProblems,
     sessionPhase,
     feedbackState,
+    selectedAnswer,
+    correctAnswer,
     isComplete,
     score,
     handleAnswer,
     handleQuit,
     sessionResult,
   } = useSession();
+
+  // Track whether to reveal the correct answer after wrong tap
+  const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
+
+  // When feedback activates with incorrect answer, reveal correct after 500ms
+  useEffect(() => {
+    if (feedbackState && !feedbackState.correct) {
+      const timer = setTimeout(() => {
+        setShowCorrectAnswer(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+    // Reset when feedback clears
+    setShowCorrectAnswer(false);
+  }, [feedbackState]);
 
   // Prevent back navigation while session is active
   const isSessionActive = !isComplete;
@@ -83,11 +114,18 @@ export default function SessionScreen() {
         total: sessionResult.total,
         xpEarned: sessionResult.xpEarned,
         durationMs: sessionResult.durationMs,
+        leveledUp: sessionResult.feedback?.leveledUp ?? false,
+        newLevel: sessionResult.feedback?.newLevel ?? 1,
+        streakCount: sessionResult.feedback?.streakCount ?? 0,
       });
     }
   }, [isComplete, sessionResult, navigation]);
 
   const isFeedbackActive = feedbackState !== null;
+
+  // Progress bar fill percentage: count current question as done when feedback is showing
+  const progressDone = currentIndex + (feedbackState ? 1 : 0);
+  const progressPercent = totalProblems > 0 ? (progressDone / totalProblems) * 100 : 0;
 
   // Loading state (should not happen due to synchronous init, but defensive)
   if (!currentProblem && !isComplete) {
@@ -107,6 +145,28 @@ export default function SessionScreen() {
 
   const problem = currentProblem?.problem;
   const options = currentProblem?.presentation.options ?? [];
+
+  /** Compute the style for an answer button based on feedback state */
+  function getOptionFeedbackStyle(
+    optionValue: number,
+  ): object | undefined {
+    if (!isFeedbackActive) return undefined;
+
+    // The button the child tapped
+    if (optionValue === selectedAnswer) {
+      if (feedbackState!.correct) {
+        return styles.optionButtonCorrect;
+      }
+      return styles.optionButtonIncorrect;
+    }
+
+    // Reveal the correct answer after delay (only on wrong answers)
+    if (showCorrectAnswer && optionValue === correctAnswer) {
+      return styles.optionButtonRevealCorrect;
+    }
+
+    return undefined;
+  }
 
   return (
     <View
@@ -132,6 +192,22 @@ export default function SessionScreen() {
         </Pressable>
       </View>
 
+      {/* Progress Bar */}
+      <View style={styles.progressBarContainer} testID="progress-bar">
+        <View style={styles.progressBarBackground}>
+          <View
+            style={[
+              styles.progressBarFill,
+              {
+                width: `${progressPercent}%`,
+                backgroundColor: getPhaseColor(sessionPhase),
+              },
+            ]}
+            testID="progress-bar-fill"
+          />
+        </View>
+      </View>
+
       {/* Problem Display */}
       <View style={styles.content}>
         {problem && (
@@ -139,37 +215,6 @@ export default function SessionScreen() {
             {problem.operands[0]} {formatOperator(problem.operation)}{' '}
             {problem.operands[1]} = ?
           </Text>
-        )}
-
-        {/* Feedback Indicator */}
-        {feedbackState && (
-          <View style={styles.feedbackContainer} testID="feedback-indicator">
-            {feedbackState.correct ? (
-              <Check
-                size={48}
-                color={colors.correct}
-                testID="feedback-correct"
-              />
-            ) : (
-              <X
-                size={48}
-                color={colors.incorrect}
-                testID="feedback-incorrect"
-              />
-            )}
-            <Text
-              style={[
-                styles.feedbackText,
-                {
-                  color: feedbackState.correct
-                    ? colors.correct
-                    : colors.incorrect,
-                },
-              ]}
-            >
-              {feedbackState.correct ? 'Correct!' : 'Not quite'}
-            </Text>
-          </View>
         )}
 
         {/* Answer Options (2x2 grid) */}
@@ -182,7 +227,9 @@ export default function SessionScreen() {
               style={({ pressed }) => [
                 styles.optionButton,
                 pressed && !isFeedbackActive && styles.optionButtonPressed,
+                pressed && !isFeedbackActive && styles.optionButtonScaled,
                 isFeedbackActive && styles.optionButtonDisabled,
+                getOptionFeedbackStyle(option.value),
               ]}
               accessibilityRole="button"
               accessibilityLabel={`Answer ${option.value}`}
@@ -226,6 +273,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  progressBarContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
+  },
+  progressBarBackground: {
+    height: 8,
+    borderRadius: layout.borderRadius.round,
+    backgroundColor: colors.surface,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: layout.borderRadius.round,
+  },
   content: {
     flex: 1,
     justifyContent: 'center',
@@ -238,15 +299,6 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     marginBottom: spacing.xl,
     textAlign: 'center',
-  },
-  feedbackContainer: {
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-  },
-  feedbackText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.lg,
-    marginTop: spacing.sm,
   },
   optionsGrid: {
     flexDirection: 'row',
@@ -265,12 +317,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: spacing.md,
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
   optionButtonPressed: {
     backgroundColor: colors.surfaceLight,
   },
+  optionButtonScaled: {
+    transform: [{ scale: 0.95 }],
+  },
   optionButtonDisabled: {
     opacity: 0.6,
+  },
+  optionButtonCorrect: {
+    borderColor: colors.correct,
+    backgroundColor: '#84cc1620',
+    opacity: 1,
+  },
+  optionButtonIncorrect: {
+    borderColor: colors.incorrect,
+    backgroundColor: '#f8717120',
+    opacity: 1,
+  },
+  optionButtonRevealCorrect: {
+    borderColor: colors.correct,
+    backgroundColor: '#84cc1620',
+    opacity: 1,
   },
   optionText: {
     fontFamily: typography.fontFamily.semiBold,

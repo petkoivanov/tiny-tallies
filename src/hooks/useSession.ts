@@ -37,6 +37,8 @@ export interface UseSessionReturn {
   totalProblems: number;
   sessionPhase: SessionPhase;
   feedbackState: FeedbackState | null;
+  selectedAnswer: number | null;
+  correctAnswer: number | null;
   isComplete: boolean;
   score: number;
   handleAnswer: (selectedValue: number) => void;
@@ -108,6 +110,7 @@ export function useSession(): UseSessionReturn {
   // React state (drives UI re-renders)
   const [currentIndex, setCurrentIndex] = useState(0);
   const [feedbackState, setFeedbackState] = useState<FeedbackState | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [score, setScore] = useState(0);
   const [sessionResult, setSessionResult] = useState<SessionResult | null>(null);
@@ -130,6 +133,7 @@ export function useSession(): UseSessionReturn {
   // Derived values
   const currentProblem = isComplete ? null : (sessionQueueRef.current[currentIndex] ?? null);
   const sessionPhase = getSessionPhase(currentIndex, DEFAULT_SESSION_CONFIG);
+  const correctAnswer = currentProblem?.problem.correctAnswer ?? null;
 
   const handleAnswer = useCallback(
     (selectedValue: number) => {
@@ -137,6 +141,9 @@ export function useSession(): UseSessionReturn {
       if (!problem || feedbackState !== null) return;
 
       const isCorrect = selectedValue === problem.problem.correctAnswer;
+
+      // Track selected answer for button coloring
+      setSelectedAnswer(selectedValue);
 
       // Show feedback
       setFeedbackState({ visible: true, correct: isCorrect });
@@ -198,6 +205,7 @@ export function useSession(): UseSessionReturn {
       feedbackTimerRef.current = setTimeout(() => {
         feedbackTimerRef.current = null;
         setFeedbackState(null);
+        setSelectedAnswer(null);
 
         const nextIndex = currentIndex + 1;
         if (nextIndex >= totalProblems) {
@@ -264,6 +272,7 @@ export function useSession(): UseSessionReturn {
 
     // Reset local state
     setFeedbackState(null);
+    setSelectedAnswer(null);
     setCurrentIndex(0);
     setScore(0);
     setIsComplete(false);
@@ -279,6 +288,8 @@ export function useSession(): UseSessionReturn {
     totalProblems,
     sessionPhase,
     feedbackState,
+    selectedAnswer,
+    correctAnswer,
     isComplete,
     score,
     handleAnswer,
