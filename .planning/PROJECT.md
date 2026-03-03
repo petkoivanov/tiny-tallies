@@ -2,7 +2,7 @@
 
 ## What This Is
 
-An AI-powered math learning mobile app for children ages 6-9 (grades 1-3). Features adaptive daily practice sessions with programmatic problem generation, misconception-based distractors via Bug Library pattern, Elo-based adaptive difficulty, and a structured session flow (warmup/practice/cooldown). Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
+An AI-powered math learning mobile app for children ages 6-9 (grades 1-3). Features adaptive daily practice sessions with programmatic problem generation, misconception-based distractors via Bug Library pattern, Elo-based adaptive difficulty, gamification (XP/levels/streaks), polished UI with animated feedback, and a full adaptive learning engine — Bayesian Knowledge Tracing for mastery estimation, Leitner spaced repetition for optimal review scheduling, prerequisite skill graph with outer fringe for new skill discovery, and smart 60/30/10 session orchestration. Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
 
 ## Core Value
 
@@ -23,14 +23,15 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - ✓ Weekly streak tracking — v0.2
 - ✓ Home screen with level/XP/streak display — v0.2
 - ✓ Animated feedback for correct/incorrect answers — v0.2
+- ✓ Bayesian Knowledge Tracing (BKT) for mastery estimation per skill — v0.3
+- ✓ Modified Leitner spaced repetition with 6 boxes and age-adjusted intervals — v0.3
+- ✓ Prerequisite skill graph (DAG) with outer fringe algorithm — v0.3
+- ✓ Smart session mix: 60% review / 30% new / 10% challenge — v0.3
+- ✓ BKT-driven mastery thresholds (≥0.95 mastered, <0.40 needs re-teaching) — v0.3
 
 ### Active
 
-- [ ] Bayesian Knowledge Tracing (BKT) for mastery estimation per skill
-- [ ] Modified Leitner spaced repetition with 6 boxes and age-adjusted intervals
-- [ ] Prerequisite skill graph (DAG) with outer fringe algorithm
-- [ ] Smart session mix: 60% review / 30% new / 10% challenge
-- [ ] BKT-driven mastery thresholds (≥0.95 mastered, <0.40 needs re-teaching)
+(None — next milestone requirements defined via `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -43,34 +44,26 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - Chat or social features with personal info — COPPA compliance
 - Free text input UI — architecture supports it, deferred to post-v0.1
 
-## Current Milestone: v0.3 Adaptive Learning Engine
-
-**Goal:** Build the adaptive learning backbone — BKT mastery estimation, Leitner spaced repetition, and prerequisite skill graph — so sessions become pedagogically structured with smart problem selection.
-
-**Target features:**
-- Bayesian Knowledge Tracing (BKT) for mastery estimation per skill
-- Modified Leitner spaced repetition with 6 boxes and age-adjusted intervals
-- Prerequisite skill graph (DAG) with outer fringe algorithm
-- Smart session mix: 60% review / 30% new / 10% challenge
-- BKT-driven mastery thresholds (≥0.95 mastered, <0.40 needs re-teaching)
-
 ## Context
 
-**Current state:** Shipped v0.1 Foundation with 6,799 LOC TypeScript across 113 files. 336 tests passing. Full functional session flow operational — child can start a session, answer 15 adaptive problems (3 warmup + 9 practice + 3 cooldown), see feedback, and view results with score/XP/duration.
+**Current state:** Shipped v0.3 Adaptive Learning Engine with 11,866 LOC TypeScript. 557 tests passing. Full adaptive learning pipeline operational — BKT mastery estimation, Leitner spaced repetition, prerequisite skill graph with outer fringe, and smart 60/30/10 session orchestration.
 
-**Architecture (implemented v0.1):**
+**Architecture (implemented through v0.3):**
 - Programmatic math engine: 14 skills across addition/subtraction (Common Core grades 1-3)
 - Bug Library: 11 misconception patterns with three-phase distractor assembly
 - Elo rating system with variable K-factor (K=40 at start, decaying toward K=16)
 - Gaussian-weighted problem selection targeting 85% success rate
 - Frustration guard (3 consecutive wrong → easier problem)
-- Session orchestrator: pre-generated 15-problem queue with commit-on-complete pattern
-- Zustand persist with versioned migrations and AsyncStorage
+- Session orchestrator: 15-problem queue (3 warmup + 9 practice + 3 cooldown) with 60/30/10 review/new/challenge mix
+- Zustand persist with versioned migrations (STORE_VERSION=4) and AsyncStorage
+- XP/level progression, weekly streaks, animated feedback and confetti celebrations
+- Bayesian Knowledge Tracing with age-adjusted parameters (3 age brackets)
+- Leitner 6-box spaced repetition with age-adjusted intervals and BKT-informed initial placement
+- Prerequisite skill DAG with BKT-mastery gating and outer fringe algorithm
+- Practice mix: BKT-weighted selection, fallback cascade, constrained shuffle (no adjacent challenges, review-first)
 
 **Architecture (planned, future milestones):**
 - Hybrid: Programmatic math engine + LLM (Gemini) for context wrapping only
-- Bayesian Knowledge Tracing (BKT) for mastery estimation per skill
-- Modified Leitner spaced repetition with age-adjusted intervals (6 boxes, drop 2 on wrong)
 - CPA progression (Concrete → Pictorial → Abstract)
 - Three-mode AI tutor: TEACH / HINT (Socratic, never reveals answer) / BOOST
 - Virtual manipulatives (base-ten blocks, number lines, ten frames, fraction strips)
@@ -88,8 +81,6 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tutoring engine design, virtual manipulatives specs, misconception detection patterns, spaced repetition algorithms, gamification design, onboarding/placement testing, child UX design, sound/audio design, math anxiety mitigation, COPPA privacy compliance, problem generation engine.
 
 **Future milestones:**
-- v0.2: Core UI polish + gamification (XP/levels, streaks, animations) — SHIPPED
-- v0.3: BKT + spaced repetition + prerequisite graph (CURRENT)
 - v0.4: Virtual manipulatives (base-ten blocks, number lines, ten frames, fraction strips)
 - v0.5: AI tutor integration (Gemini, three-mode, CPA progression)
 - v0.6: Misconception detection system (Bug Library + interventions)
@@ -112,7 +103,7 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Hybrid architecture (programmatic + LLM) | LLMs unreliable at arithmetic; separation enables testing | ✓ Good — math engine works perfectly, 336 tests |
+| Hybrid architecture (programmatic + LLM) | LLMs unreliable at arithmetic; separation enables testing | ✓ Good — math engine works perfectly, 557 tests |
 | Zustand domain slices pattern | Clean separation of concerns, composable store | ✓ Good — 4 slices, clean boundaries |
 | Mulberry32 seeded PRNG | 15-line implementation, no external dependency | ✓ Good — deterministic tests, reproducible problems |
 | Bug Library pattern | Identifies WHAT child misunderstands, not just THAT they're wrong | ✓ Good — 11 patterns, three-phase assembly |
@@ -122,13 +113,19 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | Commit-on-complete pattern | Elo/XP accumulate in refs, atomic commit only on finish | ✓ Good — quit discards cleanly |
 | usePreventRemove for nav guard | React Navigation 7 recommended approach | ✓ Good — dual guard (hook + gestureEnabled) |
 | Route params for Results data | Avoids timing issues with store clearing | ✓ Good — reliable data passing |
+| Weekly streaks (not daily) | Research: daily streaks cause anxiety in children | ✓ Good — non-punitive engagement |
+| No hearts/lives/penalties | Punitive mechanics harm learning motivation | ✓ Good — intrinsic motivation maintained |
+| BKT age-adjusted parameters | 3 brackets (6-7, 7-8, 8-9) with research-backed rates | ✓ Good — age-appropriate mastery tracking |
+| Soft mastery lock (3 consecutive wrong to break) | Protects against single slips; stable mastery | ✓ Good — prevents oscillation |
+| BKT-informed Leitner placement | v3→v4 migration uses P(L) for initial box, not all Box 1 | ✓ Good — existing progress respected |
+| Leitner drop 2 boxes (not to Box 1) | Less punishing for children; maintains engagement | ✓ Good — research-backed |
+| BKT-mastery gating (replaces Elo threshold) | True mastery, not just difficulty proxies | ✓ Good — pedagogically sound |
+| No-re-locking policy | Practiced skills stay unlocked even if prereq mastery lost | ✓ Good — avoids frustration |
+| 60/30/10 practice mix | Review/new/challenge with fallback cascade | ✓ Good — structured sessions |
 | Gemini for LLM layer | Already integrated in Tiny Tales; good for context/explanations | — Pending |
-| Modified Leitner (drop 2, not to Box 1) | Less punishing for children; maintains engagement | — Pending |
-| Weekly streaks (not daily) | Research: daily streaks cause anxiety in children | — Pending |
-| No hearts/lives/penalties | Punitive mechanics harm learning motivation | — Pending |
 | CPA progression | Research-backed (Singapore Math, NCTM recommended) | — Pending |
 | Start Common Core only | Reduce scope; add curricula in later versions | ✓ Good — 14 skills implemented |
 | Ages 6-9 focus | Clearest market gap; manageable content scope | ✓ Good — grade 1-3 content complete |
 
 ---
-*Last updated: 2026-03-03 after v0.3 milestone start*
+*Last updated: 2026-03-03 after v0.3 milestone*

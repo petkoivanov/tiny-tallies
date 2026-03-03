@@ -1,5 +1,23 @@
 # Milestones
 
+## v0.3 Adaptive Learning Engine (Shipped: 2026-03-03)
+
+**Phases completed:** 8 phases, 15 plans
+**Timeline:** 2 days (2026-03-02 → 2026-03-03)
+**LOC:** 11,866 TypeScript | 89 files changed (+12,028 / -368)
+
+**Key accomplishments:**
+- Gamification engine with XP/level progression (100+level*20 formula) and weekly streak tracking
+- Personal home screen dashboard showing child name, avatar, level, XP progress bar, and streak
+- Session UI polish: progress bars with phase colors, answer button feedback, scale-on-press, motivational messages
+- Animated feedback: spring bounce for correct answers, horizontal shake for incorrect, confetti celebrations on level-up
+- Bayesian Knowledge Tracing (BKT) with age-adjusted parameters for per-skill mastery estimation (P(L) updated via Bayesian inference)
+- Leitner 6-box spaced repetition with age-adjusted review intervals and BKT-informed initial box placement
+- Prerequisite skill DAG with BKT-mastery gating and outer fringe algorithm for new skill discovery
+- Smart session orchestration: 60/30/10 review/new/challenge mix with BKT-weighted selection and fallback cascade
+
+---
+
 ## v0.1 Foundation (Shipped: 2026-03-03)
 
 **Phases completed:** 6 phases, 12 plans
