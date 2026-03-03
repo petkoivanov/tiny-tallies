@@ -11,7 +11,7 @@ Requirements for v0.3 Adaptive Learning Engine milestone. Each maps to roadmap p
 
 - [ ] **BKT-01**: Each skill tracks a mastery probability (P(L)) updated via Bayesian inference after every answer
 - [ ] **BKT-02**: BKT parameters are age-adjusted (younger children: higher guess rate, higher slip rate, lower learn rate)
-- [ ] **BKT-03**: Skill with P(L) ≥ 0.95 is marked as mastered and moves to review-only scheduling
+- [ ] **BKT-03**: Skill with P(L) >= 0.95 is marked as mastered and moves to review-only scheduling
 - [ ] **BKT-04**: Skill with P(L) < 0.40 is flagged for re-teaching priority
 
 ### Leitner (Spaced Repetition)
@@ -87,29 +87,29 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BKT-01 | — | Pending |
-| BKT-02 | — | Pending |
-| BKT-03 | — | Pending |
-| BKT-04 | — | Pending |
-| LEIT-01 | — | Pending |
-| LEIT-02 | — | Pending |
-| LEIT-03 | — | Pending |
-| LEIT-04 | — | Pending |
-| LEIT-05 | — | Pending |
-| PREG-01 | — | Pending |
-| PREG-02 | — | Pending |
-| PREG-03 | — | Pending |
-| SESS-01 | — | Pending |
-| SESS-02 | — | Pending |
-| SESS-03 | — | Pending |
-| SESS-04 | — | Pending |
-| SESS-05 | — | Pending |
+| BKT-01 | Phase 11 | Pending |
+| BKT-02 | Phase 11 | Pending |
+| BKT-03 | Phase 11 | Pending |
+| BKT-04 | Phase 11 | Pending |
+| LEIT-01 | Phase 12 | Pending |
+| LEIT-02 | Phase 12 | Pending |
+| LEIT-03 | Phase 12 | Pending |
+| LEIT-04 | Phase 12 | Pending |
+| LEIT-05 | Phase 12 | Pending |
+| PREG-01 | Phase 13 | Pending |
+| PREG-02 | Phase 13 | Pending |
+| PREG-03 | Phase 13 | Pending |
+| SESS-01 | Phase 14 | Pending |
+| SESS-02 | Phase 14 | Pending |
+| SESS-03 | Phase 14 | Pending |
+| SESS-04 | Phase 14 | Pending |
+| SESS-05 | Phase 14 | Pending |
 
 **Coverage:**
-- v0.3 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16 ⚠️
+- v0.3 requirements: 17 total
+- Mapped to phases: 17
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after initial definition*
+*Last updated: 2026-03-03 after v0.3 roadmap creation*
