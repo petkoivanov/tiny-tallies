@@ -130,6 +130,72 @@ describe('store migrations', () => {
     expect(result.childName).toBe('Luna');
   });
 
+  it('v3->v4 migration with masteryProbability=0.96 gets leitnerBox=6', () => {
+    const input = {
+      skillStates: {
+        'mastered-skill': {
+          eloRating: 1200, attempts: 50, correct: 45,
+          masteryProbability: 0.96, consecutiveWrong: 0, masteryLocked: true,
+        },
+      },
+    };
+    const result = migrateStore(input, 3);
+    const skills = result.skillStates as Record<string, Record<string, unknown>>;
+    expect(skills['mastered-skill'].leitnerBox).toBe(6);
+  });
+
+  it('v3->v4 migration with masteryProbability=0.1 gets leitnerBox=1', () => {
+    const input = {
+      skillStates: {
+        'new-skill': {
+          eloRating: 1000, attempts: 2, correct: 1,
+          masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false,
+        },
+      },
+    };
+    const result = migrateStore(input, 3);
+    const skills = result.skillStates as Record<string, Record<string, unknown>>;
+    expect(skills['new-skill'].leitnerBox).toBe(1);
+  });
+
+  it('v3->v4 migration handles empty skillStates cleanly', () => {
+    const input = { skillStates: {} };
+    const result = migrateStore(input, 3);
+    expect(result.skillStates).toEqual({});
+  });
+
+  it('v3->v4 migration with missing masteryProbability defaults to 0.1 -> Box 1', () => {
+    const input = {
+      skillStates: {
+        'incomplete-skill': {
+          eloRating: 900, attempts: 3, correct: 1,
+          consecutiveWrong: 0, masteryLocked: false,
+        },
+      },
+    };
+    const result = migrateStore(input, 3);
+    const skills = result.skillStates as Record<string, Record<string, unknown>>;
+    expect(skills['incomplete-skill'].leitnerBox).toBe(1);
+    expect(skills['incomplete-skill'].nextReviewDue).toBeNull();
+    expect(skills['incomplete-skill'].consecutiveCorrectInBox6).toBe(0);
+  });
+
+  it('v3->v4 migration places multiple skills with varied mastery levels', () => {
+    const input = {
+      skillStates: {
+        'skill-low': { eloRating: 900, attempts: 5, correct: 2, masteryProbability: 0.15, consecutiveWrong: 0, masteryLocked: false },
+        'skill-mid': { eloRating: 1050, attempts: 20, correct: 14, masteryProbability: 0.55, consecutiveWrong: 0, masteryLocked: false },
+        'skill-high': { eloRating: 1200, attempts: 50, correct: 45, masteryProbability: 0.92, consecutiveWrong: 0, masteryLocked: true },
+      },
+    };
+    const result = migrateStore(input, 3);
+    const skills = result.skillStates as Record<string, Record<string, unknown>>;
+
+    expect(skills['skill-low'].leitnerBox).toBe(1);   // 0.15 < 0.20
+    expect(skills['skill-mid'].leitnerBox).toBe(3);   // 0.40 <= 0.55 < 0.60
+    expect(skills['skill-high'].leitnerBox).toBe(5);   // 0.80 <= 0.92 < 0.95
+  });
+
   it('migrateStore from version 4 returns state unchanged', () => {
     const input = {
       childName: 'Luna',
