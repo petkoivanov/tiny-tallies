@@ -24,10 +24,10 @@ Requirements for v0.4 Virtual Manipulatives milestone. Each maps to roadmap phas
 ### CPA Progression
 
 - [x] **CPA-01**: System tracks CPA stage per skill using BKT mastery (P(L) < 0.40 → concrete, 0.40–0.85 → pictorial, ≥ 0.85 → abstract)
-- [ ] **CPA-02**: User sees interactive manipulatives (concrete mode) when skill mastery is low
+- [x] **CPA-02**: User sees interactive manipulatives (concrete mode) when skill mastery is low
 - [x] **CPA-03**: User sees static visual representations (pictorial mode) when skill mastery is moderate
-- [ ] **CPA-04**: User sees numbers only (abstract mode) when skill mastery is high
-- [ ] **CPA-05**: CPA stage advances automatically when user completes a practice session
+- [x] **CPA-04**: User sees numbers only (abstract mode) when skill mastery is high
+- [x] **CPA-05**: CPA stage advances automatically when user completes a practice session
 
 ### Session Integration
 
@@ -104,10 +104,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MANIP-05 | Phase 17 | Complete |
 | MANIP-06 | Phase 17 | Complete |
 | MANIP-07 | Phase 17 | Complete |
-| CPA-02 | Phase 18 | Pending |
+| CPA-02 | Phase 18 | Complete |
 | CPA-03 | Phase 18 | Complete |
-| CPA-04 | Phase 18 | Pending |
-| CPA-05 | Phase 18 | Pending |
+| CPA-04 | Phase 18 | Complete |
+| CPA-05 | Phase 18 | Complete |
 | SESS-01 | Phase 18 | Complete |
 | SESS-02 | Phase 18 | Complete |
 | SESS-03 | Phase 18 | Complete |
