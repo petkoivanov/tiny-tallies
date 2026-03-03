@@ -24,9 +24,9 @@ Requirements for v0.3 Adaptive Learning Engine milestone. Each maps to roadmap p
 
 ### Prerequisite Graph
 
-- [ ] **PREG-01**: Skill prerequisite DAG defines unlock dependencies for all existing skills
-- [ ] **PREG-02**: Outer fringe algorithm computes which new skills are available based on mastered prerequisites
-- [ ] **PREG-03**: New skills are only presented in sessions when all their prerequisites are mastered
+- [x] **PREG-01**: Skill prerequisite DAG defines unlock dependencies for all existing skills
+- [x] **PREG-02**: Outer fringe algorithm computes which new skills are available based on mastered prerequisites
+- [x] **PREG-03**: New skills are only presented in sessions when all their prerequisites are mastered
 
 ### Session Orchestration
 
@@ -96,9 +96,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LEIT-03 | Phase 12 | Complete |
 | LEIT-04 | Phase 12 | Complete |
 | LEIT-05 | Phase 12 | Complete |
-| PREG-01 | Phase 13 | Pending |
-| PREG-02 | Phase 13 | Pending |
-| PREG-03 | Phase 13 | Pending |
+| PREG-01 | Phase 13 | Complete |
+| PREG-02 | Phase 13 | Complete |
+| PREG-03 | Phase 13 | Complete |
 | SESS-01 | Phase 14 | Pending |
 | SESS-02 | Phase 14 | Pending |
 | SESS-03 | Phase 14 | Pending |

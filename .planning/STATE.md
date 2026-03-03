@@ -31,16 +31,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.3 Adaptive Learning Engine -- Phase 12 (Leitner Spaced Repetition)
+**Current focus:** v0.3 Adaptive Learning Engine -- Phase 13 (Prerequisite Graph & Outer Fringe)
 
 ## Current Position
 
-Phase: 12 of 14 (Leitner Spaced Repetition) -- COMPLETE
-Plan: 2 of 2 in current phase (all plans complete)
-Status: Phase 12 complete
-Last activity: 2026-03-03 -- Completed 12-02 (Leitner Integration into Session Flow)
+Phase: 13 of 14 (Prerequisite Graph & Outer Fringe)
+Plan: 1 of 2 in current phase (13-01 complete)
+Status: Executing phase 13
+Last activity: 2026-03-03 -- Completed 13-01 (DAG Cross-Links, BKT-Mastery Gating & Outer Fringe)
 
-Progress: [████░░░░░░] 35%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
@@ -56,10 +56,10 @@ Full decision log in PROJECT.md Key Decisions table.
 
 Key context carried from v0.2:
 - SkillState type: { eloRating, attempts, correct, lastPracticed?, masteryProbability, consecutiveWrong, masteryLocked, leitnerBox, nextReviewDue, consecutiveCorrectInBox6 } in skillStatesSlice.ts
-- Existing prerequisiteGating.ts uses Elo threshold (950) for unlocking -- will be refactored to BKT mastery in Phase 13
+- prerequisiteGating.ts now uses BKT masteryLocked for unlocking (Elo threshold removed in Phase 13)
 - Session orchestrator generates 15-problem queue (3 warmup + 9 practice + 3 cooldown) with pre-generation
 - commitSessionResults handles Elo updates, XP, level-ups, streaks atomically
-- 14 skills across addition/subtraction chains with prerequisite DAG already defined in skills.ts
+- 14 skills across addition/subtraction chains with cross-operation prerequisite DAG in skills.ts
 - STORE_VERSION = 4 (v3->v4 migration adds Leitner defaults with BKT-informed placement)
 - 494 tests passing, TypeScript clean
 
@@ -78,6 +78,14 @@ Phase 12 decisions:
 - commitSessionResults now persists leitnerBox, nextReviewDue, consecutiveCorrectInBox6 atomically
 - 502 tests passing, TypeScript clean
 
+Phase 13 decisions (plan 1):
+- BKT masteryLocked replaces Elo threshold (950) for prerequisite unlocking
+- No-re-locking policy: practiced skills (attempts > 0) stay unlocked permanently
+- Outer fringe excludes practiced-but-unmastered skills (Leitner handles review)
+- Cross-operation links: each subtraction skill requires corresponding addition skill at same difficulty level
+- getOuterFringe pure function exported via barrel for session orchestrator integration
+- 519 tests passing, TypeScript clean
+
 ### Pending Todos
 
 None.
@@ -89,6 +97,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 12-02-PLAN.md (Leitner Integration into Session Flow) -- Phase 12 complete
-Resume file: Next phase (13)
+Stopped at: Completed 13-01-PLAN.md (DAG Cross-Links, BKT-Mastery Gating & Outer Fringe)
+Resume file: .planning/phases/13-prerequisite-graph-outer-fringe/13-02-PLAN.md
 Resume command: /gsd:execute-phase 13
