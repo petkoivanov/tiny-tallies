@@ -11,6 +11,8 @@ export interface NumberLineProps {
   range?: [number, number];
   /** Initial marker position. Defaults to range[0]. */
   startPosition?: number;
+  /** ID of the element to highlight with guided mode glow. */
+  guidedTargetId?: string | null;
   /** Test ID for testing. */
   testID?: string;
 }

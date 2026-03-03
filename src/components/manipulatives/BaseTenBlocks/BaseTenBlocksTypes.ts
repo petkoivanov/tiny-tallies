@@ -20,6 +20,8 @@ export interface BlockState {
 }
 
 export interface BaseTenBlocksProps {
+  /** ID of the element to highlight with guided mode glow. */
+  guidedTargetId?: string | null;
   testID?: string;
 }
 

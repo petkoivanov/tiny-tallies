@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.4
 milestone_name: Virtual Manipulatives
 status: executing
-stopped_at: Completed 20-01-PLAN.md
-last_updated: "2026-03-03T23:51:56Z"
-last_activity: 2026-03-03 -- Completed Plan 20-01 (Shared Infrastructure)
+stopped_at: Completed 20-03-PLAN.md
+last_updated: "2026-03-03T23:55:15Z"
+last_activity: 2026-03-03 -- Completed Plan 20-03 (Grid Mode and Double Frame)
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 16
-  completed_plans: 14
-  percent: 87
+  completed_plans: 15
+  percent: 93
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.4 Virtual Manipulatives -- Phase 20 in progress (1 of 3 plans complete)
+**Current focus:** v0.4 Virtual Manipulatives -- Phase 20 in progress (2 of 3 plans complete)
 
 ## Current Position
 
 Phase: 20 of 20 (Polish)
-Plan: 1 of 3 in current phase
+Plan: 3 of 3 in current phase (Plan 20-02 pending)
 Status: Executing
-Last activity: 2026-03-03 -- Completed Plan 20-01 (Shared Infrastructure)
+Last activity: 2026-03-03 -- Completed Plan 20-03 (Grid Mode and Double Frame)
 
-Progress: [████████░░] 87% (14/16 plans)
+Progress: [█████████░] 93% (15/16 plans)
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Progress: [████████░░] 87% (14/16 plans)
 | 19-01 | Sandbox infrastructure | 3min | 2 | 8 |
 | 19-02 | Explore grid UI | 6min | 2 | 7 |
 | 20-01 | Shared infrastructure | 7min | 3 | 12 |
+| 20-03 | Grid mode and double frame | 10min | 2 | 11 |
 
 ## Accumulated Context
 
@@ -108,6 +109,9 @@ v0.4 roadmap decisions:
 - [Phase 20-01]: Guided step resolvers are stateless -- consumers track subtraction phase transitions
 - [Phase 20-01]: GuidedHighlight uses shadow on iOS and border-color pulse on Android for glow
 - [Phase 20-01]: UNDO_SPRING_CONFIG reuses RETURN_SPRING_CONFIG values for consistency
+- [Phase 20-03]: Used DimensionStepper (inline +/- buttons) instead of BarModel NumberPicker for grid row/col selection
+- [Phase 20-03]: Extracted DualCountDisplay and DimensionStepper to CountersParts.tsx (500-line limit)
+- [Phase 20-03]: Grid mode auto-fills counters to match rows x cols; session auto-configures via gridRows/gridCols props
 
 ### Pending Todos
 
@@ -121,7 +125,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T23:51:56Z
-Stopped at: Completed 20-01-PLAN.md
+Last session: 2026-03-03T23:55:15Z
+Stopped at: Completed 20-03-PLAN.md
 Resume file: .planning/phases/20-polish/20-02-PLAN.md
 Resume command: /gsd:execute-phase 20

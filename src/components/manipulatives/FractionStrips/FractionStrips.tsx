@@ -18,6 +18,8 @@ import {
 
 import { ManipulativeShell } from '../ManipulativeShell';
 import { triggerSnapHaptic } from '../shared/haptics';
+import { useActionHistory } from '../shared/useActionHistory';
+import { GuidedHighlight } from '../shared/GuidedHighlight';
 import { colors, spacing, layout } from '@/theme';
 import {
   DENOMINATORS,
@@ -65,6 +67,7 @@ interface StripRowProps {
   onToggle: (stripIdx: number, sectionIdx: number) => void;
   onRemove: (stripIdx: number) => void;
   canRemove: boolean;
+  guidedTargetId?: string | null;
 }
 
 function StripRow({
@@ -74,6 +77,7 @@ function StripRow({
   onToggle,
   onRemove,
   canRemove,
+  guidedTargetId,
 }: StripRowProps) {
   const sectionWidth = stripWidth / strip.denominator;
   const needsScroll = sectionWidth < MIN_SECTION_WIDTH;
@@ -82,27 +86,29 @@ function StripRow({
   const sections = strip.shaded.map((isShaded, sectionIdx) => {
     const isFirst = sectionIdx === 0;
     const isLast = sectionIdx === strip.denominator - 1;
+    const sectionId = `section-${stripIndex}-${sectionIdx}`;
 
     return (
-      <Pressable
-        key={`section-${sectionIdx}`}
-        style={[
-          styles.section,
-          {
-            width: actualSectionWidth,
-            height: SECTION_HEIGHT,
-            backgroundColor: isShaded ? FRACTION_SHADED : FRACTION_UNSHADED,
-            borderTopLeftRadius: isFirst ? layout.borderRadius.sm : 0,
-            borderBottomLeftRadius: isFirst ? layout.borderRadius.sm : 0,
-            borderTopRightRadius: isLast ? layout.borderRadius.sm : 0,
-            borderBottomRightRadius: isLast ? layout.borderRadius.sm : 0,
-            borderRightWidth: isLast ? 2 : 1,
-          },
-        ]}
-        onPress={() => onToggle(stripIndex, sectionIdx)}
-        accessibilityLabel={`${isShaded ? 'Shaded' : 'Unshaded'} section ${sectionIdx + 1} of ${strip.denominator}`}
-        accessibilityRole="button"
-      />
+      <GuidedHighlight key={`section-${sectionIdx}`} active={guidedTargetId === sectionId}>
+        <Pressable
+          style={[
+            styles.section,
+            {
+              width: actualSectionWidth,
+              height: SECTION_HEIGHT,
+              backgroundColor: isShaded ? FRACTION_SHADED : FRACTION_UNSHADED,
+              borderTopLeftRadius: isFirst ? layout.borderRadius.sm : 0,
+              borderBottomLeftRadius: isFirst ? layout.borderRadius.sm : 0,
+              borderTopRightRadius: isLast ? layout.borderRadius.sm : 0,
+              borderBottomRightRadius: isLast ? layout.borderRadius.sm : 0,
+              borderRightWidth: isLast ? 2 : 1,
+            },
+          ]}
+          onPress={() => onToggle(stripIndex, sectionIdx)}
+          accessibilityLabel={`${isShaded ? 'Shaded' : 'Unshaded'} section ${sectionIdx + 1} of ${strip.denominator}`}
+          accessibilityRole="button"
+        />
+      </GuidedHighlight>
     );
   });
 
@@ -172,11 +178,11 @@ function DenominatorSelector({ onSelect }: DenominatorSelectorProps) {
 
 export function FractionStrips({
   initialStrips,
+  guidedTargetId,
   testID,
 }: FractionStripsProps) {
-  const [strips, setStrips] = useState<StripState[]>(
-    initialStrips ?? [createStrip(2)],
-  );
+  const initialState = initialStrips ?? [createStrip(2)];
+  const { state: strips, canUndo, pushState, undo, reset } = useActionHistory<StripState[]>(initialState);
   const [stripWidth, setStripWidth] = useState(0);
   const [showSelector, setShowSelector] = useState(false);
 
@@ -190,44 +196,47 @@ export function FractionStrips({
   // ---------- Toggle section shading ----------
   const toggleSection = useCallback(
     (stripIdx: number, sectionIdx: number) => {
-      setStrips((prev) => {
-        const next = prev.map((strip, i) => {
-          if (i !== stripIdx) return strip;
-          const newShaded = [...strip.shaded];
-          newShaded[sectionIdx] = !newShaded[sectionIdx];
-          return { ...strip, shaded: newShaded };
-        });
-        return next;
+      const next = strips.map((strip, i) => {
+        if (i !== stripIdx) return strip;
+        const newShaded = [...strip.shaded];
+        newShaded[sectionIdx] = !newShaded[sectionIdx];
+        return { ...strip, shaded: newShaded };
       });
+      pushState(next);
       triggerSnapHaptic();
     },
-    [],
+    [strips, pushState],
   );
 
   // ---------- Add strip ----------
   const addStrip = useCallback(
     (denominator: Denominator) => {
       if (strips.length >= MAX_STRIPS) return;
-      setStrips((prev) => [...prev, createStrip(denominator)]);
+      pushState([...strips, createStrip(denominator)]);
       setShowSelector(false);
     },
-    [strips.length],
+    [strips, pushState],
   );
 
   // ---------- Remove strip ----------
   const removeStrip = useCallback(
     (stripIdx: number) => {
       if (strips.length <= 1) return;
-      setStrips((prev) => prev.filter((_, i) => i !== stripIdx));
+      pushState(strips.filter((_, i) => i !== stripIdx));
     },
-    [strips.length],
+    [strips, pushState],
   );
 
   // ---------- Reset ----------
   const handleReset = useCallback(() => {
-    setStrips([createStrip(2)]);
+    reset([createStrip(2)]);
     setShowSelector(false);
-  }, []);
+  }, [reset]);
+
+  // ---------- Undo ----------
+  const handleUndo = useCallback(() => {
+    undo();
+  }, [undo]);
 
   // ---------- Count and label ----------
   const count = totalShaded(strips);
@@ -239,6 +248,8 @@ export function FractionStrips({
       count={count}
       countLabel={countLabel}
       onReset={handleReset}
+      onUndo={handleUndo}
+      canUndo={canUndo}
       testID={testID}
     >
       <View style={styles.container} onLayout={onLayout}>
@@ -252,6 +263,7 @@ export function FractionStrips({
               onToggle={toggleSection}
               onRemove={removeStrip}
               canRemove={strips.length > 1}
+              guidedTargetId={guidedTargetId}
             />
           ))}
 

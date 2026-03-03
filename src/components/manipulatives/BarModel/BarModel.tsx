@@ -17,6 +17,8 @@ import {
 
 import { ManipulativeShell } from '../ManipulativeShell';
 import { triggerSnapHaptic } from '../shared/haptics';
+import { useActionHistory } from '../shared/useActionHistory';
+import { GuidedHighlight } from '../shared/GuidedHighlight';
 import { colors, spacing, typography } from '../../../theme';
 import { NumberPicker } from './NumberPicker';
 import { PresetButton, DividerHandle, SectionView } from './BarModelParts';
@@ -55,11 +57,11 @@ function snapFraction(fraction: number): number {
   return Math.round(fraction / step) * step;
 }
 
-export function BarModel({ testID }: BarModelProps) {
+export function BarModel({ testID, guidedTargetId }: BarModelProps) {
   const [partitionCount, setPartitionCount] = useState<PartitionCount | null>(
     null,
   );
-  const [sections, setSections] = useState<SectionState[]>([]);
+  const { state: sections, canUndo, pushState, undo, reset } = useActionHistory<SectionState[]>([]);
   const [pickerTarget, setPickerTarget] = useState<{
     sectionId: string;
     currentValue: number;
@@ -80,15 +82,19 @@ export function BarModel({ testID }: BarModelProps) {
 
   const handleSelectPartition = useCallback((count: PartitionCount) => {
     setPartitionCount(count);
-    setSections(createSections(count));
+    pushState(createSections(count));
     setPickerTarget(null);
-  }, []);
+  }, [pushState]);
 
   const handleReset = useCallback(() => {
     setPartitionCount(null);
-    setSections([]);
+    reset([]);
     setPickerTarget(null);
-  }, []);
+  }, [reset]);
+
+  const handleUndo = useCallback(() => {
+    undo();
+  }, [undo]);
 
   const handleBarLayout = useCallback((event: LayoutChangeEvent) => {
     setBarWidth(event.nativeEvent.layout.width);
@@ -109,8 +115,8 @@ export function BarModel({ testID }: BarModelProps) {
   const handlePickerChange = useCallback(
     (value: number) => {
       if (!pickerTarget) return;
-      setSections((prev) =>
-        prev.map((s) =>
+      pushState(
+        sections.map((s) =>
           s.id === pickerTarget.sectionId
             ? { ...s, label: value, isUnknown: false }
             : s,
@@ -120,7 +126,7 @@ export function BarModel({ testID }: BarModelProps) {
         prev ? { ...prev, currentValue: value } : null,
       );
     },
-    [pickerTarget],
+    [pickerTarget, sections, pushState],
   );
 
   const handlePickerClose = useCallback(() => {
@@ -129,8 +135,8 @@ export function BarModel({ testID }: BarModelProps) {
 
   const handleMarkUnknown = useCallback(() => {
     if (!pickerTarget) return;
-    setSections((prev) =>
-      prev.map((s) =>
+    pushState(
+      sections.map((s) =>
         s.id === pickerTarget.sectionId
           ? { ...s, label: null, isUnknown: true }
           : s,
@@ -138,53 +144,52 @@ export function BarModel({ testID }: BarModelProps) {
     );
     setPickerTarget(null);
     triggerSnapHaptic();
-  }, [pickerTarget]);
+  }, [pickerTarget, sections, pushState]);
 
   const handleDividerMove = useCallback(
     (dividerIndex: number, newCumulativePosition: number) => {
-      setSections((prev) => {
-        const updated = [...prev];
-        const left = updated[dividerIndex];
-        const right = updated[dividerIndex + 1];
-        if (!left || !right) return prev;
+      const updated = [...sections];
+      const left = updated[dividerIndex];
+      const right = updated[dividerIndex + 1];
+      if (!left || !right) return;
 
-        // Compute cumulative left edge of the left section
-        let cumulativeLeft = 0;
-        for (let i = 0; i < dividerIndex; i++) {
-          cumulativeLeft += updated[i].widthFraction;
-        }
+      // Compute cumulative left edge of the left section
+      let cumulativeLeft = 0;
+      for (let i = 0; i < dividerIndex; i++) {
+        cumulativeLeft += updated[i].widthFraction;
+      }
 
-        // New left fraction = position - cumulative left
-        let newLeftFraction = snapFraction(
-          newCumulativePosition - cumulativeLeft,
-        );
-        // Right fraction compensates
-        const combinedFraction = left.widthFraction + right.widthFraction;
-        let newRightFraction = combinedFraction - newLeftFraction;
+      // New left fraction = position - cumulative left
+      let newLeftFraction = snapFraction(
+        newCumulativePosition - cumulativeLeft,
+      );
+      // Right fraction compensates
+      const combinedFraction = left.widthFraction + right.widthFraction;
+      let newRightFraction = combinedFraction - newLeftFraction;
 
-        // Enforce minimum section width
-        if (newLeftFraction < MIN_SECTION_FRACTION) {
-          newLeftFraction = MIN_SECTION_FRACTION;
-          newRightFraction = combinedFraction - MIN_SECTION_FRACTION;
-        }
-        if (newRightFraction < MIN_SECTION_FRACTION) {
-          newRightFraction = MIN_SECTION_FRACTION;
-          newLeftFraction = combinedFraction - MIN_SECTION_FRACTION;
-        }
+      // Enforce minimum section width
+      if (newLeftFraction < MIN_SECTION_FRACTION) {
+        newLeftFraction = MIN_SECTION_FRACTION;
+        newRightFraction = combinedFraction - MIN_SECTION_FRACTION;
+      }
+      if (newRightFraction < MIN_SECTION_FRACTION) {
+        newRightFraction = MIN_SECTION_FRACTION;
+        newLeftFraction = combinedFraction - MIN_SECTION_FRACTION;
+      }
 
-        updated[dividerIndex] = { ...left, widthFraction: newLeftFraction };
-        updated[dividerIndex + 1] = {
-          ...right,
-          widthFraction: newRightFraction,
-        };
-        return updated;
-      });
+      updated[dividerIndex] = { ...left, widthFraction: newLeftFraction };
+      updated[dividerIndex + 1] = {
+        ...right,
+        widthFraction: newRightFraction,
+      };
+      // Live update during drag (not pushed to undo history)
+      pushState(updated);
     },
-    [],
+    [sections, pushState],
   );
 
   const handleDividerEnd = useCallback(() => {
-    // Snap is already applied during move; this ensures final state is committed
+    // Divider drag end -- state already committed via pushState during move
   }, []);
 
   // --- Render: Partition Selection ---
@@ -220,6 +225,8 @@ export function BarModel({ testID }: BarModelProps) {
       count={total}
       countLabel="Total"
       onReset={handleReset}
+      onUndo={handleUndo}
+      canUndo={canUndo}
       testID={testID}
     >
       <View style={styles.workspace}>

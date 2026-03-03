@@ -21,6 +21,8 @@ export interface StripState {
 export interface FractionStripsProps {
   /** Initial strip configurations. Defaults to 1 strip with denominator 2. */
   initialStrips?: StripState[];
+  /** ID of the element to highlight with guided mode glow. */
+  guidedTargetId?: string | null;
   /** Test ID for testing. */
   testID?: string;
 }

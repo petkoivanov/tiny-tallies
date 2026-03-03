@@ -14,6 +14,7 @@ import type { SharedValue } from 'react-native-reanimated';
 import {
   DraggableItem, SnapZone, triggerGroupHaptic,
   MAX_OBJECTS, RESET_SPRING_CONFIG, RESET_STAGGER_MS,
+  useActionHistory, GuidedHighlight,
 } from '../shared';
 import type { SnapTarget } from '../shared';
 import { ManipulativeShell } from '../ManipulativeShell';
@@ -46,8 +47,8 @@ function renderBlock(type: BlockType) {
   }
 }
 
-export function BaseTenBlocks({ testID }: BaseTenBlocksProps) {
-  const [blocks, setBlocks] = useState<BlockState[]>([]);
+export function BaseTenBlocks({ testID, guidedTargetId }: BaseTenBlocksProps) {
+  const { state: blocks, canUndo, pushState, undo, reset } = useActionHistory<BlockState[]>([]);
   const [containerWidth, setContainerWidth] = useState(0);
   const [isGrouping, setIsGrouping] = useState(false);
 
@@ -69,13 +70,15 @@ export function BaseTenBlocks({ testID }: BaseTenBlocksProps) {
 
   const capMessage = blocks.length >= MAX_OBJECTS ? 'Try grouping your blocks!' : null;
 
-  // Auto-group hook
+  // Auto-group hook -- auto-group itself is undoable (undo restores 10 cubes from rod)
   const { checkAutoGroup, clearTimer } = useAutoGroup({
     onGroupStart: () => setIsGrouping(true),
     onGroupEnd: (removedIds, newBlock) => {
-      setBlocks((prev) => [...prev.filter((b) => !removedIds.includes(b.id)), newBlock]);
+      const next = [...blocksRef.current.filter((b) => !removedIds.includes(b.id)), newBlock];
+      pushState(next);
+      blocksRef.current = next;
       setIsGrouping(false);
-      setTimeout(() => checkAutoGroup(blocksRef.current), 50);
+      setTimeout(() => checkAutoGroup(next), 50);
     },
   });
 
@@ -105,13 +108,12 @@ export function BaseTenBlocks({ testID }: BaseTenBlocksProps) {
         type,
         column: blockTypeToColumn(type),
       };
-      setBlocks((prev) => {
-        const next = [...prev, newBlock];
-        setTimeout(() => checkAutoGroup(next), 0);
-        return next;
-      });
+      const next = [...blocksRef.current, newBlock];
+      pushState(next);
+      blocksRef.current = next;
+      setTimeout(() => checkAutoGroup(next), 0);
     },
-    [isGrouping, checkAutoGroup],
+    [isGrouping, checkAutoGroup, pushState],
   );
 
   // Decompose a block into GROUP_THRESHOLD smaller blocks
@@ -126,14 +128,13 @@ export function BaseTenBlocks({ testID }: BaseTenBlocksProps) {
         column: intoColumn,
       }));
 
-      setBlocks((prev) => {
-        const next = [...prev.filter((b) => b.id !== blockId), ...newBlocks];
-        setTimeout(() => checkAutoGroup(next), 0);
-        return next;
-      });
+      const next = [...blocksRef.current.filter((b) => b.id !== blockId), ...newBlocks];
+      pushState(next);
+      blocksRef.current = next;
+      setTimeout(() => checkAutoGroup(next), 0);
       triggerGroupHaptic();
     },
-    [isGrouping, checkAutoGroup],
+    [isGrouping, checkAutoGroup, pushState],
   );
 
   // Tap-to-decompose
@@ -166,13 +167,12 @@ export function BaseTenBlocks({ testID }: BaseTenBlocksProps) {
       }
 
       // Normal move
-      setBlocks((prev) => {
-        const next = prev.map((b) => (b.id === itemId ? { ...b, column } : b));
-        setTimeout(() => checkAutoGroup(next), 0);
-        return next;
-      });
+      const next = blocksRef.current.map((b) => (b.id === itemId ? { ...b, column } : b));
+      pushState(next);
+      blocksRef.current = next;
+      setTimeout(() => checkAutoGroup(next), 0);
     },
-    [decomposeBlock, checkAutoGroup],
+    [decomposeBlock, checkAutoGroup, pushState],
   );
 
   const handleRegister = useCallback(
@@ -194,10 +194,20 @@ export function BaseTenBlocks({ testID }: BaseTenBlocksProps) {
       delay += RESET_STAGGER_MS;
     });
     setTimeout(() => {
-      setBlocks([]);
+      reset([]);
+      blocksRef.current = [];
       registeredOffsets.current.clear();
     }, delay + 200);
-  }, [clearTimer]);
+  }, [clearTimer, reset]);
+
+  // CRITICAL: clearTimer BEFORE undo to prevent auto-group race condition
+  const handleUndo = useCallback(() => {
+    clearTimer();
+    const prev = undo();
+    if (prev) {
+      blocksRef.current = prev;
+    }
+  }, [clearTimer, undo]);
 
   useEffect(() => () => clearTimer(), [clearTimer]);
 
@@ -210,7 +220,7 @@ export function BaseTenBlocks({ testID }: BaseTenBlocksProps) {
   }, [blocks]);
 
   return (
-    <ManipulativeShell count={totalValue} countLabel="Total" onReset={handleReset} testID={testID}>
+    <ManipulativeShell count={totalValue} countLabel="Total" onReset={handleReset} onUndo={handleUndo} canUndo={canUndo} testID={testID}>
       <View style={styles.matContainer} onLayout={handleLayout}>
         <View style={styles.columnsRow}>
           {COLUMNS.map((col) => (
@@ -254,9 +264,15 @@ export function BaseTenBlocks({ testID }: BaseTenBlocksProps) {
         ) : null}
 
         <View style={styles.tray}>
-          <TraySource type="flat" label="100" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} />
-          <TraySource type="rod" label="10" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} />
-          <TraySource type="cube" label="1" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} />
+          <GuidedHighlight active={guidedTargetId === 'add-hundreds'}>
+            <TraySource type="flat" label="100" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} />
+          </GuidedHighlight>
+          <GuidedHighlight active={guidedTargetId === 'add-tens'}>
+            <TraySource type="rod" label="10" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} />
+          </GuidedHighlight>
+          <GuidedHighlight active={guidedTargetId === 'add-ones'}>
+            <TraySource type="cube" label="1" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} />
+          </GuidedHighlight>
         </View>
       </View>
     </ManipulativeShell>

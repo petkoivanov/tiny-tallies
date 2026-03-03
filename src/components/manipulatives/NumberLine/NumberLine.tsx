@@ -23,6 +23,8 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { ManipulativeShell } from '../ManipulativeShell';
 import { triggerSnapHaptic } from '../shared/haptics';
 import { SNAP_SPRING_CONFIG } from '../shared/animationConfig';
+import { useActionHistory } from '../shared/useActionHistory';
+import { GuidedHighlight } from '../shared/GuidedHighlight';
 import { NumberLineSvg, valueToX, xToValue } from './NumberLineSvg';
 import {
   SVG_HEIGHT,
@@ -62,6 +64,7 @@ function clampAndRound(value: number, min: number, max: number): number {
 export function NumberLine({
   range: rangeProp,
   startPosition,
+  guidedTargetId,
   testID,
 }: NumberLineProps) {
   const range: [number, number] = rangeProp ?? [0, 10];
@@ -70,13 +73,19 @@ export function NumberLine({
 
   // ---------- State ----------
   const [containerWidth, setContainerWidth] = useState(0);
-  const [markerValue, setMarkerValue] = useState(initialPosition);
+  const { state: markerValue, canUndo, pushState: pushMarkerState, undo: undoMarker, reset: resetMarker } = useActionHistory<number>(initialPosition);
   const [startValue] = useState(initialPosition);
   const [hops, setHops] = useState<HopArrow[]>([]);
   const [expandedDecade, setExpandedDecade] = useState<number | null>(null);
 
   // Animated marker position (in pixels)
   const markerX = useSharedValue(0);
+
+  // Live update during drag (not pushed to history -- intermediate ticks)
+  const [liveMarkerValue, setLiveMarkerValue] = useState(initialPosition);
+
+  // Display value: use liveMarkerValue during drag
+  const displayValue = liveMarkerValue;
 
   // Effective range for coordinate mapping when a decade is expanded
   const effectiveRange: [number, number] = useMemo(() => {
@@ -91,21 +100,29 @@ export function NumberLine({
     (event: LayoutChangeEvent) => {
       const w = event.nativeEvent.layout.width;
       setContainerWidth(w);
-      // Position marker at initial value
-      const x = valueToX(markerValue, effectiveRange, w);
+      // Position marker at current value
+      const x = valueToX(displayValue, effectiveRange, w);
       markerX.value = x;
     },
-    [markerValue, effectiveRange, markerX],
+    [displayValue, effectiveRange, markerX],
   );
 
   // ---------- Marker drag ----------
-  const updateMarkerState = useCallback(
+  const updateMarkerLive = useCallback(
     (newValue: number) => {
-      setMarkerValue(newValue);
+      setLiveMarkerValue(newValue);
       setHops(buildHops(startValue, newValue));
       triggerSnapHaptic();
     },
     [startValue],
+  );
+
+  // Push to undo history on drag end
+  const commitMarkerValue = useCallback(
+    (finalValue: number) => {
+      pushMarkerState(finalValue);
+    },
+    [pushMarkerState],
   );
 
   const lastSnappedValue = useSharedValue(initialPosition);
@@ -133,7 +150,7 @@ export function NumberLine({
 
           if (snapped !== lastSnappedValue.value) {
             lastSnappedValue.value = snapped;
-            runOnJS(updateMarkerState)(snapped);
+            runOnJS(updateMarkerLive)(snapped);
           }
         })
         .onEnd(() => {
@@ -145,13 +162,15 @@ export function NumberLine({
             containerWidth,
           );
           markerX.value = withSpring(snapX, SNAP_SPRING_CONFIG);
+          runOnJS(commitMarkerValue)(lastSnappedValue.value);
         }),
     [
       containerWidth,
       effectiveRange,
       lastSnappedValue,
       markerX,
-      updateMarkerState,
+      updateMarkerLive,
+      commitMarkerValue,
     ],
   );
 
@@ -172,7 +191,7 @@ export function NumberLine({
         setExpandedDecade(null);
         // Reposition marker for overview range
         if (containerWidth > 0) {
-          const x = valueToX(markerValue, range, containerWidth);
+          const x = valueToX(displayValue, range, containerWidth);
           markerX.value = x;
         }
       } else {
@@ -186,11 +205,12 @@ export function NumberLine({
         if (containerWidth > 0) {
           // Clamp marker to the expanded decade
           const clampedValue = clampAndRound(
-            markerValue,
+            displayValue,
             newRange[0],
             newRange[1],
           );
-          setMarkerValue(clampedValue);
+          pushMarkerState(clampedValue);
+          setLiveMarkerValue(clampedValue);
           setHops(buildHops(startValue, clampedValue));
           const x = valueToX(clampedValue, newRange, containerWidth);
           markerX.value = x;
@@ -202,11 +222,12 @@ export function NumberLine({
       isLargeRange,
       expandedDecade,
       containerWidth,
-      markerValue,
+      displayValue,
       range,
       startValue,
       markerX,
       lastSnappedValue,
+      pushMarkerState,
     ],
   );
 
@@ -228,7 +249,8 @@ export function NumberLine({
   // ---------- Reset ----------
   const handleReset = useCallback(() => {
     const resetValue = startPosition ?? range[0];
-    setMarkerValue(resetValue);
+    resetMarker(resetValue);
+    setLiveMarkerValue(resetValue);
     setHops([]);
     setExpandedDecade(null);
     lastSnappedValue.value = resetValue;
@@ -236,14 +258,30 @@ export function NumberLine({
       const x = valueToX(resetValue, range, containerWidth);
       markerX.value = withSpring(x, SNAP_SPRING_CONFIG);
     }
-  }, [startPosition, range, containerWidth, markerX, lastSnappedValue]);
+  }, [startPosition, range, containerWidth, markerX, lastSnappedValue, resetMarker]);
+
+  // ---------- Undo ----------
+  const handleUndo = useCallback(() => {
+    const prev = undoMarker();
+    if (prev !== null) {
+      setLiveMarkerValue(prev);
+      setHops(buildHops(startValue, prev));
+      lastSnappedValue.value = prev;
+      if (containerWidth > 0) {
+        const x = valueToX(prev, effectiveRange, containerWidth);
+        markerX.value = withSpring(x, SNAP_SPRING_CONFIG);
+      }
+    }
+  }, [undoMarker, startValue, lastSnappedValue, containerWidth, effectiveRange, markerX]);
 
   // ---------- Render ----------
   return (
     <ManipulativeShell
-      count={markerValue}
-      countLabel={`Position: ${markerValue}`}
+      count={displayValue}
+      countLabel={`Position: ${displayValue}`}
       onReset={handleReset}
+      onUndo={handleUndo}
+      canUndo={canUndo}
       testID={testID}
     >
       <View style={styles.container} onLayout={onLayout}>
@@ -268,16 +306,18 @@ export function NumberLine({
             </Svg>
 
             {/* Animated marker overlay -- positioned over the SVG */}
-            <GestureDetector gesture={panGesture}>
-              <Animated.View
-                style={[styles.marker, markerAnimatedStyle]}
-                accessible
-                accessibilityLabel={`Number line marker at ${markerValue}`}
-                accessibilityRole="adjustable"
-              >
-                <View style={styles.markerInner} />
-              </Animated.View>
-            </GestureDetector>
+            <GuidedHighlight active={guidedTargetId === 'marker'}>
+              <GestureDetector gesture={panGesture}>
+                <Animated.View
+                  style={[styles.marker, markerAnimatedStyle]}
+                  accessible
+                  accessibilityLabel={`Number line marker at ${displayValue}`}
+                  accessibilityRole="adjustable"
+                >
+                  <View style={styles.markerInner} />
+                </Animated.View>
+              </GestureDetector>
+            </GuidedHighlight>
 
             {/* Decade tap zones for 0-100 overview */}
             {decadeTapZones?.map((zone) => (

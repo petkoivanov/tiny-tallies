@@ -8,6 +8,8 @@ export interface TenFrameProps {
   testID?: string;
   /** Number of frames to render initially (1 or 2). Defaults to 1. */
   initialFrames?: 1 | 2;
+  /** ID of the element to highlight with guided mode glow. */
+  guidedTargetId?: string | null;
 }
 
 /** Grid dimensions for a single ten frame. */

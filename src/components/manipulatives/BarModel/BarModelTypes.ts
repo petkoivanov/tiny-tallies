@@ -18,6 +18,8 @@ export interface SectionState {
 
 /** Props for the BarModel component. */
 export interface BarModelProps {
+  /** ID of the element to highlight with guided mode glow. */
+  guidedTargetId?: string | null;
   testID?: string;
 }
 

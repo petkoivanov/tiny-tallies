@@ -7,6 +7,8 @@ import {
   DraggableItem,
   SnapZone,
   triggerSnapHaptic,
+  useActionHistory,
+  GuidedHighlight,
   type SnapTarget,
 } from '../shared';
 import { colors, spacing } from '@/theme';
@@ -36,6 +38,8 @@ interface FrameGridProps {
   onMeasured: (target: SnapTarget) => void;
   /** Frame number for labeling (1 or 2). */
   frameNumber: number;
+  /** ID of the element to highlight with guided mode glow. */
+  guidedTargetId?: string | null;
 }
 
 /**
@@ -47,6 +51,7 @@ function FrameGrid({
   onCellTap,
   onMeasured,
   frameNumber,
+  guidedTargetId,
 }: FrameGridProps) {
   const rows = Array.from({ length: GRID_ROWS }, (_, row) =>
     Array.from({ length: GRID_COLS }, (_, col) => startIndex + row * GRID_COLS + col),
@@ -63,27 +68,29 @@ function FrameGrid({
         <View key={`row-${rowIdx}`} style={styles.row}>
           {rowCells.map((cellIndex) => {
             const occupied = cells[cellIndex] ?? false;
+            const isGuided = guidedTargetId === `cell-${cellIndex}`;
             return (
-              <SnapZone
-                key={`cell-${cellIndex}`}
-                id={`cell-${cellIndex}`}
-                onMeasured={onMeasured}
-                isOccupied={occupied}
-                accessibilityLabel={`Cell ${cellIndex + 1}, ${occupied ? 'filled' : 'empty'}`}
-                style={styles.cell}
-              >
-                {occupied ? (
-                  <Pressable
-                    onPress={() => onCellTap(cellIndex)}
-                    accessibilityLabel={`Remove counter from cell ${cellIndex + 1}`}
-                    accessibilityRole="button"
-                    testID={`cell-counter-${cellIndex}`}
-                    style={styles.cellPressable}
-                  >
-                    <View style={styles.cellCounter} />
-                  </Pressable>
-                ) : null}
-              </SnapZone>
+              <GuidedHighlight key={`cell-${cellIndex}`} active={isGuided}>
+                <SnapZone
+                  id={`cell-${cellIndex}`}
+                  onMeasured={onMeasured}
+                  isOccupied={occupied}
+                  accessibilityLabel={`Cell ${cellIndex + 1}, ${occupied ? 'filled' : 'empty'}`}
+                  style={styles.cell}
+                >
+                  {occupied ? (
+                    <Pressable
+                      onPress={() => onCellTap(cellIndex)}
+                      accessibilityLabel={`Remove counter from cell ${cellIndex + 1}`}
+                      accessibilityRole="button"
+                      testID={`cell-counter-${cellIndex}`}
+                      style={styles.cellPressable}
+                    >
+                      <View style={styles.cellCounter} />
+                    </Pressable>
+                  ) : null}
+                </SnapZone>
+              </GuidedHighlight>
             );
           })}
         </View>
@@ -140,10 +147,12 @@ function TrayCounter({ snapTargets, onSnap }: TrayCounterProps) {
  * occupied cell removes the counter. When the first frame is full (10/10),
  * a second frame auto-spawns below. Running count shows total occupied cells.
  */
-export function TenFrame({ testID, initialFrames = 1 }: TenFrameProps) {
-  const [cells, setCells] = useState<boolean[]>(
+export function TenFrame({ testID, initialFrames = 1, guidedTargetId }: TenFrameProps) {
+  const initialCells = useMemo(
     () => new Array(CELLS_PER_FRAME * initialFrames).fill(false) as boolean[],
+    [initialFrames],
   );
+  const { state: cells, canUndo, pushState, undo, reset } = useActionHistory<boolean[]>(initialCells);
   const [frameCount, setFrameCount] = useState(initialFrames);
 
   // Track snap targets -- updated by SnapZone onMeasured callbacks
@@ -165,14 +174,12 @@ export function TenFrame({ testID, initialFrames = 1 }: TenFrameProps) {
   React.useEffect(() => {
     if (firstFrameFull && frameCount === 1) {
       setFrameCount(2);
-      setCells((prev) => {
-        if (prev.length < CELLS_PER_FRAME * 2) {
-          return [...prev, ...new Array(CELLS_PER_FRAME).fill(false) as boolean[]];
-        }
-        return prev;
-      });
+      if (cells.length < CELLS_PER_FRAME * 2) {
+        // Extend array without pushing to history -- frame spawn is automatic, not user action
+        pushState([...cells, ...new Array(CELLS_PER_FRAME).fill(false) as boolean[]]);
+      }
     }
-  }, [firstFrameFull, frameCount]);
+  }, [firstFrameFull, frameCount, cells, pushState]);
 
   // Rebuild snap targets filtering out occupied cells
   const updateSnapTargets = useCallback(
@@ -205,37 +212,44 @@ export function TenFrame({ testID, initialFrames = 1 }: TenFrameProps) {
   const handleSnap = useCallback(
     (_itemId: string, targetId: string) => {
       const cellIndex = parseInt(targetId.replace('cell-', ''), 10);
-      setCells((prev) => {
-        if (prev[cellIndex]) return prev; // Already occupied -- reject
-        const next = [...prev];
-        next[cellIndex] = true;
-        return next;
-      });
+      if (cells[cellIndex]) return; // Already occupied -- reject
+      const next = [...cells];
+      next[cellIndex] = true;
+      pushState(next);
       triggerSnapHaptic();
     },
-    [],
+    [cells, pushState],
   );
 
   const handleCellTap = useCallback((index: number) => {
-    setCells((prev) => {
-      const next = [...prev];
-      next[index] = false;
-      return next;
-    });
-  }, []);
+    const next = [...cells];
+    next[index] = false;
+    pushState(next);
+  }, [cells, pushState]);
 
   const handleReset = useCallback(() => {
-    setCells(new Array(CELLS_PER_FRAME * initialFrames).fill(false) as boolean[]);
+    reset(new Array(CELLS_PER_FRAME * initialFrames).fill(false) as boolean[]);
     setFrameCount(initialFrames);
     allTargetsRef.current.clear();
     snapTargets.value = [];
-  }, [snapTargets, initialFrames]);
+  }, [snapTargets, initialFrames, reset]);
+
+  const handleUndo = useCallback(() => {
+    const prev = undo();
+    if (prev) {
+      // Recalculate frameCount from restored cells
+      const needsSecond = prev.length > CELLS_PER_FRAME;
+      setFrameCount(needsSecond ? 2 : 1);
+    }
+  }, [undo]);
 
   return (
     <ManipulativeShell
       count={occupiedCount}
       countLabel="Count"
       onReset={handleReset}
+      onUndo={handleUndo}
+      canUndo={canUndo}
       testID={testID}
     >
       {/* Grid area */}
@@ -246,6 +260,7 @@ export function TenFrame({ testID, initialFrames = 1 }: TenFrameProps) {
           onCellTap={handleCellTap}
           onMeasured={handleMeasured}
           frameNumber={1}
+          guidedTargetId={guidedTargetId}
         />
         {frameCount >= 2 && (
           <FrameGrid
@@ -254,6 +269,7 @@ export function TenFrame({ testID, initialFrames = 1 }: TenFrameProps) {
             onCellTap={handleCellTap}
             onMeasured={handleMeasured}
             frameNumber={2}
+            guidedTargetId={guidedTargetId}
           />
         )}
       </View>
