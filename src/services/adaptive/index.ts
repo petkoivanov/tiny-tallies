@@ -59,4 +59,9 @@ export {
   DEFAULT_BKT_PARAMS,
   BKT_MASTERY_THRESHOLD,
   BKT_RETEACH_THRESHOLD,
+  applySoftMasteryLock,
+  MASTERY_LOCK_BREAK_COUNT,
 } from './bktCalculator';
+
+// BKT Mastery Lock Result type
+export type { MasteryLockResult } from './bktCalculator';

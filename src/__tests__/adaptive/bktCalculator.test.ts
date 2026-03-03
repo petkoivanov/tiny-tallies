@@ -4,6 +4,8 @@ import {
   DEFAULT_BKT_PARAMS,
   BKT_MASTERY_THRESHOLD,
   BKT_RETEACH_THRESHOLD,
+  applySoftMasteryLock,
+  MASTERY_LOCK_BREAK_COUNT,
 } from '@/services/adaptive/bktCalculator';
 
 describe('getBktParams', () => {
@@ -92,5 +94,57 @@ describe('BKT constants', () => {
 
   it('BKT_RETEACH_THRESHOLD equals 0.40', () => {
     expect(BKT_RETEACH_THRESHOLD).toBe(0.40);
+  });
+
+  it('MASTERY_LOCK_BREAK_COUNT equals 3', () => {
+    expect(MASTERY_LOCK_BREAK_COUNT).toBe(3);
+  });
+});
+
+describe('applySoftMasteryLock', () => {
+  it('protects mastery when locked and fewer than 3 consecutive wrong', () => {
+    const bktResult = { newPL: 0.80, isMastered: false, needsReteaching: false };
+    const result = applySoftMasteryLock(bktResult, true, 1, false);
+    expect(result.masteryProbability).toBeCloseTo(BKT_MASTERY_THRESHOLD);
+    expect(result.consecutiveWrong).toBe(2);
+    expect(result.masteryLocked).toBe(true);
+  });
+
+  it('breaks lock after 3 consecutive wrong answers', () => {
+    const bktResult = { newPL: 0.80, isMastered: false, needsReteaching: false };
+    const result = applySoftMasteryLock(bktResult, true, 2, false);
+    expect(result.masteryProbability).toBe(0.80);
+    expect(result.consecutiveWrong).toBe(3);
+    expect(result.masteryLocked).toBe(false);
+  });
+
+  it('achieves mastery lock on first mastery', () => {
+    const bktResult = { newPL: 0.96, isMastered: true, needsReteaching: false };
+    const result = applySoftMasteryLock(bktResult, false, 0, true);
+    expect(result.masteryProbability).toBe(0.96);
+    expect(result.consecutiveWrong).toBe(0);
+    expect(result.masteryLocked).toBe(true);
+  });
+
+  it('resets consecutiveWrong to 0 on correct answer', () => {
+    const bktResult = { newPL: 0.60, isMastered: false, needsReteaching: false };
+    const result = applySoftMasteryLock(bktResult, false, 2, true);
+    expect(result.consecutiveWrong).toBe(0);
+  });
+
+  it('keeps lock and resets consecutiveWrong on correct when locked', () => {
+    const bktResult = { newPL: 0.93, isMastered: false, needsReteaching: false };
+    const result = applySoftMasteryLock(bktResult, true, 1, true);
+    expect(result.masteryProbability).toBe(0.93);
+    expect(result.consecutiveWrong).toBe(0);
+    expect(result.masteryLocked).toBe(true);
+  });
+
+  it('does not lock when not mastered and not previously locked on wrong answer', () => {
+    const bktResult = { newPL: 0.50, isMastered: false, needsReteaching: false };
+    const result = applySoftMasteryLock(bktResult, false, 0, false);
+    expect(result.masteryProbability).toBe(0.50);
+    expect(result.consecutiveWrong).toBe(1);
+    expect(result.masteryLocked).toBe(false);
   });
 });

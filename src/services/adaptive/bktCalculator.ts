@@ -1,5 +1,71 @@
 import type { BktParams, BktUpdateResult } from './bktTypes';
 
+/** Consecutive wrong answers needed to break mastery lock */
+export const MASTERY_LOCK_BREAK_COUNT = 3;
+
+export interface MasteryLockResult {
+  /** Final mastery probability after lock logic */
+  masteryProbability: number;
+  /** Updated consecutive wrong count */
+  consecutiveWrong: number;
+  /** Whether mastery lock is active */
+  masteryLocked: boolean;
+}
+
+/**
+ * Applies soft mastery lock logic on top of raw BKT update.
+ *
+ * When masteryLocked=true, the skill's P(L) is held at BKT_MASTERY_THRESHOLD
+ * even if BKT math drops it lower -- UNLESS the child has gotten 3+ consecutive
+ * wrong answers, at which point the lock breaks and P(L) follows BKT naturally.
+ *
+ * This prevents a single slip or bad day from losing hard-earned mastery.
+ *
+ * Correct answers always reset consecutiveWrong to 0 and preserve the lock.
+ */
+export function applySoftMasteryLock(
+  bktResult: BktUpdateResult,
+  currentMasteryLocked: boolean,
+  currentConsecutiveWrong: number,
+  isCorrect: boolean,
+): MasteryLockResult {
+  if (isCorrect) {
+    return {
+      masteryProbability: bktResult.newPL,
+      consecutiveWrong: 0,
+      masteryLocked: bktResult.isMastered || currentMasteryLocked,
+    };
+  }
+
+  // Incorrect answer
+  const consecutiveWrong = currentConsecutiveWrong + 1;
+
+  if (currentMasteryLocked && consecutiveWrong < MASTERY_LOCK_BREAK_COUNT) {
+    // Protect mastery: hold P(L) at threshold
+    return {
+      masteryProbability: BKT_MASTERY_THRESHOLD,
+      consecutiveWrong,
+      masteryLocked: true,
+    };
+  }
+
+  if (currentMasteryLocked && consecutiveWrong >= MASTERY_LOCK_BREAK_COUNT) {
+    // Break lock: follow BKT naturally
+    return {
+      masteryProbability: bktResult.newPL,
+      consecutiveWrong,
+      masteryLocked: false,
+    };
+  }
+
+  // Not locked: follow BKT naturally
+  return {
+    masteryProbability: bktResult.newPL,
+    consecutiveWrong,
+    masteryLocked: bktResult.isMastered,
+  };
+}
+
 /** Mastery threshold: P(L) >= 0.95 means the skill is mastered. */
 export const BKT_MASTERY_THRESHOLD = 0.95;
 

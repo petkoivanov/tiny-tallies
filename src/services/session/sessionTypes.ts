@@ -33,6 +33,12 @@ export interface PendingSkillUpdate {
   newElo: number;
   attempts: number;
   correct: number;
+  /** BKT mastery probability after soft lock logic */
+  newMasteryPL: number;
+  /** Consecutive wrong answer count (for soft mastery lock) */
+  newConsecutiveWrong: number;
+  /** Whether mastery lock is active */
+  newMasteryLocked: boolean;
 }
 
 /** Structured feedback returned from commitSessionResults for UI consumption */
