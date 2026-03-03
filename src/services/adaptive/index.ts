@@ -65,3 +65,22 @@ export {
 
 // BKT Mastery Lock Result type
 export type { MasteryLockResult } from './bktCalculator';
+
+// Leitner Types
+export type {
+  LeitnerBox,
+  LeitnerTransitionResult,
+  LeitnerReviewStatus,
+} from './leitnerTypes';
+
+// Leitner Calculator
+export {
+  LEITNER_INTERVALS,
+  GRADUATED_REVIEW_INTERVAL_MS,
+  getAgeIntervalBracket,
+  getIntervalMs,
+  computeNextReviewDue,
+  transitionBox,
+  getReviewStatus,
+  mapPLToInitialBox,
+} from './leitnerCalculator';
