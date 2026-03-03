@@ -43,8 +43,8 @@ Requirements for v0.4 Virtual Manipulatives milestone. Each maps to roadmap phas
 
 ### Polish
 
-- [ ] **POL-01**: User sees guided mode highlighting the next suggested action on a manipulative
-- [ ] **POL-02**: User can undo last action on a manipulative (max 10 steps)
+- [x] **POL-01**: User sees guided mode highlighting the next suggested action on a manipulative
+- [x] **POL-02**: User can undo last action on a manipulative (max 10 steps)
 - [ ] **POL-03**: User can switch counters to array grid mode for multiplication concepts
 - [ ] **POL-04**: Ten frame auto-spawns a second frame for add-within-20 problems
 
@@ -114,8 +114,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAND-01 | Phase 19 | Complete |
 | SAND-02 | Phase 19 | Complete |
 | SAND-03 | Phase 19 | Complete |
-| POL-01 | Phase 20 | Pending |
-| POL-02 | Phase 20 | Pending |
+| POL-01 | Phase 20 | Complete |
+| POL-02 | Phase 20 | Complete |
 | POL-03 | Phase 20 | Pending |
 | POL-04 | Phase 20 | Pending |
 

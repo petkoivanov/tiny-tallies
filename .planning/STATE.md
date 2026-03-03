@@ -3,30 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.4
 milestone_name: Virtual Manipulatives
 status: executing
-stopped_at: Phase 20 context gathered
-last_updated: "2026-03-03T22:58:46.768Z"
-last_activity: 2026-03-03 -- Completed Plan 19-02 (Explore grid UI)
+stopped_at: Completed 20-01-PLAN.md
+last_updated: "2026-03-03T23:51:56Z"
+last_activity: 2026-03-03 -- Completed Plan 20-01 (Shared Infrastructure)
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 13
-  completed_plans: 13
----
-
----
-gsd_state_version: 1.0
-milestone: v0.4
-milestone_name: Virtual Manipulatives
-status: executing
-stopped_at: Completed 19-02-PLAN.md
-last_updated: "2026-03-03T22:35:33Z"
-last_activity: 2026-03-03 -- Completed Plan 19-02 (Explore grid UI)
-progress:
-  total_phases: 6
-  completed_phases: 5
-  total_plans: 13
-  completed_plans: 13
-  percent: 100
+  total_plans: 16
+  completed_plans: 14
+  percent: 87
 ---
 
 # Project State
@@ -36,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.4 Virtual Manipulatives -- Phase 19 COMPLETE (all 2 plans)
+**Current focus:** v0.4 Virtual Manipulatives -- Phase 20 in progress (1 of 3 plans complete)
 
 ## Current Position
 
-Phase: 19 of 20 (Sandbox Navigation)
-Plan: 2 of 2 in current phase (PHASE COMPLETE)
-Status: Phase Complete
-Last activity: 2026-03-03 -- Completed Plan 19-02 (Explore grid UI)
+Phase: 20 of 20 (Polish)
+Plan: 1 of 3 in current phase
+Status: Executing
+Last activity: 2026-03-03 -- Completed Plan 20-01 (Shared Infrastructure)
 
-Progress: [██████████] 100% (13/13 plans)
+Progress: [████████░░] 87% (14/16 plans)
 
 ## Performance Metrics
 
@@ -62,6 +47,7 @@ Progress: [██████████] 100% (13/13 plans)
 | 18-03 | CPA session integration | 7min | 2 | 11 |
 | 19-01 | Sandbox infrastructure | 3min | 2 | 8 |
 | 19-02 | Explore grid UI | 6min | 2 | 7 |
+| 20-01 | Shared infrastructure | 7min | 3 | 12 |
 
 ## Accumulated Context
 
@@ -118,6 +104,10 @@ v0.4 roadmap decisions:
 - [Phase 19-02]: ExploreGrid handles navigation and store reads internally (no props)
 - [Phase 19-02]: HomeScreen replaced View with ScrollView, removed flex:1 from statsSection
 - [Phase 19-02]: Muted dark accent colors per card for subtle differentiation against dark theme
+- [Phase 20-01]: useActionHistory uses useState + useRef for synchronous undo return value
+- [Phase 20-01]: Guided step resolvers are stateless -- consumers track subtraction phase transitions
+- [Phase 20-01]: GuidedHighlight uses shadow on iOS and border-color pulse on Android for glow
+- [Phase 20-01]: UNDO_SPRING_CONFIG reuses RETURN_SPRING_CONFIG values for consistency
 
 ### Pending Todos
 
@@ -127,11 +117,11 @@ None.
 
 - [RESOLVED] CPA thresholds locked at 0.40/0.85 per research recommendation (Plan 15-01).
 - BaseTenBlocks auto-group choreography (proximity threshold, animation sequencing) needs design spike in Phase 17.
-- Guided mode lookup table (problem-type -> manipulation-sequence) needs content design before Phase 20.
+- [RESOLVED] Guided mode lookup table implemented in Plan 20-01 with 7 resolvers.
 
 ## Session Continuity
 
-Last session: 2026-03-03T22:58:46.765Z
-Stopped at: Phase 20 context gathered
-Resume file: .planning/phases/20-polish/20-CONTEXT.md
+Last session: 2026-03-03T23:51:56Z
+Stopped at: Completed 20-01-PLAN.md
+Resume file: .planning/phases/20-polish/20-02-PLAN.md
 Resume command: /gsd:execute-phase 20
