@@ -14,7 +14,7 @@ Requirements for v0.2 UI Polish & Gamification milestone. Each maps to roadmap p
 - [x] **UI-03**: Results screen shows session summary with correct/total, XP earned, and a "Done" button
 - [x] **UI-04**: All touch targets are minimum 48dp for ages 6-9 motor skills
 - [x] **UI-05**: Dark theme with high contrast colors and child-friendly design
-- [ ] **UI-06**: Animated feedback for correct answers (celebration) and incorrect answers (gentle encouragement)
+- [x] **UI-06**: Animated feedback for correct answers (celebration) and incorrect answers (gentle encouragement)
 
 ### Gamification
 
@@ -69,7 +69,7 @@ Deferred to later milestones. Tracked but not in current roadmap.
 | UI-03 | Phase 9 | Complete |
 | UI-04 | Phase 9 | Complete |
 | UI-05 | Phase 9 | Complete |
-| UI-06 | Phase 10 | Pending |
+| UI-06 | Phase 10 | Complete |
 | GAME-01 | Phase 7 | Complete |
 | GAME-02 | Phase 7 | Complete |
 | GAME-03 | Phase 10 | Complete |
