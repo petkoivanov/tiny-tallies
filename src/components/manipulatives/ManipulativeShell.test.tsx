@@ -87,4 +87,77 @@ describe('ManipulativeShell', () => {
     // AnimatedCounter sets accessibilityLabel to "Total: 7"
     expect(getByLabelText('Total: 7')).toBeTruthy();
   });
+
+  // --- Undo button tests ---
+
+  it('renders undo button when onUndo is provided', () => {
+    const { getByTestId } = render(
+      <ManipulativeShell {...defaultProps} onUndo={jest.fn()} canUndo={true}>
+        <Text>workspace</Text>
+      </ManipulativeShell>,
+    );
+    expect(getByTestId('undo-button')).toBeTruthy();
+  });
+
+  it('does not render undo button when onUndo is not provided', () => {
+    const { queryByTestId } = render(
+      <ManipulativeShell {...defaultProps}>
+        <Text>workspace</Text>
+      </ManipulativeShell>,
+    );
+    expect(queryByTestId('undo-button')).toBeNull();
+  });
+
+  it('calls onUndo when undo button is pressed', () => {
+    const onUndo = jest.fn();
+    const { getByTestId } = render(
+      <ManipulativeShell {...defaultProps} onUndo={onUndo} canUndo={true}>
+        <Text>workspace</Text>
+      </ManipulativeShell>,
+    );
+    fireEvent.press(getByTestId('undo-button'));
+    expect(onUndo).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables undo button when canUndo is false', () => {
+    const onUndo = jest.fn();
+    const { getByTestId } = render(
+      <ManipulativeShell {...defaultProps} onUndo={onUndo} canUndo={false}>
+        <Text>workspace</Text>
+      </ManipulativeShell>,
+    );
+    const undoButton = getByTestId('undo-button');
+    expect(undoButton.props.accessibilityState?.disabled).toBe(true);
+  });
+
+  // --- Grid toggle button tests ---
+
+  it('renders grid toggle button when onGridToggle is provided', () => {
+    const { getByTestId } = render(
+      <ManipulativeShell {...defaultProps} onGridToggle={jest.fn()}>
+        <Text>workspace</Text>
+      </ManipulativeShell>,
+    );
+    expect(getByTestId('grid-toggle-button')).toBeTruthy();
+  });
+
+  it('does not render grid toggle button when onGridToggle is not provided', () => {
+    const { queryByTestId } = render(
+      <ManipulativeShell {...defaultProps}>
+        <Text>workspace</Text>
+      </ManipulativeShell>,
+    );
+    expect(queryByTestId('grid-toggle-button')).toBeNull();
+  });
+
+  it('calls onGridToggle when grid toggle button is pressed', () => {
+    const onGridToggle = jest.fn();
+    const { getByTestId } = render(
+      <ManipulativeShell {...defaultProps} onGridToggle={onGridToggle}>
+        <Text>workspace</Text>
+      </ManipulativeShell>,
+    );
+    fireEvent.press(getByTestId('grid-toggle-button'));
+    expect(onGridToggle).toHaveBeenCalledTimes(1);
+  });
 });
