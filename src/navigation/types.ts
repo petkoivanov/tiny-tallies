@@ -5,7 +5,7 @@
  * Global augmentation enables automatic typing for useNavigation/useRoute.
  */
 
-import type { CpaStage } from '@/services/cpa/cpaTypes';
+import type { CpaStage, ManipulativeType } from '@/services/cpa/cpaTypes';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -21,6 +21,7 @@ export type RootStackParamList = {
     streakCount: number;
     cpaAdvances: Array<{ skillId: string; from: CpaStage; to: CpaStage }>;
   };
+  Sandbox: { manipulativeType: ManipulativeType };
 };
 
 declare global {
