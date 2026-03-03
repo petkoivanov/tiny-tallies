@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create, type StateCreator } from 'zustand';
 import type { ManipulativeType } from '@/services/cpa/cpaTypes';
 
 // Import slice under test
@@ -7,11 +7,13 @@ import {
   createSandboxSlice,
 } from '@/store/slices/sandboxSlice';
 
-// Create a minimal test store with just the sandbox slice
+// Create a minimal test store with just the sandbox slice.
+// The cast is necessary because createSandboxSlice is typed for the full
+// AppState context, but the slice is self-contained and works standalone.
 function createTestStore() {
-  return create<SandboxSlice>()((...a) => ({
-    ...createSandboxSlice(...a),
-  }));
+  return create<SandboxSlice>()(
+    createSandboxSlice as unknown as StateCreator<SandboxSlice>,
+  );
 }
 
 describe('sandboxSlice', () => {
