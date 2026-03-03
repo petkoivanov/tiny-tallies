@@ -1,23 +1,24 @@
 import React from 'react';
 import { Alert } from 'react-native';
 import { render, fireEvent } from '@testing-library/react-native';
+import type { UseSessionReturn } from '@/hooks/useSession';
 
 // Mock useSession hook
 const mockHandleAnswer = jest.fn();
 const mockHandleQuit = jest.fn();
 
-const defaultUseSessionReturn = {
+const defaultUseSessionReturn: UseSessionReturn = {
   currentProblem: {
     problem: {
       id: 'test-1',
       templateId: 'add-1d-1d',
-      operation: 'addition' as const,
-      operands: [23, 45] as [number, number],
+      operation: 'addition',
+      operands: [23, 45],
       correctAnswer: 68,
       questionText: '23 + 45 = ?',
       skillId: 'addition.single',
       standards: ['1.OA.1'],
-      grade: 1 as const,
+      grade: 1,
       baseElo: 900,
       metadata: {
         digitCount: 2,
@@ -27,7 +28,7 @@ const defaultUseSessionReturn = {
     },
     presentation: {
       problem: {} as any,
-      format: 'multiple_choice' as const,
+      format: 'multiple_choice',
       options: [
         { value: 68 },
         { value: 58, bugId: 'add_no_carry' },
@@ -36,13 +37,13 @@ const defaultUseSessionReturn = {
       ],
       correctIndex: 0,
     },
-    phase: 'warmup' as const,
+    phase: 'warmup',
     skillId: 'addition.single',
     templateBaseElo: 900,
   },
   currentIndex: 0,
   totalProblems: 15,
-  sessionPhase: 'warmup' as const,
+  sessionPhase: 'warmup',
   feedbackState: null,
   isComplete: false,
   score: 0,
@@ -51,7 +52,7 @@ const defaultUseSessionReturn = {
   sessionResult: null,
 };
 
-let mockUseSessionReturn = { ...defaultUseSessionReturn };
+let mockUseSessionReturn: UseSessionReturn = { ...defaultUseSessionReturn };
 
 jest.mock('@/hooks/useSession', () => ({
   useSession: () => mockUseSessionReturn,
@@ -277,15 +278,15 @@ describe('SessionScreen', () => {
     mockUseSessionReturn = {
       ...defaultUseSessionReturn,
       currentProblem: {
-        ...defaultUseSessionReturn.currentProblem,
+        ...defaultUseSessionReturn.currentProblem!,
         problem: {
-          ...defaultUseSessionReturn.currentProblem.problem,
+          ...defaultUseSessionReturn.currentProblem!.problem,
           operation: 'subtraction',
-          operands: [50, 23] as [number, number],
+          operands: [50, 23],
           correctAnswer: 27,
         },
         presentation: {
-          ...defaultUseSessionReturn.currentProblem.presentation,
+          ...defaultUseSessionReturn.currentProblem!.presentation,
           options: [
             { value: 27 },
             { value: 33 },
