@@ -8,4 +8,5 @@ export * from './shared';
 // Manipulative components (added as each plan completes)
 export { Counters } from './Counters';
 export { TenFrame } from './TenFrame';
-// Remaining manipulatives will be added in Plans 17-02, 17-03, 17-04
+export { BaseTenBlocks } from './BaseTenBlocks';
+// Remaining manipulatives will be added in Plans 17-03, 17-04
