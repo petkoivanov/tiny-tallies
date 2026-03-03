@@ -60,6 +60,15 @@ jest.mock('react-native-reanimated', () => {
       out: jest.fn(),
       inOut: jest.fn(),
     },
+    useAnimatedReaction: jest.fn((prep, react) => {
+      // In test, call react with prep() result immediately
+      try {
+        const result = prep();
+        react(result, null);
+      } catch {
+        // Silently ignore if prep/react fail in test context
+      }
+    }),
     useReducedMotion: jest.fn(() => false),
     FadeIn: { duration: jest.fn().mockReturnThis() },
     FadeOut: { duration: jest.fn().mockReturnThis() },
@@ -69,13 +78,41 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
-// Mock react-native-gesture-handler
-jest.mock('react-native-gesture-handler', () => ({
-  GestureHandlerRootView: ({ children }) => children,
-  PanGestureHandler: 'PanGestureHandler',
-  TapGestureHandler: 'TapGestureHandler',
-  State: {},
-  Directions: {},
+// Mock react-native-gesture-handler (with Gesture builder API for Phase 16+)
+jest.mock('react-native-gesture-handler', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  const createGestureBuilder = () => ({
+    minDistance: jest.fn().mockReturnThis(),
+    maxDuration: jest.fn().mockReturnThis(),
+    onStart: jest.fn().mockReturnThis(),
+    onChange: jest.fn().mockReturnThis(),
+    onEnd: jest.fn().mockReturnThis(),
+    onFinalize: jest.fn().mockReturnThis(),
+    enabled: jest.fn().mockReturnThis(),
+  });
+  return {
+    GestureHandlerRootView: ({ children, ...props }) =>
+      React.createElement(View, { ...props, testID: 'gesture-root' }, children),
+    GestureDetector: ({ children }) => children,
+    Gesture: {
+      Pan: () => createGestureBuilder(),
+      Tap: () => createGestureBuilder(),
+      Race: jest.fn((...gestures) => gestures[0]),
+      Exclusive: jest.fn((...gestures) => gestures[0]),
+      Simultaneous: jest.fn((...gestures) => gestures[0]),
+    },
+    PanGestureHandler: 'PanGestureHandler',
+    TapGestureHandler: 'TapGestureHandler',
+    State: { UNDETERMINED: 0, FAILED: 1, BEGAN: 2, CANCELLED: 3, ACTIVE: 4, END: 5 },
+    Directions: {},
+  };
+});
+
+// Mock react-native-worklets
+jest.mock('react-native-worklets', () => ({
+  scheduleOnRN: jest.fn((fn, ...args) => fn(...args)),
+  scheduleOnUI: jest.fn((fn) => fn()),
 }));
 
 // Mock @react-native-async-storage/async-storage
