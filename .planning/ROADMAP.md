@@ -63,11 +63,11 @@
   2. Given a skill ID, the system returns the appropriate manipulative type(s) for that concept
   3. CPA stage for a skill is derived from BKT mastery: P(L) < 0.40 = concrete, 0.40-0.85 = pictorial, >= 0.85 = abstract
   4. Reanimated 4 worklet code compiles and runs without babel errors
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 15-01: TBD
-- [ ] 15-02: TBD
+- [ ] 15-01-PLAN.md — CPA types, service, skill-manipulative mapping, and babel config fix
+- [ ] 15-02-PLAN.md — Store schema v4->v5 migration and commitSessionResults CPA integration
 
 ### Phase 16: Shared Drag Primitives
 **Goal**: A reusable set of drag-and-drop primitives that run snap logic on the UI thread at 60fps, providing the interaction foundation for all 6 manipulatives
