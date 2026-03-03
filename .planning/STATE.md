@@ -3,6 +3,21 @@ gsd_state_version: 1.0
 milestone: v0.4
 milestone_name: Virtual Manipulatives
 status: executing
+stopped_at: Completed 17-02-PLAN.md
+last_updated: "2026-03-03T19:51:36.543Z"
+last_activity: 2026-03-03 -- Completed Plan 16-02 (Shared drag primitives components)
+progress:
+  total_phases: 6
+  completed_phases: 3
+  total_plans: 8
+  completed_plans: 8
+---
+
+---
+gsd_state_version: 1.0
+milestone: v0.4
+milestone_name: Virtual Manipulatives
+status: executing
 stopped_at: Completed 17-01-PLAN.md
 last_updated: "2026-03-03T19:51:10.685Z"
 last_activity: 2026-03-03 -- Completed Plan 16-02 (Shared drag primitives components)
@@ -104,6 +119,9 @@ v0.4 roadmap decisions:
 - [Phase 17]: BarModel sub-components extracted into BarModelParts.tsx to keep main file under 500 lines
 - [Phase 17]: NumberPicker uses FlatList with padding sentinel items for centered wheel selection
 - [Phase 17]: ManipulativeShell wrapper provides consistent reset+counter+workspace layout for all 6 manipulatives
+- [Phase 17-02]: SVG uses pixel-based coordinates (no viewBox) for NumberLine to avoid coordinate mismatch
+- [Phase 17-02]: NumberLine marker is Animated.View overlay on SVG for smooth gesture handling
+- [Phase 17-02]: FractionStrips use remove button (x) instead of long-press for ages 6-9 discoverability
 
 ### Pending Todos
 
@@ -117,7 +135,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T19:51:06.290Z
-Stopped at: Completed 17-01-PLAN.md
+Last session: 2026-03-03T19:51:36.541Z
+Stopped at: Completed 17-02-PLAN.md
 Resume file: None
 Resume command: /gsd:execute-phase 17
