@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: between_milestones
-stopped_at: Completed v0.3 Adaptive Learning Engine milestone
-last_updated: "2026-03-03T16:00:00.000Z"
-last_activity: 2026-03-03 -- Completed v0.3 milestone (archived)
+milestone: v0.4
+milestone_name: Virtual Manipulatives
+status: defining_requirements
+stopped_at: null
+last_updated: "2026-03-03T17:00:00.000Z"
+last_activity: 2026-03-03 -- Milestone v0.4 started
 progress:
-  total_phases: 14
-  completed_phases: 14
-  total_plans: 34
-  completed_plans: 34
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -20,12 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** Planning next milestone
+**Current focus:** v0.4 Virtual Manipulatives
 
 ## Current Position
 
-Between milestones. v0.3 Adaptive Learning Engine shipped.
-Next: /gsd:new-milestone to start v0.4 planning.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-03 — Milestone v0.4 started
 
 ## Performance Metrics
 
@@ -61,6 +63,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed v0.3 milestone
+Stopped at: Defining v0.4 requirements
 Resume file: N/A
 Resume command: /gsd:new-milestone

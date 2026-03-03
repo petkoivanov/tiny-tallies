@@ -31,7 +31,14 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ### Active
 
-(None — next milestone requirements defined via `/gsd:new-milestone`)
+**Current Milestone: v0.4 Virtual Manipulatives**
+
+- [ ] All 6 virtual manipulatives: base-ten blocks, number lines, ten frames, counters, fraction strips, bar models
+- [ ] CPA progression system (Concrete → Pictorial → Abstract) driven by BKT mastery levels
+- [ ] Fully interactive manipulation: drag-and-drop, snap-to-grid, split/combine with gesture-handler + reanimated
+- [ ] Session-embedded manipulatives as visual aids during problem solving
+- [ ] Per-manipulative standalone sandbox screens for free exploration
+- [ ] Manipulative-to-skill mapping (which manipulative suits which math concepts)
 
 ### Out of Scope
 
@@ -128,4 +135,4 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | Ages 6-9 focus | Clearest market gap; manageable content scope | ✓ Good — grade 1-3 content complete |
 
 ---
-*Last updated: 2026-03-03 after v0.3 milestone*
+*Last updated: 2026-03-03 after v0.4 milestone start*
