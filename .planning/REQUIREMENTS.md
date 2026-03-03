@@ -11,9 +11,9 @@ Requirements for v0.2 UI Polish & Gamification milestone. Each maps to roadmap p
 
 - [x] **UI-01**: Home screen shows child's name, level, XP progress bar, and a "Start Practice" button
 - [x] **UI-02**: Session screen displays the problem, answer options (multiple choice or free input), and progress indicator
-- [ ] **UI-03**: Results screen shows session summary with correct/total, XP earned, and a "Done" button
+- [x] **UI-03**: Results screen shows session summary with correct/total, XP earned, and a "Done" button
 - [x] **UI-04**: All touch targets are minimum 48dp for ages 6-9 motor skills
-- [ ] **UI-05**: Dark theme with high contrast colors and child-friendly design
+- [x] **UI-05**: Dark theme with high contrast colors and child-friendly design
 - [ ] **UI-06**: Animated feedback for correct answers (celebration) and incorrect answers (gentle encouragement)
 
 ### Gamification
@@ -66,9 +66,9 @@ Deferred to later milestones. Tracked but not in current roadmap.
 |-------------|-------|--------|
 | UI-01 | Phase 8 | Complete |
 | UI-02 | Phase 9 | Complete |
-| UI-03 | Phase 9 | Pending |
+| UI-03 | Phase 9 | Complete |
 | UI-04 | Phase 9 | Complete |
-| UI-05 | Phase 9 | Pending |
+| UI-05 | Phase 9 | Complete |
 | UI-06 | Phase 10 | Pending |
 | GAME-01 | Phase 7 | Complete |
 | GAME-02 | Phase 7 | Complete |
