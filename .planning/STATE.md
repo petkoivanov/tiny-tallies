@@ -68,5 +68,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 12 context gathered, ready to plan
-Resume file: .planning/phases/12-leitner-spaced-repetition/12-CONTEXT.md
+Stopped at: Phase 12 planned and verified (2 plans, 2 waves). Ready to execute.
+Resume file: .planning/phases/12-leitner-spaced-repetition/12-01-PLAN.md
+Resume command: /gsd:execute-phase 12
