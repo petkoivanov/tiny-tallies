@@ -140,11 +140,11 @@ function TrayCounter({ snapTargets, onSnap }: TrayCounterProps) {
  * occupied cell removes the counter. When the first frame is full (10/10),
  * a second frame auto-spawns below. Running count shows total occupied cells.
  */
-export function TenFrame({ testID }: TenFrameProps) {
+export function TenFrame({ testID, initialFrames = 1 }: TenFrameProps) {
   const [cells, setCells] = useState<boolean[]>(
-    () => new Array(CELLS_PER_FRAME).fill(false) as boolean[],
+    () => new Array(CELLS_PER_FRAME * initialFrames).fill(false) as boolean[],
   );
-  const [frameCount, setFrameCount] = useState(1);
+  const [frameCount, setFrameCount] = useState(initialFrames);
 
   // Track snap targets -- updated by SnapZone onMeasured callbacks
   const snapTargets = useSharedValue<SnapTarget[]>([]);
@@ -225,11 +225,11 @@ export function TenFrame({ testID }: TenFrameProps) {
   }, []);
 
   const handleReset = useCallback(() => {
-    setCells(new Array(CELLS_PER_FRAME).fill(false) as boolean[]);
-    setFrameCount(1);
+    setCells(new Array(CELLS_PER_FRAME * initialFrames).fill(false) as boolean[]);
+    setFrameCount(initialFrames);
     allTargetsRef.current.clear();
     snapTargets.value = [];
-  }, [snapTargets]);
+  }, [snapTargets, initialFrames]);
 
   return (
     <ManipulativeShell

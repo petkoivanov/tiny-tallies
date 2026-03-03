@@ -10,3 +10,5 @@ export {
   getManipulativesForSkill,
   getPrimaryManipulative,
 } from './skillManipulativeMap';
+export type { GuidedStep, GuidedStepResolver } from './guidedStepsTypes';
+export { getNextGuidedStep } from './guidedSteps';

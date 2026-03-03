@@ -48,3 +48,19 @@ export const DRAG_OPACITY = 0.85;
 
 /** Stagger delay in milliseconds per item during reset animation. */
 export const RESET_STAGGER_MS = 30;
+
+/** Undo reverse animation -- same as RETURN_SPRING_CONFIG for smooth undo. */
+export const UNDO_SPRING_CONFIG = {
+  damping: 15,
+  stiffness: 200,
+  mass: 1,
+  overshootClamping: false,
+} as const;
+
+/** Pulse timing for guided mode glow animation. */
+export const PULSE_GLOW_CONFIG = {
+  duration: 800,
+} as const;
+
+/** Soft green glow color for guided mode highlights. */
+export const GUIDED_GLOW_COLOR = 'rgba(74, 222, 128, 0.4)';

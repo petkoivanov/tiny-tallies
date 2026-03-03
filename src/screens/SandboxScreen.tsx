@@ -18,6 +18,20 @@ import {
 } from '@/components/manipulatives';
 import { SandboxTooltip } from '@/components/home/SandboxTooltip';
 
+/** Render the manipulative component, with type-specific props where needed. */
+function renderManipulativeComponent(
+  manipulativeType: ManipulativeType,
+  testID: string,
+): React.ReactNode {
+  // TenFrame: always show two frames in sandbox for exploration
+  if (manipulativeType === 'ten_frame') {
+    return <TenFrame initialFrames={2} testID={testID} />;
+  }
+
+  const Component = MANIPULATIVE_COMPONENTS[manipulativeType];
+  return <Component testID={testID} />;
+}
+
 const MANIPULATIVE_COMPONENTS: Record<ManipulativeType, React.ComponentType<{ testID?: string }>> = {
   counters: Counters,
   ten_frame: TenFrame,
@@ -66,7 +80,6 @@ export default function SandboxScreen() {
     }
   }, [manipulativeType]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const ManipulativeComponent = MANIPULATIVE_COMPONENTS[manipulativeType];
   const displayName = DISPLAY_NAMES[manipulativeType];
 
   return (
@@ -93,7 +106,7 @@ export default function SandboxScreen() {
             onDismiss={() => setShowTooltip(false)}
           />
         )}
-        <ManipulativeComponent testID={`sandbox-${manipulativeType}`} />
+        {renderManipulativeComponent(manipulativeType, `sandbox-${manipulativeType}`)}
       </View>
     </View>
   );

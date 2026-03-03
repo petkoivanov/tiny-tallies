@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Pressable, StyleSheet } from 'react-native';
-import { RotateCcw } from 'lucide-react-native';
+import { RotateCcw, Undo2, Grid3X3, Move } from 'lucide-react-native';
 
 import { AnimatedCounter } from './shared';
 import { colors, spacing } from '@/theme';
@@ -15,6 +15,14 @@ export interface ManipulativeShellProps {
   countLabel?: string;
   /** Callback fired when the reset button is pressed. */
   onReset: () => void;
+  /** Callback for undo button. Button only renders when provided. */
+  onUndo?: () => void;
+  /** Enables/disables undo button visually. */
+  canUndo?: boolean;
+  /** Callback for grid/free toggle. Button only renders when provided. */
+  onGridToggle?: () => void;
+  /** Current grid mode state for icon switching. */
+  isGridMode?: boolean;
   /**
    * Optional custom counter renderer. When provided, replaces the default
    * AnimatedCounter — useful for dual-count displays (e.g. Counters red/yellow).
@@ -44,6 +52,10 @@ export function ManipulativeShell({
   count,
   countLabel,
   onReset,
+  onUndo,
+  canUndo,
+  onGridToggle,
+  isGridMode,
   renderCounter,
   children,
   testID,
@@ -51,16 +63,54 @@ export function ManipulativeShell({
   return (
     <View style={styles.container} testID={testID}>
       <View style={styles.header}>
-        <Pressable
-          onPress={onReset}
-          hitSlop={HIT_SLOP}
-          accessibilityLabel="Reset manipulative"
-          accessibilityRole="button"
-          testID="reset-button"
-          style={styles.resetButton}
-        >
-          <RotateCcw size={ICON_SIZE} color={colors.textSecondary} />
-        </Pressable>
+        <View style={styles.buttonGroup}>
+          <Pressable
+            onPress={onReset}
+            hitSlop={HIT_SLOP}
+            accessibilityLabel="Reset manipulative"
+            accessibilityRole="button"
+            testID="reset-button"
+            style={styles.resetButton}
+          >
+            <RotateCcw size={ICON_SIZE} color={colors.textSecondary} />
+          </Pressable>
+
+          {onUndo !== undefined && (
+            <Pressable
+              onPress={onUndo}
+              hitSlop={HIT_SLOP}
+              disabled={!canUndo}
+              accessibilityLabel="Undo last action"
+              accessibilityRole="button"
+              testID="undo-button"
+              style={styles.undoButton}
+            >
+              <Undo2
+                size={ICON_SIZE}
+                color={canUndo ? colors.textSecondary : colors.textMuted}
+              />
+            </Pressable>
+          )}
+
+          {onGridToggle !== undefined && (
+            <Pressable
+              onPress={onGridToggle}
+              hitSlop={HIT_SLOP}
+              accessibilityLabel={
+                isGridMode ? 'Switch to free mode' : 'Switch to grid mode'
+              }
+              accessibilityRole="button"
+              testID="grid-toggle-button"
+              style={styles.gridToggleButton}
+            >
+              {isGridMode ? (
+                <Move size={ICON_SIZE} color={colors.textSecondary} />
+              ) : (
+                <Grid3X3 size={ICON_SIZE} color={colors.textSecondary} />
+              )}
+            </Pressable>
+          )}
+        </View>
 
         <View testID="counter-area">
           {renderCounter ? (
@@ -87,7 +137,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.md,
   },
+  buttonGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
   resetButton: {
+    minWidth: 48,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  undoButton: {
+    minWidth: 48,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gridToggleButton: {
     minWidth: 48,
     minHeight: 48,
     alignItems: 'center',

@@ -123,6 +123,13 @@ export function CpaSessionContent({
   // Render the manipulative component inside the panel
   const renderManipulative = () => {
     if (!manipulativeType) return null;
+
+    // TenFrame: pass initialFrames=2 when answer > 10 (double ten frame for make-a-ten strategies)
+    if (manipulativeType === 'ten_frame') {
+      const frames = problem.correctAnswer > 10 ? 2 : 1;
+      return <TenFrame key={`manip-${currentIndex}`} initialFrames={frames} testID="session-manipulative" />;
+    }
+
     const Component = MANIPULATIVE_COMPONENTS[manipulativeType];
     return <Component key={`manip-${currentIndex}`} testID="session-manipulative" />;
   };
