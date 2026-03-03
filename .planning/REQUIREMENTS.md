@@ -16,11 +16,11 @@ Requirements for v0.3 Adaptive Learning Engine milestone. Each maps to roadmap p
 
 ### Leitner (Spaced Repetition)
 
-- [ ] **LEIT-01**: Each skill occupies one of 6 Leitner boxes determining its review interval
-- [ ] **LEIT-02**: Correct answer moves skill up one box (longer interval before next review)
-- [ ] **LEIT-03**: Wrong answer drops skill down 2 boxes (minimum Box 1), not all the way to Box 1
-- [ ] **LEIT-04**: Review intervals are age-adjusted (shorter gaps for younger children)
-- [ ] **LEIT-05**: Skill is considered mastered after 3 consecutive correct answers in Box 6
+- [x] **LEIT-01**: Each skill occupies one of 6 Leitner boxes determining its review interval
+- [x] **LEIT-02**: Correct answer moves skill up one box (longer interval before next review)
+- [x] **LEIT-03**: Wrong answer drops skill down 2 boxes (minimum Box 1), not all the way to Box 1
+- [x] **LEIT-04**: Review intervals are age-adjusted (shorter gaps for younger children)
+- [x] **LEIT-05**: Skill is considered mastered after 3 consecutive correct answers in Box 6
 
 ### Prerequisite Graph
 
@@ -91,11 +91,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BKT-02 | Phase 11 | Complete |
 | BKT-03 | Phase 11 | Complete |
 | BKT-04 | Phase 11 | Complete |
-| LEIT-01 | Phase 12 | Pending |
-| LEIT-02 | Phase 12 | Pending |
-| LEIT-03 | Phase 12 | Pending |
-| LEIT-04 | Phase 12 | Pending |
-| LEIT-05 | Phase 12 | Pending |
+| LEIT-01 | Phase 12 | Complete |
+| LEIT-02 | Phase 12 | Complete |
+| LEIT-03 | Phase 12 | Complete |
+| LEIT-04 | Phase 12 | Complete |
+| LEIT-05 | Phase 12 | Complete |
 | PREG-01 | Phase 13 | Pending |
 | PREG-02 | Phase 13 | Pending |
 | PREG-03 | Phase 13 | Pending |
