@@ -24,8 +24,22 @@ export function migrateStore(
     state.lastSessionDate ??= null;
   }
 
+  if (version < 3) {
+    // v2 -> v3: Add BKT fields to existing skill states
+    const skillStates = (state.skillStates ?? {}) as Record<
+      string,
+      Record<string, unknown>
+    >;
+    for (const skillId of Object.keys(skillStates)) {
+      skillStates[skillId].masteryProbability ??= 0.1;
+      skillStates[skillId].consecutiveWrong ??= 0;
+      skillStates[skillId].masteryLocked ??= false;
+    }
+    state.skillStates = skillStates;
+  }
+
   // Future migrations chain here:
-  // if (version < 3) { ... }
+  // if (version < 4) { ... }
 
   return state;
 }

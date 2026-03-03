@@ -18,6 +18,9 @@ export function getOrCreateSkillState(
       eloRating: defaultElo,
       attempts: 0,
       correct: 0,
+      masteryProbability: 0.1,
+      consecutiveWrong: 0,
+      masteryLocked: false,
     }
   );
 }

@@ -82,8 +82,8 @@ describe('appStore composition', () => {
     expect(useAppStore.getState().xp).toBe(35);
   });
 
-  it('STORE_VERSION equals 2', () => {
-    expect(STORE_VERSION).toBe(2);
+  it('STORE_VERSION equals 3', () => {
+    expect(STORE_VERSION).toBe(3);
   });
 });
 
@@ -111,7 +111,7 @@ describe('skill state helpers', () => {
   });
 
   it('getOrCreateSkillState returns existing state when skillId exists', () => {
-    const existing = { eloRating: 1200, attempts: 10, correct: 8 };
+    const existing = { eloRating: 1200, attempts: 10, correct: 8, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false };
     const states = { 'add.single': existing };
     const result = getOrCreateSkillState(states, 'add.single');
     expect(result).toEqual(existing);
@@ -119,12 +119,12 @@ describe('skill state helpers', () => {
 
   it('getOrCreateSkillState returns default when skillId not found', () => {
     const result = getOrCreateSkillState({}, 'add.single');
-    expect(result).toEqual({ eloRating: 1000, attempts: 0, correct: 0 });
+    expect(result).toEqual({ eloRating: 1000, attempts: 0, correct: 0, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false });
   });
 
   it('getOrCreateSkillState accepts optional defaultElo parameter', () => {
     const result = getOrCreateSkillState({}, 'add.single', 800);
-    expect(result).toEqual({ eloRating: 800, attempts: 0, correct: 0 });
+    expect(result).toEqual({ eloRating: 800, attempts: 0, correct: 0, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false });
   });
 
   it('isProfileComplete returns false when any field is null', () => {
@@ -191,6 +191,9 @@ describe('enriched slice behaviors', () => {
       eloRating: 1000,
       attempts: 1,
       correct: 0,
+      masteryProbability: 0.1,
+      consecutiveWrong: 0,
+      masteryLocked: false,
     });
   });
 
@@ -208,6 +211,9 @@ describe('enriched slice behaviors', () => {
       eloRating: 1050,
       attempts: 6,
       correct: 4,
+      masteryProbability: 0.1,
+      consecutiveWrong: 0,
+      masteryLocked: false,
     });
   });
 

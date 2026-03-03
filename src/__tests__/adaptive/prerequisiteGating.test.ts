@@ -6,7 +6,7 @@ import {
 import type { SkillState } from '@/store/slices/skillStatesSlice';
 
 function makeSkillState(eloRating: number): SkillState {
-  return { eloRating, attempts: 10, correct: 8 };
+  return { eloRating, attempts: 10, correct: 8, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false };
 }
 
 describe('prerequisiteGating', () => {

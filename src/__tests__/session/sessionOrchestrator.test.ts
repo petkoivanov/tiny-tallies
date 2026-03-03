@@ -13,6 +13,9 @@ import { getTemplatesBySkill } from '@/services/mathEngine/templates';
 import { getUnlockedSkills } from '@/services/adaptive/prerequisiteGating';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
 
+/** BKT default fields for SkillState test objects */
+const bkt = { masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false } as const;
+
 describe('sessionOrchestrator', () => {
   describe('getSessionPhase', () => {
     it('returns warmup for indices 0-2', () => {
@@ -53,8 +56,8 @@ describe('sessionOrchestrator', () => {
   describe('selectStrongestSkill', () => {
     it('favors highest-Elo skills over 100 iterations', () => {
       const skillStates: Record<string, SkillState> = {
-        'addition.single-digit.no-carry': { eloRating: 1200, attempts: 50, correct: 40 },
-        'subtraction.single-digit.no-borrow': { eloRating: 800, attempts: 50, correct: 20 },
+        'addition.single-digit.no-carry': { eloRating: 1200, attempts: 50, correct: 40, ...bkt },
+        'subtraction.single-digit.no-borrow': { eloRating: 800, attempts: 50, correct: 20, ...bkt },
       };
       const skillIds = Object.keys(skillStates);
 
@@ -83,9 +86,9 @@ describe('sessionOrchestrator', () => {
     it('with equal Elos all skills get roughly equal selection', () => {
       const skillIds = ['a', 'b', 'c'];
       const skillStates: Record<string, SkillState> = {
-        a: { eloRating: 1000, attempts: 10, correct: 8 },
-        b: { eloRating: 1000, attempts: 10, correct: 8 },
-        c: { eloRating: 1000, attempts: 10, correct: 8 },
+        a: { eloRating: 1000, attempts: 10, correct: 8, ...bkt },
+        b: { eloRating: 1000, attempts: 10, correct: 8, ...bkt },
+        c: { eloRating: 1000, attempts: 10, correct: 8, ...bkt },
       };
 
       const counts: Record<string, number> = { a: 0, b: 0, c: 0 };
@@ -162,8 +165,8 @@ describe('sessionOrchestrator', () => {
     it('practice problems use weakness-weighted skills (statistical)', () => {
       // Create skill states where one skill is weak (low Elo)
       const skillStates: Record<string, SkillState> = {
-        'addition.single-digit.no-carry': { eloRating: 700, attempts: 30, correct: 10 },
-        'subtraction.single-digit.no-borrow': { eloRating: 1200, attempts: 30, correct: 25 },
+        'addition.single-digit.no-carry': { eloRating: 700, attempts: 30, correct: 10, ...bkt },
+        'subtraction.single-digit.no-borrow': { eloRating: 1200, attempts: 30, correct: 25, ...bkt },
       };
 
       // Run many sessions and count practice skill selections

@@ -6,6 +6,9 @@ import {
   WEAKNESS_BASELINE,
 } from '@/services/adaptive/skillSelector';
 
+/** BKT default fields for SkillState test objects */
+const bkt = { masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false } as const;
+
 describe('skillSelector', () => {
   const skillIds = [
     'addition.single-digit.no-carry',
@@ -20,16 +23,19 @@ describe('skillSelector', () => {
           eloRating: 800,
           attempts: 10,
           correct: 5,
+          ...bkt,
         },
         'addition.within-20.no-carry': {
           eloRating: 1100,
           attempts: 10,
           correct: 8,
+          ...bkt,
         },
         'subtraction.single-digit.no-borrow': {
           eloRating: 950,
           attempts: 10,
           correct: 7,
+          ...bkt,
         },
       };
 
@@ -51,16 +57,19 @@ describe('skillSelector', () => {
           eloRating: 800,
           attempts: 10,
           correct: 5,
+          ...bkt,
         },
         'addition.within-20.no-carry': {
           eloRating: 1100,
           attempts: 10,
           correct: 8,
+          ...bkt,
         },
         'subtraction.single-digit.no-borrow': {
           eloRating: 1100,
           attempts: 10,
           correct: 9,
+          ...bkt,
         },
       };
 
@@ -77,16 +86,19 @@ describe('skillSelector', () => {
           eloRating: 1000,
           attempts: 10,
           correct: 8,
+          ...bkt,
         },
         'addition.within-20.no-carry': {
           eloRating: 1000,
           attempts: 10,
           correct: 8,
+          ...bkt,
         },
         'subtraction.single-digit.no-borrow': {
           eloRating: 1000,
           attempts: 10,
           correct: 8,
+          ...bkt,
         },
       };
 
@@ -112,11 +124,13 @@ describe('skillSelector', () => {
           eloRating: 900,
           attempts: 5,
           correct: 3,
+          ...bkt,
         },
         'addition.within-20.no-carry': {
           eloRating: 1050,
           attempts: 5,
           correct: 4,
+          ...bkt,
         },
       };
 
@@ -135,16 +149,19 @@ describe('skillSelector', () => {
           eloRating: 800,
           attempts: 20,
           correct: 10,
+          ...bkt,
         },
         'addition.within-20.no-carry': {
           eloRating: 1100,
           attempts: 20,
           correct: 16,
+          ...bkt,
         },
         'subtraction.single-digit.no-borrow': {
           eloRating: 1000,
           attempts: 20,
           correct: 14,
+          ...bkt,
         },
       };
 

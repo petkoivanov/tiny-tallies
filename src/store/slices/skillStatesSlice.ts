@@ -7,6 +7,12 @@ export type SkillState = {
   attempts: number;
   correct: number;
   lastPracticed?: string;
+  /** BKT mastery probability P(L). Default 0.1 (prior knowledge). */
+  masteryProbability: number;
+  /** Count of consecutive wrong answers (for soft mastery lock). Resets on correct. */
+  consecutiveWrong: number;
+  /** Whether this skill has achieved mastery (P(L) >= 0.95). Soft-locked: requires 3+ consecutive wrong to revert. */
+  masteryLocked: boolean;
 };
 
 export interface SkillStatesSlice {
@@ -28,6 +34,9 @@ export const createSkillStatesSlice: StateCreator<
         eloRating: DEFAULT_ELO,
         attempts: 0,
         correct: 0,
+        masteryProbability: 0.1,
+        consecutiveWrong: 0,
+        masteryLocked: false,
       };
       return {
         skillStates: {
