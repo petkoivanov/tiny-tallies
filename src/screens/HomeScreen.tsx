@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Flame, Check } from 'lucide-react-native';
@@ -8,6 +8,7 @@ import { useAppStore } from '@/store/appStore';
 import { AVATARS, DEFAULT_AVATAR_ID } from '@/store/constants/avatars';
 import { calculateLevelFromXp } from '@/services/gamification/levelProgression';
 import { isSameISOWeek } from '@/services/gamification/weeklyStreak';
+import { ExploreGrid } from '@/components/home';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -50,10 +51,11 @@ export default function HomeScreen() {
       : null;
 
   return (
-    <View
-      style={[
-        styles.container,
-        { paddingTop: insets.top, paddingBottom: insets.bottom },
+    <ScrollView
+      style={[styles.container, { paddingTop: insets.top }]}
+      contentContainerStyle={[
+        styles.scrollContent,
+        { paddingBottom: insets.bottom },
       ]}
     >
       {/* Profile Section */}
@@ -111,7 +113,12 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Start Practice Button (fixed at bottom) */}
+      {/* Explore Section */}
+      <View style={styles.exploreSection}>
+        <ExploreGrid />
+      </View>
+
+      {/* Start Practice Button */}
       <View style={styles.buttonSection}>
         <Pressable
           onPress={() =>
@@ -129,7 +136,7 @@ export default function HomeScreen() {
           <Text style={styles.buttonText}>Start Practice</Text>
         </Pressable>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -170,10 +177,16 @@ const styles = StyleSheet.create({
     color: colors.primaryLight,
     marginBottom: spacing.xl,
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
   statsSection: {
-    flex: 1,
     paddingHorizontal: spacing.lg,
     gap: spacing.xl,
+  },
+  exploreSection: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
   },
   xpContainer: {
     gap: spacing.sm,

@@ -37,9 +37,9 @@ Requirements for v0.4 Virtual Manipulatives milestone. Each maps to roadmap phas
 
 ### Sandbox
 
-- [ ] **SAND-01**: User can access per-manipulative sandbox screens from the home screen
-- [ ] **SAND-02**: User can freely explore each manipulative without problem constraints
-- [ ] **SAND-03**: Sandbox state is ephemeral (not persisted across app restarts)
+- [x] **SAND-01**: User can access per-manipulative sandbox screens from the home screen
+- [x] **SAND-02**: User can freely explore each manipulative without problem constraints
+- [x] **SAND-03**: Sandbox state is ephemeral (not persisted across app restarts)
 
 ### Polish
 
@@ -111,9 +111,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SESS-01 | Phase 18 | Complete |
 | SESS-02 | Phase 18 | Complete |
 | SESS-03 | Phase 18 | Complete |
-| SAND-01 | Phase 19 | Pending |
-| SAND-02 | Phase 19 | Pending |
-| SAND-03 | Phase 19 | Pending |
+| SAND-01 | Phase 19 | Complete |
+| SAND-02 | Phase 19 | Complete |
+| SAND-03 | Phase 19 | Complete |
 | POL-01 | Phase 20 | Pending |
 | POL-02 | Phase 20 | Pending |
 | POL-03 | Phase 20 | Pending |

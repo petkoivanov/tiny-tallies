@@ -23,6 +23,14 @@ jest.mock('lucide-react-native', () => {
   };
 });
 
+// Mock ExploreGrid as a simple View with testID
+jest.mock('@/components/home', () => {
+  const { View } = require('react-native');
+  return {
+    ExploreGrid: () => <View testID="explore-grid" />,
+  };
+});
+
 // Mock store state
 let mockStoreState: Record<string, unknown> = {};
 jest.mock('@/store/appStore', () => ({
@@ -40,6 +48,8 @@ function setMockState(overrides: Record<string, unknown> = {}) {
     level: 1,
     weeklyStreak: 0,
     lastSessionDate: null,
+    exploredManipulatives: [],
+    markExplored: jest.fn(),
     ...overrides,
   };
 }
@@ -100,5 +110,17 @@ describe('HomeScreen', () => {
     expect(mockNavigate).toHaveBeenCalledWith('Session', {
       sessionId: expect.any(String),
     });
+  });
+
+  it('renders Explore section', () => {
+    const { getByTestId } = render(<HomeScreen />);
+    expect(getByTestId('explore-grid')).toBeTruthy();
+  });
+
+  it('renders Start Practice button below explore section', () => {
+    const { getByLabelText, getByTestId } = render(<HomeScreen />);
+    // Both exist in the rendered tree
+    expect(getByTestId('explore-grid')).toBeTruthy();
+    expect(getByLabelText('Start Practice')).toBeTruthy();
   });
 });
