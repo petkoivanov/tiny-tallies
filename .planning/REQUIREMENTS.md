@@ -31,9 +31,9 @@ Requirements for v0.4 Virtual Manipulatives milestone. Each maps to roadmap phas
 
 ### Session Integration
 
-- [ ] **SESS-01**: User sees a contextually-selected manipulative as collapsible overlay during practice problems
-- [ ] **SESS-02**: System auto-selects the appropriate manipulative type based on the current problem's skill
-- [ ] **SESS-03**: User can expand/collapse the manipulative panel during a session
+- [x] **SESS-01**: User sees a contextually-selected manipulative as collapsible overlay during practice problems
+- [x] **SESS-02**: System auto-selects the appropriate manipulative type based on the current problem's skill
+- [x] **SESS-03**: User can expand/collapse the manipulative panel during a session
 
 ### Sandbox
 
@@ -108,9 +108,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CPA-03 | Phase 18 | Pending |
 | CPA-04 | Phase 18 | Pending |
 | CPA-05 | Phase 18 | Pending |
-| SESS-01 | Phase 18 | Pending |
-| SESS-02 | Phase 18 | Pending |
-| SESS-03 | Phase 18 | Pending |
+| SESS-01 | Phase 18 | Complete |
+| SESS-02 | Phase 18 | Complete |
+| SESS-03 | Phase 18 | Complete |
 | SAND-01 | Phase 19 | Pending |
 | SAND-02 | Phase 19 | Pending |
 | SAND-03 | Phase 19 | Pending |
