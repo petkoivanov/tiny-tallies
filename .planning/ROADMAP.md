@@ -158,7 +158,10 @@ Plans:
   4. Challenge problems target skills slightly above the child's current Elo rating, providing growth opportunities without frustration
   5. BKT mastery probabilities influence problem selection across all categories: mastered skills are deprioritized, weak skills (low P(L)) are prioritized for more practice
 
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 14-01-PLAN.md — Practice mix algorithm (slot calculation, pool building, BKT-weighted selection, fallback cascade, constrained ordering)
+- [ ] 14-02-PLAN.md — Session orchestrator integration, test updates, full regression
 
 ## Progress
 
@@ -177,7 +180,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 | 8. Home Screen Dashboard | v0.2 | 1/1 | Complete | 2026-03-03 |
 | 9. Session & Results UI Polish | v0.2 | 2/2 | Complete | 2026-03-03 |
 | 10. Animated Feedback & Celebrations | v0.2 | 2/2 | Complete | 2026-03-03 |
-| 11. Bayesian Knowledge Tracing | 2/2 | Complete    | 2026-03-03 | - |
-| 12. Leitner Spaced Repetition | 2/2 | Complete    | 2026-03-03 | - |
-| 13. Prerequisite Graph & Outer Fringe | 2/2 | Complete    | 2026-03-03 | - |
-| 14. Smart Session Orchestration | v0.3 | 0/TBD | Not started | - |
+| 11. Bayesian Knowledge Tracing | v0.3 | 2/2 | Complete | 2026-03-03 |
+| 12. Leitner Spaced Repetition | v0.3 | 2/2 | Complete | 2026-03-03 |
+| 13. Prerequisite Graph & Outer Fringe | v0.3 | 2/2 | Complete | 2026-03-03 |
+| 14. Smart Session Orchestration | v0.3 | 0/2 | Not started | - |
