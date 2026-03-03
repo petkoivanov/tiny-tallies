@@ -13,6 +13,7 @@ import {
   transitionBox,
   computeNextReviewDue,
 } from '../services/adaptive';
+import { advanceCpaStage } from '../services/cpa';
 import {
   generateSessionQueue,
   getSessionPhase,
@@ -223,6 +224,10 @@ export function useSession(): UseSessionReturn {
         finalConsecutiveCorrectInBox6 = 0; // reset: didn't earn it via Box 6 streak
       }
 
+      // CPA one-way advance: compute from current stage + new mastery
+      const currentCpaLevel = existing?.newCpaLevel ?? skillState.cpaLevel ?? 'concrete';
+      const newCpaLevel = advanceCpaStage(currentCpaLevel, masteryResult.masteryProbability);
+
       pendingUpdatesRef.current.set(problem.skillId, {
         skillId: problem.skillId,
         newElo: eloResult.newElo,
@@ -234,6 +239,7 @@ export function useSession(): UseSessionReturn {
         newLeitnerBox: finalLeitnerBox,
         newNextReviewDue: finalNextReviewDue,
         newConsecutiveCorrectInBox6: finalConsecutiveCorrectInBox6,
+        newCpaLevel,
       });
 
       // Calculate XP if correct

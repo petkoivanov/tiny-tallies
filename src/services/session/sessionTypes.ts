@@ -1,5 +1,6 @@
 import type { Problem } from '../mathEngine/types';
 import type { MultipleChoicePresentation } from '../mathEngine/answerFormats/types';
+import type { CpaStage } from '../cpa/cpaTypes';
 
 /** Phase of a session, derived from problem index */
 export type SessionPhase = 'warmup' | 'practice' | 'cooldown' | 'complete';
@@ -45,6 +46,8 @@ export interface PendingSkillUpdate {
   newNextReviewDue: string | null;
   /** Consecutive correct count in Box 6 */
   newConsecutiveCorrectInBox6: number;
+  /** CPA stage after one-way advance logic */
+  newCpaLevel: CpaStage;
 }
 
 /** Structured feedback returned from commitSessionResults for UI consumption */

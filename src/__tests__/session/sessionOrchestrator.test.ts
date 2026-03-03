@@ -687,8 +687,8 @@ describe('sessionOrchestrator', () => {
       const mocks = createMocks();
 
       const pendingUpdates = new Map<string, PendingSkillUpdate>([
-        ['skill-a', { skillId: 'skill-a', newElo: 1050, attempts: 5, correct: 4, newMasteryPL: 0.5, newConsecutiveWrong: 0, newMasteryLocked: false, newLeitnerBox: 1 as const, newNextReviewDue: null, newConsecutiveCorrectInBox6: 0 }],
-        ['skill-b', { skillId: 'skill-b', newElo: 980, attempts: 3, correct: 1, newMasteryPL: 0.3, newConsecutiveWrong: 1, newMasteryLocked: false, newLeitnerBox: 1 as const, newNextReviewDue: null, newConsecutiveCorrectInBox6: 0 }],
+        ['skill-a', { skillId: 'skill-a', newElo: 1050, attempts: 5, correct: 4, newMasteryPL: 0.5, newConsecutiveWrong: 0, newMasteryLocked: false, newLeitnerBox: 1 as const, newNextReviewDue: null, newConsecutiveCorrectInBox6: 0, newCpaLevel: 'concrete' as const }],
+        ['skill-b', { skillId: 'skill-b', newElo: 980, attempts: 3, correct: 1, newMasteryPL: 0.3, newConsecutiveWrong: 1, newMasteryLocked: false, newLeitnerBox: 1 as const, newNextReviewDue: null, newConsecutiveCorrectInBox6: 0, newCpaLevel: 'concrete' as const }],
       ]);
 
       commitSessionResults(
@@ -928,6 +928,7 @@ describe('sessionOrchestrator', () => {
           newLeitnerBox: 1 as const,
           newNextReviewDue: null,
           newConsecutiveCorrectInBox6: 0,
+          newCpaLevel: 'concrete' as const,
         }],
       ]);
 
@@ -960,6 +961,7 @@ describe('sessionOrchestrator', () => {
           newLeitnerBox: 3 as const,
           newNextReviewDue: reviewDue,
           newConsecutiveCorrectInBox6: 0,
+          newCpaLevel: 'concrete' as const,
         }],
       ]);
 
@@ -992,6 +994,7 @@ describe('sessionOrchestrator', () => {
           newLeitnerBox: 6 as const,
           newNextReviewDue: graduatedReviewDue,
           newConsecutiveCorrectInBox6: 3,
+          newCpaLevel: 'concrete' as const,
         }],
       ]);
 
@@ -1023,6 +1026,7 @@ describe('sessionOrchestrator', () => {
           newLeitnerBox: 2 as const,
           newNextReviewDue: '2026-03-04T00:00:00.000Z',
           newConsecutiveCorrectInBox6: 0,
+          newCpaLevel: 'concrete' as const,
         }],
         ['skill-b', {
           skillId: 'skill-b',
@@ -1035,6 +1039,7 @@ describe('sessionOrchestrator', () => {
           newLeitnerBox: 1 as const,
           newNextReviewDue: null,
           newConsecutiveCorrectInBox6: 0,
+          newCpaLevel: 'concrete' as const,
         }],
       ]);
 
@@ -1051,6 +1056,82 @@ describe('sessionOrchestrator', () => {
       expect(mocks.updateSkillState).toHaveBeenCalledWith('skill-b', expect.objectContaining({
         leitnerBox: 1,
         nextReviewDue: null,
+      }));
+    });
+
+    it('commitSessionResults writes cpaLevel from pending update', () => {
+      const mocks = createMocks();
+
+      const pendingUpdates = new Map<string, PendingSkillUpdate>([
+        ['skill-cpa', {
+          skillId: 'skill-cpa',
+          newElo: 1100,
+          attempts: 15,
+          correct: 12,
+          newMasteryPL: 0.55,
+          newConsecutiveWrong: 0,
+          newMasteryLocked: false,
+          newLeitnerBox: 3 as const,
+          newNextReviewDue: null,
+          newConsecutiveCorrectInBox6: 0,
+          newCpaLevel: 'pictorial' as const,
+        }],
+      ]);
+
+      commitSessionResults(
+        pendingUpdates, 50, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
+      );
+
+      expect(mocks.updateSkillState).toHaveBeenCalledWith('skill-cpa', expect.objectContaining({
+        cpaLevel: 'pictorial',
+      }));
+    });
+
+    it('commitSessionResults handles mixed CPA levels across skills', () => {
+      const mocks = createMocks();
+
+      const pendingUpdates = new Map<string, PendingSkillUpdate>([
+        ['skill-concrete', {
+          skillId: 'skill-concrete',
+          newElo: 950,
+          attempts: 5,
+          correct: 2,
+          newMasteryPL: 0.2,
+          newConsecutiveWrong: 1,
+          newMasteryLocked: false,
+          newLeitnerBox: 1 as const,
+          newNextReviewDue: null,
+          newConsecutiveCorrectInBox6: 0,
+          newCpaLevel: 'concrete' as const,
+        }],
+        ['skill-abstract', {
+          skillId: 'skill-abstract',
+          newElo: 1200,
+          attempts: 40,
+          correct: 38,
+          newMasteryPL: 0.92,
+          newConsecutiveWrong: 0,
+          newMasteryLocked: true,
+          newLeitnerBox: 6 as const,
+          newNextReviewDue: '2026-04-01T00:00:00.000Z',
+          newConsecutiveCorrectInBox6: 2,
+          newCpaLevel: 'abstract' as const,
+        }],
+      ]);
+
+      commitSessionResults(
+        pendingUpdates, 100, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
+      );
+
+      expect(mocks.updateSkillState).toHaveBeenCalledWith('skill-concrete', expect.objectContaining({
+        cpaLevel: 'concrete',
+      }));
+      expect(mocks.updateSkillState).toHaveBeenCalledWith('skill-abstract', expect.objectContaining({
+        cpaLevel: 'abstract',
       }));
     });
   });

@@ -249,6 +249,7 @@ export function commitSessionResults(
       leitnerBox: update.newLeitnerBox,
       nextReviewDue: update.newNextReviewDue,
       consecutiveCorrectInBox6: update.newConsecutiveCorrectInBox6,
+      cpaLevel: update.newCpaLevel,
     });
   }
   addXp(totalXp);
