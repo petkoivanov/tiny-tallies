@@ -493,5 +493,115 @@ describe('sessionOrchestrator', () => {
         masteryLocked: true,
       }));
     });
+
+    it('passes Leitner fields through to updateSkillState', () => {
+      const mocks = createMocks();
+      const reviewDue = '2026-03-10T00:00:00.000Z';
+
+      const pendingUpdates = new Map<string, PendingSkillUpdate>([
+        ['skill-leitner', {
+          skillId: 'skill-leitner',
+          newElo: 1050,
+          attempts: 5,
+          correct: 4,
+          newMasteryPL: 0.6,
+          newConsecutiveWrong: 0,
+          newMasteryLocked: false,
+          newLeitnerBox: 3 as const,
+          newNextReviewDue: reviewDue,
+          newConsecutiveCorrectInBox6: 0,
+        }],
+      ]);
+
+      commitSessionResults(
+        pendingUpdates, 50, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
+      );
+
+      expect(mocks.updateSkillState).toHaveBeenCalledWith('skill-leitner', expect.objectContaining({
+        leitnerBox: 3,
+        nextReviewDue: reviewDue,
+        consecutiveCorrectInBox6: 0,
+      }));
+    });
+
+    it('commits Leitner Box 6 graduation data through to store', () => {
+      const mocks = createMocks();
+      const graduatedReviewDue = '2026-04-02T00:00:00.000Z';
+
+      const pendingUpdates = new Map<string, PendingSkillUpdate>([
+        ['skill-grad', {
+          skillId: 'skill-grad',
+          newElo: 1200,
+          attempts: 20,
+          correct: 18,
+          newMasteryPL: 0.97,
+          newConsecutiveWrong: 0,
+          newMasteryLocked: true,
+          newLeitnerBox: 6 as const,
+          newNextReviewDue: graduatedReviewDue,
+          newConsecutiveCorrectInBox6: 3,
+        }],
+      ]);
+
+      commitSessionResults(
+        pendingUpdates, 50, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
+      );
+
+      expect(mocks.updateSkillState).toHaveBeenCalledWith('skill-grad', expect.objectContaining({
+        leitnerBox: 6,
+        nextReviewDue: graduatedReviewDue,
+        consecutiveCorrectInBox6: 3,
+      }));
+    });
+
+    it('commits multiple skills with different Leitner boxes', () => {
+      const mocks = createMocks();
+
+      const pendingUpdates = new Map<string, PendingSkillUpdate>([
+        ['skill-a', {
+          skillId: 'skill-a',
+          newElo: 1050,
+          attempts: 5,
+          correct: 4,
+          newMasteryPL: 0.3,
+          newConsecutiveWrong: 0,
+          newMasteryLocked: false,
+          newLeitnerBox: 2 as const,
+          newNextReviewDue: '2026-03-04T00:00:00.000Z',
+          newConsecutiveCorrectInBox6: 0,
+        }],
+        ['skill-b', {
+          skillId: 'skill-b',
+          newElo: 900,
+          attempts: 8,
+          correct: 3,
+          newMasteryPL: 0.2,
+          newConsecutiveWrong: 2,
+          newMasteryLocked: false,
+          newLeitnerBox: 1 as const,
+          newNextReviewDue: null,
+          newConsecutiveCorrectInBox6: 0,
+        }],
+      ]);
+
+      commitSessionResults(
+        pendingUpdates, 50, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+        0, null, mocks.setWeeklyStreak,
+      );
+
+      expect(mocks.updateSkillState).toHaveBeenCalledWith('skill-a', expect.objectContaining({
+        leitnerBox: 2,
+        nextReviewDue: '2026-03-04T00:00:00.000Z',
+      }));
+      expect(mocks.updateSkillState).toHaveBeenCalledWith('skill-b', expect.objectContaining({
+        leitnerBox: 1,
+        nextReviewDue: null,
+      }));
+    });
   });
 });
