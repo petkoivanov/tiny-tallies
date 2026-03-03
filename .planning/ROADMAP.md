@@ -168,7 +168,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 12. Leitner Spaced Repetition | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 13. Prerequisite Graph & Outer Fringe | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 14. Smart Session Orchestration | v0.3 | 2/2 | Complete | 2026-03-03 |
-| 15. Foundation -- Store Schema, Services, and Mappings | v0.4 | 0/2 | Not started | - |
+| 15. Foundation -- Store Schema, Services, and Mappings | 1/2 | In Progress|  | - |
 | 16. Shared Drag Primitives | v0.4 | 0/2 | Not started | - |
 | 17. Manipulative Components | v0.4 | 0/3 | Not started | - |
 | 18. CPA Progression and Session Integration | v0.4 | 0/2 | Not started | - |

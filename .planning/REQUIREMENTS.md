@@ -23,7 +23,7 @@ Requirements for v0.4 Virtual Manipulatives milestone. Each maps to roadmap phas
 
 ### CPA Progression
 
-- [ ] **CPA-01**: System tracks CPA stage per skill using BKT mastery (P(L) < 0.40 → concrete, 0.40–0.85 → pictorial, ≥ 0.85 → abstract)
+- [x] **CPA-01**: System tracks CPA stage per skill using BKT mastery (P(L) < 0.40 → concrete, 0.40–0.85 → pictorial, ≥ 0.85 → abstract)
 - [ ] **CPA-02**: User sees interactive manipulatives (concrete mode) when skill mastery is low
 - [ ] **CPA-03**: User sees static visual representations (pictorial mode) when skill mastery is moderate
 - [ ] **CPA-04**: User sees numbers only (abstract mode) when skill mastery is high
@@ -51,9 +51,9 @@ Requirements for v0.4 Virtual Manipulatives milestone. Each maps to roadmap phas
 ### Foundation
 
 - [ ] **FOUND-01**: Store schema supports CPA level per skill (STORE_VERSION 5 with migration)
-- [ ] **FOUND-02**: Babel config updated for Reanimated 4 worklet compilation
+- [x] **FOUND-02**: Babel config updated for Reanimated 4 worklet compilation
 - [ ] **FOUND-03**: Shared drag primitives (DraggableItem, SnapZone) run snap logic on UI thread at 60fps
-- [ ] **FOUND-04**: Manipulative-to-skill mapping table determines which manipulative suits each math concept
+- [x] **FOUND-04**: Manipulative-to-skill mapping table determines which manipulative suits each math concept
 
 ## Future Requirements
 
@@ -89,9 +89,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | FOUND-01 | Phase 15 | Pending |
-| FOUND-02 | Phase 15 | Pending |
-| FOUND-04 | Phase 15 | Pending |
-| CPA-01 | Phase 15 | Pending |
+| FOUND-02 | Phase 15 | Complete |
+| FOUND-04 | Phase 15 | Complete |
+| CPA-01 | Phase 15 | Complete |
 | FOUND-03 | Phase 16 | Pending |
 | MANIP-08 | Phase 16 | Pending |
 | MANIP-09 | Phase 16 | Pending |
