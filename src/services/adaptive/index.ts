@@ -27,7 +27,7 @@ export {
 export {
   isSkillUnlocked,
   getUnlockedSkills,
-  UNLOCK_THRESHOLD,
+  getOuterFringe,
 } from './prerequisiteGating';
 
 // Problem Selector
