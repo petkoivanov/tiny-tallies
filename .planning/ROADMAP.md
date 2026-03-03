@@ -171,7 +171,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 14. Smart Session Orchestration | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 15. Foundation -- Store Schema, Services, and Mappings | v0.4 | 2/2 | Complete | 2026-03-03 |
 | 16. Shared Drag Primitives | v0.4 | 2/2 | Complete | 2026-03-03 |
-| 17. Manipulative Components | 4/4 | Complete   | 2026-03-03 | - |
+| 17. Manipulative Components | 4/4 | Complete    | 2026-03-03 | - |
 | 18. CPA Progression and Session Integration | v0.4 | 0/2 | Not started | - |
 | 19. Sandbox Navigation | v0.4 | 0/1 | Not started | - |
 | 20. Polish | v0.4 | 0/2 | Not started | - |
