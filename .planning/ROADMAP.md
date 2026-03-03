@@ -142,7 +142,10 @@ Plans:
   1. All 14 existing skills have prerequisite dependencies defined in a DAG that matches the curriculum progression (addition chain and subtraction chain with shared roots)
   2. The outer fringe algorithm returns exactly those unmastered skills whose prerequisites are all BKT-mastered (P(L) >= 0.95), providing the pool of "ready to learn" skills
   3. During a session, new skills are only drawn from the outer fringe -- a child never sees a problem for a skill whose prerequisites they have not mastered
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 13-01-PLAN.md — DAG cross-links, BKT-mastery gating refactor, outer fringe algorithm
+- [ ] 13-02-PLAN.md — Integration wiring, test updates, full regression
 
 ### Phase 14: Smart Session Orchestration
 **Goal**: Each practice session delivers a pedagogically structured mix of review, new learning, and stretch challenges tailored to this specific child
@@ -176,5 +179,5 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 | 10. Animated Feedback & Celebrations | v0.2 | 2/2 | Complete | 2026-03-03 |
 | 11. Bayesian Knowledge Tracing | 2/2 | Complete    | 2026-03-03 | - |
 | 12. Leitner Spaced Repetition | 2/2 | Complete    | 2026-03-03 | - |
-| 13. Prerequisite Graph & Outer Fringe | v0.3 | 0/TBD | Not started | - |
+| 13. Prerequisite Graph & Outer Fringe | v0.3 | 0/2 | Not started | - |
 | 14. Smart Session Orchestration | v0.3 | 0/TBD | Not started | - |
