@@ -2,26 +2,13 @@
 gsd_state_version: 1.0
 milestone: v0.1
 milestone_name: milestone
-status: unknown
-last_updated: "2026-03-02T23:16:52.597Z"
-progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 10
-  completed_plans: 10
----
-
----
-gsd_state_version: 1.0
-milestone: v0.1
-milestone_name: milestone
 status: in-progress
-last_updated: "2026-03-02T23:11:45.000Z"
+last_updated: "2026-03-03T00:31:00.000Z"
 progress:
   total_phases: 8
   completed_phases: 5
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 12
+  completed_plans: 11
 ---
 
 # Project State
@@ -31,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-01)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** Phase 5 complete -- Adaptive difficulty service fully built. Ready for Phase 6.
+**Current focus:** Phase 6 in progress -- Session flow and navigation control.
 
 ## Current Position
 
-Phase: 5 of 8 (Adaptive Difficulty)
-Plan: 2 of 2 in current phase (phase complete)
-Status: Phase Complete
-Last activity: 2026-03-02 -- Completed 05-02-PLAN.md (Problem Selector, Skill Selector & XP Calculator)
+Phase: 6 of 8 (Session Flow & Navigation Control)
+Plan: 1 of 2 in current phase (06-01 complete)
+Status: In Progress
+Last activity: 2026-03-03 -- Completed 06-01-PLAN.md (Session Orchestrator & useSession Hook)
 
-Progress: [██████████] 100%
+Progress: [███████████░] 92%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 2.8min
-- Total execution time: 0.47 hours
+- Total plans completed: 11
+- Average duration: 3.0min
+- Total execution time: 0.55 hours
 
 **By Phase:**
 
@@ -58,10 +45,11 @@ Progress: [██████████] 100%
 | 3 - Bug Library & Answer Formats | 2 | 6min | 3min |
 | 4 - State Management & Persistence | 2 | 5min | 2.5min |
 | 5 - Adaptive Difficulty | 2 | 7min | 3.5min |
+| 6 - Session Flow & Nav Control | 1/2 | 7min | 7min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (2min), 04-02 (3min), 05-01 (3min), 05-02 (4min)
-- Trend: Stable
+- Last 5 plans: 04-02 (3min), 05-01 (3min), 05-02 (4min), 06-01 (7min)
+- Trend: Stable (complexity increasing)
 
 *Updated after each plan completion*
 
@@ -112,6 +100,11 @@ Recent decisions affecting current work:
 - [05-02]: XP SCALE_FACTOR=0.01 gives moderate bonus (3 XP per 250 Elo above reference)
 - [05-02]: Frustration override filters templates but still applies gaussian weighted selection
 - [05-02]: Integration tests use real functions (no mocking) to validate module composition
+- [06-01]: Full pre-generation of 15-problem queue (accept minor Elo drift from warmup)
+- [06-01]: Synchronous ref initialization over useEffect for immediate queue availability
+- [06-01]: STRENGTH_BASELINE=50 inverts weakness formula for confidence-building phases
+- [06-01]: Elo/XP accumulate in refs, committed atomically only on completion (not on quit)
+- [06-01]: Frustration guard tracked but not used for queue selection in v0.1 (pre-generated queue)
 
 ### Pending Todos
 
@@ -123,6 +116,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-02
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-session-flow-navigation-control/06-CONTEXT.md
+Last session: 2026-03-03
+Stopped at: Completed 06-01-PLAN.md (Session Orchestrator & useSession Hook)
+Resume file: .planning/phases/06-session-flow-navigation-control/06-01-SUMMARY.md
