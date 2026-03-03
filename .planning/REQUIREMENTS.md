@@ -20,7 +20,7 @@ Requirements for v0.2 UI Polish & Gamification milestone. Each maps to roadmap p
 
 - [x] **GAME-01**: Child earns XP for each correct answer (scaled by problem difficulty)
 - [x] **GAME-02**: XP accumulates toward levels with formula: XP per level = 100 + (level x 20)
-- [ ] **GAME-03**: Level-up triggers celebration animation
+- [x] **GAME-03**: Level-up triggers celebration animation
 - [x] **GAME-04**: Weekly streak tracks consecutive weeks with at least one completed session
 - [x] **GAME-05**: Home screen displays current level, XP progress, and streak count
 
@@ -72,7 +72,7 @@ Deferred to later milestones. Tracked but not in current roadmap.
 | UI-06 | Phase 10 | Pending |
 | GAME-01 | Phase 7 | Complete |
 | GAME-02 | Phase 7 | Complete |
-| GAME-03 | Phase 10 | Pending |
+| GAME-03 | Phase 10 | Complete |
 | GAME-04 | Phase 7 | Complete |
 | GAME-05 | Phase 8 | Complete |
 
