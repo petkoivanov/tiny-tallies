@@ -116,9 +116,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 18-01-PLAN.md — useCpaMode hook, ManipulativePanel animated drawer, CompactAnswerRow, and CpaModeIcon
-- [ ] 18-02-PLAN.md — 6 pictorial SVG diagram renderers and PictorialDiagram dispatcher
-- [ ] 18-03-PLAN.md — CpaSessionContent mode renderer, SessionScreen integration, and Results CPA celebration
+- [x] 18-01-PLAN.md — useCpaMode hook, ManipulativePanel animated drawer, CompactAnswerRow, and CpaModeIcon
+- [x] 18-02-PLAN.md — 6 pictorial SVG diagram renderers and PictorialDiagram dispatcher
+- [x] 18-03-PLAN.md — CpaSessionContent mode renderer, SessionScreen integration, and Results CPA celebration
 
 ### Phase 19: Sandbox Navigation
 **Goal**: Children can freely explore any manipulative without problem constraints, accessible from the home screen
@@ -131,8 +131,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 19-01-PLAN.md — sandboxSlice, navigation route, SandboxScreen with tooltip, and tests
-- [ ] 19-02-PLAN.md — ExploreCard/ExploreGrid components and HomeScreen ScrollView integration
+- [x] 19-01-PLAN.md — sandboxSlice, navigation route, SandboxScreen with tooltip, and tests
+- [x] 19-02-PLAN.md — ExploreCard/ExploreGrid components and HomeScreen ScrollView integration
 
 ### Phase 20: Polish
 **Goal**: Enhanced manipulative interactions with guided hints, undo capability, and extended modes for multiplication and addition-within-20
@@ -143,11 +143,12 @@ Plans:
   2. User can undo the last action on a manipulative (up to 10 steps)
   3. User can switch counters to array grid mode for multiplication concepts
   4. Ten frame auto-spawns a second frame when working on add-within-20 problems
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 20-01: TBD
-- [ ] 20-02: TBD
+- [ ] 20-01-PLAN.md — Shared infrastructure: useActionHistory hook, GuidedHighlight component, guided steps service, and ManipulativeShell extension
+- [ ] 20-02-PLAN.md — Undo wiring across all 6 manipulatives and guided mode session integration
+- [ ] 20-03-PLAN.md — Counter array grid mode and TenFrame double-frame pre-spawning
 
 ## Progress
 
@@ -175,5 +176,5 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 16. Shared Drag Primitives | v0.4 | 2/2 | Complete | 2026-03-03 |
 | 17. Manipulative Components | v0.4 | 4/4 | Complete | 2026-03-03 |
 | 18. CPA Progression and Session Integration | v0.4 | 3/3 | Complete | 2026-03-03 |
-| 19. Sandbox Navigation | 2/2 | Complete    | 2026-03-03 | - |
-| 20. Polish | v0.4 | 0/2 | Not started | - |
+| 19. Sandbox Navigation | v0.4 | 2/2 | Complete | 2026-03-03 |
+| 20. Polish | v0.4 | 0/3 | Not started | - |
