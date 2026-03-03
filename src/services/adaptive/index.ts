@@ -48,3 +48,15 @@ export {
 
 // XP Calculator
 export { calculateXp, BASE_XP } from './xpCalculator';
+
+// BKT Types
+export type { BktParams, BktUpdateResult } from './bktTypes';
+
+// BKT Calculator
+export {
+  updateBktMastery,
+  getBktParams,
+  DEFAULT_BKT_PARAMS,
+  BKT_MASTERY_THRESHOLD,
+  BKT_RETEACH_THRESHOLD,
+} from './bktCalculator';
