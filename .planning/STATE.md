@@ -48,5 +48,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Roadmap created for v0.3 milestone
-Resume file: None
+Stopped at: Phase 11 context gathered
+Resume file: .planning/phases/11-bayesian-knowledge-tracing/11-CONTEXT.md
