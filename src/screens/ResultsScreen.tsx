@@ -7,7 +7,10 @@ import {
   CommonActions,
 } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
+import { Flame, Check } from 'lucide-react-native';
 import { colors, spacing, typography, layout } from '@/theme';
+import { useAppStore } from '@/store/appStore';
+import { calculateLevelFromXp } from '@/services/gamification/levelProgression';
 import type { RootStackParamList } from '@/navigation/types';
 
 type ResultsRouteProp = RouteProp<RootStackParamList, 'Results'>;
@@ -24,12 +27,42 @@ function formatDuration(durationMs: number): string {
   return `${minutes}m ${seconds}s`;
 }
 
+/** Dynamic motivational message based on score percentage */
+function getMotivationalMessage(scorePercent: number): string {
+  if (scorePercent >= 90) return 'Amazing!';
+  if (scorePercent >= 70) return 'Great job!';
+  return 'Nice effort!';
+}
+
+/** Color for the motivational message based on score percentage */
+function getMotivationalColor(scorePercent: number): string {
+  if (scorePercent >= 90) return colors.correct;
+  if (scorePercent >= 70) return colors.primaryLight;
+  return colors.textPrimary;
+}
+
 export default function ResultsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const route = useRoute<ResultsRouteProp>();
 
-  const { score, total, xpEarned, durationMs } = route.params;
+  const { score, total, xpEarned, durationMs, leveledUp, newLevel, streakCount } =
+    route.params;
+
+  const xp = useAppStore((state) => state.xp);
+
+  const { level, xpIntoCurrentLevel, xpNeededForNextLevel } =
+    calculateLevelFromXp(xp);
+
+  const scorePercent = total > 0 ? (score / total) * 100 : 0;
+  const motivationalMessage = getMotivationalMessage(scorePercent);
+  const motivationalColor = getMotivationalColor(scorePercent);
+
+  const progressFraction =
+    xpNeededForNextLevel > 0
+      ? xpIntoCurrentLevel / xpNeededForNextLevel
+      : 0;
+  const progressPercent = Math.min(progressFraction * 100, 100);
 
   const handleDone = () => {
     navigation.dispatch(
@@ -48,11 +81,20 @@ export default function ResultsScreen() {
       ]}
     >
       <View style={styles.content}>
-        {/* Title */}
-        <Text style={styles.title}>Session Complete!</Text>
+        {/* Motivational Message */}
+        <Text
+          style={[styles.motivationalMessage, { color: motivationalColor }]}
+          testID="motivational-message"
+        >
+          {motivationalMessage}
+        </Text>
 
-        {/* Score Card */}
+        {/* Subtitle */}
+        <Text style={styles.subtitle}>Session Complete!</Text>
+
+        {/* Stats Card */}
         <View style={styles.statsCard}>
+          {/* Score Row */}
           <View style={styles.statRow}>
             <Text style={styles.statLabel}>Score</Text>
             <Text style={styles.scoreText}>
@@ -64,6 +106,7 @@ export default function ResultsScreen() {
 
           <View style={styles.divider} />
 
+          {/* XP Earned Row */}
           <View style={styles.statRow}>
             <Text style={styles.statLabel}>XP Earned</Text>
             <Text style={styles.xpText}>+{xpEarned} XP</Text>
@@ -71,6 +114,57 @@ export default function ResultsScreen() {
 
           <View style={styles.divider} />
 
+          {/* XP Progress Bar Row */}
+          <View style={styles.xpBarContainer}>
+            <Text style={styles.xpBarLabel}>
+              {xpIntoCurrentLevel} / {xpNeededForNextLevel} XP to Level{' '}
+              {level + 1}
+            </Text>
+            <View style={styles.xpBarBackground} testID="xp-progress-bar">
+              <View
+                style={[
+                  styles.xpBarFill,
+                  {
+                    width:
+                      xpIntoCurrentLevel > 0
+                        ? `${Math.max(progressPercent, 2)}%`
+                        : '0%',
+                  },
+                ]}
+              />
+            </View>
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* Streak Row */}
+          <View style={styles.streakRow} testID="streak-row">
+            <Flame
+              size={20}
+              color={colors.primaryLight}
+              strokeWidth={2}
+            />
+            <Text style={styles.streakText}>
+              Streak: {streakCount} week{streakCount !== 1 ? 's' : ''}
+            </Text>
+            <Check size={18} color={colors.correct} strokeWidth={3} />
+          </View>
+
+          {/* Level Up Callout (conditional) */}
+          {leveledUp && (
+            <>
+              <View style={styles.divider} />
+              <View style={styles.levelUpRow} testID="level-up-callout">
+                <Text style={styles.levelUpText}>
+                  Level Up! {'\u2192'} Level {newLevel}
+                </Text>
+              </View>
+            </>
+          )}
+
+          <View style={styles.divider} />
+
+          {/* Time Row */}
           <View style={styles.statRow}>
             <Text style={styles.statLabel}>Time</Text>
             <Text style={styles.timeText}>{formatDuration(durationMs)}</Text>
@@ -106,10 +200,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
   },
-  title: {
+  motivationalMessage: {
     fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.xxl,
-    color: colors.textPrimary,
+    fontSize: typography.fontSize.display,
+    textAlign: 'center',
+    marginBottom: spacing.xs,
+  },
+  subtitle: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.lg,
+    color: colors.textSecondary,
     marginBottom: spacing.xl,
     textAlign: 'center',
   },
@@ -147,6 +247,49 @@ const styles = StyleSheet.create({
   xpText: {
     fontFamily: typography.fontFamily.bold,
     fontSize: typography.fontSize.xl,
+    color: colors.primaryLight,
+  },
+  xpBarContainer: {
+    paddingVertical: spacing.md,
+    gap: spacing.sm,
+  },
+  xpBarLabel: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: typography.fontSize.sm,
+    color: colors.textSecondary,
+  },
+  xpBarBackground: {
+    width: '100%',
+    height: 10,
+    borderRadius: layout.borderRadius.round,
+    backgroundColor: colors.surfaceLight,
+    overflow: 'hidden',
+  },
+  xpBarFill: {
+    height: '100%',
+    borderRadius: layout.borderRadius.round,
+    backgroundColor: colors.primary,
+    minWidth: 0,
+  },
+  streakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+  },
+  streakText: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.md,
+    color: colors.textPrimary,
+    flex: 1,
+  },
+  levelUpRow: {
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+  },
+  levelUpText: {
+    fontFamily: typography.fontFamily.bold,
+    fontSize: typography.fontSize.lg,
     color: colors.primaryLight,
   },
   timeText: {
