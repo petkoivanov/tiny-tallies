@@ -2,11 +2,52 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { Flame, Check } from 'lucide-react-native';
 import { colors, spacing, typography, layout } from '@/theme';
+import { useAppStore } from '@/store/appStore';
+import { AVATARS, DEFAULT_AVATAR_ID } from '@/store/constants/avatars';
+import { calculateLevelFromXp } from '@/services/gamification/levelProgression';
+import { isSameISOWeek } from '@/services/gamification/weeklyStreak';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+
+  const childName = useAppStore((state) => state.childName);
+  const avatarId = useAppStore((state) => state.avatarId);
+  const xp = useAppStore((state) => state.xp);
+  const level = useAppStore((state) => state.level);
+  const weeklyStreak = useAppStore((state) => state.weeklyStreak);
+  const lastSessionDate = useAppStore((state) => state.lastSessionDate);
+
+  const { xpIntoCurrentLevel, xpNeededForNextLevel } =
+    calculateLevelFromXp(xp);
+
+  const practicedThisWeek =
+    lastSessionDate !== null &&
+    isSameISOWeek(new Date(lastSessionDate), new Date());
+
+  const progressFraction =
+    xpNeededForNextLevel > 0
+      ? xpIntoCurrentLevel / xpNeededForNextLevel
+      : 0;
+  const progressPercent = Math.min(progressFraction * 100, 100);
+
+  const avatar =
+    AVATARS.find((a) => a.id === (avatarId ?? DEFAULT_AVATAR_ID)) ??
+    AVATARS[0];
+
+  const greeting = childName ? `Hi, ${childName}!` : 'Hi, Mathematician!';
+
+  const streakLabel =
+    weeklyStreak > 0
+      ? `${weeklyStreak} week streak`
+      : 'Start your streak!';
+
+  const streakNudge =
+    !practicedThisWeek && weeklyStreak > 0
+      ? 'Ready to keep your streak going?'
+      : null;
 
   return (
     <View
@@ -15,9 +56,63 @@ export default function HomeScreen() {
         { paddingTop: insets.top, paddingBottom: insets.bottom },
       ]}
     >
-      <View style={styles.content}>
-        <Text style={styles.title}>Tiny Tallies</Text>
-        <Text style={styles.subtitle}>Math made fun!</Text>
+      {/* Profile Section */}
+      <View style={styles.profileSection}>
+        <View style={styles.avatarCircle}>
+          <Text style={styles.avatarEmoji}>{avatar.emoji}</Text>
+        </View>
+        <Text style={styles.greeting}>{greeting}</Text>
+        <Text style={styles.levelBadge}>Level {level}</Text>
+      </View>
+
+      {/* Stats Section */}
+      <View style={styles.statsSection}>
+        {/* XP Progress Bar */}
+        <View style={styles.xpContainer}>
+          <Text style={styles.xpText}>
+            {xpIntoCurrentLevel} / {xpNeededForNextLevel} XP
+          </Text>
+          <View style={styles.xpBarBackground}>
+            <View
+              style={[
+                styles.xpBarFill,
+                {
+                  width:
+                    xpIntoCurrentLevel > 0
+                      ? `${Math.max(progressPercent, 2)}%`
+                      : '0%',
+                },
+              ]}
+            />
+          </View>
+        </View>
+
+        {/* Streak Display */}
+        <View style={styles.streakContainer}>
+          <View style={styles.streakRow}>
+            <Flame
+              size={20}
+              color={colors.primaryLight}
+              strokeWidth={2}
+            />
+            <Text style={styles.streakText}>{streakLabel}</Text>
+            {practicedThisWeek && (
+              <Check size={18} color={colors.correct} strokeWidth={3} />
+            )}
+          </View>
+          {streakNudge !== null && (
+            <Text style={styles.streakNudge}>{streakNudge}</Text>
+          )}
+          {weeklyStreak === 0 && (
+            <Text style={styles.streakNudge}>
+              Complete a session to begin!
+            </Text>
+          )}
+        </View>
+      </View>
+
+      {/* Start Practice Button (fixed at bottom) */}
+      <View style={styles.buttonSection}>
         <Pressable
           onPress={() =>
             navigation.navigate('Session', {
@@ -38,36 +133,97 @@ export default function HomeScreen() {
   );
 }
 
+const AVATAR_SIZE = 80;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
+  profileSection: {
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl,
   },
-  title: {
+  avatarCircle: {
+    width: AVATAR_SIZE,
+    height: AVATAR_SIZE,
+    borderRadius: layout.borderRadius.round,
+    backgroundColor: colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  avatarEmoji: {
+    fontSize: 40,
+  },
+  greeting: {
     fontFamily: typography.fontFamily.bold,
     fontSize: typography.fontSize.display,
     color: colors.textPrimary,
-    marginBottom: spacing.sm,
+    textAlign: 'center',
+    marginBottom: spacing.xs,
   },
-  subtitle: {
+  levelBadge: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.xl,
+    color: colors.primaryLight,
+    marginBottom: spacing.xl,
+  },
+  statsSection: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
+    gap: spacing.xl,
+  },
+  xpContainer: {
+    gap: spacing.sm,
+  },
+  xpText: {
     fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.lg,
+    fontSize: typography.fontSize.md,
     color: colors.textSecondary,
-    marginBottom: spacing.xxl,
+  },
+  xpBarBackground: {
+    width: '100%',
+    height: 12,
+    borderRadius: layout.borderRadius.round,
+    backgroundColor: colors.surface,
+    overflow: 'hidden',
+  },
+  xpBarFill: {
+    height: '100%',
+    borderRadius: layout.borderRadius.round,
+    backgroundColor: colors.primary,
+    minWidth: 0,
+  },
+  streakContainer: {
+    gap: spacing.xs,
+  },
+  streakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  streakText: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.lg,
+    color: colors.textPrimary,
+  },
+  streakNudge: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: typography.fontSize.sm,
+    color: colors.textSecondary,
+    marginLeft: 28,
+  },
+  buttonSection: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
+    paddingTop: spacing.md,
   },
   button: {
     backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xl,
+    minHeight: 56,
     borderRadius: layout.borderRadius.lg,
-    minHeight: layout.minTouchTarget,
-    minWidth: 200,
     justifyContent: 'center',
     alignItems: 'center',
   },
