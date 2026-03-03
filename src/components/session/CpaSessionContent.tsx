@@ -16,13 +16,14 @@ import {
 import { ManipulativePanel } from './ManipulativePanel';
 import { CompactAnswerRow } from './CompactAnswerRow';
 import { PictorialDiagram } from './pictorial/PictorialDiagram';
+import { getNextGuidedStep } from '@/services/cpa';
 import type { ManipulativeType } from '@/services/cpa/cpaTypes';
 import type { Problem } from '@/services/mathEngine/types';
 
 /** Map ManipulativeType to its React component */
 const MANIPULATIVE_COMPONENTS: Record<
   ManipulativeType,
-  React.ComponentType<{ testID?: string }>
+  React.ComponentType<{ testID?: string; guidedTargetId?: string | null }>
 > = {
   counters: Counters,
   ten_frame: TenFrame,
@@ -98,11 +99,32 @@ export function CpaSessionContent({
   // Tracks whether "Need help?" was activated in pictorial mode
   const [needHelpActive, setNeedHelpActive] = useState(false);
 
+  // Guided mode state -- active only in concrete CPA mode
+  const [guidedTargetId, setGuidedTargetId] = useState<string | null>(null);
+  const [guidedHintText, setGuidedHintText] = useState<string | null>(null);
+
   // Reset panel state when problem advances or stage changes
   useEffect(() => {
     setPanelExpanded(stage === 'concrete');
     setNeedHelpActive(false);
   }, [currentIndex, stage]);
+
+  // Compute guided step for concrete mode
+  useEffect(() => {
+    if (stage === 'concrete' && manipulativeType) {
+      const step = getNextGuidedStep(
+        problem.operation,
+        manipulativeType,
+        problem.operands,
+        0, // Initial count -- manipulative starts fresh each problem
+      );
+      setGuidedTargetId(step?.targetId ?? null);
+      setGuidedHintText(step?.hintText ?? null);
+    } else {
+      setGuidedTargetId(null);
+      setGuidedHintText(null);
+    }
+  }, [stage, manipulativeType, problem, currentIndex]);
 
   const showPanel = stage === 'concrete' || needHelpActive;
   const isExpanded = panelExpanded;
@@ -123,15 +145,29 @@ export function CpaSessionContent({
   // Render the manipulative component inside the panel
   const renderManipulative = () => {
     if (!manipulativeType) return null;
+    const targetId = stage === 'concrete' ? guidedTargetId : null;
 
     // TenFrame: pass initialFrames=2 when answer > 10 (double ten frame for make-a-ten strategies)
     if (manipulativeType === 'ten_frame') {
       const frames = problem.correctAnswer > 10 ? 2 : 1;
-      return <TenFrame key={`manip-${currentIndex}`} initialFrames={frames} testID="session-manipulative" />;
+      return (
+        <TenFrame
+          key={`manip-${currentIndex}`}
+          initialFrames={frames}
+          guidedTargetId={targetId}
+          testID="session-manipulative"
+        />
+      );
     }
 
     const Component = MANIPULATIVE_COMPONENTS[manipulativeType];
-    return <Component key={`manip-${currentIndex}`} testID="session-manipulative" />;
+    return (
+      <Component
+        key={`manip-${currentIndex}`}
+        guidedTargetId={targetId}
+        testID="session-manipulative"
+      />
+    );
   };
 
   // Render answer buttons: compact row when panel expanded, standard 2x2 grid otherwise
@@ -222,6 +258,13 @@ export function CpaSessionContent({
 
       {/* Answer Buttons */}
       {renderAnswers()}
+
+      {/* Guided hint text (concrete mode only, supplementary to glow) */}
+      {guidedHintText && stage === 'concrete' && (
+        <View style={styles.guidedHint}>
+          <Text style={styles.guidedHintText}>{guidedHintText}</Text>
+        </View>
+      )}
 
       {/* Manipulative Panel (concrete mode or "Need help?" in pictorial) */}
       {showPanel && manipulativeType && (
@@ -342,5 +385,14 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.md,
     color: colors.primaryLight,
     textDecorationLine: 'underline',
+  },
+  guidedHint: {
+    marginBottom: spacing.sm,
+    alignItems: 'center',
+  },
+  guidedHintText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.primaryLight,
+    fontFamily: typography.fontFamily.medium,
   },
 });
