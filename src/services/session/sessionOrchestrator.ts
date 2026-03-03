@@ -1,12 +1,13 @@
 import type { SkillState } from '../../store/slices/skillStatesSlice';
 import type { SeededRng } from '../mathEngine/seededRng';
-import type { PendingSkillUpdate, SessionConfig, SessionPhase, SessionProblem } from './sessionTypes';
+import type { PendingSkillUpdate, SessionConfig, SessionFeedback, SessionPhase, SessionProblem } from './sessionTypes';
 import { DEFAULT_SESSION_CONFIG } from './sessionTypes';
 import { selectSkill } from '../adaptive/skillSelector';
 import { selectTemplateForSkill } from '../adaptive/problemSelector';
 import { getUnlockedSkills } from '../adaptive/prerequisiteGating';
 import { getOrCreateSkillState } from '../../store/helpers/skillStateHelpers';
 import { generateProblem, formatAsMultipleChoice, createRng, getTemplatesBySkill } from '../mathEngine';
+import { detectLevelUp } from '../gamification';
 
 /**
  * Baseline floor weight added to all skills in strength-weighted selection,
@@ -155,23 +156,33 @@ export function generateSessionQueue(
 }
 
 /**
- * Commits accumulated session results to the store.
+ * Commits accumulated session results to the store and returns structured feedback.
  * Called only on successful session completion (not on quit).
  *
  * Iterates pending Elo updates and applies them via updateSkillState,
- * then adds total XP via addXp.
+ * adds total XP via addXp, detects level-ups, updates level if needed,
+ * and records the session date.
  *
- * @param pendingUpdates  - Map of skillId -> accumulated Elo/attempt/correct updates
- * @param totalXp         - Total XP earned during the session
- * @param updateSkillState - Store action to update a single skill's state
- * @param addXp           - Store action to add XP to gamification state
+ * @param pendingUpdates    - Map of skillId -> accumulated Elo/attempt/correct updates
+ * @param totalXp           - Total XP earned during the session
+ * @param updateSkillState  - Store action to update a single skill's state
+ * @param addXp             - Store action to add XP to gamification state
+ * @param currentTotalXp    - Total XP before this session
+ * @param currentLevel      - Current level before this session
+ * @param setLevel          - Store action to set the player's level
+ * @param setLastSessionDate - Store action to record when the session happened
+ * @returns SessionFeedback with XP earned, level info, and level-up detection
  */
 export function commitSessionResults(
   pendingUpdates: Map<string, PendingSkillUpdate>,
   totalXp: number,
   updateSkillState: (skillId: string, update: Partial<SkillState>) => void,
   addXp: (amount: number) => void,
-): void {
+  currentTotalXp: number,
+  currentLevel: number,
+  setLevel: (level: number) => void,
+  setLastSessionDate: (date: string) => void,
+): SessionFeedback {
   for (const [skillId, update] of pendingUpdates) {
     updateSkillState(skillId, {
       eloRating: update.newElo,
@@ -181,4 +192,21 @@ export function commitSessionResults(
     });
   }
   addXp(totalXp);
+
+  const newTotalXp = currentTotalXp + totalXp;
+  const levelResult = detectLevelUp(currentTotalXp, newTotalXp);
+
+  if (levelResult.leveledUp) {
+    setLevel(levelResult.newLevel);
+  }
+
+  setLastSessionDate(new Date().toISOString());
+
+  return {
+    xpEarned: totalXp,
+    newLevel: levelResult.newLevel,
+    previousLevel: levelResult.previousLevel,
+    leveledUp: levelResult.leveledUp,
+    levelsGained: levelResult.levelsGained,
+  };
 }

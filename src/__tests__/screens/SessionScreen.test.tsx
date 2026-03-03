@@ -247,6 +247,7 @@ describe('SessionScreen', () => {
         xpEarned: 150,
         durationMs: 120000,
         pendingUpdates: new Map(),
+        feedback: null,
       },
     };
 

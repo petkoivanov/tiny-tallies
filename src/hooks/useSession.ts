@@ -18,6 +18,7 @@ import type {
   SessionPhase,
   SessionProblem,
   SessionResult,
+  SessionFeedback,
   PendingSkillUpdate,
 } from '../services/session';
 import { getOrCreateSkillState } from '../store/helpers/skillStateHelpers';
@@ -79,6 +80,10 @@ export function useSession(): UseSessionReturn {
   const recordAnswer = useAppStore((s) => s.recordAnswer);
   const updateSkillState = useAppStore((s) => s.updateSkillState);
   const addXp = useAppStore((s) => s.addXp);
+  const xp = useAppStore((s) => s.xp);
+  const level = useAppStore((s) => s.level);
+  const setLevel = useAppStore((s) => s.setLevel);
+  const setLastSessionDate = useAppStore((s) => s.setLastSessionDate);
 
   // Synchronous initialization: generate queue on first render, not in useEffect.
   // This ensures currentProblem is available immediately.
@@ -195,11 +200,15 @@ export function useSession(): UseSessionReturn {
         if (nextIndex >= totalProblems) {
           // Session complete -- commit results
           setIsComplete(true);
-          commitSessionResults(
+          const feedback = commitSessionResults(
             pendingUpdatesRef.current,
             totalXpEarnedRef.current,
             updateSkillState,
             addXp,
+            xp,
+            level,
+            setLevel,
+            setLastSessionDate,
           );
           endSession();
 
@@ -210,6 +219,7 @@ export function useSession(): UseSessionReturn {
             xpEarned: totalXpEarnedRef.current,
             durationMs,
             pendingUpdates: new Map(pendingUpdatesRef.current),
+            feedback,
           });
         } else {
           setCurrentIndex(nextIndex);
@@ -225,6 +235,10 @@ export function useSession(): UseSessionReturn {
       recordAnswer,
       updateSkillState,
       addXp,
+      xp,
+      level,
+      setLevel,
+      setLastSessionDate,
       endSession,
     ],
   );

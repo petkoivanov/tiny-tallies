@@ -35,6 +35,16 @@ export interface PendingSkillUpdate {
   correct: number;
 }
 
+/** Structured feedback returned from commitSessionResults for UI consumption */
+export interface SessionFeedback {
+  xpEarned: number;
+  newLevel: number;
+  previousLevel: number;
+  leveledUp: boolean;
+  levelsGained: number;
+  // Streak fields will be added by Plan 02
+}
+
 /** Final result of a completed session */
 export interface SessionResult {
   score: number;
@@ -42,4 +52,5 @@ export interface SessionResult {
   xpEarned: number;
   durationMs: number;
   pendingUpdates: Map<string, PendingSkillUpdate>;
+  feedback: SessionFeedback | null;
 }

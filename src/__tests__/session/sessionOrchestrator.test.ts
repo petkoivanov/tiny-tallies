@@ -222,24 +222,33 @@ describe('sessionOrchestrator', () => {
   });
 
   describe('commitSessionResults', () => {
+    const createMocks = () => ({
+      updateSkillState: jest.fn(),
+      addXp: jest.fn(),
+      setLevel: jest.fn(),
+      setLastSessionDate: jest.fn(),
+    });
+
     it('calls updateSkillState for each pending update', () => {
-      const updateSkillState = jest.fn();
-      const addXp = jest.fn();
+      const mocks = createMocks();
 
       const pendingUpdates = new Map<string, PendingSkillUpdate>([
         ['skill-a', { skillId: 'skill-a', newElo: 1050, attempts: 5, correct: 4 }],
         ['skill-b', { skillId: 'skill-b', newElo: 980, attempts: 3, correct: 1 }],
       ]);
 
-      commitSessionResults(pendingUpdates, 120, updateSkillState, addXp);
+      commitSessionResults(
+        pendingUpdates, 120, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+      );
 
-      expect(updateSkillState).toHaveBeenCalledTimes(2);
-      expect(updateSkillState).toHaveBeenCalledWith('skill-a', expect.objectContaining({
+      expect(mocks.updateSkillState).toHaveBeenCalledTimes(2);
+      expect(mocks.updateSkillState).toHaveBeenCalledWith('skill-a', expect.objectContaining({
         eloRating: 1050,
         attempts: 5,
         correct: 4,
       }));
-      expect(updateSkillState).toHaveBeenCalledWith('skill-b', expect.objectContaining({
+      expect(mocks.updateSkillState).toHaveBeenCalledWith('skill-b', expect.objectContaining({
         eloRating: 980,
         attempts: 3,
         correct: 1,
@@ -247,24 +256,103 @@ describe('sessionOrchestrator', () => {
     });
 
     it('calls addXp with total XP', () => {
-      const updateSkillState = jest.fn();
-      const addXp = jest.fn();
+      const mocks = createMocks();
 
       const pendingUpdates = new Map<string, PendingSkillUpdate>();
-      commitSessionResults(pendingUpdates, 150, updateSkillState, addXp);
+      commitSessionResults(
+        pendingUpdates, 150, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+      );
 
-      expect(addXp).toHaveBeenCalledTimes(1);
-      expect(addXp).toHaveBeenCalledWith(150);
+      expect(mocks.addXp).toHaveBeenCalledTimes(1);
+      expect(mocks.addXp).toHaveBeenCalledWith(150);
     });
 
     it('handles empty pending updates', () => {
-      const updateSkillState = jest.fn();
-      const addXp = jest.fn();
+      const mocks = createMocks();
 
-      commitSessionResults(new Map(), 0, updateSkillState, addXp);
+      commitSessionResults(
+        new Map(), 0, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+      );
 
-      expect(updateSkillState).not.toHaveBeenCalled();
-      expect(addXp).toHaveBeenCalledWith(0);
+      expect(mocks.updateSkillState).not.toHaveBeenCalled();
+      expect(mocks.addXp).toHaveBeenCalledWith(0);
+    });
+
+    it('returns a SessionFeedback object', () => {
+      const mocks = createMocks();
+
+      const feedback = commitSessionResults(
+        new Map(), 50, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+      );
+
+      expect(feedback).toEqual(expect.objectContaining({
+        xpEarned: 50,
+        previousLevel: 1,
+        newLevel: 1,
+        leveledUp: false,
+        levelsGained: 0,
+      }));
+    });
+
+    it('calls setLevel when enough XP for level-up', () => {
+      const mocks = createMocks();
+
+      // Level 2 requires 120 cumulative XP. Start at 100, earn 50 -> 150 total (level 2)
+      const feedback = commitSessionResults(
+        new Map(), 50, mocks.updateSkillState, mocks.addXp,
+        100, 1, mocks.setLevel, mocks.setLastSessionDate,
+      );
+
+      expect(feedback.leveledUp).toBe(true);
+      expect(feedback.previousLevel).toBe(1);
+      expect(feedback.newLevel).toBe(2);
+      expect(feedback.levelsGained).toBe(1);
+      expect(mocks.setLevel).toHaveBeenCalledWith(2);
+    });
+
+    it('does not call setLevel when no level-up occurs', () => {
+      const mocks = createMocks();
+
+      // Stay within level 1 (0 + 50 = 50, still level 1)
+      const feedback = commitSessionResults(
+        new Map(), 50, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+      );
+
+      expect(feedback.leveledUp).toBe(false);
+      expect(mocks.setLevel).not.toHaveBeenCalled();
+    });
+
+    it('calls setLastSessionDate with an ISO date string', () => {
+      const mocks = createMocks();
+
+      commitSessionResults(
+        new Map(), 50, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+      );
+
+      expect(mocks.setLastSessionDate).toHaveBeenCalledTimes(1);
+      const dateArg = mocks.setLastSessionDate.mock.calls[0][0];
+      // Verify it's a valid ISO date string
+      expect(new Date(dateArg).toISOString()).toBe(dateArg);
+    });
+
+    it('detects multi-level jumps', () => {
+      const mocks = createMocks();
+
+      // Level 3 requires 260 cumulative XP. Start at 0, earn 300 -> level 3
+      const feedback = commitSessionResults(
+        new Map(), 300, mocks.updateSkillState, mocks.addXp,
+        0, 1, mocks.setLevel, mocks.setLastSessionDate,
+      );
+
+      expect(feedback.leveledUp).toBe(true);
+      expect(feedback.newLevel).toBe(3);
+      expect(feedback.levelsGained).toBe(2);
+      expect(mocks.setLevel).toHaveBeenCalledWith(3);
     });
   });
 });

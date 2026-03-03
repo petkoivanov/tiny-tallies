@@ -5,6 +5,7 @@ export type {
   SessionProblem,
   PendingSkillUpdate,
   SessionResult,
+  SessionFeedback,
 } from './sessionTypes';
 
 export { DEFAULT_SESSION_CONFIG } from './sessionTypes';
