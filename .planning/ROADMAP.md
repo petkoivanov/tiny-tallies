@@ -21,7 +21,7 @@
 
 ### v0.2 UI Polish & Gamification
 
-- [ ] **Phase 7: Gamification Engine** - XP scaling, level progression formula, and weekly streak tracking in store/services
+- [x] **Phase 7: Gamification Engine** (2/2 plans) — completed 2026-03-02
 - [ ] **Phase 8: Home Screen Dashboard** - Child profile display with level, XP progress bar, streak counter, and Start Practice button
 - [ ] **Phase 9: Session & Results UI Polish** - Problem display layout, answer option styling, results screen refinement, 48dp touch targets, and dark theme consistency
 - [ ] **Phase 10: Animated Feedback & Celebrations** - Reanimated-driven correct/incorrect answer animations and level-up celebration
@@ -97,7 +97,7 @@ Plans:
 | 4. State Management & Persistence | v0.1 | 2/2 | Complete | 2026-03-02 |
 | 5. Adaptive Difficulty | v0.1 | 2/2 | Complete | 2026-03-02 |
 | 6. Session Flow & Navigation Control | v0.1 | 2/2 | Complete | 2026-03-02 |
-| 7. Gamification Engine | v0.2 | 0/2 | Not started | - |
+| 7. Gamification Engine | v0.2 | 2/2 | Complete | 2026-03-02 |
 | 8. Home Screen Dashboard | v0.2 | 0/1 | Not started | - |
 | 9. Session & Results UI Polish | v0.2 | 0/2 | Not started | - |
 | 10. Animated Feedback & Celebrations | v0.2 | 0/2 | Not started | - |
