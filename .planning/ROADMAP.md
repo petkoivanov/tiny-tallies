@@ -37,11 +37,11 @@
   2. XP accumulates toward the next level using the formula: XP needed = 100 + (level x 20)
   3. When enough XP is earned, the child's level increments automatically
   4. Weekly streak increments when a session is completed in a new calendar week, and resets if a full week is missed
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 07-01: XP scaling and level progression service
-- [ ] 07-02: Weekly streak tracking with date logic
+- [ ] 07-01-PLAN.md — Level progression service and XP-to-level integration into session commit
+- [ ] 07-02-PLAN.md — Weekly streak service and streak integration into session commit
 
 ### Phase 8: Home Screen Dashboard
 **Goal**: Children see their identity and progress the moment they open the app
