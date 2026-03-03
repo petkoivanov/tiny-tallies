@@ -39,6 +39,12 @@ export interface PendingSkillUpdate {
   newConsecutiveWrong: number;
   /** Whether mastery lock is active */
   newMasteryLocked: boolean;
+  /** New Leitner box after session transitions */
+  newLeitnerBox: 1 | 2 | 3 | 4 | 5 | 6;
+  /** ISO date of next scheduled review */
+  newNextReviewDue: string | null;
+  /** Consecutive correct count in Box 6 */
+  newConsecutiveCorrectInBox6: number;
 }
 
 /** Structured feedback returned from commitSessionResults for UI consumption */

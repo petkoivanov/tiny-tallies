@@ -13,8 +13,8 @@ import { getTemplatesBySkill } from '@/services/mathEngine/templates';
 import { getUnlockedSkills } from '@/services/adaptive/prerequisiteGating';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
 
-/** BKT default fields for SkillState test objects */
-const bkt = { masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false } as const;
+/** BKT + Leitner default fields for SkillState test objects */
+const bkt = { masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1 as const, nextReviewDue: null, consecutiveCorrectInBox6: 0 } as const;
 
 describe('sessionOrchestrator', () => {
   describe('getSessionPhase', () => {
@@ -237,8 +237,8 @@ describe('sessionOrchestrator', () => {
       const mocks = createMocks();
 
       const pendingUpdates = new Map<string, PendingSkillUpdate>([
-        ['skill-a', { skillId: 'skill-a', newElo: 1050, attempts: 5, correct: 4, newMasteryPL: 0.5, newConsecutiveWrong: 0, newMasteryLocked: false }],
-        ['skill-b', { skillId: 'skill-b', newElo: 980, attempts: 3, correct: 1, newMasteryPL: 0.3, newConsecutiveWrong: 1, newMasteryLocked: false }],
+        ['skill-a', { skillId: 'skill-a', newElo: 1050, attempts: 5, correct: 4, newMasteryPL: 0.5, newConsecutiveWrong: 0, newMasteryLocked: false, newLeitnerBox: 1 as const, newNextReviewDue: null, newConsecutiveCorrectInBox6: 0 }],
+        ['skill-b', { skillId: 'skill-b', newElo: 980, attempts: 3, correct: 1, newMasteryPL: 0.3, newConsecutiveWrong: 1, newMasteryLocked: false, newLeitnerBox: 1 as const, newNextReviewDue: null, newConsecutiveCorrectInBox6: 0 }],
       ]);
 
       commitSessionResults(
@@ -475,6 +475,9 @@ describe('sessionOrchestrator', () => {
           newMasteryPL: 0.96,
           newConsecutiveWrong: 0,
           newMasteryLocked: true,
+          newLeitnerBox: 1 as const,
+          newNextReviewDue: null,
+          newConsecutiveCorrectInBox6: 0,
         }],
       ]);
 

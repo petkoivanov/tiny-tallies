@@ -1,3 +1,5 @@
+import { mapPLToInitialBox } from '../services/adaptive/leitnerCalculator';
+
 /**
  * Store migration functions for Zustand persist middleware.
  * Each STORE_VERSION bump must have a corresponding migration case.
@@ -38,8 +40,25 @@ export function migrateStore(
     state.skillStates = skillStates;
   }
 
+  if (version < 4) {
+    // v3 -> v4: Add Leitner spaced repetition fields to existing skill states
+    const skillStates = (state.skillStates ?? {}) as Record<
+      string,
+      Record<string, unknown>
+    >;
+    for (const skillId of Object.keys(skillStates)) {
+      const skill = skillStates[skillId];
+      // BKT-informed initial box placement
+      const masteryProbability = (skill.masteryProbability as number) ?? 0.1;
+      skill.leitnerBox ??= mapPLToInitialBox(masteryProbability);
+      skill.nextReviewDue ??= null; // null = immediately due for review
+      skill.consecutiveCorrectInBox6 ??= 0;
+    }
+    state.skillStates = skillStates;
+  }
+
   // Future migrations chain here:
-  // if (version < 4) { ... }
+  // if (version < 5) { ... }
 
   return state;
 }

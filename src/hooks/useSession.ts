@@ -199,6 +199,11 @@ export function useSession(): UseSessionReturn {
         isCorrect,
       );
 
+      // Leitner fields: carry forward current values until session integration (Phase 12-02)
+      const currentLeitnerBox = existing?.newLeitnerBox ?? skillState.leitnerBox;
+      const currentNextReviewDue = existing?.newNextReviewDue ?? skillState.nextReviewDue;
+      const currentConsecutiveCorrectInBox6 = existing?.newConsecutiveCorrectInBox6 ?? skillState.consecutiveCorrectInBox6;
+
       pendingUpdatesRef.current.set(problem.skillId, {
         skillId: problem.skillId,
         newElo: eloResult.newElo,
@@ -207,6 +212,9 @@ export function useSession(): UseSessionReturn {
         newMasteryPL: masteryResult.masteryProbability,
         newConsecutiveWrong: masteryResult.consecutiveWrong,
         newMasteryLocked: masteryResult.masteryLocked,
+        newLeitnerBox: currentLeitnerBox,
+        newNextReviewDue: currentNextReviewDue,
+        newConsecutiveCorrectInBox6: currentConsecutiveCorrectInBox6,
       });
 
       // Calculate XP if correct

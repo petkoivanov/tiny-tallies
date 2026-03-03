@@ -21,6 +21,9 @@ export function getOrCreateSkillState(
       masteryProbability: 0.1,
       consecutiveWrong: 0,
       masteryLocked: false,
+      leitnerBox: 1 as const,
+      nextReviewDue: null,
+      consecutiveCorrectInBox6: 0,
     }
   );
 }

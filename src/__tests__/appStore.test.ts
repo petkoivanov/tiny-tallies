@@ -82,8 +82,8 @@ describe('appStore composition', () => {
     expect(useAppStore.getState().xp).toBe(35);
   });
 
-  it('STORE_VERSION equals 3', () => {
-    expect(STORE_VERSION).toBe(3);
+  it('STORE_VERSION equals 4', () => {
+    expect(STORE_VERSION).toBe(4);
   });
 });
 
@@ -111,7 +111,7 @@ describe('skill state helpers', () => {
   });
 
   it('getOrCreateSkillState returns existing state when skillId exists', () => {
-    const existing = { eloRating: 1200, attempts: 10, correct: 8, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false };
+    const existing = { eloRating: 1200, attempts: 10, correct: 8, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1 as const, nextReviewDue: null, consecutiveCorrectInBox6: 0 };
     const states = { 'add.single': existing };
     const result = getOrCreateSkillState(states, 'add.single');
     expect(result).toEqual(existing);
@@ -119,12 +119,12 @@ describe('skill state helpers', () => {
 
   it('getOrCreateSkillState returns default when skillId not found', () => {
     const result = getOrCreateSkillState({}, 'add.single');
-    expect(result).toEqual({ eloRating: 1000, attempts: 0, correct: 0, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false });
+    expect(result).toEqual({ eloRating: 1000, attempts: 0, correct: 0, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1, nextReviewDue: null, consecutiveCorrectInBox6: 0 });
   });
 
   it('getOrCreateSkillState accepts optional defaultElo parameter', () => {
     const result = getOrCreateSkillState({}, 'add.single', 800);
-    expect(result).toEqual({ eloRating: 800, attempts: 0, correct: 0, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false });
+    expect(result).toEqual({ eloRating: 800, attempts: 0, correct: 0, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1, nextReviewDue: null, consecutiveCorrectInBox6: 0 });
   });
 
   it('isProfileComplete returns false when any field is null', () => {
@@ -194,6 +194,9 @@ describe('enriched slice behaviors', () => {
       masteryProbability: 0.1,
       consecutiveWrong: 0,
       masteryLocked: false,
+      leitnerBox: 1,
+      nextReviewDue: null,
+      consecutiveCorrectInBox6: 0,
     });
   });
 
@@ -214,6 +217,9 @@ describe('enriched slice behaviors', () => {
       masteryProbability: 0.1,
       consecutiveWrong: 0,
       masteryLocked: false,
+      leitnerBox: 1,
+      nextReviewDue: null,
+      consecutiveCorrectInBox6: 0,
     });
   });
 
@@ -372,10 +378,12 @@ describe('store migrations', () => {
     expect(result.lastSessionDate).toBeNull();
   });
 
-  it('migrateStore from version 2 returns state unchanged', () => {
+  it('migrateStore from version 2 applies v3 and v4 migrations', () => {
     const input = { childName: 'Luna', xp: 100, skillStates: {} };
     const result = migrateStore(input, 2);
-    expect(result).toEqual(input);
+    expect(result.childName).toBe('Luna');
+    expect(result.xp).toBe(100);
+    expect(result.skillStates).toEqual({});
   });
 
   it('migrateStore handles null persistedState', () => {

@@ -13,6 +13,12 @@ export type SkillState = {
   consecutiveWrong: number;
   /** Whether this skill has achieved mastery (P(L) >= 0.95). Soft-locked: requires 3+ consecutive wrong to revert. */
   masteryLocked: boolean;
+  /** Leitner box number (1-6). Determines review interval. */
+  leitnerBox: 1 | 2 | 3 | 4 | 5 | 6;
+  /** ISO date string of when this skill is next due for review. null = immediately due. */
+  nextReviewDue: string | null;
+  /** Count of consecutive correct answers while in Box 6. Resets on wrong or box change. */
+  consecutiveCorrectInBox6: number;
 };
 
 export interface SkillStatesSlice {
@@ -37,6 +43,9 @@ export const createSkillStatesSlice: StateCreator<
         masteryProbability: 0.1,
         consecutiveWrong: 0,
         masteryLocked: false,
+        leitnerBox: 1 as const,
+        nextReviewDue: null,
+        consecutiveCorrectInBox6: 0,
       };
       return {
         skillStates: {

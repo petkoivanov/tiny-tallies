@@ -61,7 +61,7 @@ describe('store migrations', () => {
     expect(result.lastSessionDate).toBeNull();
   });
 
-  it('migrateStore from version 2 adds BKT defaults to existing skills', () => {
+  it('migrateStore from version 2 adds BKT and Leitner defaults to existing skills', () => {
     const input = {
       skillStates: {
         'add-single': { eloRating: 1050, attempts: 10, correct: 8, lastPracticed: '2026-03-01' },
@@ -71,7 +71,7 @@ describe('store migrations', () => {
     const result = migrateStore(input, 2);
     const skills = result.skillStates as Record<string, Record<string, unknown>>;
 
-    // BKT defaults added
+    // BKT defaults added (v3)
     expect(skills['add-single'].masteryProbability).toBe(0.1);
     expect(skills['add-single'].consecutiveWrong).toBe(0);
     expect(skills['add-single'].masteryLocked).toBe(false);
@@ -79,6 +79,15 @@ describe('store migrations', () => {
     expect(skills['sub-single'].masteryProbability).toBe(0.1);
     expect(skills['sub-single'].consecutiveWrong).toBe(0);
     expect(skills['sub-single'].masteryLocked).toBe(false);
+
+    // Leitner defaults added (v4) -- P(L)=0.1 -> Box 1
+    expect(skills['add-single'].leitnerBox).toBe(1);
+    expect(skills['add-single'].nextReviewDue).toBeNull();
+    expect(skills['add-single'].consecutiveCorrectInBox6).toBe(0);
+
+    expect(skills['sub-single'].leitnerBox).toBe(1);
+    expect(skills['sub-single'].nextReviewDue).toBeNull();
+    expect(skills['sub-single'].consecutiveCorrectInBox6).toBe(0);
 
     // Existing values preserved
     expect(skills['add-single'].eloRating).toBe(1050);
@@ -97,7 +106,7 @@ describe('store migrations', () => {
     expect(result.skillStates).toEqual({});
   });
 
-  it('migrateStore from version 3 returns state unchanged', () => {
+  it('migrateStore from version 3 adds Leitner defaults with BKT-informed placement', () => {
     const input = {
       childName: 'Luna',
       skillStates: {
@@ -108,10 +117,35 @@ describe('store migrations', () => {
       },
     };
     const result = migrateStore(input, 3);
+    const skills = result.skillStates as Record<string, Record<string, unknown>>;
+
+    // P(L)=0.85 -> Box 5 (0.80 <= 0.85 < 0.95)
+    expect(skills['add-single'].leitnerBox).toBe(5);
+    expect(skills['add-single'].nextReviewDue).toBeNull();
+    expect(skills['add-single'].consecutiveCorrectInBox6).toBe(0);
+
+    // Existing values preserved
+    expect(skills['add-single'].eloRating).toBe(1050);
+    expect(skills['add-single'].masteryProbability).toBe(0.85);
+    expect(result.childName).toBe('Luna');
+  });
+
+  it('migrateStore from version 4 returns state unchanged', () => {
+    const input = {
+      childName: 'Luna',
+      skillStates: {
+        'add-single': {
+          eloRating: 1050, attempts: 10, correct: 8,
+          masteryProbability: 0.85, consecutiveWrong: 0, masteryLocked: false,
+          leitnerBox: 5, nextReviewDue: null, consecutiveCorrectInBox6: 0,
+        },
+      },
+    };
+    const result = migrateStore(input, 4);
     expect(result).toEqual(input);
   });
 
-  it('migrateStore chains v1->v3 correctly', () => {
+  it('migrateStore chains v1->v4 correctly', () => {
     const input = {
       childName: 'Max',
       skillStates: {
@@ -130,5 +164,10 @@ describe('store migrations', () => {
     expect(skills['add-double'].consecutiveWrong).toBe(0);
     expect(skills['add-double'].masteryLocked).toBe(false);
     expect(skills['add-double'].eloRating).toBe(1100);
+
+    // v3->v4 Leitner defaults (P(L)=0.1 -> Box 1)
+    expect(skills['add-double'].leitnerBox).toBe(1);
+    expect(skills['add-double'].nextReviewDue).toBeNull();
+    expect(skills['add-double'].consecutiveCorrectInBox6).toBe(0);
   });
 });
