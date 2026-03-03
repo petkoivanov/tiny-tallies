@@ -45,7 +45,7 @@
 
 **Milestone Goal:** Deliver six interactive virtual manipulatives with CPA progression, session-embedded visual aids, and standalone sandbox exploration -- making abstract math concepts tangible through direct manipulation at 60fps.
 
-- [ ] **Phase 15: Foundation -- Store Schema, Services, and Mappings** - CPA tracking per skill, manipulative-to-skill mapping, and babel config for Reanimated 4
+- [x] **Phase 15: Foundation -- Store Schema, Services, and Mappings** - CPA tracking per skill, manipulative-to-skill mapping, and babel config for Reanimated 4 (completed 2026-03-03)
 - [ ] **Phase 16: Shared Drag Primitives** - Reusable DraggableItem, SnapZone, and interaction patterns that all manipulatives build on
 - [ ] **Phase 17: Manipulative Components** - All 6 manipulatives as standalone interactive components (base-ten blocks, number line, ten frames, counters, fraction strips, bar models)
 - [ ] **Phase 18: CPA Progression and Session Integration** - BKT-driven concrete/pictorial/abstract rendering and session-embedded manipulative overlay
@@ -168,7 +168,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 12. Leitner Spaced Repetition | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 13. Prerequisite Graph & Outer Fringe | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 14. Smart Session Orchestration | v0.3 | 2/2 | Complete | 2026-03-03 |
-| 15. Foundation -- Store Schema, Services, and Mappings | 1/2 | In Progress|  | - |
+| 15. Foundation -- Store Schema, Services, and Mappings | 2/2 | Complete   | 2026-03-03 | - |
 | 16. Shared Drag Primitives | v0.4 | 0/2 | Not started | - |
 | 17. Manipulative Components | v0.4 | 0/3 | Not started | - |
 | 18. CPA Progression and Session Integration | v0.4 | 0/2 | Not started | - |

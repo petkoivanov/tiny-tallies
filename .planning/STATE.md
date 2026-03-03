@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.4
 milestone_name: Virtual Manipulatives
 status: executing
-stopped_at: Completed 15-01-PLAN.md
-last_updated: "2026-03-03T17:22:00Z"
-last_activity: 2026-03-03 -- Completed Plan 15-01 (CPA service module)
+stopped_at: Completed 15-02-PLAN.md
+last_updated: "2026-03-03T17:31:00Z"
+last_activity: 2026-03-03 -- Completed Plan 15-02 (Store schema + session CPA integration)
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 12
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -24,12 +24,12 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 
 ## Current Position
 
-Phase: 15 of 20 (Foundation -- Store Schema, Services, and Mappings)
-Plan: 1 of 2 in current phase
-Status: Executing
-Last activity: 2026-03-03 -- Completed Plan 15-01 (CPA service module)
+Phase: 15 of 20 (Foundation -- Store Schema, Services, and Mappings) -- COMPLETE
+Plan: 2 of 2 in current phase
+Status: Phase Complete
+Last activity: 2026-03-03 -- Completed Plan 15-02 (Store schema + session CPA integration)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -47,12 +47,12 @@ Full decision log in PROJECT.md Key Decisions table.
 
 Key context carried from v0.3:
 - SkillState type: { eloRating, attempts, correct, lastPracticed?, masteryProbability, consecutiveWrong, masteryLocked, leitnerBox, nextReviewDue, consecutiveCorrectInBox6 }
-- STORE_VERSION = 4 (migrations: v1->v2->v3->v4)
+- STORE_VERSION = 5 (migrations: v1->v2->v3->v4->v5, v5 adds cpaLevel per skill)
 - BKT masteryLocked for unlocking; Elo threshold removed in Phase 13
 - Session orchestrator: 15 problems (3+9+3), 60/30/10 review/new/challenge mix
 - commitSessionResults handles Elo + BKT + Leitner updates atomically
 - 14 skills across addition/subtraction with cross-operation prerequisite DAG
-- 557 tests passing, TypeScript clean
+- 589 tests passing, TypeScript clean
 
 v0.4 roadmap decisions:
 - CPA thresholds: P(L) < 0.40 = concrete, 0.40-0.85 = pictorial, >= 0.85 = abstract
@@ -73,7 +73,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T17:22:00Z
-Stopped at: Completed 15-01-PLAN.md
-Resume file: .planning/phases/15-foundation-store-schema-services-and-mappings/15-02-PLAN.md
-Resume command: /gsd:execute-phase 15
+Last session: 2026-03-03T17:31:00Z
+Stopped at: Completed 15-02-PLAN.md (Phase 15 complete)
+Resume file: .planning/phases/16-manipulative-components/16-01-PLAN.md
+Resume command: /gsd:execute-phase 16
