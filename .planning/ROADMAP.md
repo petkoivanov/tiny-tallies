@@ -169,7 +169,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 13. Prerequisite Graph & Outer Fringe | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 14. Smart Session Orchestration | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 15. Foundation -- Store Schema, Services, and Mappings | v0.4 | 2/2 | Complete | 2026-03-03 |
-| 16. Shared Drag Primitives | 2/2 | Complete   | 2026-03-03 | - |
+| 16. Shared Drag Primitives | 2/2 | Complete    | 2026-03-03 | - |
 | 17. Manipulative Components | v0.4 | 0/3 | Not started | - |
 | 18. CPA Progression and Session Integration | v0.4 | 0/2 | Not started | - |
 | 19. Sandbox Navigation | v0.4 | 0/1 | Not started | - |
