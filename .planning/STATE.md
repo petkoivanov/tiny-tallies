@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v0.4
 milestone_name: Virtual Manipulatives
 status: executing
-stopped_at: Completed 15-02-PLAN.md (Phase 15 complete)
-last_updated: "2026-03-03T17:30:10.820Z"
+stopped_at: Phase 16 context gathered
+last_updated: "2026-03-03T17:31:48.026Z"
 last_activity: 2026-03-03 -- Completed Plan 15-02 (Store schema + session CPA integration)
 progress:
   total_phases: 6
@@ -88,7 +88,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T17:31:00Z
-Stopped at: Completed 15-02-PLAN.md (Phase 15 complete)
-Resume file: .planning/phases/16-manipulative-components/16-01-PLAN.md
+Last session: 2026-03-03T17:31:48.024Z
+Stopped at: Phase 16 context gathered
+Resume file: .planning/phases/16-shared-drag-primitives/16-CONTEXT.md
 Resume command: /gsd:execute-phase 16
