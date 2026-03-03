@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v0.4
 milestone_name: Virtual Manipulatives
 status: executing
-stopped_at: Completed 17-03-PLAN.md
-last_updated: "2026-03-03T19:50:53.685Z"
+stopped_at: Completed 17-01-PLAN.md
+last_updated: "2026-03-03T19:51:10.685Z"
 last_activity: 2026-03-03 -- Completed Plan 16-02 (Shared drag primitives components)
 progress:
   total_phases: 6
@@ -103,6 +103,7 @@ v0.4 roadmap decisions:
 - [Phase 17]: Auto-group uses single-timer pattern (ones priority) to prevent race conditions
 - [Phase 17]: BarModel sub-components extracted into BarModelParts.tsx to keep main file under 500 lines
 - [Phase 17]: NumberPicker uses FlatList with padding sentinel items for centered wheel selection
+- [Phase 17]: ManipulativeShell wrapper provides consistent reset+counter+workspace layout for all 6 manipulatives
 
 ### Pending Todos
 
@@ -116,7 +117,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T19:50:53.683Z
-Stopped at: Completed 17-03-PLAN.md
+Last session: 2026-03-03T19:51:06.290Z
+Stopped at: Completed 17-01-PLAN.md
 Resume file: None
 Resume command: /gsd:execute-phase 17
