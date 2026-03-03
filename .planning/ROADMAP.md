@@ -118,7 +118,10 @@
   2. A 6-year-old child's BKT parameters differ from an 8-year-old's: younger children have higher guess/slip rates and lower learn rates, reflecting age-appropriate cognitive differences
   3. When a skill's P(L) reaches 0.95 or above, it is visibly marked as mastered in the store and excluded from active practice rotation
   4. When a skill's P(L) drops below 0.40, it is flagged as needing re-teaching and receives priority in problem selection
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 11-01-PLAN.md — BKT computation service, store schema extension, migration
+- [ ] 11-02-PLAN.md — BKT integration into session flow with soft mastery lock
 
 ### Phase 12: Leitner Spaced Repetition
 **Goal**: The app schedules skill reviews at optimal intervals so children retain what they have learned without wasting time on already-mastered material
@@ -171,7 +174,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 | 8. Home Screen Dashboard | v0.2 | 1/1 | Complete | 2026-03-03 |
 | 9. Session & Results UI Polish | v0.2 | 2/2 | Complete | 2026-03-03 |
 | 10. Animated Feedback & Celebrations | v0.2 | 2/2 | Complete | 2026-03-03 |
-| 11. Bayesian Knowledge Tracing | v0.3 | 0/TBD | Not started | - |
+| 11. Bayesian Knowledge Tracing | v0.3 | 0/2 | Planned | - |
 | 12. Leitner Spaced Repetition | v0.3 | 0/TBD | Not started | - |
 | 13. Prerequisite Graph & Outer Fringe | v0.3 | 0/TBD | Not started | - |
 | 14. Smart Session Orchestration | v0.3 | 0/TBD | Not started | - |
