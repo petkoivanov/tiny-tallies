@@ -21,3 +21,7 @@ export {
 } from './animationConfig';
 
 export { triggerSnapHaptic, triggerGroupHaptic } from './haptics';
+
+export { DraggableItem } from './DraggableItem';
+export { SnapZone } from './SnapZone';
+export { AnimatedCounter } from './AnimatedCounter';
