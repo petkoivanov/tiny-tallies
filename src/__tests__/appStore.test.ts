@@ -82,8 +82,8 @@ describe('appStore composition', () => {
     expect(useAppStore.getState().xp).toBe(35);
   });
 
-  it('STORE_VERSION equals 4', () => {
-    expect(STORE_VERSION).toBe(4);
+  it('STORE_VERSION equals 5', () => {
+    expect(STORE_VERSION).toBe(5);
   });
 });
 
@@ -111,7 +111,7 @@ describe('skill state helpers', () => {
   });
 
   it('getOrCreateSkillState returns existing state when skillId exists', () => {
-    const existing = { eloRating: 1200, attempts: 10, correct: 8, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1 as const, nextReviewDue: null, consecutiveCorrectInBox6: 0 };
+    const existing = { eloRating: 1200, attempts: 10, correct: 8, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1 as const, nextReviewDue: null, consecutiveCorrectInBox6: 0, cpaLevel: 'concrete' as const };
     const states = { 'add.single': existing };
     const result = getOrCreateSkillState(states, 'add.single');
     expect(result).toEqual(existing);
@@ -119,12 +119,12 @@ describe('skill state helpers', () => {
 
   it('getOrCreateSkillState returns default when skillId not found', () => {
     const result = getOrCreateSkillState({}, 'add.single');
-    expect(result).toEqual({ eloRating: 1000, attempts: 0, correct: 0, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1, nextReviewDue: null, consecutiveCorrectInBox6: 0 });
+    expect(result).toEqual({ eloRating: 1000, attempts: 0, correct: 0, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1, nextReviewDue: null, consecutiveCorrectInBox6: 0, cpaLevel: 'concrete' });
   });
 
   it('getOrCreateSkillState accepts optional defaultElo parameter', () => {
     const result = getOrCreateSkillState({}, 'add.single', 800);
-    expect(result).toEqual({ eloRating: 800, attempts: 0, correct: 0, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1, nextReviewDue: null, consecutiveCorrectInBox6: 0 });
+    expect(result).toEqual({ eloRating: 800, attempts: 0, correct: 0, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1, nextReviewDue: null, consecutiveCorrectInBox6: 0, cpaLevel: 'concrete' });
   });
 
   it('isProfileComplete returns false when any field is null', () => {
@@ -197,6 +197,7 @@ describe('enriched slice behaviors', () => {
       leitnerBox: 1,
       nextReviewDue: null,
       consecutiveCorrectInBox6: 0,
+      cpaLevel: 'concrete',
     });
   });
 
@@ -220,6 +221,7 @@ describe('enriched slice behaviors', () => {
       leitnerBox: 1,
       nextReviewDue: null,
       consecutiveCorrectInBox6: 0,
+      cpaLevel: 'concrete',
     });
   });
 

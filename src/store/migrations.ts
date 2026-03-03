@@ -1,4 +1,5 @@
 import { mapPLToInitialBox } from '../services/adaptive/leitnerCalculator';
+import { deriveCpaStage } from '../services/cpa/cpaMappingService';
 
 /**
  * Store migration functions for Zustand persist middleware.
@@ -57,8 +58,22 @@ export function migrateStore(
     state.skillStates = skillStates;
   }
 
+  if (version < 5) {
+    // v4 -> v5: Add CPA level to existing skill states with BKT-informed placement
+    const skillStates = (state.skillStates ?? {}) as Record<
+      string,
+      Record<string, unknown>
+    >;
+    for (const skillId of Object.keys(skillStates)) {
+      const skill = skillStates[skillId];
+      const masteryProbability = (skill.masteryProbability as number) ?? 0.1;
+      skill.cpaLevel ??= deriveCpaStage(masteryProbability);
+    }
+    state.skillStates = skillStates;
+  }
+
   // Future migrations chain here:
-  // if (version < 5) { ... }
+  // if (version < 6) { ... }
 
   return state;
 }

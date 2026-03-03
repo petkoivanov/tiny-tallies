@@ -14,7 +14,7 @@ import { getUnlockedSkills } from '@/services/adaptive/prerequisiteGating';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
 
 /** BKT + Leitner default fields for SkillState test objects */
-const bkt = { masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1 as const, nextReviewDue: null, consecutiveCorrectInBox6: 0 } as const;
+const bkt = { masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1 as const, nextReviewDue: null, consecutiveCorrectInBox6: 0, cpaLevel: 'concrete' as const } as const;
 
 describe('sessionOrchestrator', () => {
   describe('getSessionPhase', () => {
@@ -170,12 +170,12 @@ describe('sessionOrchestrator', () => {
         'addition.single-digit.no-carry': {
           eloRating: 900, attempts: 30, correct: 10, masteryProbability: 0.15,
           consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1 as const,
-          nextReviewDue: null, consecutiveCorrectInBox6: 0,
+          nextReviewDue: null, consecutiveCorrectInBox6: 0, cpaLevel: 'concrete' as const,
         },
         'subtraction.single-digit.no-borrow': {
           eloRating: 1100, attempts: 30, correct: 25, masteryProbability: 0.60,
           consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1 as const,
-          nextReviewDue: null, consecutiveCorrectInBox6: 0,
+          nextReviewDue: null, consecutiveCorrectInBox6: 0, cpaLevel: 'pictorial' as const,
         },
       };
 

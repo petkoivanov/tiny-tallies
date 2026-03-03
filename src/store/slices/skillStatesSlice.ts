@@ -1,5 +1,6 @@
 import type { StateCreator } from 'zustand';
 import type { AppState } from '../appStore';
+import type { CpaStage } from '../../services/cpa/cpaTypes';
 import { DEFAULT_ELO } from '../helpers/skillStateHelpers';
 
 export type SkillState = {
@@ -19,6 +20,8 @@ export type SkillState = {
   nextReviewDue: string | null;
   /** Count of consecutive correct answers while in Box 6. Resets on wrong or box change. */
   consecutiveCorrectInBox6: number;
+  /** CPA progression stage derived from BKT mastery. One-way advance only. */
+  cpaLevel: CpaStage;
 };
 
 export interface SkillStatesSlice {
@@ -46,6 +49,7 @@ export const createSkillStatesSlice: StateCreator<
         leitnerBox: 1 as const,
         nextReviewDue: null,
         consecutiveCorrectInBox6: 0,
+        cpaLevel: 'concrete' as const,
       };
       return {
         skillStates: {

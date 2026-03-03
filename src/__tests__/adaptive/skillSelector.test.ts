@@ -7,7 +7,7 @@ import {
 } from '@/services/adaptive/skillSelector';
 
 /** BKT + Leitner default fields for SkillState test objects */
-const bkt = { masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1 as const, nextReviewDue: null, consecutiveCorrectInBox6: 0 } as const;
+const bkt = { masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1 as const, nextReviewDue: null, consecutiveCorrectInBox6: 0, cpaLevel: 'concrete' as const } as const;
 
 describe('skillSelector', () => {
   const skillIds = [

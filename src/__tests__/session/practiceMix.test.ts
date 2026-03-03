@@ -26,6 +26,7 @@ const bktDefaults = {
   leitnerBox: 1 as const,
   nextReviewDue: null,
   consecutiveCorrectInBox6: 0,
+  cpaLevel: 'concrete' as const,
 } as const;
 
 function makeSkillState(overrides: Partial<SkillState> = {}): SkillState {

@@ -196,7 +196,7 @@ describe('store migrations', () => {
     expect(skills['skill-high'].leitnerBox).toBe(5);   // 0.80 <= 0.92 < 0.95
   });
 
-  it('migrateStore from version 4 returns state unchanged', () => {
+  it('migrateStore from version 4 adds cpaLevel with BKT-informed placement', () => {
     const input = {
       childName: 'Luna',
       skillStates: {
@@ -208,10 +208,62 @@ describe('store migrations', () => {
       },
     };
     const result = migrateStore(input, 4);
-    expect(result).toEqual(input);
+    const skills = result.skillStates as Record<string, Record<string, unknown>>;
+    // P(L)=0.85 >= 0.85 -> abstract
+    expect(skills['add-single'].cpaLevel).toBe('abstract');
   });
 
-  it('migrateStore chains v1->v4 correctly', () => {
+  it('v4->v5 migration adds cpaLevel with BKT-informed placement', () => {
+    const input = {
+      skillStates: {
+        'skill-low': {
+          eloRating: 900, attempts: 5, correct: 2,
+          masteryProbability: 0.15, consecutiveWrong: 0, masteryLocked: false,
+          leitnerBox: 1, nextReviewDue: null, consecutiveCorrectInBox6: 0,
+        },
+        'skill-mid': {
+          eloRating: 1050, attempts: 20, correct: 14,
+          masteryProbability: 0.55, consecutiveWrong: 0, masteryLocked: false,
+          leitnerBox: 3, nextReviewDue: null, consecutiveCorrectInBox6: 0,
+        },
+        'skill-high': {
+          eloRating: 1200, attempts: 50, correct: 45,
+          masteryProbability: 0.92, consecutiveWrong: 0, masteryLocked: true,
+          leitnerBox: 5, nextReviewDue: null, consecutiveCorrectInBox6: 0,
+        },
+      },
+    };
+    const result = migrateStore(input, 4);
+    const skills = result.skillStates as Record<string, Record<string, unknown>>;
+
+    expect(skills['skill-low'].cpaLevel).toBe('concrete');     // 0.15 < 0.40
+    expect(skills['skill-mid'].cpaLevel).toBe('pictorial');     // 0.40 <= 0.55 < 0.85
+    expect(skills['skill-high'].cpaLevel).toBe('abstract');     // 0.92 >= 0.85
+  });
+
+  it('v4->v5 migration handles empty skillStates cleanly', () => {
+    const input = { skillStates: {} };
+    const result = migrateStore(input, 4);
+    expect(result.skillStates).toEqual({});
+  });
+
+  it('v4->v5 migration with missing masteryProbability defaults to concrete', () => {
+    const input = {
+      skillStates: {
+        'incomplete-skill': {
+          eloRating: 900, attempts: 3, correct: 1,
+          consecutiveWrong: 0, masteryLocked: false,
+          leitnerBox: 1, nextReviewDue: null, consecutiveCorrectInBox6: 0,
+        },
+      },
+    };
+    const result = migrateStore(input, 4);
+    const skills = result.skillStates as Record<string, Record<string, unknown>>;
+    // Missing masteryProbability defaults to 0.1 -> concrete
+    expect(skills['incomplete-skill'].cpaLevel).toBe('concrete');
+  });
+
+  it('migrateStore chains v1->v5 correctly', () => {
     const input = {
       childName: 'Max',
       skillStates: {
@@ -235,5 +287,8 @@ describe('store migrations', () => {
     expect(skills['add-double'].leitnerBox).toBe(1);
     expect(skills['add-double'].nextReviewDue).toBeNull();
     expect(skills['add-double'].consecutiveCorrectInBox6).toBe(0);
+
+    // v4->v5 CPA level (P(L)=0.1 -> concrete)
+    expect(skills['add-double'].cpaLevel).toBe('concrete');
   });
 });

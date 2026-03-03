@@ -374,6 +374,7 @@ describe('useSession', () => {
         leitnerBox: 3 as const,
         nextReviewDue: null,
         consecutiveCorrectInBox6: 0,
+        cpaLevel: 'concrete' as const,
       },
     };
     useAppStore.setState({ skillStates: initialSkillStates });
@@ -459,6 +460,7 @@ describe('useSession', () => {
         leitnerBox: 6 as const,
         nextReviewDue: null,
         consecutiveCorrectInBox6: 1,
+        cpaLevel: 'pictorial' as const,
       },
     };
     useAppStore.setState({ skillStates: initialSkillStates });

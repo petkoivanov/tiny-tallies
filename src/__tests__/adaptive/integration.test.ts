@@ -27,6 +27,7 @@ function makeSkillState(overrides: Partial<SkillState> = {}): SkillState {
     leitnerBox: 1 as const,
     nextReviewDue: null,
     consecutiveCorrectInBox6: 0,
+    cpaLevel: 'concrete' as const,
     ...overrides,
   };
 }
