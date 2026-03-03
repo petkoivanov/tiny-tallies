@@ -198,6 +198,9 @@ export function commitSessionResults(
       masteryProbability: update.newMasteryPL,
       consecutiveWrong: update.newConsecutiveWrong,
       masteryLocked: update.newMasteryLocked,
+      leitnerBox: update.newLeitnerBox,
+      nextReviewDue: update.newNextReviewDue,
+      consecutiveCorrectInBox6: update.newConsecutiveCorrectInBox6,
     });
   }
   addXp(totalXp);
