@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.4
 milestone_name: Virtual Manipulatives
 status: executing
-stopped_at: Completed 16-01-PLAN.md
-last_updated: "2026-03-03T18:58:01Z"
-last_activity: 2026-03-03 -- Completed Plan 16-01 (Shared drag primitives foundation)
+stopped_at: Completed 16-02-PLAN.md (Phase 16 complete)
+last_updated: "2026-03-03T19:03:48Z"
+last_activity: 2026-03-03 -- Completed Plan 16-02 (Shared drag primitives components)
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 12
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -20,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.4 Virtual Manipulatives -- Phase 16 (Shared Drag Primitives)
+**Current focus:** v0.4 Virtual Manipulatives -- Phase 16 COMPLETE, ready for Phase 17
 
 ## Current Position
 
-Phase: 16 of 20 (Shared Drag Primitives)
-Plan: 1 of 2 in current phase -- COMPLETE
+Phase: 16 of 20 (Shared Drag Primitives) -- COMPLETE
+Plan: 2 of 2 in current phase -- COMPLETE
 Status: Executing
-Last activity: 2026-03-03 -- Completed Plan 16-01 (Shared drag primitives foundation)
+Last activity: 2026-03-03 -- Completed Plan 16-02 (Shared drag primitives components)
 
-Progress: [██████████████░░░░░░░░░░░░] 25% (3/12 plans)
+Progress: [█████████████████░░░░░░░░░] 33% (4/12 plans)
 
 ## Performance Metrics
 
@@ -52,7 +52,7 @@ Key context carried from v0.3:
 - Session orchestrator: 15 problems (3+9+3), 60/30/10 review/new/challenge mix
 - commitSessionResults handles Elo + BKT + Leitner updates atomically
 - 14 skills across addition/subtraction with cross-operation prerequisite DAG
-- 603 tests passing, TypeScript clean
+- 622 tests passing, TypeScript clean
 
 v0.4 roadmap decisions:
 - CPA thresholds: P(L) < 0.40 = concrete, 0.40-0.85 = pictorial, >= 0.85 = abstract
@@ -62,6 +62,10 @@ v0.4 roadmap decisions:
 - ManipulativePanel is in-screen collapsible (not Modal navigator) to avoid gesture conflicts
 - Snap threshold is exclusive (distance < threshold) for precision placement
 - GestureHandlerRootView wraps entire app (required for all gesture functionality)
+- DraggableItem uses onRegister callback to expose shared values for parent-driven reset
+- SnapZone uses measureInWindow for absolute coordinates matching DraggableItem translateX/Y
+- AnimatedCounter uses regular prop (not SharedValue) since updates only on drop events
+- Pan gesture minDistance(8) prevents accidental drags from child finger rests
 
 ### Pending Todos
 
@@ -75,7 +79,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T18:58:01Z
-Stopped at: Completed 16-01-PLAN.md
-Resume file: .planning/phases/16-shared-drag-primitives/16-02-PLAN.md
-Resume command: /gsd:execute-phase 16
+Last session: 2026-03-03T19:03:48Z
+Stopped at: Completed 16-02-PLAN.md (Phase 16 complete)
+Resume file: .planning/phases/17-manipulative-components/17-01-PLAN.md
+Resume command: /gsd:execute-phase 17

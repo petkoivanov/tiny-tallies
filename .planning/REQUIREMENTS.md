@@ -16,10 +16,10 @@ Requirements for v0.4 Virtual Manipulatives milestone. Each maps to roadmap phas
 - [ ] **MANIP-05**: User can drag counters freely and use two-color mode for comparison/subtraction
 - [ ] **MANIP-06**: User can shade fraction strip sections and compare fractions by stacking strips
 - [ ] **MANIP-07**: User can create bar model part-whole layouts with labeled sections and "?" placeholder
-- [ ] **MANIP-08**: User can tap to add/remove pieces as alternative to dragging (48dp touch targets)
-- [ ] **MANIP-09**: User can reset any manipulative to its starting state
+- [x] **MANIP-08**: User can tap to add/remove pieces as alternative to dragging (48dp touch targets)
+- [x] **MANIP-09**: User can reset any manipulative to its starting state
 - [x] **MANIP-10**: User receives haptic feedback on snap and grouping events
-- [ ] **MANIP-11**: User sees a running count/value that updates when objects are placed (not during drag)
+- [x] **MANIP-11**: User sees a running count/value that updates when objects are placed (not during drag)
 
 ### CPA Progression
 
@@ -93,10 +93,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-04 | Phase 15 | Complete |
 | CPA-01 | Phase 15 | Complete |
 | FOUND-03 | Phase 16 | Complete |
-| MANIP-08 | Phase 16 | Pending |
-| MANIP-09 | Phase 16 | Pending |
+| MANIP-08 | Phase 16 | Complete |
+| MANIP-09 | Phase 16 | Complete |
 | MANIP-10 | Phase 16 | Complete |
-| MANIP-11 | Phase 16 | Pending |
+| MANIP-11 | Phase 16 | Complete |
 | MANIP-01 | Phase 17 | Pending |
 | MANIP-02 | Phase 17 | Pending |
 | MANIP-03 | Phase 17 | Pending |
