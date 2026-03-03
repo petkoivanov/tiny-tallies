@@ -74,7 +74,7 @@ export const SKILLS: readonly SkillDefinition[] = [
     operation: 'subtraction',
     grade: 1,
     standards: ['1.OA.C.6'],
-    prerequisites: ['subtraction.single-digit.no-borrow'],
+    prerequisites: ['subtraction.single-digit.no-borrow', 'addition.within-20.no-carry'],
   },
   {
     id: 'subtraction.within-20.with-borrow',
@@ -82,7 +82,7 @@ export const SKILLS: readonly SkillDefinition[] = [
     operation: 'subtraction',
     grade: 1,
     standards: ['1.OA.C.6'],
-    prerequisites: ['subtraction.within-20.no-borrow'],
+    prerequisites: ['subtraction.within-20.no-borrow', 'addition.within-20.with-carry'],
   },
   {
     id: 'subtraction.two-digit.no-borrow',
@@ -90,7 +90,7 @@ export const SKILLS: readonly SkillDefinition[] = [
     operation: 'subtraction',
     grade: 2,
     standards: ['2.NBT.B.5'],
-    prerequisites: ['subtraction.within-20.with-borrow'],
+    prerequisites: ['subtraction.within-20.with-borrow', 'addition.two-digit.no-carry'],
   },
   {
     id: 'subtraction.two-digit.with-borrow',
@@ -98,7 +98,7 @@ export const SKILLS: readonly SkillDefinition[] = [
     operation: 'subtraction',
     grade: 2,
     standards: ['2.NBT.B.5'],
-    prerequisites: ['subtraction.two-digit.no-borrow'],
+    prerequisites: ['subtraction.two-digit.no-borrow', 'addition.two-digit.with-carry'],
   },
   {
     id: 'subtraction.three-digit.no-borrow',
@@ -106,7 +106,7 @@ export const SKILLS: readonly SkillDefinition[] = [
     operation: 'subtraction',
     grade: 3,
     standards: ['3.NBT.A.2'],
-    prerequisites: ['subtraction.two-digit.with-borrow'],
+    prerequisites: ['subtraction.two-digit.with-borrow', 'addition.three-digit.no-carry'],
   },
   {
     id: 'subtraction.three-digit.with-borrow',
@@ -114,7 +114,7 @@ export const SKILLS: readonly SkillDefinition[] = [
     operation: 'subtraction',
     grade: 3,
     standards: ['3.NBT.A.2'],
-    prerequisites: ['subtraction.three-digit.no-borrow'],
+    prerequisites: ['subtraction.three-digit.no-borrow', 'addition.three-digit.with-carry'],
   },
 ];
 
