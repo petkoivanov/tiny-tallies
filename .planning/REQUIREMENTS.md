@@ -9,8 +9,8 @@ Requirements for v0.3 Adaptive Learning Engine milestone. Each maps to roadmap p
 
 ### BKT (Mastery Estimation)
 
-- [ ] **BKT-01**: Each skill tracks a mastery probability (P(L)) updated via Bayesian inference after every answer
-- [ ] **BKT-02**: BKT parameters are age-adjusted (younger children: higher guess rate, higher slip rate, lower learn rate)
+- [x] **BKT-01**: Each skill tracks a mastery probability (P(L)) updated via Bayesian inference after every answer
+- [x] **BKT-02**: BKT parameters are age-adjusted (younger children: higher guess rate, higher slip rate, lower learn rate)
 - [ ] **BKT-03**: Skill with P(L) >= 0.95 is marked as mastered and moves to review-only scheduling
 - [ ] **BKT-04**: Skill with P(L) < 0.40 is flagged for re-teaching priority
 
@@ -87,8 +87,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BKT-01 | Phase 11 | Pending |
-| BKT-02 | Phase 11 | Pending |
+| BKT-01 | Phase 11 | Complete |
+| BKT-02 | Phase 11 | Complete |
 | BKT-03 | Phase 11 | Pending |
 | BKT-04 | Phase 11 | Pending |
 | LEIT-01 | Phase 12 | Pending |
