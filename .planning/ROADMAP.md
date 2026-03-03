@@ -47,7 +47,7 @@
 
 - [x] **Phase 15: Foundation -- Store Schema, Services, and Mappings** - CPA tracking per skill, manipulative-to-skill mapping, and babel config for Reanimated 4 (completed 2026-03-03)
 - [x] **Phase 16: Shared Drag Primitives** - Reusable DraggableItem, SnapZone, and interaction patterns that all manipulatives build on (completed 2026-03-03)
-- [ ] **Phase 17: Manipulative Components** - All 6 manipulatives as standalone interactive components (base-ten blocks, number line, ten frames, counters, fraction strips, bar models)
+- [x] **Phase 17: Manipulative Components** - All 6 manipulatives as standalone interactive components (base-ten blocks, number line, ten frames, counters, fraction strips, bar models) (completed 2026-03-03)
 - [ ] **Phase 18: CPA Progression and Session Integration** - BKT-driven concrete/pictorial/abstract rendering and session-embedded manipulative overlay
 - [ ] **Phase 19: Sandbox Navigation** - Per-manipulative free exploration screens accessible from home
 - [ ] **Phase 20: Polish** - Guided mode, undo, array grid counters, and double ten frame
@@ -171,7 +171,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 14. Smart Session Orchestration | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 15. Foundation -- Store Schema, Services, and Mappings | v0.4 | 2/2 | Complete | 2026-03-03 |
 | 16. Shared Drag Primitives | v0.4 | 2/2 | Complete | 2026-03-03 |
-| 17. Manipulative Components | v0.4 | 0/4 | Not started | - |
+| 17. Manipulative Components | 4/4 | Complete   | 2026-03-03 | - |
 | 18. CPA Progression and Session Integration | v0.4 | 0/2 | Not started | - |
 | 19. Sandbox Navigation | v0.4 | 0/1 | Not started | - |
 | 20. Polish | v0.4 | 0/2 | Not started | - |

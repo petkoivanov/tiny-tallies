@@ -9,8 +9,8 @@ Requirements for v0.4 Virtual Manipulatives milestone. Each maps to roadmap phas
 
 ### Manipulatives
 
-- [ ] **MANIP-01**: User can drag and drop base-ten blocks (ones cubes, tens rods, hundreds flats) onto a place-value mat
-- [ ] **MANIP-02**: User can auto-group 10 ones cubes into a tens rod, and tap a rod to decompose into 10 cubes
+- [x] **MANIP-01**: User can drag and drop base-ten blocks (ones cubes, tens rods, hundreds flats) onto a place-value mat
+- [x] **MANIP-02**: User can auto-group 10 ones cubes into a tens rod, and tap a rod to decompose into 10 cubes
 - [ ] **MANIP-03**: User can drag a marker along a number line and see hop arrows with labeled values
 - [ ] **MANIP-04**: User can place counters on a ten frame with snap-to-cell behavior and running count display
 - [ ] **MANIP-05**: User can drag counters freely and use two-color mode for comparison/subtraction
@@ -97,8 +97,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MANIP-09 | Phase 16 | Complete |
 | MANIP-10 | Phase 16 | Complete |
 | MANIP-11 | Phase 16 | Complete |
-| MANIP-01 | Phase 17 | Pending |
-| MANIP-02 | Phase 17 | Pending |
+| MANIP-01 | Phase 17 | Complete |
+| MANIP-02 | Phase 17 | Complete |
 | MANIP-03 | Phase 17 | Pending |
 | MANIP-04 | Phase 17 | Pending |
 | MANIP-05 | Phase 17 | Pending |
