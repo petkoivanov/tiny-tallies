@@ -175,6 +175,6 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 | 9. Session & Results UI Polish | v0.2 | 2/2 | Complete | 2026-03-03 |
 | 10. Animated Feedback & Celebrations | v0.2 | 2/2 | Complete | 2026-03-03 |
 | 11. Bayesian Knowledge Tracing | 2/2 | Complete    | 2026-03-03 | - |
-| 12. Leitner Spaced Repetition | 2/2 | Complete   | 2026-03-03 | - |
+| 12. Leitner Spaced Repetition | 2/2 | Complete    | 2026-03-03 | - |
 | 13. Prerequisite Graph & Outer Fringe | v0.3 | 0/TBD | Not started | - |
 | 14. Smart Session Orchestration | v0.3 | 0/TBD | Not started | - |
