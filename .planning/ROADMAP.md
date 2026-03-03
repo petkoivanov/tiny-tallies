@@ -12,7 +12,7 @@ Tiny Tallies v0.1 Foundation delivers a working math practice app for children a
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [x] **Phase 1: Project Scaffolding & Navigation** - Expo 54 project setup, TypeScript strict, navigation shell, Zustand store skeleton (completed 2026-03-01)
+- [x] **Phase 1: Project Scaffolding & Navigation** - Expo 54 project setup, TypeScript strict, navigation shell, Zustand store skeleton (completed 2026-03-01)
 - [x] **Phase 2: Math Engine Core** - Programmatic addition/subtraction generation with standards tagging and difficulty templates (completed 2026-03-02)
 - [x] **Phase 3: Bug Library & Answer Formats** - Misconception-based distractor generation, multiple choice, and free input formats (completed 2026-03-02)
 - [x] **Phase 4: State Management & Persistence** - Child profile, skill states, session state, and AsyncStorage persistence (completed 2026-03-02)
@@ -110,12 +110,11 @@ Plans:
   3. Problems display one at a time with immediate correct/incorrect feedback after each answer
   4. Session ends with a summary screen showing correct/total, XP earned, and skills practiced
   5. Back button/gesture is disabled during active session; child can only exit via explicit "Quit" button with confirmation dialog
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
-- [ ] 06-03: TBD
+- [ ] 06-01-PLAN.md — Session orchestrator service, types, useSession hook with feedback timing and commit-on-complete
+- [ ] 06-02-PLAN.md — SessionScreen with MC answers and navigation guards, ResultsScreen with summary, nav type updates
 
 ### Phase 7: Core UI Screens
 **Goal**: Home, session, and results screens are fully styled with child-friendly design (48dp touch targets, high contrast dark theme, Lexend font)
@@ -165,6 +164,6 @@ Note: Phase 4 can begin in parallel with Phases 2-3 (no dependency on math engin
 | 3. Bug Library & Answer Formats | 2/2 | Complete | 2026-03-02 |
 | 4. State Management & Persistence | 2/2 | Complete | 2026-03-02 |
 | 5. Adaptive Difficulty | 0/2 | Not started | - |
-| 6. Session Flow & Navigation Control | 0/3 | Not started | - |
+| 6. Session Flow & Navigation Control | 0/2 | Not started | - |
 | 7. Core UI Screens | 0/3 | Not started | - |
 | 8. Gamification & Feedback | 0/3 | Not started | - |
