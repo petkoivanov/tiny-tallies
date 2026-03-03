@@ -6,6 +6,8 @@ export type {
   PendingSkillUpdate,
   SessionResult,
   SessionFeedback,
+  PracticeProblemCategory,
+  PracticeSlotCounts,
 } from './sessionTypes';
 
 export { DEFAULT_SESSION_CONFIG } from './sessionTypes';
@@ -19,3 +21,14 @@ export {
   commitSessionResults,
   STRENGTH_BASELINE,
 } from './sessionOrchestrator';
+
+// Practice Mix
+export {
+  computeSlotCounts,
+  buildReviewPool,
+  buildNewSkillPool,
+  buildChallengePool,
+  selectFromPool,
+  generatePracticeMix,
+  constrainedShuffle,
+} from './practiceMix';

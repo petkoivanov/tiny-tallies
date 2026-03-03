@@ -58,6 +58,16 @@ export interface SessionFeedback {
   practicedThisWeek: boolean;
 }
 
+/** Category tag for practice problems in the 60/30/10 mix */
+export type PracticeProblemCategory = 'review' | 'new' | 'challenge';
+
+/** Slot allocation for the practice portion of a session */
+export interface PracticeSlotCounts {
+  readonly review: number;
+  readonly new: number;
+  readonly challenge: number;
+}
+
 /** Final result of a completed session */
 export interface SessionResult {
   score: number;
