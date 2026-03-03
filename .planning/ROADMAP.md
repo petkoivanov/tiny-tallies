@@ -49,7 +49,7 @@
 - [x] **Phase 16: Shared Drag Primitives** - Reusable DraggableItem, SnapZone, and interaction patterns that all manipulatives build on (completed 2026-03-03)
 - [x] **Phase 17: Manipulative Components** - All 6 manipulatives as standalone interactive components (base-ten blocks, number line, ten frames, counters, fraction strips, bar models) (completed 2026-03-03)
 - [x] **Phase 18: CPA Progression and Session Integration** - BKT-driven concrete/pictorial/abstract rendering and session-embedded manipulative overlay (completed 2026-03-03)
-- [ ] **Phase 19: Sandbox Navigation** - Per-manipulative free exploration screens accessible from home
+- [x] **Phase 19: Sandbox Navigation** - Per-manipulative free exploration screens accessible from home (completed 2026-03-03)
 - [ ] **Phase 20: Polish** - Guided mode, undo, array grid counters, and double ten frame
 
 ## Phase Details
@@ -175,5 +175,5 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 16. Shared Drag Primitives | v0.4 | 2/2 | Complete | 2026-03-03 |
 | 17. Manipulative Components | v0.4 | 4/4 | Complete | 2026-03-03 |
 | 18. CPA Progression and Session Integration | v0.4 | 3/3 | Complete | 2026-03-03 |
-| 19. Sandbox Navigation | 1/2 | In Progress|  | - |
+| 19. Sandbox Navigation | 2/2 | Complete   | 2026-03-03 | - |
 | 20. Polish | v0.4 | 0/2 | Not started | - |
