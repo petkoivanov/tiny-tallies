@@ -82,8 +82,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 16-01-PLAN.md — Types, snap math worklets, animation config, haptics, jest mocks, and GestureHandlerRootView
-- [ ] 16-02-PLAN.md — DraggableItem, SnapZone, and AnimatedCounter interactive components
+- [x] 16-01-PLAN.md — Types, snap math worklets, animation config, haptics, jest mocks, and GestureHandlerRootView
+- [x] 16-02-PLAN.md — DraggableItem, SnapZone, and AnimatedCounter interactive components
 
 ### Phase 17: Manipulative Components
 **Goal**: All six virtual manipulatives are fully interactive standalone components that children can directly manipulate to explore math concepts
@@ -95,12 +95,13 @@ Plans:
   3. User can place counters on a ten frame with snap-to-cell behavior and use two-color mode for comparison
   4. User can shade fraction strip sections and compare fractions by stacking strips vertically
   5. User can create bar model part-whole layouts with labeled sections and a "?" placeholder
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 17-01: TBD
-- [ ] 17-02: TBD
-- [ ] 17-03: TBD
+- [ ] 17-01-PLAN.md — ManipulativeShell wrapper, Counters (two-color flip), and TenFrame (snap grid)
+- [ ] 17-02-PLAN.md — NumberLine (SVG + hop arrows) and FractionStrips (tap-to-shade + stacking)
+- [ ] 17-03-PLAN.md — BarModel (draggable dividers + NumberPicker wheel)
+- [ ] 17-04-PLAN.md — BaseTenBlocks (auto-group/decompose choreography + place-value mat)
 
 ### Phase 18: CPA Progression and Session Integration
 **Goal**: Practice sessions automatically show the right representation (concrete manipulative, pictorial diagram, or abstract numbers) based on the child's mastery of each skill, with an embedded manipulative overlay for hands-on problem solving
@@ -169,8 +170,8 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 13. Prerequisite Graph & Outer Fringe | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 14. Smart Session Orchestration | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 15. Foundation -- Store Schema, Services, and Mappings | v0.4 | 2/2 | Complete | 2026-03-03 |
-| 16. Shared Drag Primitives | 2/2 | Complete    | 2026-03-03 | - |
-| 17. Manipulative Components | v0.4 | 0/3 | Not started | - |
+| 16. Shared Drag Primitives | v0.4 | 2/2 | Complete | 2026-03-03 |
+| 17. Manipulative Components | v0.4 | 0/4 | Not started | - |
 | 18. CPA Progression and Session Integration | v0.4 | 0/2 | Not started | - |
 | 19. Sandbox Navigation | v0.4 | 0/1 | Not started | - |
 | 20. Polish | v0.4 | 0/2 | Not started | - |
