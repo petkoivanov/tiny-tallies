@@ -3,14 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.4
 milestone_name: Virtual Manipulatives
 status: executing
-stopped_at: Completed 18-01-PLAN.md
-last_updated: "2026-03-03T20:40:49Z"
-last_activity: 2026-03-03 -- Completed Plan 18-01 (CPA session building blocks)
+stopped_at: Completed 18-02-PLAN.md
+last_updated: "2026-03-03T20:41:04Z"
+last_activity: 2026-03-03 -- Completed Plan 18-02 (Pictorial diagram renderers)
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 12
-  completed_plans: 9
+  total_plans: 11
+  completed_plans: 10
+  percent: 91
 ---
 
 # Project State
@@ -20,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.4 Virtual Manipulatives -- Phase 18 Plan 01 COMPLETE
+**Current focus:** v0.4 Virtual Manipulatives -- Phase 18 Plan 02 COMPLETE
 
 ## Current Position
 
 Phase: 18 of 20 (CPA Progression and Session Integration)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: Executing
-Last activity: 2026-03-03 -- Completed Plan 18-01 (CPA session building blocks)
+Last activity: 2026-03-03 -- Completed Plan 18-02 (Pictorial diagram renderers)
 
-Progress: [██████████████████████░░░░] 75% (9/12 plans)
+Progress: [█████████░] 91% (10/11 plans)
 
 ## Performance Metrics
 
@@ -42,6 +43,7 @@ Progress: [██████████████████████░
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 18-01 | CPA session building blocks | 3min | 2 | 8 |
+| 18-02 | Pictorial diagram renderers | 4min | 1 | 9 |
 
 ## Accumulated Context
 
@@ -56,7 +58,7 @@ Key context carried from v0.3:
 - Session orchestrator: 15 problems (3+9+3), 60/30/10 review/new/challenge mix
 - commitSessionResults handles Elo + BKT + Leitner updates atomically
 - 14 skills across addition/subtraction with cross-operation prerequisite DAG
-- 659 tests passing, TypeScript clean (pre-existing error in uncommitted TenFrameDiagram.tsx)
+- 659 tests passing, TypeScript clean
 
 v0.4 roadmap decisions:
 - CPA thresholds: P(L) < 0.40 = concrete, 0.40-0.85 = pictorial, >= 0.85 = abstract
@@ -84,6 +86,8 @@ v0.4 roadmap decisions:
 - [Phase 18-01]: CompactAnswerRow uses inline feedback animations (AnswerFeedbackAnimation width:45% incompatible with 4-button layout)
 - [Phase 18-01]: ManipulativePanel tap-only toggle (no pan gesture) avoids gesture conflicts with manipulatives inside
 - [Phase 18-01]: PANEL_SPRING_CONFIG: damping 20, stiffness 200, mass 0.8, overshootClamping true
+- [Phase 18-02]: SVG mock placed in test file (not jest.setup.js) since only pictorial tests need it
+- [Phase 18-02]: Color convention: primary (#6366f1) for first operand, yellow (#FACC15) for second
 
 ### Pending Todos
 
@@ -97,7 +101,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T20:40:49Z
-Stopped at: Completed 18-01-PLAN.md
-Resume file: .planning/phases/18-cpa-progression-and-session-integration/18-01-SUMMARY.md
+Last session: 2026-03-03T20:41:04Z
+Stopped at: Completed 18-02-PLAN.md
+Resume file: .planning/phases/18-cpa-progression-and-session-integration/18-02-SUMMARY.md
 Resume command: /gsd:execute-phase 18
