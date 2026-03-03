@@ -18,14 +18,19 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - ✓ Basic session flow (warmup → practice → cooldown) — v0.1
 - ✓ Zustand store with domain slices (child profile, skill states, session state) — v0.1
 - ✓ Navigation: Home → Session → Results with back-prevention guards — v0.1
+- ✓ Problem display UI polish (48dp touch targets, high contrast dark theme, Lexend font) — v0.2
+- ✓ Basic XP and level system with celebration animations — v0.2
+- ✓ Weekly streak tracking — v0.2
+- ✓ Home screen with level/XP/streak display — v0.2
+- ✓ Animated feedback for correct/incorrect answers — v0.2
 
 ### Active
 
-- [ ] Problem display UI polish (48dp touch targets, high contrast dark theme, Lexend font)
-- [ ] Basic XP and level system with celebration animations
-- [ ] Weekly streak tracking
-- [ ] Home screen with level/XP/streak display
-- [ ] Animated feedback for correct/incorrect answers
+- [ ] Bayesian Knowledge Tracing (BKT) for mastery estimation per skill
+- [ ] Modified Leitner spaced repetition with 6 boxes and age-adjusted intervals
+- [ ] Prerequisite skill graph (DAG) with outer fringe algorithm
+- [ ] Smart session mix: 60% review / 30% new / 10% challenge
+- [ ] BKT-driven mastery thresholds (≥0.95 mastered, <0.40 needs re-teaching)
 
 ### Out of Scope
 
@@ -38,17 +43,16 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - Chat or social features with personal info — COPPA compliance
 - Free text input UI — architecture supports it, deferred to post-v0.1
 
-## Current Milestone: v0.2 UI Polish & Gamification
+## Current Milestone: v0.3 Adaptive Learning Engine
 
-**Goal:** Transform the functional foundation into an engaging, child-friendly experience with polished UI, XP/level progression, streak tracking, and animated feedback.
+**Goal:** Build the adaptive learning backbone — BKT mastery estimation, Leitner spaced repetition, and prerequisite skill graph — so sessions become pedagogically structured with smart problem selection.
 
 **Target features:**
-- Problem display UI polish (48dp touch targets, high contrast dark theme, Lexend font)
-- Basic XP and level system with celebration animations
-- Weekly streak tracking
-- Home screen with level/XP/streak display
-- Animated feedback for correct/incorrect answers
-- Answer format visual polish (multiple choice buttons, layout)
+- Bayesian Knowledge Tracing (BKT) for mastery estimation per skill
+- Modified Leitner spaced repetition with 6 boxes and age-adjusted intervals
+- Prerequisite skill graph (DAG) with outer fringe algorithm
+- Smart session mix: 60% review / 30% new / 10% challenge
+- BKT-driven mastery thresholds (≥0.95 mastered, <0.40 needs re-teaching)
 
 ## Context
 
@@ -84,8 +88,8 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tutoring engine design, virtual manipulatives specs, misconception detection patterns, spaced repetition algorithms, gamification design, onboarding/placement testing, child UX design, sound/audio design, math anxiety mitigation, COPPA privacy compliance, problem generation engine.
 
 **Future milestones:**
-- v0.2: Core UI polish + gamification (XP/levels, streaks, animations) + UI-01 through UI-06, GAME-01 through GAME-05
-- v0.3: BKT + spaced repetition + prerequisite graph
+- v0.2: Core UI polish + gamification (XP/levels, streaks, animations) — SHIPPED
+- v0.3: BKT + spaced repetition + prerequisite graph (CURRENT)
 - v0.4: Virtual manipulatives (base-ten blocks, number lines, ten frames, fraction strips)
 - v0.5: AI tutor integration (Gemini, three-mode, CPA progression)
 - v0.6: Misconception detection system (Bug Library + interventions)
@@ -127,4 +131,4 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | Ages 6-9 focus | Clearest market gap; manageable content scope | ✓ Good — grade 1-3 content complete |
 
 ---
-*Last updated: 2026-03-02 after v0.2 milestone start*
+*Last updated: 2026-03-03 after v0.3 milestone start*
