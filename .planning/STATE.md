@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: Adaptive Learning Engine
-status: unknown
-last_updated: "2026-03-03T13:11:44.640Z"
+status: executing
+last_updated: "2026-03-03T14:01:24.000Z"
 progress:
   total_phases: 5
   completed_phases: 5
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 11
+  completed_plans: 11
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 
 ## Current Position
 
-Phase: 12 of 14 (Leitner Spaced Repetition)
-Plan: 1 of 2 in current phase
-Status: Executing phase 12
-Last activity: 2026-03-03 -- Completed 12-01 (Leitner Service & Store Schema)
+Phase: 12 of 14 (Leitner Spaced Repetition) -- COMPLETE
+Plan: 2 of 2 in current phase (all plans complete)
+Status: Phase 12 complete
+Last activity: 2026-03-03 -- Completed 12-02 (Leitner Integration into Session Flow)
 
-Progress: [███░░░░░░░] 25%
+Progress: [████░░░░░░] 35%
 
 ## Performance Metrics
 
@@ -60,8 +60,10 @@ Phase 11 decisions:
 Phase 12 decisions:
 - Leitner calculator follows BKT calculator pattern: pure functions, exported constants, age bracket lookup
 - BKT-informed initial placement: mapPLToInitialBox uses P(L) thresholds to place existing skills in appropriate boxes during v3->v4 migration
-- Leitner fields carry forward in useSession handleAnswer as passthrough until 12-02 wires actual transitions
-- 494 tests passing, TypeScript clean
+- Leitner transition computed after BKT update in handleAnswer so auto-advance can check masteryLocked flag
+- BKT mastery auto-advance resets consecutiveCorrectInBox6 to 0 (Box 6 not earned via streak)
+- commitSessionResults now persists leitnerBox, nextReviewDue, consecutiveCorrectInBox6 atomically
+- 502 tests passing, TypeScript clean
 
 ### Pending Todos
 
@@ -74,6 +76,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 12-01-PLAN.md (Leitner Service & Store Schema)
-Resume file: .planning/phases/12-leitner-spaced-repetition/12-02-PLAN.md
-Resume command: /gsd:execute-phase 12
+Stopped at: Completed 12-02-PLAN.md (Leitner Integration into Session Flow) -- Phase 12 complete
+Resume file: Next phase (13)
+Resume command: /gsd:execute-phase 13
