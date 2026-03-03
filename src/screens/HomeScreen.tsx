@@ -19,7 +19,11 @@ export default function HomeScreen() {
         <Text style={styles.title}>Tiny Tallies</Text>
         <Text style={styles.subtitle}>Math made fun!</Text>
         <Pressable
-          onPress={() => navigation.navigate('Session')}
+          onPress={() =>
+            navigation.navigate('Session', {
+              sessionId: String(Date.now()),
+            })
+          }
           style={({ pressed }) => [
             styles.button,
             pressed && styles.buttonPressed,

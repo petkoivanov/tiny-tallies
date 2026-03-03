@@ -5,12 +5,16 @@
  * Global augmentation enables automatic typing for useNavigation/useRoute.
  */
 
-// Session and Results will receive params in Phase 6
-// (e.g., Session: { sessionId: string }, Results: { sessionId: string })
 export type RootStackParamList = {
   Home: undefined;
-  Session: undefined;
-  Results: undefined;
+  Session: { sessionId: string };
+  Results: {
+    sessionId: string;
+    score: number;
+    total: number;
+    xpEarned: number;
+    durationMs: number;
+  };
 };
 
 declare global {

@@ -17,7 +17,11 @@ export default function AppNavigator() {
       }}
     >
       <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Session" component={SessionScreen} />
+      <Stack.Screen
+        name="Session"
+        component={SessionScreen}
+        options={{ gestureEnabled: false }}
+      />
       <Stack.Screen name="Results" component={ResultsScreen} />
     </Stack.Navigator>
   );
