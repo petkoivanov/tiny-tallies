@@ -128,10 +128,11 @@ Plans:
   1. User can navigate to a per-manipulative sandbox screen from the home screen
   2. User can freely interact with each manipulative without time limits, scoring, or problem prompts
   3. Sandbox state is ephemeral and does not persist across app restarts
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 19-01: TBD
+- [ ] 19-01-PLAN.md — sandboxSlice, navigation route, SandboxScreen with tooltip, and tests
+- [ ] 19-02-PLAN.md — ExploreCard/ExploreGrid components and HomeScreen ScrollView integration
 
 ### Phase 20: Polish
 **Goal**: Enhanced manipulative interactions with guided hints, undo capability, and extended modes for multiplication and addition-within-20
@@ -173,6 +174,6 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 15. Foundation -- Store Schema, Services, and Mappings | v0.4 | 2/2 | Complete | 2026-03-03 |
 | 16. Shared Drag Primitives | v0.4 | 2/2 | Complete | 2026-03-03 |
 | 17. Manipulative Components | v0.4 | 4/4 | Complete | 2026-03-03 |
-| 18. CPA Progression and Session Integration | 3/3 | Complete    | 2026-03-03 | - |
-| 19. Sandbox Navigation | v0.4 | 0/1 | Not started | - |
+| 18. CPA Progression and Session Integration | v0.4 | 3/3 | Complete | 2026-03-03 |
+| 19. Sandbox Navigation | v0.4 | 0/2 | Not started | - |
 | 20. Polish | v0.4 | 0/2 | Not started | - |
