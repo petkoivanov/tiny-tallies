@@ -88,13 +88,42 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated by roadmapper) | | |
+| FOUND-01 | Phase 15 | Pending |
+| FOUND-02 | Phase 15 | Pending |
+| FOUND-04 | Phase 15 | Pending |
+| CPA-01 | Phase 15 | Pending |
+| FOUND-03 | Phase 16 | Pending |
+| MANIP-08 | Phase 16 | Pending |
+| MANIP-09 | Phase 16 | Pending |
+| MANIP-10 | Phase 16 | Pending |
+| MANIP-11 | Phase 16 | Pending |
+| MANIP-01 | Phase 17 | Pending |
+| MANIP-02 | Phase 17 | Pending |
+| MANIP-03 | Phase 17 | Pending |
+| MANIP-04 | Phase 17 | Pending |
+| MANIP-05 | Phase 17 | Pending |
+| MANIP-06 | Phase 17 | Pending |
+| MANIP-07 | Phase 17 | Pending |
+| CPA-02 | Phase 18 | Pending |
+| CPA-03 | Phase 18 | Pending |
+| CPA-04 | Phase 18 | Pending |
+| CPA-05 | Phase 18 | Pending |
+| SESS-01 | Phase 18 | Pending |
+| SESS-02 | Phase 18 | Pending |
+| SESS-03 | Phase 18 | Pending |
+| SAND-01 | Phase 19 | Pending |
+| SAND-02 | Phase 19 | Pending |
+| SAND-03 | Phase 19 | Pending |
+| POL-01 | Phase 20 | Pending |
+| POL-02 | Phase 20 | Pending |
+| POL-03 | Phase 20 | Pending |
+| POL-04 | Phase 20 | Pending |
 
 **Coverage:**
-- v0.4 requirements: 27 total
-- Mapped to phases: 0
-- Unmapped: 27 ⚠️
+- v0.4 requirements: 30 total
+- Mapped to phases: 30
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after initial definition*
+*Last updated: 2026-03-03 after roadmap creation*

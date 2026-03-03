@@ -5,6 +5,7 @@
 - ✅ **v0.1 Foundation** — Phases 1-6 (shipped 2026-03-03)
 - ✅ **v0.2 UI Polish & Gamification** — Phases 7-10 (shipped 2026-03-03)
 - ✅ **v0.3 Adaptive Learning Engine** — Phases 11-14 (shipped 2026-03-03)
+- 🚧 **v0.4 Virtual Manipulatives** — Phases 15-20 (in progress)
 
 ## Phases
 
@@ -40,7 +41,116 @@
 
 </details>
 
+### 🚧 v0.4 Virtual Manipulatives (In Progress)
+
+**Milestone Goal:** Deliver six interactive virtual manipulatives with CPA progression, session-embedded visual aids, and standalone sandbox exploration -- making abstract math concepts tangible through direct manipulation at 60fps.
+
+- [ ] **Phase 15: Foundation -- Store Schema, Services, and Mappings** - CPA tracking per skill, manipulative-to-skill mapping, and babel config for Reanimated 4
+- [ ] **Phase 16: Shared Drag Primitives** - Reusable DraggableItem, SnapZone, and interaction patterns that all manipulatives build on
+- [ ] **Phase 17: Manipulative Components** - All 6 manipulatives as standalone interactive components (base-ten blocks, number line, ten frames, counters, fraction strips, bar models)
+- [ ] **Phase 18: CPA Progression and Session Integration** - BKT-driven concrete/pictorial/abstract rendering and session-embedded manipulative overlay
+- [ ] **Phase 19: Sandbox Navigation** - Per-manipulative free exploration screens accessible from home
+- [ ] **Phase 20: Polish** - Guided mode, undo, array grid counters, and double ten frame
+
+## Phase Details
+
+### Phase 15: Foundation -- Store Schema, Services, and Mappings
+**Goal**: The system can track CPA stage per skill, determine which manipulative suits each math concept, and compile Reanimated 4 worklet code
+**Depends on**: Phase 14 (v0.3 complete)
+**Requirements**: FOUND-01, FOUND-02, FOUND-04, CPA-01
+**Success Criteria** (what must be TRUE):
+  1. Store schema includes cpaLevel per skill with migration from STORE_VERSION 4 to 5 that initializes existing skills to concrete
+  2. Given a skill ID, the system returns the appropriate manipulative type(s) for that concept
+  3. CPA stage for a skill is derived from BKT mastery: P(L) < 0.40 = concrete, 0.40-0.85 = pictorial, >= 0.85 = abstract
+  4. Reanimated 4 worklet code compiles and runs without babel errors
+**Plans**: TBD
+
+Plans:
+- [ ] 15-01: TBD
+- [ ] 15-02: TBD
+
+### Phase 16: Shared Drag Primitives
+**Goal**: A reusable set of drag-and-drop primitives that run snap logic on the UI thread at 60fps, providing the interaction foundation for all 6 manipulatives
+**Depends on**: Phase 15
+**Requirements**: FOUND-03, MANIP-08, MANIP-09, MANIP-10, MANIP-11
+**Success Criteria** (what must be TRUE):
+  1. User can drag an item and it snaps to valid zones with spring animation at 60fps (no JS thread lag)
+  2. User can tap to add or remove pieces as an alternative to dragging, with 48dp touch targets
+  3. User can reset any manipulative to its starting state via a reset action
+  4. User receives haptic feedback when items snap or group
+  5. A running count/value display updates on drop events (not during active drag)
+**Plans**: TBD
+
+Plans:
+- [ ] 16-01: TBD
+- [ ] 16-02: TBD
+
+### Phase 17: Manipulative Components
+**Goal**: All six virtual manipulatives are fully interactive standalone components that children can directly manipulate to explore math concepts
+**Depends on**: Phase 16
+**Requirements**: MANIP-01, MANIP-02, MANIP-03, MANIP-04, MANIP-05, MANIP-06, MANIP-07
+**Success Criteria** (what must be TRUE):
+  1. User can drag base-ten blocks (ones, tens, hundreds) onto a place-value mat, auto-group 10 cubes into a rod, and tap a rod to decompose
+  2. User can drag a marker along a number line and see hop arrows with labeled values
+  3. User can place counters on a ten frame with snap-to-cell behavior and use two-color mode for comparison
+  4. User can shade fraction strip sections and compare fractions by stacking strips vertically
+  5. User can create bar model part-whole layouts with labeled sections and a "?" placeholder
+**Plans**: TBD
+
+Plans:
+- [ ] 17-01: TBD
+- [ ] 17-02: TBD
+- [ ] 17-03: TBD
+
+### Phase 18: CPA Progression and Session Integration
+**Goal**: Practice sessions automatically show the right representation (concrete manipulative, pictorial diagram, or abstract numbers) based on the child's mastery of each skill, with an embedded manipulative overlay for hands-on problem solving
+**Depends on**: Phase 15, Phase 17
+**Requirements**: CPA-02, CPA-03, CPA-04, CPA-05, SESS-01, SESS-02, SESS-03
+**Success Criteria** (what must be TRUE):
+  1. User sees interactive manipulatives during practice when their skill mastery is low (concrete mode)
+  2. User sees static visual representations during practice when their skill mastery is moderate (pictorial mode)
+  3. User sees numbers only during practice when their skill mastery is high (abstract mode)
+  4. User can expand and collapse a contextually-selected manipulative overlay during any practice problem
+  5. CPA stage advances automatically after a practice session completes based on updated BKT mastery
+**Plans**: TBD
+
+Plans:
+- [ ] 18-01: TBD
+- [ ] 18-02: TBD
+
+### Phase 19: Sandbox Navigation
+**Goal**: Children can freely explore any manipulative without problem constraints, accessible from the home screen
+**Depends on**: Phase 17
+**Requirements**: SAND-01, SAND-02, SAND-03
+**Success Criteria** (what must be TRUE):
+  1. User can navigate to a per-manipulative sandbox screen from the home screen
+  2. User can freely interact with each manipulative without time limits, scoring, or problem prompts
+  3. Sandbox state is ephemeral and does not persist across app restarts
+**Plans**: TBD
+
+Plans:
+- [ ] 19-01: TBD
+
+### Phase 20: Polish
+**Goal**: Enhanced manipulative interactions with guided hints, undo capability, and extended modes for multiplication and addition-within-20
+**Depends on**: Phase 17, Phase 18
+**Requirements**: POL-01, POL-02, POL-03, POL-04
+**Success Criteria** (what must be TRUE):
+  1. User sees guided mode highlighting the next suggested action on a manipulative
+  2. User can undo the last action on a manipulative (up to 10 steps)
+  3. User can switch counters to array grid mode for multiplication concepts
+  4. Ten frame auto-spawns a second frame when working on add-within-20 problems
+**Plans**: TBD
+
+Plans:
+- [ ] 20-01: TBD
+- [ ] 20-02: TBD
+
 ## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
+(Phase 19 can run after 17, in parallel with 18)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -58,3 +168,9 @@
 | 12. Leitner Spaced Repetition | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 13. Prerequisite Graph & Outer Fringe | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 14. Smart Session Orchestration | v0.3 | 2/2 | Complete | 2026-03-03 |
+| 15. Foundation -- Store Schema, Services, and Mappings | v0.4 | 0/2 | Not started | - |
+| 16. Shared Drag Primitives | v0.4 | 0/2 | Not started | - |
+| 17. Manipulative Components | v0.4 | 0/3 | Not started | - |
+| 18. CPA Progression and Session Integration | v0.4 | 0/2 | Not started | - |
+| 19. Sandbox Navigation | v0.4 | 0/1 | Not started | - |
+| 20. Polish | v0.4 | 0/2 | Not started | - |
