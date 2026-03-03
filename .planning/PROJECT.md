@@ -38,6 +38,18 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - Chat or social features with personal info — COPPA compliance
 - Free text input UI — architecture supports it, deferred to post-v0.1
 
+## Current Milestone: v0.2 UI Polish & Gamification
+
+**Goal:** Transform the functional foundation into an engaging, child-friendly experience with polished UI, XP/level progression, streak tracking, and animated feedback.
+
+**Target features:**
+- Problem display UI polish (48dp touch targets, high contrast dark theme, Lexend font)
+- Basic XP and level system with celebration animations
+- Weekly streak tracking
+- Home screen with level/XP/streak display
+- Animated feedback for correct/incorrect answers
+- Answer format visual polish (multiple choice buttons, layout)
+
 ## Context
 
 **Current state:** Shipped v0.1 Foundation with 6,799 LOC TypeScript across 113 files. 336 tests passing. Full functional session flow operational — child can start a session, answer 15 adaptive problems (3 warmup + 9 practice + 3 cooldown), see feedback, and view results with score/XP/duration.
@@ -115,4 +127,4 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | Ages 6-9 focus | Clearest market gap; manageable content scope | ✓ Good — grade 1-3 content complete |
 
 ---
-*Last updated: 2026-03-03 after v0.1 milestone*
+*Last updated: 2026-03-02 after v0.2 milestone start*
