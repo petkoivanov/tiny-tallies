@@ -12,10 +12,10 @@ Requirements for v0.4 Virtual Manipulatives milestone. Each maps to roadmap phas
 - [x] **MANIP-01**: User can drag and drop base-ten blocks (ones cubes, tens rods, hundreds flats) onto a place-value mat
 - [x] **MANIP-02**: User can auto-group 10 ones cubes into a tens rod, and tap a rod to decompose into 10 cubes
 - [ ] **MANIP-03**: User can drag a marker along a number line and see hop arrows with labeled values
-- [ ] **MANIP-04**: User can place counters on a ten frame with snap-to-cell behavior and running count display
-- [ ] **MANIP-05**: User can drag counters freely and use two-color mode for comparison/subtraction
+- [x] **MANIP-04**: User can place counters on a ten frame with snap-to-cell behavior and running count display
+- [x] **MANIP-05**: User can drag counters freely and use two-color mode for comparison/subtraction
 - [ ] **MANIP-06**: User can shade fraction strip sections and compare fractions by stacking strips
-- [ ] **MANIP-07**: User can create bar model part-whole layouts with labeled sections and "?" placeholder
+- [x] **MANIP-07**: User can create bar model part-whole layouts with labeled sections and "?" placeholder
 - [x] **MANIP-08**: User can tap to add/remove pieces as alternative to dragging (48dp touch targets)
 - [x] **MANIP-09**: User can reset any manipulative to its starting state
 - [x] **MANIP-10**: User receives haptic feedback on snap and grouping events
@@ -100,10 +100,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MANIP-01 | Phase 17 | Complete |
 | MANIP-02 | Phase 17 | Complete |
 | MANIP-03 | Phase 17 | Pending |
-| MANIP-04 | Phase 17 | Pending |
-| MANIP-05 | Phase 17 | Pending |
+| MANIP-04 | Phase 17 | Complete |
+| MANIP-05 | Phase 17 | Complete |
 | MANIP-06 | Phase 17 | Pending |
-| MANIP-07 | Phase 17 | Pending |
+| MANIP-07 | Phase 17 | Complete |
 | CPA-02 | Phase 18 | Pending |
 | CPA-03 | Phase 18 | Pending |
 | CPA-04 | Phase 18 | Pending |

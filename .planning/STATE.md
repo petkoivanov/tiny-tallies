@@ -3,6 +3,21 @@ gsd_state_version: 1.0
 milestone: v0.4
 milestone_name: Virtual Manipulatives
 status: executing
+stopped_at: Completed 17-03-PLAN.md
+last_updated: "2026-03-03T19:50:53.685Z"
+last_activity: 2026-03-03 -- Completed Plan 16-02 (Shared drag primitives components)
+progress:
+  total_phases: 6
+  completed_phases: 3
+  total_plans: 8
+  completed_plans: 8
+---
+
+---
+gsd_state_version: 1.0
+milestone: v0.4
+milestone_name: Virtual Manipulatives
+status: executing
 stopped_at: Completed 17-04-PLAN.md
 last_updated: "2026-03-03T19:50:24.908Z"
 last_activity: 2026-03-03 -- Completed Plan 16-02 (Shared drag primitives components)
@@ -81,8 +96,13 @@ v0.4 roadmap decisions:
 - SnapZone uses measureInWindow for absolute coordinates matching DraggableItem translateX/Y
 - AnimatedCounter uses regular prop (not SharedValue) since updates only on drop events
 - Pan gesture minDistance(8) prevents accidental drags from child finger rests
+- [Phase 17]: Counters uses custom Gesture.Pan() for free placement (no DraggableItem needed)
+- [Phase 17]: TenFrame filters snap targets dynamically to exclude occupied cells
+- [Phase 17]: TrayCounter respawns via re-keying after each successful snap
 - [Phase 17]: Extracted useAutoGroup hook to keep BaseTenBlocks.tsx under 500 lines
 - [Phase 17]: Auto-group uses single-timer pattern (ones priority) to prevent race conditions
+- [Phase 17]: BarModel sub-components extracted into BarModelParts.tsx to keep main file under 500 lines
+- [Phase 17]: NumberPicker uses FlatList with padding sentinel items for centered wheel selection
 
 ### Pending Todos
 
@@ -96,7 +116,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T19:50:24.906Z
-Stopped at: Completed 17-04-PLAN.md
+Last session: 2026-03-03T19:50:53.683Z
+Stopped at: Completed 17-03-PLAN.md
 Resume file: None
 Resume command: /gsd:execute-phase 17
