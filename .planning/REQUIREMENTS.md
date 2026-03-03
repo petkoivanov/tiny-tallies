@@ -18,7 +18,7 @@ Requirements for v0.4 Virtual Manipulatives milestone. Each maps to roadmap phas
 - [ ] **MANIP-07**: User can create bar model part-whole layouts with labeled sections and "?" placeholder
 - [ ] **MANIP-08**: User can tap to add/remove pieces as alternative to dragging (48dp touch targets)
 - [ ] **MANIP-09**: User can reset any manipulative to its starting state
-- [ ] **MANIP-10**: User receives haptic feedback on snap and grouping events
+- [x] **MANIP-10**: User receives haptic feedback on snap and grouping events
 - [ ] **MANIP-11**: User sees a running count/value that updates when objects are placed (not during drag)
 
 ### CPA Progression
@@ -52,7 +52,7 @@ Requirements for v0.4 Virtual Manipulatives milestone. Each maps to roadmap phas
 
 - [x] **FOUND-01**: Store schema supports CPA level per skill (STORE_VERSION 5 with migration)
 - [x] **FOUND-02**: Babel config updated for Reanimated 4 worklet compilation
-- [ ] **FOUND-03**: Shared drag primitives (DraggableItem, SnapZone) run snap logic on UI thread at 60fps
+- [x] **FOUND-03**: Shared drag primitives (DraggableItem, SnapZone) run snap logic on UI thread at 60fps
 - [x] **FOUND-04**: Manipulative-to-skill mapping table determines which manipulative suits each math concept
 
 ## Future Requirements
@@ -92,10 +92,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-02 | Phase 15 | Complete |
 | FOUND-04 | Phase 15 | Complete |
 | CPA-01 | Phase 15 | Complete |
-| FOUND-03 | Phase 16 | Pending |
+| FOUND-03 | Phase 16 | Complete |
 | MANIP-08 | Phase 16 | Pending |
 | MANIP-09 | Phase 16 | Pending |
-| MANIP-10 | Phase 16 | Pending |
+| MANIP-10 | Phase 16 | Complete |
 | MANIP-11 | Phase 16 | Pending |
 | MANIP-01 | Phase 17 | Pending |
 | MANIP-02 | Phase 17 | Pending |
