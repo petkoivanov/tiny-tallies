@@ -66,8 +66,8 @@
 **Plans**: 2 plans
 
 Plans:
-- [ ] 15-01-PLAN.md — CPA types, service, skill-manipulative mapping, and babel config fix
-- [ ] 15-02-PLAN.md — Store schema v4->v5 migration and commitSessionResults CPA integration
+- [x] 15-01-PLAN.md — CPA types, service, skill-manipulative mapping, and babel config fix
+- [x] 15-02-PLAN.md — Store schema v4->v5 migration and commitSessionResults CPA integration
 
 ### Phase 16: Shared Drag Primitives
 **Goal**: A reusable set of drag-and-drop primitives that run snap logic on the UI thread at 60fps, providing the interaction foundation for all 6 manipulatives
@@ -79,11 +79,11 @@ Plans:
   3. User can reset any manipulative to its starting state via a reset action
   4. User receives haptic feedback when items snap or group
   5. A running count/value display updates on drop events (not during active drag)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 16-01: TBD
-- [ ] 16-02: TBD
+- [ ] 16-01-PLAN.md — Types, snap math worklets, animation config, haptics, jest mocks, and GestureHandlerRootView
+- [ ] 16-02-PLAN.md — DraggableItem, SnapZone, and AnimatedCounter interactive components
 
 ### Phase 17: Manipulative Components
 **Goal**: All six virtual manipulatives are fully interactive standalone components that children can directly manipulate to explore math concepts
@@ -168,7 +168,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 12. Leitner Spaced Repetition | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 13. Prerequisite Graph & Outer Fringe | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 14. Smart Session Orchestration | v0.3 | 2/2 | Complete | 2026-03-03 |
-| 15. Foundation -- Store Schema, Services, and Mappings | 2/2 | Complete    | 2026-03-03 | - |
+| 15. Foundation -- Store Schema, Services, and Mappings | v0.4 | 2/2 | Complete | 2026-03-03 |
 | 16. Shared Drag Primitives | v0.4 | 0/2 | Not started | - |
 | 17. Manipulative Components | v0.4 | 0/3 | Not started | - |
 | 18. CPA Progression and Session Integration | v0.4 | 0/2 | Not started | - |
