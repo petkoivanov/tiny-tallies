@@ -5,6 +5,7 @@ import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { X } from 'lucide-react-native';
 import { colors, spacing, typography, layout } from '@/theme';
+import { AnswerFeedbackAnimation } from '@/components/animations/AnswerFeedbackAnimation';
 import { useSession } from '@/hooks/useSession';
 import type { RootStackParamList } from '@/navigation/types';
 import type { SessionPhase } from '@/services/session';
@@ -220,23 +221,33 @@ export default function SessionScreen() {
         {/* Answer Options (2x2 grid) */}
         <View style={styles.optionsGrid}>
           {options.map((option, index) => (
-            <Pressable
+            <AnswerFeedbackAnimation
               key={`option-${index}`}
-              onPress={() => handleAnswer(option.value)}
-              disabled={isFeedbackActive}
-              style={({ pressed }) => [
-                styles.optionButton,
-                pressed && !isFeedbackActive && styles.optionButtonPressed,
-                pressed && !isFeedbackActive && styles.optionButtonScaled,
-                isFeedbackActive && styles.optionButtonDisabled,
-                getOptionFeedbackStyle(option.value),
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={`Answer ${option.value}`}
-              testID={`answer-option-${index}`}
+              feedbackType={
+                isFeedbackActive && option.value === selectedAnswer
+                  ? feedbackState!.correct
+                    ? 'correct'
+                    : 'incorrect'
+                  : null
+              }
             >
-              <Text style={styles.optionText}>{option.value}</Text>
-            </Pressable>
+              <Pressable
+                onPress={() => handleAnswer(option.value)}
+                disabled={isFeedbackActive}
+                style={({ pressed }) => [
+                  styles.optionButton,
+                  pressed && !isFeedbackActive && styles.optionButtonPressed,
+                  pressed && !isFeedbackActive && styles.optionButtonScaled,
+                  isFeedbackActive && styles.optionButtonDisabled,
+                  getOptionFeedbackStyle(option.value),
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel={`Answer ${option.value}`}
+                testID={`answer-option-${index}`}
+              >
+                <Text style={styles.optionText}>{option.value}</Text>
+              </Pressable>
+            </AnswerFeedbackAnimation>
           ))}
         </View>
       </View>
@@ -312,8 +323,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: layout.borderRadius.lg,
     minHeight: layout.minTouchTarget + 16,
-    minWidth: 140,
-    width: '45%',
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: spacing.md,

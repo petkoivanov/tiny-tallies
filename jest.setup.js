@@ -25,12 +25,48 @@ jest.mock('@sentry/react-native', () => ({
   ReactNativeTracing: jest.fn(),
 }));
 
-// Mock react-native-reanimated
+// Mock react-native-reanimated (manual mock — react-native-reanimated/mock
+// tries to load native worklets and crashes in Jest)
 jest.mock('react-native-reanimated', () => {
-  const Reanimated = require('react-native-reanimated/mock');
-  Reanimated.default.call = () => {};
-  Reanimated.useReducedMotion = jest.fn(() => false);
-  return Reanimated;
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: {
+      View,
+      Text: View,
+      Image: View,
+      ScrollView: View,
+      FlatList: View,
+      createAnimatedComponent: (component) => component,
+      call: () => {},
+    },
+    useSharedValue: jest.fn((init) => ({ value: init })),
+    useAnimatedStyle: jest.fn((fn) => fn()),
+    useDerivedValue: jest.fn((fn) => ({ value: fn() })),
+    useAnimatedScrollHandler: jest.fn(() => jest.fn()),
+    withSpring: jest.fn((toValue) => toValue),
+    withTiming: jest.fn((toValue) => toValue),
+    withSequence: jest.fn((...args) => args[args.length - 1]),
+    withDelay: jest.fn((_, anim) => anim),
+    withRepeat: jest.fn((anim) => anim),
+    cancelAnimation: jest.fn(),
+    runOnJS: jest.fn((fn) => fn),
+    runOnUI: jest.fn((fn) => fn),
+    Easing: {
+      linear: jest.fn(),
+      ease: jest.fn(),
+      bezier: jest.fn(() => jest.fn()),
+      in: jest.fn(),
+      out: jest.fn(),
+      inOut: jest.fn(),
+    },
+    useReducedMotion: jest.fn(() => false),
+    FadeIn: { duration: jest.fn().mockReturnThis() },
+    FadeOut: { duration: jest.fn().mockReturnThis() },
+    SlideInRight: { duration: jest.fn().mockReturnThis() },
+    SlideOutLeft: { duration: jest.fn().mockReturnThis() },
+    Layout: { duration: jest.fn().mockReturnThis() },
+  };
 });
 
 // Mock react-native-gesture-handler
