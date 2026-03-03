@@ -34,7 +34,7 @@
 
 - [x] **Phase 11: Bayesian Knowledge Tracing** - BKT mastery estimation service with age-adjusted parameters and mastery/re-teaching thresholds (completed 2026-03-03)
 - [x] **Phase 12: Leitner Spaced Repetition** - Modified 6-box Leitner system with age-adjusted intervals and review queue scheduling (completed 2026-03-03)
-- [ ] **Phase 13: Prerequisite Graph & Outer Fringe** - BKT-mastery-based skill gating with outer fringe algorithm for new skill discovery
+- [x] **Phase 13: Prerequisite Graph & Outer Fringe** - BKT-mastery-based skill gating with outer fringe algorithm for new skill discovery (completed 2026-03-03)
 - [ ] **Phase 14: Smart Session Orchestration** - Session problem selection using 60/30/10 mix sourced from Leitner queue, outer fringe, and challenge pool
 
 ## Phase Details
@@ -179,5 +179,5 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 | 10. Animated Feedback & Celebrations | v0.2 | 2/2 | Complete | 2026-03-03 |
 | 11. Bayesian Knowledge Tracing | 2/2 | Complete    | 2026-03-03 | - |
 | 12. Leitner Spaced Repetition | 2/2 | Complete    | 2026-03-03 | - |
-| 13. Prerequisite Graph & Outer Fringe | 1/2 | In Progress|  | - |
+| 13. Prerequisite Graph & Outer Fringe | 2/2 | Complete   | 2026-03-03 | - |
 | 14. Smart Session Orchestration | v0.3 | 0/TBD | Not started | - |
