@@ -98,10 +98,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 17-01-PLAN.md — ManipulativeShell wrapper, Counters (two-color flip), and TenFrame (snap grid)
-- [ ] 17-02-PLAN.md — NumberLine (SVG + hop arrows) and FractionStrips (tap-to-shade + stacking)
-- [ ] 17-03-PLAN.md — BarModel (draggable dividers + NumberPicker wheel)
-- [ ] 17-04-PLAN.md — BaseTenBlocks (auto-group/decompose choreography + place-value mat)
+- [x] 17-01-PLAN.md — ManipulativeShell wrapper, Counters (two-color flip), and TenFrame (snap grid)
+- [x] 17-02-PLAN.md — NumberLine (SVG + hop arrows) and FractionStrips (tap-to-shade + stacking)
+- [x] 17-03-PLAN.md — BarModel (draggable dividers + NumberPicker wheel)
+- [x] 17-04-PLAN.md — BaseTenBlocks (auto-group/decompose choreography + place-value mat)
 
 ### Phase 18: CPA Progression and Session Integration
 **Goal**: Practice sessions automatically show the right representation (concrete manipulative, pictorial diagram, or abstract numbers) based on the child's mastery of each skill, with an embedded manipulative overlay for hands-on problem solving
@@ -113,11 +113,12 @@ Plans:
   3. User sees numbers only during practice when their skill mastery is high (abstract mode)
   4. User can expand and collapse a contextually-selected manipulative overlay during any practice problem
   5. CPA stage advances automatically after a practice session completes based on updated BKT mastery
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 18-01: TBD
-- [ ] 18-02: TBD
+- [ ] 18-01-PLAN.md — useCpaMode hook, ManipulativePanel animated drawer, CompactAnswerRow, and CpaModeIcon
+- [ ] 18-02-PLAN.md — 6 pictorial SVG diagram renderers and PictorialDiagram dispatcher
+- [ ] 18-03-PLAN.md — CpaSessionContent mode renderer, SessionScreen integration, and Results CPA celebration
 
 ### Phase 19: Sandbox Navigation
 **Goal**: Children can freely explore any manipulative without problem constraints, accessible from the home screen
@@ -171,7 +172,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 14. Smart Session Orchestration | v0.3 | 2/2 | Complete | 2026-03-03 |
 | 15. Foundation -- Store Schema, Services, and Mappings | v0.4 | 2/2 | Complete | 2026-03-03 |
 | 16. Shared Drag Primitives | v0.4 | 2/2 | Complete | 2026-03-03 |
-| 17. Manipulative Components | 4/4 | Complete    | 2026-03-03 | - |
-| 18. CPA Progression and Session Integration | v0.4 | 0/2 | Not started | - |
+| 17. Manipulative Components | v0.4 | 4/4 | Complete | 2026-03-03 |
+| 18. CPA Progression and Session Integration | v0.4 | 0/3 | Not started | - |
 | 19. Sandbox Navigation | v0.4 | 0/1 | Not started | - |
 | 20. Polish | v0.4 | 0/2 | Not started | - |
