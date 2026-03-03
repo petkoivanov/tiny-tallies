@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.3 Adaptive Learning Engine -- Phase 11 (Bayesian Knowledge Tracing)
+**Current focus:** v0.3 Adaptive Learning Engine -- Phase 12 (Leitner Spaced Repetition)
 
 ## Current Position
 
-Phase: 11 of 14 (Bayesian Knowledge Tracing)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-03-03 -- Completed 11-02 BKT Session Integration
+Phase: 12 of 14 (Leitner Spaced Repetition)
+Plan: 0 of TBD in current phase
+Status: Context gathered, ready to plan
+Last activity: 2026-03-03 -- Phase 12 context gathered
 
-Progress: [██████████] 100%
+Progress: [███░░░░░░░] 25%
 
 ## Performance Metrics
 
@@ -68,5 +68,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 11-02-PLAN.md (Phase 11 complete)
-Resume file: .planning/phases/11-bayesian-knowledge-tracing/11-02-SUMMARY.md
+Stopped at: Phase 12 context gathered, ready to plan
+Resume file: .planning/phases/12-leitner-spaced-repetition/12-CONTEXT.md
