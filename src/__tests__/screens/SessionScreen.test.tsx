@@ -45,9 +45,9 @@ const defaultUseSessionReturn: UseSessionReturn = {
   totalProblems: 15,
   sessionPhase: 'warmup',
   feedbackState: null,
-  isComplete: false,
   selectedAnswer: null,
   correctAnswer: 68,
+  isComplete: false,
   score: 0,
   handleAnswer: mockHandleAnswer,
   handleQuit: mockHandleQuit,
@@ -127,6 +127,13 @@ describe('SessionScreen', () => {
     expect(getByText('1 / 15')).toBeTruthy();
   });
 
+  it('renders progress bar', () => {
+    const { getByTestId } = render(<SessionScreen />);
+
+    expect(getByTestId('progress-bar')).toBeTruthy();
+    expect(getByTestId('progress-bar-fill')).toBeTruthy();
+  });
+
   it('displays session phase label', () => {
     const { getByText } = render(<SessionScreen />);
 
@@ -164,34 +171,45 @@ describe('SessionScreen', () => {
     expect(mockHandleAnswer).toHaveBeenCalledWith(68);
   });
 
-  it('shows correct feedback indicator', () => {
+  it('applies correct feedback style to selected answer button on correct answer', () => {
     mockUseSessionReturn = {
       ...defaultUseSessionReturn,
       feedbackState: { visible: true, correct: true },
+      selectedAnswer: 68,
     };
 
-    const { getByTestId, getByText } = render(<SessionScreen />);
+    const { getByTestId } = render(<SessionScreen />);
 
-    expect(getByTestId('feedback-indicator')).toBeTruthy();
-    expect(getByText('Correct!')).toBeTruthy();
+    // The selected answer button (option 0, value 68) should exist and be rendered
+    const correctButton = getByTestId('answer-option-0');
+    expect(correctButton).toBeTruthy();
+
+    // No feedback-indicator testID should exist (removed)
+    expect(() => getByTestId('feedback-indicator')).toThrow();
   });
 
-  it('shows incorrect feedback indicator', () => {
+  it('applies incorrect feedback style to selected answer button on wrong answer', () => {
     mockUseSessionReturn = {
       ...defaultUseSessionReturn,
       feedbackState: { visible: true, correct: false },
+      selectedAnswer: 58,
     };
 
-    const { getByTestId, getByText } = render(<SessionScreen />);
+    const { getByTestId } = render(<SessionScreen />);
 
-    expect(getByTestId('feedback-indicator')).toBeTruthy();
-    expect(getByText('Not quite')).toBeTruthy();
+    // The selected answer button (option 1, value 58) should exist and be rendered
+    const incorrectButton = getByTestId('answer-option-1');
+    expect(incorrectButton).toBeTruthy();
+
+    // No feedback-indicator testID should exist (removed)
+    expect(() => getByTestId('feedback-indicator')).toThrow();
   });
 
   it('disables answer buttons during feedback', () => {
     mockUseSessionReturn = {
       ...defaultUseSessionReturn,
       feedbackState: { visible: true, correct: true },
+      selectedAnswer: 68,
     };
 
     const { getByTestId } = render(<SessionScreen />);
@@ -238,7 +256,7 @@ describe('SessionScreen', () => {
     expect(mockDispatch).toHaveBeenCalledWith(mockAction);
   });
 
-  it('navigates to Results when session completes', () => {
+  it('navigates to Results with extended params when session completes', () => {
     mockUseSessionReturn = {
       ...defaultUseSessionReturn,
       isComplete: true,
@@ -249,7 +267,15 @@ describe('SessionScreen', () => {
         xpEarned: 150,
         durationMs: 120000,
         pendingUpdates: new Map(),
-        feedback: null,
+        feedback: {
+          xpEarned: 150,
+          newLevel: 3,
+          previousLevel: 2,
+          leveledUp: true,
+          levelsGained: 1,
+          streakCount: 2,
+          practicedThisWeek: true,
+        },
       },
     };
 
@@ -262,6 +288,36 @@ describe('SessionScreen', () => {
         total: 15,
         xpEarned: 150,
         durationMs: 120000,
+        leveledUp: true,
+        newLevel: 3,
+        streakCount: 2,
+      }),
+    );
+  });
+
+  it('navigates to Results with default gamification params when feedback is null', () => {
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      isComplete: true,
+      currentProblem: null,
+      sessionResult: {
+        score: 10,
+        total: 15,
+        xpEarned: 100,
+        durationMs: 90000,
+        pendingUpdates: new Map(),
+        feedback: null,
+      },
+    };
+
+    render(<SessionScreen />);
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      'Results',
+      expect.objectContaining({
+        leveledUp: false,
+        newLevel: 1,
+        streakCount: 0,
       }),
     );
   });
