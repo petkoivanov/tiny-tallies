@@ -1,13 +1,34 @@
 import {
   isSkillUnlocked,
   getUnlockedSkills,
-  UNLOCK_THRESHOLD,
+  getOuterFringe,
 } from '@/services/adaptive/prerequisiteGating';
 import { SKILLS } from '@/services/mathEngine/skills';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
 
-function makeSkillState(eloRating: number): SkillState {
-  return { eloRating, attempts: 10, correct: 8, masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false, leitnerBox: 1, nextReviewDue: null, consecutiveCorrectInBox6: 0 };
+function makeSkillState(overrides?: Partial<SkillState>): SkillState {
+  return {
+    eloRating: 1000,
+    attempts: 0,
+    correct: 0,
+    masteryProbability: 0.1,
+    consecutiveWrong: 0,
+    masteryLocked: false,
+    leitnerBox: 1,
+    nextReviewDue: null,
+    consecutiveCorrectInBox6: 0,
+    ...overrides,
+  };
+}
+
+function mastered(overrides?: Partial<SkillState>): SkillState {
+  return makeSkillState({
+    attempts: 20,
+    correct: 18,
+    masteryProbability: 0.97,
+    masteryLocked: true,
+    ...overrides,
+  });
 }
 
 describe('DAG validation', () => {
@@ -93,94 +114,149 @@ describe('DAG validation', () => {
   });
 });
 
-describe('prerequisiteGating', () => {
-  it('root skills are always unlocked', () => {
-    expect(
-      isSkillUnlocked('addition.single-digit.no-carry', {}),
-    ).toBe(true);
-    expect(
-      isSkillUnlocked('subtraction.single-digit.no-borrow', {}),
-    ).toBe(true);
+describe('isSkillUnlocked (BKT mastery)', () => {
+  it('root skills are always unlocked with empty skillStates', () => {
+    expect(isSkillUnlocked('addition.single-digit.no-carry', {})).toBe(true);
+    expect(isSkillUnlocked('subtraction.single-digit.no-borrow', {})).toBe(true);
   });
 
-  it('skill with met prerequisite is unlocked', () => {
+  it('skill with all prereqs having masteryLocked=true is unlocked', () => {
     const skillStates: Record<string, SkillState> = {
-      'addition.single-digit.no-carry': makeSkillState(950),
+      'addition.single-digit.no-carry': mastered(),
     };
-    expect(
-      isSkillUnlocked('addition.within-20.no-carry', skillStates),
-    ).toBe(true);
+    expect(isSkillUnlocked('addition.within-20.no-carry', skillStates)).toBe(true);
   });
 
-  it('skill with unmet prerequisite is locked', () => {
+  it('skill with any prereq having masteryLocked=false is locked', () => {
     const skillStates: Record<string, SkillState> = {
-      'addition.single-digit.no-carry': makeSkillState(900),
+      'addition.single-digit.no-carry': makeSkillState({ masteryLocked: false, attempts: 5 }),
     };
-    expect(
-      isSkillUnlocked('addition.within-20.no-carry', skillStates),
-    ).toBe(false);
+    expect(isSkillUnlocked('addition.within-20.no-carry', skillStates)).toBe(false);
   });
 
-  it('uses defaultElo when skill not in skillStates', () => {
-    // Default Elo is 1000, which >= 950 threshold, so prereq is met
-    expect(
-      isSkillUnlocked('addition.within-20.no-carry', {}),
-    ).toBe(true);
+  it('no-re-locking: skill with attempts > 0 stays unlocked even if prereq mastery lost', () => {
+    const skillStates: Record<string, SkillState> = {
+      'addition.single-digit.no-carry': makeSkillState({ masteryLocked: false, attempts: 10 }),
+      // The child has practiced within-20 (attempts > 0), so it stays unlocked
+      'addition.within-20.no-carry': makeSkillState({ attempts: 5, correct: 3 }),
+    };
+    expect(isSkillUnlocked('addition.within-20.no-carry', skillStates)).toBe(true);
   });
 
   it('unknown skillId returns false', () => {
     expect(isSkillUnlocked('nonexistent.skill', {})).toBe(false);
   });
 
-  it('getUnlockedSkills returns all root skills with empty state', () => {
+  it('prerequisite not in skillStates means not mastered (locked)', () => {
+    // addition.within-20.no-carry prereq is addition.single-digit.no-carry
+    // which is not in skillStates, so masteryLocked is not true -> locked
+    expect(isSkillUnlocked('addition.within-20.no-carry', {})).toBe(false);
+  });
+});
+
+describe('getUnlockedSkills (BKT mastery)', () => {
+  it('returns root skills with empty state', () => {
     const unlocked = getUnlockedSkills({});
     expect(unlocked).toContain('addition.single-digit.no-carry');
     expect(unlocked).toContain('subtraction.single-digit.no-borrow');
-    expect(unlocked.length).toBeGreaterThanOrEqual(2);
+    expect(unlocked).toHaveLength(2);
   });
 
-  it('getUnlockedSkills includes chain of unlocked skills', () => {
+  it('returns chain of unlocked skills when prereqs mastered', () => {
     const skillStates: Record<string, SkillState> = {
-      'addition.single-digit.no-carry': makeSkillState(1000),
-      'addition.within-20.no-carry': makeSkillState(960),
-      'addition.within-20.with-carry': makeSkillState(800), // below threshold
+      'addition.single-digit.no-carry': mastered(),
+      'addition.within-20.no-carry': mastered(),
     };
     const unlocked = getUnlockedSkills(skillStates);
-    // Root always included
     expect(unlocked).toContain('addition.single-digit.no-carry');
-    // within-20.no-carry: prereq (single-digit) has 1000 >= 950 -> unlocked
     expect(unlocked).toContain('addition.within-20.no-carry');
-    // within-20.with-carry: prereq (within-20.no-carry) has 960 >= 950 -> unlocked
     expect(unlocked).toContain('addition.within-20.with-carry');
-    // two-digit.no-carry: prereq (within-20.with-carry) has 800 < 950 -> LOCKED
+    // two-digit.no-carry requires within-20.with-carry to be mastered
     expect(unlocked).not.toContain('addition.two-digit.no-carry');
   });
+});
 
-  it('deeply chained skill requires all ancestors to meet threshold', () => {
-    // Build a full addition chain with all ancestors at or above threshold
-    const fullChain: Record<string, SkillState> = {
-      'addition.single-digit.no-carry': makeSkillState(1000),
-      'addition.within-20.no-carry': makeSkillState(980),
-      'addition.within-20.with-carry': makeSkillState(960),
-      'addition.two-digit.no-carry': makeSkillState(970),
-      'addition.two-digit.with-carry': makeSkillState(955),
-      'addition.three-digit.no-carry': makeSkillState(950),
+describe('getOuterFringe', () => {
+  it('empty skillStates: returns two root skills', () => {
+    const fringe = getOuterFringe({});
+    expect(fringe).toContain('addition.single-digit.no-carry');
+    expect(fringe).toContain('subtraction.single-digit.no-borrow');
+    expect(fringe).toHaveLength(2);
+  });
+
+  it('one root mastered: fringe includes second root + first next-in-chain skill', () => {
+    const skillStates: Record<string, SkillState> = {
+      'addition.single-digit.no-carry': mastered(),
     };
-    // three-digit.with-carry requires three-digit.no-carry >= 950 -> yes
-    expect(
-      isSkillUnlocked('addition.three-digit.with-carry', fullChain),
-    ).toBe(true);
+    const fringe = getOuterFringe(skillStates);
+    // Root mastered -> excluded from fringe
+    expect(fringe).not.toContain('addition.single-digit.no-carry');
+    // Next in addition chain is unlocked and not mastered -> in fringe
+    expect(fringe).toContain('addition.within-20.no-carry');
+    // Subtraction root still not mastered -> in fringe
+    expect(fringe).toContain('subtraction.single-digit.no-borrow');
+  });
 
-    // Set one ancestor below threshold
-    const brokenChain = {
-      ...fullChain,
-      'addition.three-digit.no-carry': makeSkillState(940),
+  it('all skills mastered: returns empty array', () => {
+    const skillStates: Record<string, SkillState> = {};
+    for (const skill of SKILLS) {
+      skillStates[skill.id] = mastered();
+    }
+    const fringe = getOuterFringe(skillStates);
+    expect(fringe).toHaveLength(0);
+  });
+
+  it('skill with attempts > 0 but not mastered: excluded from fringe (Leitner handles)', () => {
+    const skillStates: Record<string, SkillState> = {
+      // Root practiced but not mastered
+      'addition.single-digit.no-carry': makeSkillState({ attempts: 5, correct: 2, masteryLocked: false }),
     };
-    expect(
-      isSkillUnlocked('addition.three-digit.with-carry', brokenChain),
-    ).toBe(false);
+    const fringe = getOuterFringe(skillStates);
+    // Practiced but not mastered -> Leitner review, not fringe
+    expect(fringe).not.toContain('addition.single-digit.no-carry');
+    // Subtraction root still fresh -> in fringe
+    expect(fringe).toContain('subtraction.single-digit.no-borrow');
+  });
 
-    // Confirm threshold constant
-    expect(UNLOCK_THRESHOLD).toBe(950);
+  it('cross-link: subtraction skill only in fringe when BOTH prereqs mastered', () => {
+    // subtraction.within-20.no-borrow requires subtraction.single-digit.no-borrow AND addition.within-20.no-carry
+    const onlySubMastered: Record<string, SkillState> = {
+      'subtraction.single-digit.no-borrow': mastered(),
+    };
+    let fringe = getOuterFringe(onlySubMastered);
+    // Only subtraction prereq mastered, addition prereq not -> not in fringe
+    expect(fringe).not.toContain('subtraction.within-20.no-borrow');
+
+    const bothMastered: Record<string, SkillState> = {
+      'subtraction.single-digit.no-borrow': mastered(),
+      'addition.within-20.no-carry': mastered(),
+      // also need addition root mastered for the chain
+      'addition.single-digit.no-carry': mastered(),
+    };
+    fringe = getOuterFringe(bothMastered);
+    // Both prereqs mastered -> in fringe
+    expect(fringe).toContain('subtraction.within-20.no-borrow');
+  });
+
+  it('mastered skills are excluded from fringe', () => {
+    const skillStates: Record<string, SkillState> = {
+      'addition.single-digit.no-carry': mastered(),
+      'subtraction.single-digit.no-borrow': mastered(),
+    };
+    const fringe = getOuterFringe(skillStates);
+    expect(fringe).not.toContain('addition.single-digit.no-carry');
+    expect(fringe).not.toContain('subtraction.single-digit.no-borrow');
+  });
+
+  it('skill whose prereq lost mastery is not re-entered into fringe if it has attempts > 0', () => {
+    const skillStates: Record<string, SkillState> = {
+      'addition.single-digit.no-carry': makeSkillState({ masteryLocked: false, attempts: 20 }),
+      // Child practiced within-20 but prereq lost mastery
+      'addition.within-20.no-carry': makeSkillState({ attempts: 5, correct: 2, masteryLocked: false }),
+    };
+    const fringe = getOuterFringe(skillStates);
+    // Both practiced -> neither in fringe (Leitner handles)
+    expect(fringe).not.toContain('addition.single-digit.no-carry');
+    expect(fringe).not.toContain('addition.within-20.no-carry');
   });
 });
