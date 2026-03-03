@@ -52,10 +52,10 @@ Plans:
   2. Home screen shows current level number and an XP progress bar toward the next level
   3. Home screen displays the current weekly streak count
   4. A large "Start Practice" button is the primary call-to-action
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 08-01: Home screen dashboard layout with profile, XP bar, and streak display
+- [ ] 08-01-PLAN.md — Home screen dashboard with profile greeting, XP progress bar, streak display, and Start Practice button
 
 ### Phase 9: Session & Results UI Polish
 **Goal**: The practice experience feels polished, readable, and physically comfortable for small hands
