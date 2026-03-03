@@ -1,13 +1,44 @@
 # Requirements: Tiny Tallies
 
-**Defined:** 2026-03-02
+**Defined:** 2026-03-03
 **Core Value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
 
-## v0.2 Requirements
+## v0.3 Requirements
 
-Requirements for v0.2 UI Polish & Gamification milestone. Each maps to roadmap phases.
+Requirements for v0.3 Adaptive Learning Engine milestone. Each maps to roadmap phases.
 
-### UI Polish
+### BKT (Mastery Estimation)
+
+- [ ] **BKT-01**: Each skill tracks a mastery probability (P(L)) updated via Bayesian inference after every answer
+- [ ] **BKT-02**: BKT parameters are age-adjusted (younger children: higher guess rate, higher slip rate, lower learn rate)
+- [ ] **BKT-03**: Skill with P(L) ≥ 0.95 is marked as mastered and moves to review-only scheduling
+- [ ] **BKT-04**: Skill with P(L) < 0.40 is flagged for re-teaching priority
+
+### Leitner (Spaced Repetition)
+
+- [ ] **LEIT-01**: Each skill occupies one of 6 Leitner boxes determining its review interval
+- [ ] **LEIT-02**: Correct answer moves skill up one box (longer interval before next review)
+- [ ] **LEIT-03**: Wrong answer drops skill down 2 boxes (minimum Box 1), not all the way to Box 1
+- [ ] **LEIT-04**: Review intervals are age-adjusted (shorter gaps for younger children)
+- [ ] **LEIT-05**: Skill is considered mastered after 3 consecutive correct answers in Box 6
+
+### Prerequisite Graph
+
+- [ ] **PREG-01**: Skill prerequisite DAG defines unlock dependencies for all existing skills
+- [ ] **PREG-02**: Outer fringe algorithm computes which new skills are available based on mastered prerequisites
+- [ ] **PREG-03**: New skills are only presented in sessions when all their prerequisites are mastered
+
+### Session Orchestration
+
+- [ ] **SESS-01**: Session problems follow 60% review / 30% new / 10% challenge composition
+- [ ] **SESS-02**: Review problems are sourced from the Leitner queue (skills due for review)
+- [ ] **SESS-03**: New problems are sourced from the prerequisite outer fringe
+- [ ] **SESS-04**: Challenge problems are selected slightly above the child's current Elo rating
+- [ ] **SESS-05**: BKT mastery probabilities inform problem selection (deprioritize mastered skills, prioritize weak ones)
+
+## Previous Milestones (Shipped)
+
+### v0.2 — UI Polish & Gamification
 
 - [x] **UI-01**: Home screen shows child's name, level, XP progress bar, and a "Start Practice" button
 - [x] **UI-02**: Session screen displays the problem, answer options (multiple choice or free input), and progress indicator
@@ -15,9 +46,6 @@ Requirements for v0.2 UI Polish & Gamification milestone. Each maps to roadmap p
 - [x] **UI-04**: All touch targets are minimum 48dp for ages 6-9 motor skills
 - [x] **UI-05**: Dark theme with high contrast colors and child-friendly design
 - [x] **UI-06**: Animated feedback for correct answers (celebration) and incorrect answers (gentle encouragement)
-
-### Gamification
-
 - [x] **GAME-01**: Child earns XP for each correct answer (scaled by problem difficulty)
 - [x] **GAME-02**: XP accumulates toward levels with formula: XP per level = 100 + (level x 20)
 - [x] **GAME-03**: Level-up triggers celebration animation
@@ -27,13 +55,6 @@ Requirements for v0.2 UI Polish & Gamification milestone. Each maps to roadmap p
 ## Future Requirements
 
 Deferred to later milestones. Tracked but not in current roadmap.
-
-### Intelligence (v0.3)
-
-- **INTL-01**: Bayesian Knowledge Tracing per skill for mastery estimation
-- **INTL-02**: Modified Leitner spaced repetition with 6 boxes and age-adjusted intervals
-- **INTL-03**: Prerequisite graph with outer fringe algorithm for skill sequencing
-- **INTL-04**: Session composition follows 60% review / 30% new / 10% challenge ratio
 
 ### Manipulatives (v0.4)
 
@@ -55,32 +76,40 @@ Deferred to later milestones. Tracked but not in current roadmap.
 | Sound effects / audio | Requires audio asset pipeline; defer to dedicated audio milestone |
 | Parental controls / PIN | Deferred to subscription milestone (v0.8) |
 | Multiple child profiles | Deferred to social milestone (v0.8) |
-| Onboarding / placement test | Requires BKT (v0.3) to be meaningful |
+| Onboarding / placement test | Requires BKT to be meaningful; consider for v0.3+ |
 | Coin shop / purchasable items | Extended gamification in v0.7 |
 | Badges / achievements | Extended gamification in v0.7 |
 | Skill map visualization | Extended gamification in v0.7 |
 
 ## Traceability
 
+Which phases cover which requirements. Updated during roadmap creation.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| UI-01 | Phase 8 | Complete |
-| UI-02 | Phase 9 | Complete |
-| UI-03 | Phase 9 | Complete |
-| UI-04 | Phase 9 | Complete |
-| UI-05 | Phase 9 | Complete |
-| UI-06 | Phase 10 | Complete |
-| GAME-01 | Phase 7 | Complete |
-| GAME-02 | Phase 7 | Complete |
-| GAME-03 | Phase 10 | Complete |
-| GAME-04 | Phase 7 | Complete |
-| GAME-05 | Phase 8 | Complete |
+| BKT-01 | — | Pending |
+| BKT-02 | — | Pending |
+| BKT-03 | — | Pending |
+| BKT-04 | — | Pending |
+| LEIT-01 | — | Pending |
+| LEIT-02 | — | Pending |
+| LEIT-03 | — | Pending |
+| LEIT-04 | — | Pending |
+| LEIT-05 | — | Pending |
+| PREG-01 | — | Pending |
+| PREG-02 | — | Pending |
+| PREG-03 | — | Pending |
+| SESS-01 | — | Pending |
+| SESS-02 | — | Pending |
+| SESS-03 | — | Pending |
+| SESS-04 | — | Pending |
+| SESS-05 | — | Pending |
 
 **Coverage:**
-- v0.2 requirements: 11 total
-- Mapped to phases: 11
-- Unmapped: 0
+- v0.3 requirements: 16 total
+- Mapped to phases: 0
+- Unmapped: 16 ⚠️
 
 ---
-*Requirements defined: 2026-03-02*
-*Last updated: 2026-03-02 after roadmap creation*
+*Requirements defined: 2026-03-03*
+*Last updated: 2026-03-03 after initial definition*
