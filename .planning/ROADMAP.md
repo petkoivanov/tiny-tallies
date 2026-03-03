@@ -67,11 +67,11 @@ Plans:
   3. Results screen shows session summary with score, XP earned, and duration in a polished card layout
   4. Every interactive element across all screens meets the 48dp minimum touch target
   5. All screens use the high-contrast dark theme consistently with child-friendly color accents
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 09-01: Session screen problem display and answer layout polish
-- [ ] 09-02: Results screen polish and cross-screen touch target / theme audit
+- [ ] 09-01-PLAN.md — Session screen progress bar, answer button feedback coloring, scale-on-press, and extended Results nav params
+- [ ] 09-02-PLAN.md — Results screen XP bar, motivational message, streak/level-up callout, and cross-screen 48dp/theme audit
 
 ### Phase 10: Animated Feedback & Celebrations
 **Goal**: Children receive delightful, immediate visual feedback that reinforces learning and rewards milestones
