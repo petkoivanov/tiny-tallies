@@ -9,4 +9,6 @@ export * from './shared';
 export { Counters } from './Counters';
 export { TenFrame } from './TenFrame';
 export { BaseTenBlocks } from './BaseTenBlocks';
-// Remaining manipulatives will be added in Plans 17-03, 17-04
+export { NumberLine } from './NumberLine';
+export { FractionStrips } from './FractionStrips';
+export { BarModel } from './BarModel';
