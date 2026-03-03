@@ -38,12 +38,13 @@ created: 2026-03-03
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 20-01-01 | 01 | 1 | POL-02 | unit | `npm test -- --testPathPattern=useActionHistory` | ❌ W0 | ⬜ pending |
+| 20-01-01 | 01 | 1 | POL-01, POL-02 | unit | `npm test -- --testPathPattern="useActionHistory\|guidedSteps"` | ❌ W0 | ⬜ pending |
 | 20-01-02 | 01 | 1 | POL-02 | unit | `npm test -- --testPathPattern=ManipulativeShell` | ✅ | ⬜ pending |
-| 20-02-01 | 02 | 1 | POL-03 | unit | `npm test -- --testPathPattern=CountersGrid` | ❌ W0 | ⬜ pending |
-| 20-02-02 | 02 | 1 | POL-04 | unit | `npm test -- --testPathPattern=TenFrame` | ❌ W0 | ⬜ pending |
-| 20-03-01 | 03 | 2 | POL-01 | unit | `npm test -- --testPathPattern=GuidedHighlight` | ❌ W0 | ⬜ pending |
-| 20-03-02 | 03 | 2 | POL-01 | unit | `npm test -- --testPathPattern=guidedSteps` | ❌ W0 | ⬜ pending |
+| 20-01-03 | 01 | 1 | POL-01 | unit | `npm test -- --testPathPattern=GuidedHighlight` | ❌ W0 | ⬜ pending |
+| 20-02-01 | 02 | 2 | POL-01, POL-02 | unit + typecheck | `npm run typecheck && npm test -- --testPathPattern="Counters\|TenFrame\|BaseTenBlocks\|NumberLine\|FractionStrips\|BarModel"` | ✅ | ⬜ pending |
+| 20-02-02 | 02 | 2 | POL-01 | unit | `npm test -- --testPathPattern=CpaSessionContent` | ✅ | ⬜ pending |
+| 20-03-01 | 03 | 3 | POL-04 | unit | `npm test -- --testPathPattern="TenFrame\|CpaSessionContent\|SandboxScreen"` | ❌ W0 | ⬜ pending |
+| 20-03-02 | 03 | 3 | POL-03 | unit | `npm test -- --testPathPattern="CountersGrid\|Counters"` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -66,7 +67,7 @@ created: 2026-03-03
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Pulsing glow animation is visible and smooth | POL-01 | Animation visual quality is subjective | Trigger guided mode in concrete CPA, verify glow pulses smoothly on target |
+| Pulsing glow animation is visible and smooth on actual target zone/item | POL-01 | Animation visual quality is subjective | Trigger guided mode in concrete CPA, verify glow pulses smoothly on the target SnapZone/cell/counter inside the manipulative |
 | Undo reverse animation plays correctly | POL-02 | Animation direction and feel is visual | Perform action then undo, verify item animates back to previous position |
 | Counter grid/free toggle animation is smooth | POL-03 | Animation smoothness is device-dependent | Toggle grid/free mode, verify counters animate to/from grid positions |
 | Guided hints don't block manipulative gestures | POL-01 | Gesture interaction is device-dependent | With guided mode active, verify child can still freely interact with non-highlighted areas |
