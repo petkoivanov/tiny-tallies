@@ -1,5 +1,6 @@
 import {
   getUnlockedSkills,
+  getOuterFringe,
   selectSkill,
   selectTemplateForSkill,
   calculateEloUpdate,
@@ -13,6 +14,22 @@ import {
 import { generateProblem } from '@/services/mathEngine';
 import { createRng } from '@/services/mathEngine/seededRng';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
+
+/** Helper to create a SkillState with sensible defaults */
+function makeSkillState(overrides: Partial<SkillState> = {}): SkillState {
+  return {
+    eloRating: 1000,
+    attempts: 0,
+    correct: 0,
+    masteryProbability: 0.1,
+    consecutiveWrong: 0,
+    masteryLocked: false,
+    leitnerBox: 1 as const,
+    nextReviewDue: null,
+    consecutiveCorrectInBox6: 0,
+    ...overrides,
+  };
+}
 
 describe('adaptive difficulty integration', () => {
   it('full adaptive flow: select skill, template, generate problem, update Elo', () => {
@@ -137,5 +154,47 @@ describe('adaptive difficulty integration', () => {
     expect(resultA.newElo).not.toBe(resultB.newElo);
     expect(resultA.eloDelta).toBeGreaterThan(0);
     expect(resultB.eloDelta).toBeLessThan(0);
+  });
+
+  it('BKT-mastery gating: skill unlocks when prerequisite masteryLocked=true', () => {
+    // Create state where addition.single-digit.no-carry is mastered
+    const skillStates: Record<string, SkillState> = {
+      'addition.single-digit.no-carry': makeSkillState({
+        masteryLocked: true,
+        masteryProbability: 0.96,
+        attempts: 50,
+        correct: 45,
+      }),
+    };
+    const unlocked = getUnlockedSkills(skillStates);
+    // Next addition skill should be unlocked (prereq mastered)
+    expect(unlocked).toContain('addition.within-20.no-carry');
+    // subtraction.within-20.no-borrow requires BOTH subtraction root + addition.within-20.no-carry
+    // addition.within-20.no-carry is not mastered -> subtraction.within-20.no-borrow NOT unlocked
+    expect(unlocked).not.toContain('subtraction.within-20.no-borrow');
+  });
+
+  it('outer fringe returns ready-to-learn skills', () => {
+    const skillStates: Record<string, SkillState> = {
+      'addition.single-digit.no-carry': makeSkillState({
+        masteryLocked: true,
+        masteryProbability: 0.96,
+        attempts: 50,
+        correct: 45,
+      }),
+      'subtraction.single-digit.no-borrow': makeSkillState({
+        masteryLocked: true,
+        masteryProbability: 0.95,
+        attempts: 40,
+        correct: 35,
+      }),
+    };
+    const fringe = getOuterFringe(skillStates);
+    // addition.within-20.no-carry should be in fringe (prereq mastered, not practiced)
+    expect(fringe).toContain('addition.within-20.no-carry');
+    // subtraction.within-20.no-borrow needs BOTH prereqs mastered
+    // (subtraction.single-digit.no-borrow + addition.within-20.no-carry)
+    // addition.within-20.no-carry is NOT mastered -> NOT in fringe
+    expect(fringe).not.toContain('subtraction.within-20.no-borrow');
   });
 });
