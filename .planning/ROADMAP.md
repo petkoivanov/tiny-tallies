@@ -105,7 +105,10 @@ Plans:
   3. Tutor delivers Socratic hints that guide thinking without ever revealing the answer
   4. Chat state resets completely when the problem advances, with any in-flight LLM calls cancelled via AbortController
   5. When the device is offline, child sees a friendly message explaining help is unavailable and practice continues normally
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 23-01-PLAN.md — Chat building blocks: HelpButton, ChatBubble, TypingIndicator, ChatMessageList, useNetworkStatus
+- [ ] 23-02-PLAN.md — ResponseButtons, ChatPanel, and SessionScreen integration with full chat flow
 
 ### Phase 24: TEACH, BOOST & Auto-Escalation
 **Goal**: The tutor automatically escalates from hints to CPA-aware teaching with manipulatives to deep scaffolding based on the child's struggle level, with Bug Library misconception tags informing explanations
@@ -147,6 +150,6 @@ Phases execute in numeric order: 21 -> 22 -> 23 -> 24
 | 19. Sandbox Navigation | v0.4 | 2/2 | Complete | 2026-03-03 |
 | 20. Polish | v0.4 | 4/4 | Complete | 2026-03-04 |
 | 21. LLM Service & Store | v0.5 | 3/3 | Complete | 2026-03-04 |
-| 22. Safety & Compliance | 3/3 | Complete    | 2026-03-04 | - |
-| 23. Chat UI & HINT Mode | v0.5 | 0/? | Not started | - |
+| 22. Safety & Compliance | v0.5 | 3/3 | Complete | 2026-03-04 |
+| 23. Chat UI & HINT Mode | v0.5 | 0/2 | Not started | - |
 | 24. TEACH, BOOST & Auto-Escalation | v0.5 | 0/? | Not started | - |
