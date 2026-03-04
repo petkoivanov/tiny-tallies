@@ -57,7 +57,7 @@
 ### v0.5 AI Tutor (In Progress)
 
 - [x] **Phase 21: LLM Service & Store** - Gemini client, prompt templates, rate limiting, tutor store slice, and core lifecycle hook (completed 2026-03-04)
-- [ ] **Phase 22: Safety & Compliance** - Output filtering, COPPA data minimization, safety filters, content validation, fallback responses, and VPC gate
+- [x] **Phase 22: Safety & Compliance** - Output filtering, COPPA data minimization, safety filters, content validation, fallback responses, and VPC gate (completed 2026-03-04)
 - [ ] **Phase 23: Chat UI & HINT Mode** - Help button, chat bubble UI, response buttons, per-problem reset, offline detection, and Socratic hint delivery
 - [ ] **Phase 24: TEACH, BOOST & Auto-Escalation** - TEACH mode with manipulative integration, BOOST mode scaffolding, auto-escalation state machine, and Bug Library-informed explanations
 
@@ -89,7 +89,7 @@ Plans:
   3. Outbound prompts never contain child name, specific age, or profile data -- only math problem, numeric answer, and misconception tag
   4. Content validator rejects responses exceeding sentence length or vocabulary limits for the child's age bracket, substituting a canned fallback
   5. When LLM fails, is blocked, times out, or is rate-limited, the child sees a friendly canned fallback response and the session continues uninterrupted
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 22-01-PLAN.md — Safety types, constants, and pure filter functions with tests
 - [ ] 22-02-PLAN.md — Gemini client safety settings, system instruction enhancement, and consent store migration
@@ -147,6 +147,6 @@ Phases execute in numeric order: 21 -> 22 -> 23 -> 24
 | 19. Sandbox Navigation | v0.4 | 2/2 | Complete | 2026-03-03 |
 | 20. Polish | v0.4 | 4/4 | Complete | 2026-03-04 |
 | 21. LLM Service & Store | v0.5 | 3/3 | Complete | 2026-03-04 |
-| 22. Safety & Compliance | 2/3 | In Progress|  | - |
+| 22. Safety & Compliance | 3/3 | Complete   | 2026-03-04 | - |
 | 23. Chat UI & HINT Mode | v0.5 | 0/? | Not started | - |
 | 24. TEACH, BOOST & Auto-Escalation | v0.5 | 0/? | Not started | - |
