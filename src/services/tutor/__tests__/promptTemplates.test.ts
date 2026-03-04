@@ -4,7 +4,11 @@ import {
   buildTeachPrompt,
   buildBoostPrompt,
 } from '../promptTemplates';
-import type { PromptParams, BoostPromptParams } from '../types';
+import type {
+  PromptParams,
+  BoostPromptParams,
+  ConfirmedMisconceptionContext,
+} from '../types';
 
 function makeParams(overrides: Partial<PromptParams> = {}): PromptParams {
   return {
@@ -275,5 +279,260 @@ describe('buildBoostPrompt', () => {
   it('includes WHY explanation instruction', () => {
     const result = buildBoostPrompt(makeBoostParams());
     expect(result).toContain('WHY');
+  });
+});
+
+// --- Misconception context in prompts ---
+
+describe('misconception context in prompts', () => {
+  const sampleMisconceptions: ConfirmedMisconceptionContext[] = [
+    { bugTag: 'add_no_carry', description: 'ignores carry in addition' },
+    { bugTag: 'sub_smaller_from_larger', description: 'always subtracts smaller from larger digit' },
+  ];
+
+  describe('buildHintPrompt with confirmedMisconceptions', () => {
+    it('includes "Steer them away from these mistakes" guidance', () => {
+      const result = buildHintPrompt(
+        makeParams({
+          tutorMode: 'hint',
+          confirmedMisconceptions: sampleMisconceptions,
+        }),
+      );
+      expect(result).toContain('Steer them away from these mistakes');
+    });
+
+    it('includes each misconception description', () => {
+      const result = buildHintPrompt(
+        makeParams({
+          tutorMode: 'hint',
+          confirmedMisconceptions: sampleMisconceptions,
+        }),
+      );
+      expect(result).toContain('ignores carry in addition');
+      expect(result).toContain('always subtracts smaller from larger digit');
+    });
+
+    it('includes "Historical misconception patterns" section header', () => {
+      const result = buildHintPrompt(
+        makeParams({
+          tutorMode: 'hint',
+          confirmedMisconceptions: sampleMisconceptions,
+        }),
+      );
+      expect(result).toContain('Historical misconception patterns for this skill:');
+    });
+  });
+
+  describe('buildTeachPrompt with confirmedMisconceptions', () => {
+    it('includes "Address these step by step" guidance', () => {
+      const result = buildTeachPrompt(
+        makeParams({
+          tutorMode: 'teach',
+          confirmedMisconceptions: sampleMisconceptions,
+        }),
+      );
+      expect(result).toContain('Address these step by step');
+    });
+
+    it('includes each misconception description', () => {
+      const result = buildTeachPrompt(
+        makeParams({
+          tutorMode: 'teach',
+          confirmedMisconceptions: sampleMisconceptions,
+        }),
+      );
+      expect(result).toContain('ignores carry in addition');
+      expect(result).toContain('always subtracts smaller from larger digit');
+    });
+  });
+
+  describe('buildBoostPrompt with confirmedMisconceptions', () => {
+    function makeBoostWithMisconceptions(
+      overrides: Partial<BoostPromptParams> = {},
+    ): BoostPromptParams {
+      return {
+        ageBracket: '7-8',
+        cpaStage: 'concrete',
+        problemText: '3 + 4',
+        operation: 'addition',
+        tutorMode: 'boost',
+        hintLevel: 0,
+        correctAnswer: 7,
+        ...overrides,
+      };
+    }
+
+    it('includes "Explain why these patterns lead to wrong answers" guidance', () => {
+      const result = buildBoostPrompt(
+        makeBoostWithMisconceptions({
+          confirmedMisconceptions: sampleMisconceptions,
+        }),
+      );
+      expect(result).toContain('Explain why these patterns lead to wrong answers');
+    });
+
+    it('includes each misconception description', () => {
+      const result = buildBoostPrompt(
+        makeBoostWithMisconceptions({
+          confirmedMisconceptions: sampleMisconceptions,
+        }),
+      );
+      expect(result).toContain('ignores carry in addition');
+      expect(result).toContain('always subtracts smaller from larger digit');
+    });
+  });
+
+  describe('backward compatibility', () => {
+    it('hint prompt unchanged when confirmedMisconceptions is undefined', () => {
+      const withoutMisconceptions = buildHintPrompt(makeParams({ tutorMode: 'hint' }));
+      const withEmptyMisconceptions = buildHintPrompt(
+        makeParams({ tutorMode: 'hint', confirmedMisconceptions: undefined }),
+      );
+      expect(withoutMisconceptions).toBe(withEmptyMisconceptions);
+    });
+
+    it('hint prompt unchanged when confirmedMisconceptions is empty array', () => {
+      const withoutMisconceptions = buildHintPrompt(makeParams({ tutorMode: 'hint' }));
+      const withEmptyArray = buildHintPrompt(
+        makeParams({ tutorMode: 'hint', confirmedMisconceptions: [] }),
+      );
+      expect(withoutMisconceptions).toBe(withEmptyArray);
+    });
+
+    it('teach prompt unchanged when confirmedMisconceptions is undefined', () => {
+      const withoutMisconceptions = buildTeachPrompt(makeParams({ tutorMode: 'teach' }));
+      const withUndefined = buildTeachPrompt(
+        makeParams({ tutorMode: 'teach', confirmedMisconceptions: undefined }),
+      );
+      expect(withoutMisconceptions).toBe(withUndefined);
+    });
+
+    it('teach prompt unchanged when confirmedMisconceptions is empty array', () => {
+      const withoutMisconceptions = buildTeachPrompt(makeParams({ tutorMode: 'teach' }));
+      const withEmptyArray = buildTeachPrompt(
+        makeParams({ tutorMode: 'teach', confirmedMisconceptions: [] }),
+      );
+      expect(withoutMisconceptions).toBe(withEmptyArray);
+    });
+
+    it('boost prompt unchanged when confirmedMisconceptions is empty array', () => {
+      const boostBase = {
+        ageBracket: '7-8' as const,
+        cpaStage: 'concrete' as const,
+        problemText: '3 + 4',
+        operation: 'addition',
+        tutorMode: 'boost' as const,
+        hintLevel: 0,
+        correctAnswer: 7,
+      };
+      const withoutMisconceptions = buildBoostPrompt(boostBase);
+      const withEmptyArray = buildBoostPrompt({
+        ...boostBase,
+        confirmedMisconceptions: [],
+      });
+      expect(withoutMisconceptions).toBe(withEmptyArray);
+    });
+  });
+
+  describe('cap at 3 misconceptions', () => {
+    const fourMisconceptions: ConfirmedMisconceptionContext[] = [
+      { bugTag: 'bug1', description: 'first misconception' },
+      { bugTag: 'bug2', description: 'second misconception' },
+      { bugTag: 'bug3', description: 'third misconception' },
+      { bugTag: 'bug4', description: 'fourth misconception' },
+    ];
+
+    it('includes only first 3 misconception descriptions in hint prompt', () => {
+      const result = buildHintPrompt(
+        makeParams({
+          tutorMode: 'hint',
+          confirmedMisconceptions: fourMisconceptions,
+        }),
+      );
+      expect(result).toContain('first misconception');
+      expect(result).toContain('second misconception');
+      expect(result).toContain('third misconception');
+      expect(result).not.toContain('fourth misconception');
+    });
+
+    it('includes only first 3 misconception descriptions in teach prompt', () => {
+      const result = buildTeachPrompt(
+        makeParams({
+          tutorMode: 'teach',
+          confirmedMisconceptions: fourMisconceptions,
+        }),
+      );
+      expect(result).toContain('first misconception');
+      expect(result).toContain('second misconception');
+      expect(result).toContain('third misconception');
+      expect(result).not.toContain('fourth misconception');
+    });
+
+    it('includes only first 3 misconception descriptions in boost prompt', () => {
+      const result = buildBoostPrompt({
+        ageBracket: '7-8',
+        cpaStage: 'concrete',
+        problemText: '3 + 4',
+        operation: 'addition',
+        tutorMode: 'boost',
+        hintLevel: 0,
+        correctAnswer: 7,
+        confirmedMisconceptions: fourMisconceptions,
+      });
+      expect(result).toContain('first misconception');
+      expect(result).toContain('second misconception');
+      expect(result).toContain('third misconception');
+      expect(result).not.toContain('fourth misconception');
+    });
+  });
+
+  describe('bugDescription and confirmedMisconceptions coexist', () => {
+    it('hint prompt includes both bugDescription (immediate) and misconception context (historical)', () => {
+      const result = buildHintPrompt(
+        makeParams({
+          tutorMode: 'hint',
+          bugDescription: 'ignores carry',
+          confirmedMisconceptions: [
+            { bugTag: 'sub_smaller_from_larger', description: 'always subtracts smaller from larger digit' },
+          ],
+        }),
+      );
+      // Immediate context
+      expect(result).toContain('ignores carry');
+      // Historical context
+      expect(result).toContain('always subtracts smaller from larger digit');
+    });
+
+    it('teach prompt includes both bugDescription and misconception context', () => {
+      const result = buildTeachPrompt(
+        makeParams({
+          tutorMode: 'teach',
+          bugDescription: 'ignores carry',
+          confirmedMisconceptions: [
+            { bugTag: 'sub_smaller_from_larger', description: 'always subtracts smaller from larger digit' },
+          ],
+        }),
+      );
+      expect(result).toContain('ignores carry');
+      expect(result).toContain('always subtracts smaller from larger digit');
+    });
+
+    it('boost prompt includes both bugDescription and misconception context', () => {
+      const result = buildBoostPrompt({
+        ageBracket: '7-8',
+        cpaStage: 'concrete',
+        problemText: '3 + 4',
+        operation: 'addition',
+        tutorMode: 'boost',
+        hintLevel: 0,
+        correctAnswer: 7,
+        bugDescription: 'ignores carry',
+        confirmedMisconceptions: [
+          { bugTag: 'sub_smaller_from_larger', description: 'always subtracts smaller from larger digit' },
+        ],
+      });
+      expect(result).toContain('ignores carry');
+      expect(result).toContain('always subtracts smaller from larger digit');
+    });
   });
 });
