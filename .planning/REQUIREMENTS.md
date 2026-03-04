@@ -9,11 +9,11 @@ Requirements for AI Tutor milestone. Each maps to roadmap phases.
 
 ### LLM Service
 
-- [ ] **LLM-01**: Gemini client singleton with lazy initialization and API key from expo-secure-store
-- [ ] **LLM-02**: Prompt templates as pure functions parameterized by child age, CPA stage, and problem context
+- [x] **LLM-01**: Gemini client singleton with lazy initialization and API key from expo-secure-store
+- [x] **LLM-02**: Prompt templates as pure functions parameterized by child age, CPA stage, and problem context
 - [ ] **LLM-03**: System instruction enforces safety rules (no answer reveal, age-appropriate language, effort praise only)
-- [ ] **LLM-04**: Non-streaming Gemini API call with AbortController and 8-second timeout
-- [ ] **LLM-05**: Rate limiting (max 3 calls/problem, 20/session, 50/day configurable)
+- [x] **LLM-04**: Non-streaming Gemini API call with AbortController and 8-second timeout
+- [x] **LLM-05**: Rate limiting (max 3 calls/problem, 20/session, 50/day configurable)
 
 ### Chat UI
 
@@ -84,11 +84,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LLM-01 | Phase 21 | Pending |
-| LLM-02 | Phase 21 | Pending |
+| LLM-01 | Phase 21 | Complete |
+| LLM-02 | Phase 21 | Complete |
 | LLM-03 | Phase 22 | Pending |
-| LLM-04 | Phase 21 | Pending |
-| LLM-05 | Phase 21 | Pending |
+| LLM-04 | Phase 21 | Complete |
+| LLM-05 | Phase 21 | Complete |
 | CHAT-01 | Phase 23 | Pending |
 | CHAT-02 | Phase 23 | Pending |
 | CHAT-03 | Phase 23 | Pending |

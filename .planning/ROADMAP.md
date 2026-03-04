@@ -56,7 +56,7 @@
 
 ### v0.5 AI Tutor (In Progress)
 
-- [ ] **Phase 21: LLM Service & Store** - Gemini client, prompt templates, rate limiting, tutor store slice, and core lifecycle hook
+- [x] **Phase 21: LLM Service & Store** - Gemini client, prompt templates, rate limiting, tutor store slice, and core lifecycle hook (completed 2026-03-04)
 - [ ] **Phase 22: Safety & Compliance** - Output filtering, COPPA data minimization, safety filters, content validation, fallback responses, and VPC gate
 - [ ] **Phase 23: Chat UI & HINT Mode** - Help button, chat bubble UI, response buttons, per-problem reset, offline detection, and Socratic hint delivery
 - [ ] **Phase 24: TEACH, BOOST & Auto-Escalation** - TEACH mode with manipulative integration, BOOST mode scaffolding, auto-escalation state machine, and Bug Library-informed explanations
@@ -73,7 +73,7 @@
   3. LLM calls abort cleanly via AbortController and enforce an 8-second timeout
   4. Rate limiter blocks calls exceeding 3/problem, 20/session, or 50/day thresholds and returns a user-friendly message
   5. Tutor store slice holds chat messages, tutor mode, hint level, and loading/error state without persisting to AsyncStorage or triggering a store migration
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 21-01-PLAN.md — Tutor types, ephemeral tutorSlice, and appStore integration
 - [ ] 21-02-PLAN.md — Prompt templates, rate limiter, and Gemini client services
@@ -142,7 +142,7 @@ Phases execute in numeric order: 21 -> 22 -> 23 -> 24
 | 18. CPA Progression and Session Integration | v0.4 | 3/3 | Complete | 2026-03-03 |
 | 19. Sandbox Navigation | v0.4 | 2/2 | Complete | 2026-03-03 |
 | 20. Polish | v0.4 | 4/4 | Complete | 2026-03-04 |
-| 21. LLM Service & Store | 1/3 | In Progress|  | - |
+| 21. LLM Service & Store | 3/3 | Complete   | 2026-03-04 | - |
 | 22. Safety & Compliance | v0.5 | 0/? | Not started | - |
 | 23. Chat UI & HINT Mode | v0.5 | 0/? | Not started | - |
 | 24. TEACH, BOOST & Auto-Escalation | v0.5 | 0/? | Not started | - |

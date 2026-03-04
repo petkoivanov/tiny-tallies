@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.5
 milestone_name: AI Tutor
 status: executing
-stopped_at: Completed 21-01-PLAN.md
+stopped_at: Completed 21-02-PLAN.md
 last_updated: "2026-03-04"
-last_activity: 2026-03-04 -- Completed Plan 21-01 (Tutor Types & State)
+last_activity: 2026-03-04 -- Completed Plan 21-02 (Core Tutor Service Modules)
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 21 of 24 (LLM Service & Store)
-Plan: 1 of 3 complete
+Plan: 2 of 3 complete
 Status: Executing
-Last activity: 2026-03-04 -- Completed Plan 21-01 (Tutor Types & State)
+Last activity: 2026-03-04 -- Completed Plan 21-02 (Core Tutor Service Modules)
 
-Progress: [███░░░░░░░] 33%
+Progress: [██████░░░░] 67%
 
 ## Performance Metrics
 
@@ -42,6 +42,7 @@ Progress: [███░░░░░░░] 33%
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 21    | 01   | 2min     | 2     | 5     |
+| 21    | 02   | 7min     | 2     | 7     |
 
 ## Accumulated Context
 
@@ -56,13 +57,16 @@ Key context carried from v0.4:
 - ManipulativePanel is in-screen collapsible (not Modal) -- tutor TEACH mode signals expansion
 - LLM must NEVER compute math or reveal answers in HINT mode
 - Non-streaming generateContent is the stable primary path for v0.5 (streaming deferred)
-- 782 tests passing, TypeScript clean
+- 805 tests passing, TypeScript clean (except pre-existing Plan 03 stub errors)
 
 v0.5 Phase 21 decisions:
 - tutorSlice excluded from partialize -- fully ephemeral, no AsyncStorage persistence
 - STORE_VERSION stays at 5 -- no migration needed for ephemeral state
 - Daily call count reset uses ISO date string comparison for simplicity
 - PromptParams deliberately excludes correctAnswer -- LLM must never see it
+- AbortSignal.any() with manual listener fallback for Hermes compatibility
+- @ts-expect-error for httpOptions.signal typing (runtime-supported, not typed in SDK v1.30)
+- Word limits: 6-7=8 words, 7-8=10 words, 8-9=12 words per sentence
 
 ### Pending Todos
 
@@ -74,7 +78,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T06:14:45.153Z
-Stopped at: Completed 21-01-PLAN.md
+Last session: 2026-03-04T06:20:32.964Z
+Stopped at: Completed 21-02-PLAN.md
 Resume file: None
 Resume command: /gsd:execute-phase 21
