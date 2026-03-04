@@ -174,4 +174,4 @@ Phases execute in numeric order: 21 -> 22 -> 23 -> 24 -> 25
 | 22. Safety & Compliance | v0.5 | 3/3 | Complete | 2026-03-04 |
 | 23. Chat UI & HINT Mode | v0.5 | 2/2 | Complete | 2026-03-04 |
 | 24. TEACH, BOOST & Auto-Escalation | v0.5 | 3/3 | Complete | 2026-03-04 |
-| 25. Consent Gate & Minor Fixes | 2/2 | Complete   | 2026-03-04 | - |
+| 25. Consent Gate & Minor Fixes | 2/2 | Complete    | 2026-03-04 | - |
