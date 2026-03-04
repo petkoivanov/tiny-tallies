@@ -42,7 +42,23 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ### Active
 
-(None — planning next milestone)
+## Current Milestone: v0.6 Misconception Detection
+
+**Goal:** Track misconception patterns across sessions using the 2-then-3 confirmation rule, store misconception history per child, and deliver targeted interventions — shifting from reactive per-problem feedback to systematic misconception remediation.
+
+**Target features:**
+- Cross-session misconception pattern tracking (which Bug Library tags a child triggers over time)
+- 2-then-3 confirmation rule: 2 occurrences = suspected, 3 = confirmed misconception
+- Misconception history persisted in child profile (store)
+- Targeted interventions: session mix prioritization for confirmed misconceptions
+- AI tutor context enrichment with confirmed misconception data
+- Remediation mini-sessions for confirmed misconceptions
+
+- [ ] Cross-session misconception tracking with 2-then-3 confirmation
+- [ ] Misconception history in store with persistence
+- [ ] Session mix adaptation for confirmed misconceptions
+- [ ] AI tutor misconception-aware explanations
+- [ ] Remediation flow for confirmed misconceptions
 
 ### Out of Scope
 
@@ -103,8 +119,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tutoring engine design, virtual manipulatives specs, misconception detection patterns, spaced repetition algorithms, gamification design, onboarding/placement testing, child UX design, sound/audio design, math anxiety mitigation, COPPA privacy compliance, problem generation engine.
 
 **Future milestones:**
-- v0.6: Misconception detection system (Bug Library + interventions, 2-then-3 confirmation)
-- v0.7: Extended gamification (coins, shop, badges, skill map)
+- v0.7: Gamification — achievement badges, skill map, daily challenges (XP + special badges), avatar customization, themes (no coins/economy, no collectibles)
 - v0.8: Social & subscription (family groups, parent dashboard, IAP)
 
 ## Constraints
@@ -159,4 +174,4 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | Non-streaming Gemini calls | Simpler implementation, streaming deferred to future | ✓ Good — stable primary path for v0.5 |
 
 ---
-*Last updated: 2026-03-04 after v0.5 milestone*
+*Last updated: 2026-03-04 after v0.6 milestone started*

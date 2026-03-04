@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: between_milestones
-stopped_at: v0.5 AI Tutor milestone archived
-last_updated: "2026-03-04T17:15:00Z"
-last_activity: 2026-03-04 -- Archived v0.5 AI Tutor milestone
+milestone: v0.6
+milestone_name: Misconception Detection
+status: defining_requirements
+stopped_at: null
+last_updated: "2026-03-04T18:00:00Z"
+last_activity: 2026-03-04 -- Milestone v0.6 started
 progress:
   total_phases: 0
   completed_phases: 0
@@ -20,12 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** Planning next milestone
+**Current focus:** v0.6 Misconception Detection — defining requirements
 
 ## Current Position
 
-Status: Between milestones (v0.5 complete, v0.6 not started)
-Last activity: 2026-03-04 -- Archived v0.5 AI Tutor milestone
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-04 — Milestone v0.6 started
 
 ## Performance Metrics
 
@@ -50,6 +52,8 @@ Key context:
 - LLM must NEVER compute math or reveal answers in HINT mode
 - 1,051 tests passing, TypeScript clean
 - ~29,092 LOC TypeScript
+- Bug Library has 11 misconception patterns with three-phase distractor assembly
+- BKT tracks per-skill mastery with age-adjusted parameters
 
 ### Pending Todos
 
@@ -62,6 +66,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-04
-Stopped at: v0.5 milestone archived
+Stopped at: Milestone v0.6 initialized
 Resume file: N/A
-Resume command: /gsd:new-milestone
+Resume command: /gsd:new-milestone (continue from research/requirements)
