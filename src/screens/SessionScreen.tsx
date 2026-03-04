@@ -84,6 +84,7 @@ export default function SessionScreen() {
   const incrementWrongAnswerCount = useAppStore(
     (s) => s.incrementWrongAnswerCount,
   );
+  const tutorConsentGranted = useAppStore((s) => s.tutorConsentGranted);
 
   // Chat UI state
   const [chatOpen, setChatOpen] = useState(false);
@@ -91,6 +92,9 @@ export default function SessionScreen() {
   const [helpUsed, setHelpUsed] = useState(false);
   const [shouldPulse, setShouldPulse] = useState(false);
   const autoCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Track whether consent was pending (child tapped Help without consent, then navigated to ConsentScreen)
+  const consentPendingRef = useRef(false);
 
   // BOOST mode: derived directly from tutor mode for immediate availability
   const boostReveal = tutor.tutorMode === 'boost';
@@ -128,6 +132,17 @@ export default function SessionScreen() {
       setChatOpen(false);
     }
   }, [tutor.shouldExpandManipulative, chatOpen]);
+
+  // Auto-fire tutor request when returning from ConsentScreen with consent granted
+  useEffect(() => {
+    if (tutorConsentGranted && consentPendingRef.current) {
+      consentPendingRef.current = false;
+      // Chat is already open from the handleHelpTap that triggered navigation
+      if (isOnline) {
+        tutor.requestHint();
+      }
+    }
+  }, [tutorConsentGranted, isOnline, tutor]);
 
   // Per-problem reset (chat, escalation state, wrong context)
   useEffect(() => {
@@ -244,16 +259,31 @@ export default function SessionScreen() {
     ],
   );
 
-  // Handle help tap: open chat and request first hint
+  // Handle help tap: open chat and request first hint (or intercept for consent)
   const handleHelpTap = useCallback(() => {
     setHelpUsed(true);
     setShouldPulse(false);
     setChatOpen(true);
     setChatMinimized(false);
+
+    if (!tutorConsentGranted) {
+      // Show child-friendly consent message in chat
+      addTutorMessage({
+        id: `consent-${Date.now()}`,
+        role: 'tutor',
+        text: 'Ask a grown-up to turn on your math helper! They can set it up for you.',
+        timestamp: Date.now(),
+      });
+      // Set pending flag and navigate to ConsentScreen
+      consentPendingRef.current = true;
+      navigation.navigate('Consent');
+      return;
+    }
+
     if (isOnline) {
       tutor.requestHint();
     }
-  }, [isOnline, tutor]);
+  }, [isOnline, tutor, tutorConsentGranted, addTutorMessage, navigation]);
 
   // Determine response mode based on tutor mode
   const responseMode = tutor.tutorMode === 'boost' ? 'gotit' : 'standard';
@@ -304,7 +334,9 @@ export default function SessionScreen() {
           break;
         }
         case 'retry': {
-          tutor.requestTutor();
+          if (isOnline) {
+            tutor.requestTutor();
+          }
           break;
         }
         case 'gotit': {
@@ -322,7 +354,7 @@ export default function SessionScreen() {
         }
       }
     },
-    [addTutorMessage, tutor],
+    [addTutorMessage, tutor, isOnline],
   );
 
   const handleCloseChat = useCallback(() => {
