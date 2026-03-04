@@ -138,7 +138,7 @@ Plans:
   2. After consent is granted, child can tap Help and receive tutor responses (full E2E flow works)
   3. STORE_VERSION test assertion matches actual store version
   4. Retry button in chat respects offline state (no Gemini call when offline)
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 25-01-PLAN.md — PIN service, ConsentScreen, and navigation wiring
 - [ ] 25-02-PLAN.md — SessionScreen consent interception, auto-fire on return, and retry offline guard
@@ -174,4 +174,4 @@ Phases execute in numeric order: 21 -> 22 -> 23 -> 24 -> 25
 | 22. Safety & Compliance | v0.5 | 3/3 | Complete | 2026-03-04 |
 | 23. Chat UI & HINT Mode | v0.5 | 2/2 | Complete | 2026-03-04 |
 | 24. TEACH, BOOST & Auto-Escalation | v0.5 | 3/3 | Complete | 2026-03-04 |
-| 25. Consent Gate & Minor Fixes | v0.5 | 0/2 | Not started | - |
+| 25. Consent Gate & Minor Fixes | 1/2 | In Progress|  | - |

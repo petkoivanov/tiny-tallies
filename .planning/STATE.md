@@ -2,31 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.5
 milestone_name: AI Tutor
-status: completed
-stopped_at: Phase 25 context gathered
-last_updated: "2026-03-04T15:44:42.781Z"
-last_activity: 2026-03-04 -- Completed Plan 24-03 (TEACH/BOOST/Escalation UI Orchestration)
+status: executing
+stopped_at: Completed 25-01-PLAN.md
+last_updated: "2026-03-04T16:05:22Z"
+last_activity: 2026-03-04 -- Completed Plan 25-01 (Consent Gate PIN Service & Screen)
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
----
-
----
-gsd_state_version: 1.0
-milestone: v0.5
-milestone_name: AI Tutor
-status: complete
-stopped_at: Completed 24-03-PLAN.md
-last_updated: "2026-03-04T15:14:10Z"
-last_activity: 2026-03-04 -- Completed Plan 24-03 (TEACH/BOOST/Escalation UI Orchestration)
-progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
+  total_plans: 13
+  completed_plans: 12
+  percent: 92
 ---
 
 # Project State
@@ -36,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.5 AI Tutor -- Phase 24 (TEACH, BOOST & Auto-Escalation)
+**Current focus:** v0.5 AI Tutor -- Phase 25 (Consent Gate & Minor Fixes)
 
 ## Current Position
 
-Phase: 24 of 24 (TEACH, BOOST & Auto-Escalation)
-Plan: 3 of 3 complete
-Status: Complete
-Last activity: 2026-03-04 -- Completed Plan 24-03 (TEACH/BOOST/Escalation UI Orchestration)
+Phase: 25 of 25 (Consent Gate & Minor Fixes)
+Plan: 1 of 2 complete
+Status: Executing
+Last activity: 2026-03-04 -- Completed Plan 25-01 (Consent Gate PIN Service & Screen)
 
-Progress: [██████████] 100%
+Progress: [█████████ ] 92%
 
 ## Performance Metrics
 
@@ -68,6 +53,7 @@ Progress: [██████████] 100%
 | 24    | 01   | 5min     | 2     | 12    |
 | 24    | 02   | 4min     | 1     | 2     |
 | 24    | 03   | 9min     | 2     | 9     |
+| 25    | 01   | 5min     | 1     | 6     |
 
 ## Accumulated Context
 
@@ -125,6 +111,13 @@ v0.5 Phase 24 decisions:
 - TEACH minimize uses ref guard to prevent re-minimize on banner re-open
 - 1030 tests passing after Plan 24-03, TypeScript clean
 
+v0.5 Phase 25 decisions:
+- Ref-based PIN tracking (useRef) instead of useState for rapid synchronous digit presses without stale closures
+- Single displayPin state + pinRef/firstPinRef pattern separates immediate reads from render triggers
+- setTutorConsentGranted(true) called before navigation.goBack() to avoid race condition
+- ConsentScreen gestureEnabled: false to prevent swipe-back bypass of consent gate
+- 1046 tests passing after Plan 25-01, TypeScript clean
+
 ### Pending Todos
 
 None.
@@ -135,7 +128,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T15:44:42.779Z
-Stopped at: Phase 25 context gathered
-Resume file: .planning/phases/25-consent-gate-minor-fixes/25-CONTEXT.md
+Last session: 2026-03-04T16:05:22Z
+Stopped at: Completed 25-01-PLAN.md
+Resume file: .planning/phases/25-consent-gate-minor-fixes/25-02-PLAN.md
 Resume command: N/A
