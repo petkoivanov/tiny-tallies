@@ -6,7 +6,7 @@
 - ✅ **v0.2 UI Polish & Gamification** — Phases 7-10 (shipped 2026-03-03)
 - ✅ **v0.3 Adaptive Learning Engine** — Phases 11-14 (shipped 2026-03-03)
 - ✅ **v0.4 Virtual Manipulatives** — Phases 15-20 (shipped 2026-03-04)
-- 🚧 **v0.5 AI Tutor** — Phases 21-24 (in progress)
+- 🚧 **v0.5 AI Tutor** — Phases 21-25 (in progress)
 
 ## Phases
 
@@ -60,6 +60,8 @@
 - [x] **Phase 22: Safety & Compliance** - Output filtering, COPPA data minimization, safety filters, content validation, fallback responses, and VPC gate (completed 2026-03-04)
 - [x] **Phase 23: Chat UI & HINT Mode** - Help button, chat bubble UI, response buttons, per-problem reset, offline detection, and Socratic hint delivery (completed 2026-03-04)
 - [x] **Phase 24: TEACH, BOOST & Auto-Escalation** - TEACH mode with manipulative integration, BOOST mode scaffolding, auto-escalation state machine, and Bug Library-informed explanations (completed 2026-03-04)
+
+- [ ] **Phase 25: Consent Gate & Minor Fixes** - Parental consent screen with PIN verification, navigation wiring, retry offline guard, and stale test fix (gap closure)
 
 ## Phase Details
 
@@ -126,6 +128,18 @@ Plans:
 - [ ] 24-02-PLAN.md — useTutor mode-aware routing, CPA integration, and escalation wiring
 - [ ] 24-03-PLAN.md — ChatBanner, ResponseButtons gotit mode, SessionScreen full orchestration with ManipulativePanel auto-expand and answer highlight
 
+### Phase 25: Consent Gate & Minor Fixes
+**Goal**: A parent can grant AI tutor consent through a PIN-verified screen, unblocking the entire tutor flow for real users, with minor tech debt fixes
+**Depends on**: Phase 24
+**Requirements**: SAFE-06
+**Gap Closure**: Closes gaps from v0.5 milestone audit
+**Success Criteria** (what must be TRUE):
+  1. Parent sees a consent screen before first AI tutor use, verifies with parental PIN, and grants consent that persists across app restarts
+  2. After consent is granted, child can tap Help and receive tutor responses (full E2E flow works)
+  3. STORE_VERSION test assertion matches actual store version
+  4. Retry button in chat respects offline state (no Gemini call when offline)
+**Plans:** 0 plans
+
 ## Progress
 
 **Execution Order:**
@@ -156,4 +170,5 @@ Phases execute in numeric order: 21 -> 22 -> 23 -> 24
 | 21. LLM Service & Store | v0.5 | 3/3 | Complete | 2026-03-04 |
 | 22. Safety & Compliance | v0.5 | 3/3 | Complete | 2026-03-04 |
 | 23. Chat UI & HINT Mode | v0.5 | 2/2 | Complete | 2026-03-04 |
-| 24. TEACH, BOOST & Auto-Escalation | 3/3 | Complete    | 2026-03-04 | - |
+| 24. TEACH, BOOST & Auto-Escalation | v0.5 | 3/3 | Complete | 2026-03-04 |
+| 25. Consent Gate & Minor Fixes | v0.5 | 0/0 | Not started | - |

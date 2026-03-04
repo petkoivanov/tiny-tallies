@@ -39,7 +39,7 @@ Requirements for AI Tutor milestone. Each maps to roadmap phases.
 - [x] **SAFE-03**: Gemini safety filters set to BLOCK_LOW_AND_ABOVE for all 4 categories
 - [x] **SAFE-04**: Content validation (sentence length, vocabulary level per age bracket)
 - [x] **SAFE-05**: Canned fallback responses when LLM fails, is blocked, or times out
-- [x] **SAFE-06**: VPC parental consent gate before first AI tutor use
+- [ ] **SAFE-06**: VPC parental consent gate before first AI tutor use
 
 ### Store & State
 
@@ -105,7 +105,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAFE-03 | Phase 22 | Complete |
 | SAFE-04 | Phase 22 | Complete |
 | SAFE-05 | Phase 22 | Complete |
-| SAFE-06 | Phase 22 | Complete |
+| SAFE-06 | Phase 25 | Pending |
 | STATE-01 | Phase 21 | Complete |
 | STATE-02 | Phase 21 | Complete |
 | STATE-03 | Phase 21 | Complete |
@@ -113,6 +113,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 **Coverage:**
 - v0.5 requirements: 25 total
 - Mapped to phases: 25
+- Complete: 24
+- Pending: 1 (SAFE-06 → Phase 25)
 - Unmapped: 0
 
 ---
