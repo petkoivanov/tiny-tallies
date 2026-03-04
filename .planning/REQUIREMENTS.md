@@ -10,8 +10,8 @@ Requirements for Misconception Detection milestone. Each maps to roadmap phases.
 ### Misconception Tracking
 
 - [x] **MISC-01**: System records which Bug Library misconception tag each wrong answer triggers, persisted across sessions
-- [ ] **MISC-02**: 2-then-3 confirmation rule — 2 occurrences flags "suspected", 3 confirms the misconception
-- [ ] **MISC-03**: Misconception history per child in store with timestamps, skill, and confirmation status
+- [x] **MISC-02**: 2-then-3 confirmation rule — 2 occurrences flags "suspected", 3 confirms the misconception
+- [x] **MISC-03**: Misconception history per child in store with timestamps, skill, and confirmation status
 
 ### Interventions
 
@@ -61,8 +61,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STATE-01 | Phase 26 | Complete |
 | STATE-02 | Phase 26 | Complete |
 | MISC-01 | Phase 26 | Complete |
-| MISC-02 | Phase 27 | Pending |
-| MISC-03 | Phase 27 | Pending |
+| MISC-02 | Phase 27 | Complete |
+| MISC-03 | Phase 27 | Complete |
 | INTV-01 | Phase 28 | Pending |
 | INTV-02 | Phase 29 | Pending |
 | INTV-03 | Phase 30 | Pending |
