@@ -6,6 +6,7 @@ import Animated, {
   withSequence,
   withSpring,
   withTiming,
+  withRepeat,
 } from 'react-native-reanimated';
 
 import { colors, spacing, typography, layout } from '@/theme';
@@ -22,6 +23,7 @@ interface CompactAnswerRowProps {
   selectedAnswer: number | null;
   correctAnswer: number | null;
   showCorrectAnswer: boolean;
+  boostHighlightAnswer?: number | null;
 }
 
 /**
@@ -38,6 +40,7 @@ export function CompactAnswerRow({
   selectedAnswer,
   correctAnswer,
   showCorrectAnswer,
+  boostHighlightAnswer = null,
 }: CompactAnswerRowProps) {
   return (
     <View style={styles.row}>
@@ -51,6 +54,7 @@ export function CompactAnswerRow({
           selectedAnswer={selectedAnswer}
           correctAnswer={correctAnswer}
           showCorrectAnswer={showCorrectAnswer}
+          boostHighlightAnswer={boostHighlightAnswer}
         />
       ))}
     </View>
@@ -65,6 +69,7 @@ interface CompactAnswerButtonProps {
   selectedAnswer: number | null;
   correctAnswer: number | null;
   showCorrectAnswer: boolean;
+  boostHighlightAnswer?: number | null;
 }
 
 function CompactAnswerButton({
@@ -75,6 +80,7 @@ function CompactAnswerButton({
   selectedAnswer,
   correctAnswer,
   showCorrectAnswer,
+  boostHighlightAnswer = null,
 }: CompactAnswerButtonProps) {
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
@@ -87,6 +93,26 @@ function CompactAnswerButton({
     showCorrectAnswer &&
     option.value === correctAnswer &&
     option.value !== selectedAnswer;
+
+  const isBoostHighlighted =
+    boostHighlightAnswer !== null &&
+    option.value === boostHighlightAnswer &&
+    !feedbackActive;
+
+  // Boost highlight pulse animation
+  const pulseOpacity = useSharedValue(1);
+
+  useEffect(() => {
+    if (isBoostHighlighted) {
+      pulseOpacity.value = withRepeat(
+        withTiming(0.6, { duration: 800 }),
+        -1,
+        true,
+      );
+    } else {
+      pulseOpacity.value = 1;
+    }
+  }, [isBoostHighlighted, pulseOpacity]);
 
   useEffect(() => {
     if (isCorrectSelection) {
@@ -115,12 +141,14 @@ function CompactAnswerButton({
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }, { translateX: translateX.value }],
+    opacity: pulseOpacity.value,
   }));
 
   function getFeedbackStyle() {
     if (isCorrectSelection) return styles.buttonCorrect;
     if (isIncorrectSelection) return styles.buttonIncorrect;
     if (isRevealedCorrect) return styles.buttonRevealCorrect;
+    if (isBoostHighlighted) return styles.buttonBoostHighlight;
     return undefined;
   }
 
@@ -181,6 +209,11 @@ const styles = StyleSheet.create({
     borderColor: colors.correct,
     backgroundColor: '#84cc1620',
     opacity: 1,
+  },
+  buttonBoostHighlight: {
+    borderColor: '#a78bfa',
+    borderWidth: 3,
+    backgroundColor: '#a78bfa20',
   },
   buttonText: {
     fontFamily: typography.fontFamily.semiBold,

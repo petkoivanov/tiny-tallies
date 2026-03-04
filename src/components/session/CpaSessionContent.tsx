@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { colors, spacing, typography, layout } from '@/theme';
 import { useCpaMode } from '@/hooks/useCpaMode';
@@ -59,6 +65,8 @@ interface CpaSessionContentProps {
   correctAnswer: number | null;
   showCorrectAnswer: boolean;
   chatOpen?: boolean;
+  teachExpand?: boolean;
+  boostHighlightAnswer?: number | null;
 }
 
 /** Format operator symbol from operation type */
@@ -93,6 +101,8 @@ export function CpaSessionContent({
   correctAnswer,
   showCorrectAnswer,
   chatOpen,
+  teachExpand = false,
+  boostHighlightAnswer = null,
 }: CpaSessionContentProps) {
   const { stage, manipulativeType } = useCpaMode(skillId);
 
@@ -117,6 +127,13 @@ export function CpaSessionContent({
       setPanelExpanded(false);
     }
   }, [chatOpen]);
+
+  // TEACH mode: force panel expansion when tutor signals
+  useEffect(() => {
+    if (teachExpand) {
+      setPanelExpanded(true);
+    }
+  }, [teachExpand]);
 
   // Compute guided step for concrete mode
   useEffect(() => {
@@ -190,47 +207,59 @@ export function CpaSessionContent({
           selectedAnswer={selectedAnswer}
           correctAnswer={correctAnswer}
           showCorrectAnswer={showCorrectAnswer}
+          boostHighlightAnswer={boostHighlightAnswer}
         />
       );
     }
 
     return (
       <View style={styles.optionsGrid}>
-        {options.map((option, index) => (
-          <AnswerFeedbackAnimation
-            key={`option-${index}`}
-            feedbackType={
-              feedbackActive && option.value === selectedAnswer
-                ? option.value === correctAnswer
-                  ? 'correct'
-                  : 'incorrect'
-                : null
-            }
-          >
-            <Pressable
-              onPress={() => onAnswer(option.value)}
-              disabled={feedbackActive}
-              style={({ pressed }) => [
-                styles.optionButton,
-                pressed && !feedbackActive && styles.optionButtonPressed,
-                pressed && !feedbackActive && styles.optionButtonScaled,
-                feedbackActive && styles.optionButtonDisabled,
-                getOptionFeedbackStyle(
-                  option.value,
-                  feedbackActive,
-                  selectedAnswer,
-                  correctAnswer,
-                  showCorrectAnswer,
-                ),
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={`Answer ${option.value}`}
-              testID={`answer-option-${index}`}
+        {options.map((option, index) => {
+          const isBoostHighlighted =
+            boostHighlightAnswer !== null &&
+            option.value === boostHighlightAnswer;
+
+          return (
+            <AnswerFeedbackAnimation
+              key={`option-${index}`}
+              feedbackType={
+                feedbackActive && option.value === selectedAnswer
+                  ? option.value === correctAnswer
+                    ? 'correct'
+                    : 'incorrect'
+                  : null
+              }
             >
-              <Text style={styles.optionText}>{option.value}</Text>
-            </Pressable>
-          </AnswerFeedbackAnimation>
-        ))}
+              <BoostHighlightWrapper active={isBoostHighlighted && !feedbackActive}>
+                <Pressable
+                  onPress={() => onAnswer(option.value)}
+                  disabled={feedbackActive}
+                  style={({ pressed }) => [
+                    styles.optionButton,
+                    pressed && !feedbackActive && styles.optionButtonPressed,
+                    pressed && !feedbackActive && styles.optionButtonScaled,
+                    feedbackActive && styles.optionButtonDisabled,
+                    isBoostHighlighted &&
+                      !feedbackActive &&
+                      styles.optionButtonBoostHighlight,
+                    getOptionFeedbackStyle(
+                      option.value,
+                      feedbackActive,
+                      selectedAnswer,
+                      correctAnswer,
+                      showCorrectAnswer,
+                    ),
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Answer ${option.value}`}
+                  testID={`answer-option-${index}`}
+                >
+                  <Text style={styles.optionText}>{option.value}</Text>
+                </Pressable>
+              </BoostHighlightWrapper>
+            </AnswerFeedbackAnimation>
+          );
+        })}
       </View>
     );
   };
@@ -294,6 +323,40 @@ export function CpaSessionContent({
       )}
     </View>
   );
+}
+
+/**
+ * Wrapper that applies a subtle pulsing opacity animation to boost-highlighted
+ * answer buttons, drawing the child's attention to the revealed correct answer.
+ */
+function BoostHighlightWrapper({
+  active,
+  children,
+}: {
+  active: boolean;
+  children: React.ReactNode;
+}) {
+  const pulseOpacity = useSharedValue(1);
+
+  useEffect(() => {
+    if (active) {
+      pulseOpacity.value = withRepeat(
+        withTiming(0.6, { duration: 800 }),
+        -1,
+        true,
+      );
+    } else {
+      pulseOpacity.value = 1;
+    }
+  }, [active, pulseOpacity]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: pulseOpacity.value,
+  }));
+
+  if (!active) return <>{children}</>;
+
+  return <Animated.View style={animatedStyle}>{children}</Animated.View>;
 }
 
 /** Compute the feedback style for an answer button */
@@ -376,6 +439,11 @@ const styles = StyleSheet.create({
     borderColor: colors.correct,
     backgroundColor: '#84cc1620',
     opacity: 1,
+  },
+  optionButtonBoostHighlight: {
+    borderColor: '#a78bfa',
+    borderWidth: 3,
+    backgroundColor: '#a78bfa20',
   },
   optionText: {
     fontFamily: typography.fontFamily.semiBold,

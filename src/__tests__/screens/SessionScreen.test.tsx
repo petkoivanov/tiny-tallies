@@ -94,20 +94,32 @@ jest.mock('@/hooks/useCpaMode', () => ({
   useCpaMode: () => ({ stage: 'abstract', manipulativeType: null }),
 }));
 
-// Mock useTutor hook
+// Mock useTutor hook -- mutable return value for mode testing
 const mockRequestHint = jest.fn();
+const mockRequestTutor = jest.fn();
 const mockResetForProblem = jest.fn();
 
+let mockTutorReturn = {
+  messages: [] as any[],
+  loading: false,
+  error: null,
+  tutorMode: 'hint' as string,
+  hintLevel: 0,
+  shouldExpandManipulative: false,
+  manipulativeType: null as string | null,
+  requestHint: mockRequestHint,
+  requestTutor: mockRequestTutor,
+  resetForProblem: mockResetForProblem,
+};
+
 jest.mock('@/hooks/useTutor', () => ({
-  useTutor: jest.fn(() => ({
-    messages: [],
-    loading: false,
-    error: null,
-    tutorMode: 'hint',
-    hintLevel: 0,
-    requestHint: mockRequestHint,
-    resetForProblem: mockResetForProblem,
-  })),
+  useTutor: jest.fn(() => mockTutorReturn),
+}));
+
+// Mock getBugDescription
+const mockGetBugDescription = jest.fn();
+jest.mock('@/services/tutor/bugLookup', () => ({
+  getBugDescription: (...args: any[]) => mockGetBugDescription(...args),
 }));
 
 // Mock useNetworkStatus hook
@@ -118,9 +130,13 @@ jest.mock('@/hooks/useNetworkStatus', () => ({
 
 // Mock appStore
 const mockAddTutorMessage = jest.fn();
+const mockIncrementWrongAnswerCount = jest.fn();
 jest.mock('@/store/appStore', () => ({
   useAppStore: (selector: any) => {
-    const state = { addTutorMessage: mockAddTutorMessage };
+    const state = {
+      addTutorMessage: mockAddTutorMessage,
+      incrementWrongAnswerCount: mockIncrementWrongAnswerCount,
+    };
     return selector(state);
   },
 }));
@@ -188,7 +204,7 @@ jest.mock('@/components/animations/AnswerFeedbackAnimation', () => {
   };
 });
 
-// Mock chat components
+// Mock chat components -- extended with ChatBanner and gotit support
 jest.mock('@/components/chat', () => {
   const { View, Pressable, Text } = require('react-native');
   return {
@@ -198,7 +214,13 @@ jest.mock('@/components/chat', () => {
           <Text>{pulsing ? 'Help (pulsing)' : 'Help'}</Text>
         </Pressable>
       ) : null,
-    ChatPanel: ({ isOpen, onClose, onResponse, messages }: any) =>
+    ChatPanel: ({
+      isOpen,
+      onClose,
+      onResponse,
+      messages,
+      responseMode,
+    }: any) =>
       isOpen ? (
         <View testID="chat-panel">
           <Pressable onPress={onClose} testID="chat-close-button">
@@ -216,8 +238,23 @@ jest.mock('@/components/chat', () => {
           >
             <Text>Tell me more</Text>
           </Pressable>
+          {responseMode === 'gotit' && (
+            <Pressable
+              onPress={() => onResponse('gotit')}
+              testID="response-gotit"
+            >
+              <Text>Got it!</Text>
+            </Pressable>
+          )}
           <Text testID="chat-message-count">{messages.length} messages</Text>
+          <Text testID="chat-response-mode">{responseMode ?? 'standard'}</Text>
         </View>
+      ) : null,
+    ChatBanner: ({ message, onTap, visible }: any) =>
+      visible ? (
+        <Pressable onPress={onTap} testID="chat-banner">
+          <Text testID="chat-banner-message">{message}</Text>
+        </Pressable>
       ) : null,
   };
 });
@@ -275,6 +312,18 @@ describe('SessionScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSessionReturn = { ...defaultUseSessionReturn };
+    mockTutorReturn = {
+      messages: [],
+      loading: false,
+      error: null,
+      tutorMode: 'hint',
+      hintLevel: 0,
+      shouldExpandManipulative: false,
+      manipulativeType: null,
+      requestHint: mockRequestHint,
+      requestTutor: mockRequestTutor,
+      resetForProblem: mockResetForProblem,
+    };
     mockPreventRemoveCallback = null;
     mockIsOnline = true;
   });
@@ -620,7 +669,7 @@ describe('SessionScreen', () => {
     );
   });
 
-  it('adds child message and requests hint when "Tell me more" pressed', () => {
+  it('adds child message and requests tutor when "Tell me more" pressed', () => {
     mockUseSessionReturn = {
       ...defaultUseSessionReturn,
       sessionPhase: 'practice',
@@ -629,7 +678,7 @@ describe('SessionScreen', () => {
     const { getByTestId } = render(<SessionScreen />);
 
     fireEvent.press(getByTestId('help-button'));
-    mockRequestHint.mockClear(); // Clear the initial requestHint call
+    mockRequestTutor.mockClear(); // Clear the initial requestHint call
 
     fireEvent.press(getByTestId('response-more'));
 
@@ -639,7 +688,7 @@ describe('SessionScreen', () => {
         text: 'Tell me more',
       }),
     );
-    expect(mockRequestHint).toHaveBeenCalled();
+    expect(mockRequestTutor).toHaveBeenCalled();
   });
 
   it('hides help button when chat is open', () => {
@@ -658,5 +707,221 @@ describe('SessionScreen', () => {
 
     // Help button should be hidden
     expect(queryByTestId('help-button')).toBeNull();
+  });
+
+  // ---- TEACH/BOOST/Escalation Integration Tests ----
+
+  it('calls incrementWrongAnswerCount on wrong answer', () => {
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId } = render(<SessionScreen />);
+
+    // Tap wrong answer (58 is wrong, 68 is correct)
+    fireEvent.press(getByTestId('answer-option-1'));
+
+    expect(mockIncrementWrongAnswerCount).toHaveBeenCalled();
+  });
+
+  it('does not call incrementWrongAnswerCount on correct answer', () => {
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId } = render(<SessionScreen />);
+
+    // Tap correct answer (68)
+    fireEvent.press(getByTestId('answer-option-0'));
+
+    expect(mockIncrementWrongAnswerCount).not.toHaveBeenCalled();
+  });
+
+  it('resolves bug description from bugId on wrong answer', () => {
+    mockGetBugDescription.mockReturnValue('Forgot to carry');
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId } = render(<SessionScreen />);
+
+    // Tap wrong answer with bugId (value 58, bugId 'add_no_carry')
+    fireEvent.press(getByTestId('answer-option-1'));
+
+    expect(mockGetBugDescription).toHaveBeenCalledWith('add_no_carry');
+  });
+
+  it('passes responseMode "gotit" to ChatPanel when tutor is in boost mode', () => {
+    mockTutorReturn = {
+      ...mockTutorReturn,
+      tutorMode: 'boost',
+    };
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId } = render(<SessionScreen />);
+
+    // Open chat
+    fireEvent.press(getByTestId('help-button'));
+
+    // Check responseMode is 'gotit'
+    expect(getByTestId('chat-response-mode').props.children).toBe('gotit');
+  });
+
+  it('adds child "Got it!" message when gotit response pressed', () => {
+    mockTutorReturn = {
+      ...mockTutorReturn,
+      tutorMode: 'boost',
+    };
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId } = render(<SessionScreen />);
+
+    // Open chat
+    fireEvent.press(getByTestId('help-button'));
+
+    // Press "Got it!"
+    fireEvent.press(getByTestId('response-gotit'));
+
+    expect(mockAddTutorMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        role: 'child',
+        text: 'Got it!',
+      }),
+    );
+  });
+
+  it('renders ChatBanner when chat is minimized during TEACH', () => {
+    mockTutorReturn = {
+      ...mockTutorReturn,
+      tutorMode: 'teach',
+      shouldExpandManipulative: true,
+      messages: [
+        {
+          id: 'tutor-1',
+          role: 'tutor',
+          text: 'Let me show you with blocks!',
+          timestamp: Date.now(),
+        },
+      ],
+    };
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId } = render(<SessionScreen />);
+
+    // Open chat first (so the TEACH minimize effect can fire)
+    fireEvent.press(getByTestId('help-button'));
+
+    // The shouldExpandManipulative effect will minimize chat
+    // ChatBanner should be visible with the tutor message
+    expect(getByTestId('chat-banner')).toBeTruthy();
+    expect(getByTestId('chat-banner-message').props.children).toBe(
+      'Let me show you with blocks!',
+    );
+  });
+
+  it('tapping ChatBanner re-expands full chat panel', () => {
+    mockTutorReturn = {
+      ...mockTutorReturn,
+      tutorMode: 'teach',
+      shouldExpandManipulative: true,
+      messages: [
+        {
+          id: 'tutor-1',
+          role: 'tutor',
+          text: 'Let me show you with blocks!',
+          timestamp: Date.now(),
+        },
+      ],
+    };
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId, queryByTestId } = render(<SessionScreen />);
+
+    // Open chat first (triggers minimize via shouldExpandManipulative)
+    fireEvent.press(getByTestId('help-button'));
+
+    // Banner should be visible
+    expect(getByTestId('chat-banner')).toBeTruthy();
+
+    // Tap banner to re-expand
+    fireEvent.press(getByTestId('chat-banner'));
+
+    // Chat panel should be visible again
+    expect(getByTestId('chat-panel')).toBeTruthy();
+    // Banner should be gone (chatMinimized = false)
+    expect(queryByTestId('chat-banner')).toBeNull();
+  });
+
+  it('BOOST-revealed correct tap calls handleAnswer with sentinel (wrong scoring)', () => {
+    mockTutorReturn = {
+      ...mockTutorReturn,
+      tutorMode: 'boost',
+    };
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId } = render(<SessionScreen />);
+
+    // Tap the correct answer (68) while boost mode is active
+    fireEvent.press(getByTestId('answer-option-0'));
+
+    // Should call handleAnswer with sentinel value, NOT 68
+    // The sentinel forces wrong-answer scoring in useSession
+    expect(mockHandleAnswer).toHaveBeenCalledWith(-999999);
+    expect(mockHandleAnswer).not.toHaveBeenCalledWith(68);
+  });
+
+  it('BOOST mode does not intercept wrong answer taps', () => {
+    mockTutorReturn = {
+      ...mockTutorReturn,
+      tutorMode: 'boost',
+    };
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId } = render(<SessionScreen />);
+
+    // Tap a wrong answer (58) -- should pass through normally
+    fireEvent.press(getByTestId('answer-option-1'));
+
+    expect(mockHandleAnswer).toHaveBeenCalledWith(58);
+  });
+
+  it('passes standard responseMode when tutor is in hint mode', () => {
+    mockTutorReturn = {
+      ...mockTutorReturn,
+      tutorMode: 'hint',
+    };
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId } = render(<SessionScreen />);
+
+    // Open chat
+    fireEvent.press(getByTestId('help-button'));
+
+    // Check responseMode is 'standard'
+    expect(getByTestId('chat-response-mode').props.children).toBe('standard');
   });
 });

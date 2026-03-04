@@ -9,13 +9,17 @@ import { useSession } from '@/hooks/useSession';
 import { useCpaMode } from '@/hooks/useCpaMode';
 import { useTutor } from '@/hooks/useTutor';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { getBugDescription } from '@/services/tutor/bugLookup';
 import { CpaSessionContent, CpaModeIcon } from '@/components/session';
-import { HelpButton, ChatPanel } from '@/components/chat';
+import { HelpButton, ChatPanel, ChatBanner } from '@/components/chat';
 import { useAppStore } from '@/store/appStore';
 import type { RootStackParamList } from '@/navigation/types';
 import type { SessionPhase } from '@/services/session';
 
 type SessionNavProp = NativeStackNavigationProp<RootStackParamList, 'Session'>;
+
+/** Sentinel value used to force wrong-answer scoring for BOOST-revealed taps */
+const BOOST_SENTINEL = -999999;
 
 /** Capitalize and format session phase label for the header */
 function formatPhaseLabel(phase: SessionPhase): string {
@@ -64,18 +68,35 @@ export default function SessionScreen() {
     sessionResult,
   } = useSession();
 
-  const { stage } = useCpaMode(currentProblem?.skillId ?? null);
+  const cpaInfo = useCpaMode(currentProblem?.skillId ?? null);
+  const { stage } = cpaInfo;
 
-  // Tutor and network hooks
-  const tutor = useTutor(currentProblem);
+  // Wrong answer tracking for tutor context
+  const [lastWrongContext, setLastWrongContext] = useState<{
+    wrongAnswer: number;
+    bugDescription: string | null;
+  } | null>(null);
+
+  // Tutor and network hooks -- pass CPA info and wrong context
+  const tutor = useTutor(currentProblem, cpaInfo, lastWrongContext);
   const { isOnline } = useNetworkStatus();
   const addTutorMessage = useAppStore((s) => s.addTutorMessage);
+  const incrementWrongAnswerCount = useAppStore(
+    (s) => s.incrementWrongAnswerCount,
+  );
 
   // Chat UI state
   const [chatOpen, setChatOpen] = useState(false);
+  const [chatMinimized, setChatMinimized] = useState(false);
   const [helpUsed, setHelpUsed] = useState(false);
   const [shouldPulse, setShouldPulse] = useState(false);
   const autoCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // BOOST mode: derived directly from tutor mode for immediate availability
+  const boostReveal = tutor.tutorMode === 'boost';
+
+  // Track whether TEACH has already minimized chat (prevent re-minimize on re-open)
+  const teachMinimizedRef = useRef(false);
 
   // Track whether to reveal the correct answer after wrong tap
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
@@ -99,12 +120,24 @@ export default function SessionScreen() {
     }
   }, [feedbackState, helpUsed]);
 
-  // Per-problem chat reset
+  // TEACH mode: auto-expand ManipulativePanel and minimize chat (once per escalation)
+  useEffect(() => {
+    if (tutor.shouldExpandManipulative && chatOpen && !teachMinimizedRef.current) {
+      teachMinimizedRef.current = true;
+      setChatMinimized(true);
+      setChatOpen(false);
+    }
+  }, [tutor.shouldExpandManipulative, chatOpen]);
+
+  // Per-problem reset (chat, escalation state, wrong context)
   useEffect(() => {
     tutor.resetForProblem();
     setChatOpen(false);
+    setChatMinimized(false);
     setHelpUsed(false);
     setShouldPulse(false);
+    setLastWrongContext(null);
+    teachMinimizedRef.current = false;
     if (autoCloseTimerRef.current) {
       clearTimeout(autoCloseTimerRef.current);
       autoCloseTimerRef.current = null;
@@ -162,24 +195,72 @@ export default function SessionScreen() {
 
   // Progress bar fill percentage: count current question as done when feedback is showing
   const progressDone = currentIndex + (feedbackState ? 1 : 0);
-  const progressPercent = totalProblems > 0 ? (progressDone / totalProblems) * 100 : 0;
+  const progressPercent =
+    totalProblems > 0 ? (progressDone / totalProblems) * 100 : 0;
 
-  // Help button visibility: practice phase only, not when chat is open, not when complete
-  const showHelp = sessionPhase === 'practice' && !chatOpen && !isComplete;
+  // Help button visibility: practice phase only, not when chat/banner visible, not when complete
+  const showHelp =
+    sessionPhase === 'practice' &&
+    !chatOpen &&
+    !chatMinimized &&
+    !isComplete;
+
+  /**
+   * Wrapped answer handler with BOOST scoring guard.
+   *
+   * When boostReveal is true and the child taps the highlighted correct answer,
+   * we pass a sentinel value to handleAnswer so it scores as WRONG for Elo/BKT/XP.
+   * The child did not solve independently -- honest tracking, encouragement from chat.
+   */
+  const handleAnswerWithBoost = useCallback(
+    (selectedValue: number) => {
+      // Track wrong answers and resolve bug descriptions for tutor context
+      if (correctAnswer !== null && selectedValue !== correctAnswer) {
+        incrementWrongAnswerCount();
+        const selectedOption = currentProblem?.presentation.options.find(
+          (o) => o.value === selectedValue,
+        );
+        const bugDesc = getBugDescription(selectedOption?.bugId);
+        setLastWrongContext({
+          wrongAnswer: selectedValue,
+          bugDescription: bugDesc ?? null,
+        });
+      }
+
+      // BOOST scoring guard: revealed correct tap is scored as WRONG
+      if (boostReveal && correctAnswer !== null && selectedValue === correctAnswer) {
+        handleAnswer(BOOST_SENTINEL);
+        return;
+      }
+
+      handleAnswer(selectedValue);
+    },
+    [
+      boostReveal,
+      correctAnswer,
+      handleAnswer,
+      incrementWrongAnswerCount,
+      currentProblem,
+    ],
+  );
 
   // Handle help tap: open chat and request first hint
   const handleHelpTap = useCallback(() => {
     setHelpUsed(true);
     setShouldPulse(false);
     setChatOpen(true);
+    setChatMinimized(false);
     if (isOnline) {
       tutor.requestHint();
     }
   }, [isOnline, tutor]);
 
-  // Handle response buttons
+  // Determine response mode based on tutor mode
+  const responseMode = tutor.tutorMode === 'boost' ? 'gotit' : 'standard';
+
+  // Handle response buttons (including gotit for BOOST)
   const handleResponse = useCallback(
-    (type: 'understand' | 'more' | 'confused' | 'retry') => {
+    (type: 'understand' | 'more' | 'confused' | 'retry' | 'gotit') => {
       switch (type) {
         case 'understand': {
           addTutorMessage({
@@ -209,7 +290,7 @@ export default function SessionScreen() {
             text: 'Tell me more',
             timestamp: Date.now(),
           });
-          tutor.requestHint();
+          tutor.requestTutor();
           break;
         }
         case 'confused': {
@@ -219,11 +300,24 @@ export default function SessionScreen() {
             text: "I'm confused",
             timestamp: Date.now(),
           });
-          tutor.requestHint();
+          tutor.requestTutor();
           break;
         }
         case 'retry': {
-          tutor.requestHint();
+          tutor.requestTutor();
+          break;
+        }
+        case 'gotit': {
+          addTutorMessage({
+            id: `child-${Date.now()}`,
+            role: 'child',
+            text: 'Got it!',
+            timestamp: Date.now(),
+          });
+          // Auto-close chat after short delay -- child taps highlighted answer
+          autoCloseTimerRef.current = setTimeout(() => {
+            setChatOpen(false);
+          }, 800);
           break;
         }
       }
@@ -238,6 +332,18 @@ export default function SessionScreen() {
       autoCloseTimerRef.current = null;
     }
   }, []);
+
+  // ChatBanner: tap re-expands full chat
+  const handleBannerTap = useCallback(() => {
+    setChatOpen(true);
+    setChatMinimized(false);
+  }, []);
+
+  // Get latest tutor message text for banner
+  const lastTutorMessage = tutor.messages
+    .filter((m) => m.role === 'tutor')
+    .at(-1);
+  const bannerMessage = lastTutorMessage?.text ?? '';
 
   // Loading state (should not happen due to synchronous init, but defensive)
   if (!currentProblem && !isComplete) {
@@ -299,6 +405,13 @@ export default function SessionScreen() {
         </View>
       </View>
 
+      {/* ChatBanner: visible when chat is minimized during TEACH mode */}
+      <ChatBanner
+        message={bannerMessage}
+        onTap={handleBannerTap}
+        visible={chatMinimized}
+      />
+
       {/* CPA-aware Problem Display + Answer Options */}
       {problem && currentProblem && (
         <CpaSessionContent
@@ -306,12 +419,14 @@ export default function SessionScreen() {
           skillId={currentProblem.skillId}
           options={options}
           currentIndex={currentIndex}
-          onAnswer={handleAnswer}
+          onAnswer={handleAnswerWithBoost}
           feedbackActive={isFeedbackActive}
           selectedAnswer={selectedAnswer}
           correctAnswer={correctAnswer}
           showCorrectAnswer={showCorrectAnswer}
           chatOpen={chatOpen}
+          teachExpand={tutor.shouldExpandManipulative}
+          boostHighlightAnswer={boostReveal ? correctAnswer : null}
         />
       )}
 
@@ -330,6 +445,7 @@ export default function SessionScreen() {
         isLoading={tutor.loading}
         isOnline={isOnline}
         onResponse={handleResponse}
+        responseMode={responseMode}
       />
     </View>
   );
