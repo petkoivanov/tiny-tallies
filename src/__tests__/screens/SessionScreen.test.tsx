@@ -21,6 +21,7 @@ jest.mock('react-native-reanimated', () => {
     withDelay: (_d: number, v: any) => v,
     withSequence: (...args: any[]) => args[args.length - 1],
     withRepeat: (v: any) => v,
+    runOnJS: (fn: any) => fn,
     Easing: {
       in: (e: any) => e,
       quad: (v: any) => v,
@@ -93,6 +94,37 @@ jest.mock('@/hooks/useCpaMode', () => ({
   useCpaMode: () => ({ stage: 'abstract', manipulativeType: null }),
 }));
 
+// Mock useTutor hook
+const mockRequestHint = jest.fn();
+const mockResetForProblem = jest.fn();
+
+jest.mock('@/hooks/useTutor', () => ({
+  useTutor: jest.fn(() => ({
+    messages: [],
+    loading: false,
+    error: null,
+    tutorMode: 'hint',
+    hintLevel: 0,
+    requestHint: mockRequestHint,
+    resetForProblem: mockResetForProblem,
+  })),
+}));
+
+// Mock useNetworkStatus hook
+let mockIsOnline = true;
+jest.mock('@/hooks/useNetworkStatus', () => ({
+  useNetworkStatus: () => ({ isOnline: mockIsOnline }),
+}));
+
+// Mock appStore
+const mockAddTutorMessage = jest.fn();
+jest.mock('@/store/appStore', () => ({
+  useAppStore: (selector: any) => {
+    const state = { addTutorMessage: mockAddTutorMessage };
+    return selector(state);
+  },
+}));
+
 // Mock CpaModeIcon
 jest.mock('@/components/session/CpaModeIcon', () => {
   const { View } = require('react-native');
@@ -156,6 +188,40 @@ jest.mock('@/components/animations/AnswerFeedbackAnimation', () => {
   };
 });
 
+// Mock chat components
+jest.mock('@/components/chat', () => {
+  const { View, Pressable, Text } = require('react-native');
+  return {
+    HelpButton: ({ visible, onPress, pulsing }: any) =>
+      visible ? (
+        <Pressable onPress={onPress} testID="help-button">
+          <Text>{pulsing ? 'Help (pulsing)' : 'Help'}</Text>
+        </Pressable>
+      ) : null,
+    ChatPanel: ({ isOpen, onClose, onResponse, messages }: any) =>
+      isOpen ? (
+        <View testID="chat-panel">
+          <Pressable onPress={onClose} testID="chat-close-button">
+            <Text>Close</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => onResponse('understand')}
+            testID="response-understand"
+          >
+            <Text>I understand!</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => onResponse('more')}
+            testID="response-more"
+          >
+            <Text>Tell me more</Text>
+          </Pressable>
+          <Text testID="chat-message-count">{messages.length} messages</Text>
+        </View>
+      ) : null,
+  };
+});
+
 // Mock navigation
 const mockNavigate = jest.fn();
 const mockGoBack = jest.fn();
@@ -196,6 +262,7 @@ jest.mock('lucide-react-native', () => {
     Hash: () => <View />,
     ChevronUp: () => <View />,
     ChevronDown: () => <View />,
+    CircleHelp: () => <View />,
   };
 });
 
@@ -209,20 +276,18 @@ describe('SessionScreen', () => {
     jest.clearAllMocks();
     mockUseSessionReturn = { ...defaultUseSessionReturn };
     mockPreventRemoveCallback = null;
+    mockIsOnline = true;
   });
 
   it('renders problem text and 4 answer options', () => {
     const { getByText, getAllByTestId } = render(<SessionScreen />);
 
-    // Problem text: "23 + 45 = ?" (minus sign is Unicode \u2212 for subtraction, + for addition)
     expect(getByText(/23/)).toBeTruthy();
     expect(getByText(/45/)).toBeTruthy();
 
-    // 4 answer options
     const options = getAllByTestId(/answer-option-/);
     expect(options).toHaveLength(4);
 
-    // Option values
     expect(getByText('68')).toBeTruthy();
     expect(getByText('58')).toBeTruthy();
     expect(getByText('78')).toBeTruthy();
@@ -231,20 +296,17 @@ describe('SessionScreen', () => {
 
   it('displays progress indicator with correct format', () => {
     const { getByText } = render(<SessionScreen />);
-
     expect(getByText('1 / 15')).toBeTruthy();
   });
 
   it('renders progress bar', () => {
     const { getByTestId } = render(<SessionScreen />);
-
     expect(getByTestId('progress-bar')).toBeTruthy();
     expect(getByTestId('progress-bar-fill')).toBeTruthy();
   });
 
   it('displays session phase label', () => {
     const { getByText } = render(<SessionScreen />);
-
     expect(getByText('Warmup')).toBeTruthy();
   });
 
@@ -273,9 +335,7 @@ describe('SessionScreen', () => {
 
   it('calls handleAnswer when answer option is tapped', () => {
     const { getByTestId } = render(<SessionScreen />);
-
     fireEvent.press(getByTestId('answer-option-0'));
-
     expect(mockHandleAnswer).toHaveBeenCalledWith(68);
   });
 
@@ -287,12 +347,8 @@ describe('SessionScreen', () => {
     };
 
     const { getByTestId } = render(<SessionScreen />);
-
-    // The selected answer button (option 0, value 68) should exist and be rendered
     const correctButton = getByTestId('answer-option-0');
     expect(correctButton).toBeTruthy();
-
-    // No feedback-indicator testID should exist (removed)
     expect(() => getByTestId('feedback-indicator')).toThrow();
   });
 
@@ -304,12 +360,8 @@ describe('SessionScreen', () => {
     };
 
     const { getByTestId } = render(<SessionScreen />);
-
-    // The selected answer button (option 1, value 58) should exist and be rendered
     const incorrectButton = getByTestId('answer-option-1');
     expect(incorrectButton).toBeTruthy();
-
-    // No feedback-indicator testID should exist (removed)
     expect(() => getByTestId('feedback-indicator')).toThrow();
   });
 
@@ -321,16 +373,12 @@ describe('SessionScreen', () => {
     };
 
     const { getByTestId } = render(<SessionScreen />);
-
-    // Buttons should be disabled during feedback
     fireEvent.press(getByTestId('answer-option-0'));
     expect(mockHandleAnswer).not.toHaveBeenCalled();
   });
 
   it('quit button triggers confirmation dialog via usePreventRemove', () => {
     render(<SessionScreen />);
-
-    // Simulate the navigation prevention callback (triggered when goBack is called)
     expect(mockPreventRemoveCallback).not.toBeNull();
 
     const mockAction = { type: 'GO_BACK' };
@@ -352,7 +400,6 @@ describe('SessionScreen', () => {
     const mockAction = { type: 'GO_BACK' };
     mockPreventRemoveCallback!({ data: { action: mockAction } });
 
-    // Get the quit button's onPress handler from Alert.alert call
     const alertCall = (Alert.alert as jest.Mock).mock.calls[0];
     const buttons = alertCall[2];
     const quitButton = buttons.find(
@@ -467,9 +514,149 @@ describe('SessionScreen', () => {
     };
 
     const { getByText } = render(<SessionScreen />);
-    // Should show the minus sign (\u2212) for subtraction
     expect(getByText(/50/)).toBeTruthy();
     expect(getByText(/\u2212/)).toBeTruthy();
     expect(getByText(/23/)).toBeTruthy();
+  });
+
+  // ---- Chat UI Integration Tests ----
+
+  it('shows help button during practice phase', () => {
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId } = render(<SessionScreen />);
+    expect(getByTestId('help-button')).toBeTruthy();
+  });
+
+  it('hides help button during warmup phase', () => {
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'warmup',
+    };
+
+    const { queryByTestId } = render(<SessionScreen />);
+    expect(queryByTestId('help-button')).toBeNull();
+  });
+
+  it('hides help button during cooldown phase', () => {
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'cooldown',
+    };
+
+    const { queryByTestId } = render(<SessionScreen />);
+    expect(queryByTestId('help-button')).toBeNull();
+  });
+
+  it('opens chat panel and requests hint when help button tapped', () => {
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId } = render(<SessionScreen />);
+    fireEvent.press(getByTestId('help-button'));
+
+    // Chat panel should now be visible
+    expect(getByTestId('chat-panel')).toBeTruthy();
+    // Should have requested a hint
+    expect(mockRequestHint).toHaveBeenCalled();
+  });
+
+  it('does not request hint when offline and help tapped', () => {
+    mockIsOnline = false;
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId } = render(<SessionScreen />);
+    fireEvent.press(getByTestId('help-button'));
+
+    // Chat panel opens but no hint requested
+    expect(getByTestId('chat-panel')).toBeTruthy();
+    expect(mockRequestHint).not.toHaveBeenCalled();
+  });
+
+  it('closes chat panel when close button pressed', () => {
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId, queryByTestId } = render(<SessionScreen />);
+
+    // Open chat
+    fireEvent.press(getByTestId('help-button'));
+    expect(getByTestId('chat-panel')).toBeTruthy();
+
+    // Close chat
+    fireEvent.press(getByTestId('chat-close-button'));
+    expect(queryByTestId('chat-panel')).toBeNull();
+  });
+
+  it('adds child message when "I understand!" response pressed', () => {
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId } = render(<SessionScreen />);
+
+    // Open chat first
+    fireEvent.press(getByTestId('help-button'));
+
+    // Press "I understand!"
+    fireEvent.press(getByTestId('response-understand'));
+
+    expect(mockAddTutorMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        role: 'child',
+        text: 'I understand!',
+      }),
+    );
+  });
+
+  it('adds child message and requests hint when "Tell me more" pressed', () => {
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId } = render(<SessionScreen />);
+
+    fireEvent.press(getByTestId('help-button'));
+    mockRequestHint.mockClear(); // Clear the initial requestHint call
+
+    fireEvent.press(getByTestId('response-more'));
+
+    expect(mockAddTutorMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        role: 'child',
+        text: 'Tell me more',
+      }),
+    );
+    expect(mockRequestHint).toHaveBeenCalled();
+  });
+
+  it('hides help button when chat is open', () => {
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      sessionPhase: 'practice',
+    };
+
+    const { getByTestId, queryByTestId } = render(<SessionScreen />);
+
+    // Help button visible initially
+    expect(getByTestId('help-button')).toBeTruthy();
+
+    // Open chat
+    fireEvent.press(getByTestId('help-button'));
+
+    // Help button should be hidden
+    expect(queryByTestId('help-button')).toBeNull();
   });
 });

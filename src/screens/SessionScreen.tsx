@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, usePreventRemove } from '@react-navigation/native';
@@ -7,7 +7,11 @@ import { X } from 'lucide-react-native';
 import { colors, spacing, typography, layout } from '@/theme';
 import { useSession } from '@/hooks/useSession';
 import { useCpaMode } from '@/hooks/useCpaMode';
+import { useTutor } from '@/hooks/useTutor';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { CpaSessionContent, CpaModeIcon } from '@/components/session';
+import { HelpButton, ChatPanel } from '@/components/chat';
+import { useAppStore } from '@/store/appStore';
 import type { RootStackParamList } from '@/navigation/types';
 import type { SessionPhase } from '@/services/session';
 
@@ -62,6 +66,17 @@ export default function SessionScreen() {
 
   const { stage } = useCpaMode(currentProblem?.skillId ?? null);
 
+  // Tutor and network hooks
+  const tutor = useTutor(currentProblem);
+  const { isOnline } = useNetworkStatus();
+  const addTutorMessage = useAppStore((s) => s.addTutorMessage);
+
+  // Chat UI state
+  const [chatOpen, setChatOpen] = useState(false);
+  const [helpUsed, setHelpUsed] = useState(false);
+  const [shouldPulse, setShouldPulse] = useState(false);
+  const autoCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Track whether to reveal the correct answer after wrong tap
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
 
@@ -76,6 +91,35 @@ export default function SessionScreen() {
     // Reset when feedback clears
     setShowCorrectAnswer(false);
   }, [feedbackState]);
+
+  // Pulse help button after wrong answer
+  useEffect(() => {
+    if (feedbackState && !feedbackState.correct && !helpUsed) {
+      setShouldPulse(true);
+    }
+  }, [feedbackState, helpUsed]);
+
+  // Per-problem chat reset
+  useEffect(() => {
+    tutor.resetForProblem();
+    setChatOpen(false);
+    setHelpUsed(false);
+    setShouldPulse(false);
+    if (autoCloseTimerRef.current) {
+      clearTimeout(autoCloseTimerRef.current);
+      autoCloseTimerRef.current = null;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex]);
+
+  // Cleanup auto-close timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autoCloseTimerRef.current) {
+        clearTimeout(autoCloseTimerRef.current);
+      }
+    };
+  }, []);
 
   // Prevent back navigation while session is active
   const isSessionActive = !isComplete;
@@ -119,6 +163,81 @@ export default function SessionScreen() {
   // Progress bar fill percentage: count current question as done when feedback is showing
   const progressDone = currentIndex + (feedbackState ? 1 : 0);
   const progressPercent = totalProblems > 0 ? (progressDone / totalProblems) * 100 : 0;
+
+  // Help button visibility: practice phase only, not when chat is open, not when complete
+  const showHelp = sessionPhase === 'practice' && !chatOpen && !isComplete;
+
+  // Handle help tap: open chat and request first hint
+  const handleHelpTap = useCallback(() => {
+    setHelpUsed(true);
+    setShouldPulse(false);
+    setChatOpen(true);
+    if (isOnline) {
+      tutor.requestHint();
+    }
+  }, [isOnline, tutor]);
+
+  // Handle response buttons
+  const handleResponse = useCallback(
+    (type: 'understand' | 'more' | 'confused' | 'retry') => {
+      switch (type) {
+        case 'understand': {
+          addTutorMessage({
+            id: `child-${Date.now()}`,
+            role: 'child',
+            text: 'I understand!',
+            timestamp: Date.now(),
+          });
+          // Show encouragement then auto-close
+          setTimeout(() => {
+            addTutorMessage({
+              id: `tutor-encourage-${Date.now()}`,
+              role: 'tutor',
+              text: 'Great! Give it a try!',
+              timestamp: Date.now(),
+            });
+          }, 200);
+          autoCloseTimerRef.current = setTimeout(() => {
+            setChatOpen(false);
+          }, 1500);
+          break;
+        }
+        case 'more': {
+          addTutorMessage({
+            id: `child-${Date.now()}`,
+            role: 'child',
+            text: 'Tell me more',
+            timestamp: Date.now(),
+          });
+          tutor.requestHint();
+          break;
+        }
+        case 'confused': {
+          addTutorMessage({
+            id: `child-${Date.now()}`,
+            role: 'child',
+            text: "I'm confused",
+            timestamp: Date.now(),
+          });
+          tutor.requestHint();
+          break;
+        }
+        case 'retry': {
+          tutor.requestHint();
+          break;
+        }
+      }
+    },
+    [addTutorMessage, tutor],
+  );
+
+  const handleCloseChat = useCallback(() => {
+    setChatOpen(false);
+    if (autoCloseTimerRef.current) {
+      clearTimeout(autoCloseTimerRef.current);
+      autoCloseTimerRef.current = null;
+    }
+  }, []);
 
   // Loading state (should not happen due to synchronous init, but defensive)
   if (!currentProblem && !isComplete) {
@@ -192,8 +311,26 @@ export default function SessionScreen() {
           selectedAnswer={selectedAnswer}
           correctAnswer={correctAnswer}
           showCorrectAnswer={showCorrectAnswer}
+          chatOpen={chatOpen}
         />
       )}
+
+      {/* Help FAB - visible during practice only */}
+      <HelpButton
+        visible={showHelp}
+        onPress={handleHelpTap}
+        pulsing={shouldPulse && !helpUsed}
+      />
+
+      {/* Chat Panel */}
+      <ChatPanel
+        isOpen={chatOpen}
+        onClose={handleCloseChat}
+        messages={tutor.messages}
+        isLoading={tutor.loading}
+        isOnline={isOnline}
+        onResponse={handleResponse}
+      />
     </View>
   );
 }

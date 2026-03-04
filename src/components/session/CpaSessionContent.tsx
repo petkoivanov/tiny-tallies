@@ -58,6 +58,7 @@ interface CpaSessionContentProps {
   selectedAnswer: number | null;
   correctAnswer: number | null;
   showCorrectAnswer: boolean;
+  chatOpen?: boolean;
 }
 
 /** Format operator symbol from operation type */
@@ -91,6 +92,7 @@ export function CpaSessionContent({
   selectedAnswer,
   correctAnswer,
   showCorrectAnswer,
+  chatOpen,
 }: CpaSessionContentProps) {
   const { stage, manipulativeType } = useCpaMode(skillId);
 
@@ -108,6 +110,13 @@ export function CpaSessionContent({
     setPanelExpanded(stage === 'concrete');
     setNeedHelpActive(false);
   }, [currentIndex, stage]);
+
+  // Collapse ManipulativePanel when chat opens to avoid visual overlap
+  useEffect(() => {
+    if (chatOpen) {
+      setPanelExpanded(false);
+    }
+  }, [chatOpen]);
 
   // Compute guided step for concrete mode
   useEffect(() => {
