@@ -13,6 +13,17 @@ jest.mock('@/services/tutor/rateLimiter', () => ({
   checkRateLimit: jest.fn(() => null),
   getRateLimitMessage: jest.fn(() => 'Rate limited message'),
 }));
+jest.mock('@/services/tutor/safetyFilter', () => ({
+  scrubOutboundPii: jest.fn(
+    (sys: string, usr: string) => ({ systemInstruction: sys, userMessage: usr, piiFound: false }),
+  ),
+  runSafetyPipeline: jest.fn(
+    (text: string) => ({ passed: true, text }),
+  ),
+}));
+jest.mock('@/services/tutor/safetyConstants', () => ({
+  getCannedFallback: jest.fn(() => 'Friendly fallback message'),
+}));
 
 import { useTutor } from '../useTutor';
 import { callGemini } from '@/services/tutor/geminiClient';
@@ -24,6 +35,11 @@ import {
   checkRateLimit,
   getRateLimitMessage,
 } from '@/services/tutor/rateLimiter';
+import {
+  scrubOutboundPii,
+  runSafetyPipeline,
+} from '@/services/tutor/safetyFilter';
+import { getCannedFallback } from '@/services/tutor/safetyConstants';
 
 const mockCallGemini = callGemini as jest.MockedFunction<typeof callGemini>;
 const mockCheckRateLimit = checkRateLimit as jest.MockedFunction<
@@ -36,6 +52,15 @@ const mockBuildSystemInstruction =
   buildSystemInstruction as jest.MockedFunction<typeof buildSystemInstruction>;
 const mockBuildHintPrompt = buildHintPrompt as jest.MockedFunction<
   typeof buildHintPrompt
+>;
+const mockScrubOutboundPii = scrubOutboundPii as jest.MockedFunction<
+  typeof scrubOutboundPii
+>;
+const mockRunSafetyPipeline = runSafetyPipeline as jest.MockedFunction<
+  typeof runSafetyPipeline
+>;
+const mockGetCannedFallback = getCannedFallback as jest.MockedFunction<
+  typeof getCannedFallback
 >;
 
 import type { SessionProblem } from '@/services/session/sessionTypes';
@@ -81,6 +106,7 @@ function setupStore(overrides: Record<string, unknown> = {}) {
     {
       ...useAppStore.getInitialState(),
       childAge: 7,
+      tutorConsentGranted: true,
       ...overrides,
     },
     true,
@@ -334,5 +360,178 @@ describe('useTutor', () => {
 
     expect(result.current.error).toBeTruthy();
     expect(mockCallGemini).not.toHaveBeenCalled();
+  });
+
+  // --- Safety pipeline integration tests ---
+
+  describe('consent gate', () => {
+    it('blocks requestHint when tutorConsentGranted is false and sets error to consent_required', async () => {
+      setupStore({ tutorConsentGranted: false });
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestHint();
+      });
+
+      expect(result.current.error).toBe('consent_required');
+      expect(mockCallGemini).not.toHaveBeenCalled();
+    });
+
+    it('proceeds to call Gemini when tutorConsentGranted is true', async () => {
+      setupStore({ tutorConsentGranted: true });
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestHint();
+      });
+
+      expect(mockCallGemini).toHaveBeenCalled();
+    });
+  });
+
+  describe('PII scrubbing', () => {
+    it('calls scrubOutboundPii with system instruction, hint prompt, childName, and childAge before callGemini', async () => {
+      setupStore({ childName: 'Alice', childAge: 8, tutorConsentGranted: true });
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestHint();
+      });
+
+      expect(mockScrubOutboundPii).toHaveBeenCalledWith(
+        'system-instruction',
+        'hint-prompt',
+        'Alice',
+        8,
+      );
+      // scrubOutboundPii must be called before callGemini
+      const scrubOrder = mockScrubOutboundPii.mock.invocationCallOrder[0];
+      const geminiOrder = mockCallGemini.mock.invocationCallOrder[0];
+      expect(scrubOrder).toBeLessThan(geminiOrder);
+    });
+  });
+
+  describe('safety-blocked null response', () => {
+    it('adds canned fallback for safety_blocked when callGemini returns null', async () => {
+      mockCallGemini.mockResolvedValue(null as unknown as string);
+      mockGetCannedFallback.mockReturnValue('Safety blocked fallback');
+
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestHint();
+      });
+
+      expect(mockGetCannedFallback).toHaveBeenCalledWith('safety_blocked');
+      const state = useAppStore.getState();
+      expect(state.tutorMessages).toHaveLength(1);
+      expect(state.tutorMessages[0].text).toBe('Safety blocked fallback');
+    });
+  });
+
+  describe('answer-leak detection', () => {
+    it('adds canned fallback for answer_leaked when runSafetyPipeline detects a leak', async () => {
+      mockCallGemini.mockResolvedValue('The answer is 7!');
+      mockRunSafetyPipeline.mockReturnValue({
+        passed: false,
+        fallbackCategory: 'answer_leaked',
+        reason: 'answer_digit_leak',
+      });
+      mockGetCannedFallback.mockReturnValue('Answer leak fallback');
+
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestHint();
+      });
+
+      expect(mockGetCannedFallback).toHaveBeenCalledWith('answer_leaked');
+      const state = useAppStore.getState();
+      expect(state.tutorMessages).toHaveLength(1);
+      expect(state.tutorMessages[0].text).toBe('Answer leak fallback');
+      // incrementCallCount should NOT be called on safety failure
+      expect(state.problemCallCount).toBe(0);
+    });
+  });
+
+  describe('content validation', () => {
+    it('adds canned fallback for content_invalid when runSafetyPipeline fails validation', async () => {
+      mockCallGemini.mockResolvedValue('A very long complicated response');
+      mockRunSafetyPipeline.mockReturnValue({
+        passed: false,
+        fallbackCategory: 'content_invalid',
+        reason: 'sentence_too_long',
+      });
+      mockGetCannedFallback.mockReturnValue('Content invalid fallback');
+
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestHint();
+      });
+
+      expect(mockGetCannedFallback).toHaveBeenCalledWith('content_invalid');
+      const state = useAppStore.getState();
+      expect(state.tutorMessages).toHaveLength(1);
+      expect(state.tutorMessages[0].text).toBe('Content invalid fallback');
+      expect(state.problemCallCount).toBe(0);
+    });
+  });
+
+  describe('full success path', () => {
+    it('adds safe response as tutor message and increments call count when all checks pass', async () => {
+      const safeText = 'Try counting on your fingers!';
+      mockCallGemini.mockResolvedValue(safeText);
+      mockRunSafetyPipeline.mockReturnValue({ passed: true, text: safeText });
+
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestHint();
+      });
+
+      const state = useAppStore.getState();
+      expect(state.tutorMessages).toHaveLength(1);
+      expect(state.tutorMessages[0].text).toBe(safeText);
+      expect(state.problemCallCount).toBe(1);
+    });
+  });
+
+  describe('error fallbacks', () => {
+    it('uses getCannedFallback for error instead of raw error string on generic error', async () => {
+      mockCallGemini.mockRejectedValue(new Error('Network error'));
+      mockGetCannedFallback.mockReturnValue('Error fallback message');
+
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestHint();
+      });
+
+      expect(mockGetCannedFallback).toHaveBeenCalledWith('error');
+      const state = useAppStore.getState();
+      expect(state.tutorMessages).toHaveLength(1);
+      expect(state.tutorMessages[0].text).toBe('Error fallback message');
+      // Should NOT have raw error string
+      expect(state.tutorMessages[0].text).not.toContain('Network error');
+    });
+
+    it('uses getCannedFallback for timeout on DOMException timeout error', async () => {
+      mockCallGemini.mockRejectedValue(
+        new DOMException('The operation timed out', 'TimeoutError'),
+      );
+      mockGetCannedFallback.mockReturnValue('Timeout fallback message');
+
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestHint();
+      });
+
+      expect(mockGetCannedFallback).toHaveBeenCalledWith('timeout');
+      const state = useAppStore.getState();
+      expect(state.tutorMessages).toHaveLength(1);
+      expect(state.tutorMessages[0].text).toBe('Timeout fallback message');
+    });
   });
 });
