@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.4
 milestone_name: Virtual Manipulatives
-status: executing
-stopped_at: Completed 20-03-PLAN.md
-last_updated: "2026-03-03T23:55:15Z"
-last_activity: 2026-03-03 -- Completed Plan 20-03 (Grid Mode and Double Frame)
+status: complete
+stopped_at: Completed 20-02-PLAN.md (all plans complete)
+last_updated: "2026-03-04T00:01:57Z"
+last_activity: 2026-03-03 -- Completed Plan 20-02 (Undo and Guided Mode)
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 16
-  completed_plans: 15
-  percent: 93
+  completed_plans: 16
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.4 Virtual Manipulatives -- Phase 20 in progress (2 of 3 plans complete)
+**Current focus:** v0.4 Virtual Manipulatives -- Complete (all 16/16 plans)
 
 ## Current Position
 
 Phase: 20 of 20 (Polish)
-Plan: 3 of 3 in current phase (Plan 20-02 pending)
-Status: Executing
-Last activity: 2026-03-03 -- Completed Plan 20-03 (Grid Mode and Double Frame)
+Plan: 3 of 3 in current phase (all complete)
+Status: Complete
+Last activity: 2026-03-03 -- Completed Plan 20-02 (Undo and Guided Mode)
 
-Progress: [█████████░] 93% (15/16 plans)
+Progress: [██████████] 100% (16/16 plans)
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Progress: [█████████░] 93% (15/16 plans)
 | 19-02 | Explore grid UI | 6min | 2 | 7 |
 | 20-01 | Shared infrastructure | 7min | 3 | 12 |
 | 20-03 | Grid mode and double frame | 10min | 2 | 11 |
+| 20-02 | Undo wiring and guided mode | 15min | 2 | 13 |
 
 ## Accumulated Context
 
@@ -112,6 +113,9 @@ v0.4 roadmap decisions:
 - [Phase 20-03]: Used DimensionStepper (inline +/- buttons) instead of BarModel NumberPicker for grid row/col selection
 - [Phase 20-03]: Extracted DualCountDisplay and DimensionStepper to CountersParts.tsx (500-line limit)
 - [Phase 20-03]: Grid mode auto-fills counters to match rows x cols; session auto-configures via gridRows/gridCols props
+- [Phase 20-02]: BaseTenBlocks clearTimer() before undo() prevents auto-group race condition
+- [Phase 20-02]: NumberLine liveMarkerValue for drag intermediates, pushMarkerState only on drag end
+- [Phase 20-02]: CpaSessionContent passes guidedTargetId only in concrete mode (null in pictorial/abstract/sandbox)
 
 ### Pending Todos
 
@@ -125,7 +129,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T23:55:15Z
-Stopped at: Completed 20-03-PLAN.md
-Resume file: .planning/phases/20-polish/20-02-PLAN.md
+Last session: 2026-03-04T00:01:57.449Z
+Stopped at: Completed 20-02-PLAN.md
+Resume file: None
 Resume command: /gsd:execute-phase 20

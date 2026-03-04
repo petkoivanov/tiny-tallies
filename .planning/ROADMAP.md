@@ -50,7 +50,7 @@
 - [x] **Phase 17: Manipulative Components** - All 6 manipulatives as standalone interactive components (base-ten blocks, number line, ten frames, counters, fraction strips, bar models) (completed 2026-03-03)
 - [x] **Phase 18: CPA Progression and Session Integration** - BKT-driven concrete/pictorial/abstract rendering and session-embedded manipulative overlay (completed 2026-03-03)
 - [x] **Phase 19: Sandbox Navigation** - Per-manipulative free exploration screens accessible from home (completed 2026-03-03)
-- [ ] **Phase 20: Polish** - Guided mode, undo, array grid counters, and double ten frame
+- [x] **Phase 20: Polish** - Guided mode, undo, array grid counters, and double ten frame (completed 2026-03-04)
 
 ## Phase Details
 
@@ -146,9 +146,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 20-01-PLAN.md — Shared infrastructure: useActionHistory hook, GuidedHighlight component, guided steps service, and ManipulativeShell extension
-- [ ] 20-02-PLAN.md — Undo wiring across all 6 manipulatives and guided mode session integration
-- [ ] 20-03-PLAN.md — Counter array grid mode and TenFrame double-frame pre-spawning
+- [x] 20-01-PLAN.md — Shared infrastructure: useActionHistory hook, GuidedHighlight component, guided steps service, and ManipulativeShell extension
+- [x] 20-02-PLAN.md — Undo wiring across all 6 manipulatives and guided mode session integration
+- [x] 20-03-PLAN.md — Counter array grid mode and TenFrame double-frame pre-spawning
 
 ## Progress
 
@@ -177,4 +177,4 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 17. Manipulative Components | v0.4 | 4/4 | Complete | 2026-03-03 |
 | 18. CPA Progression and Session Integration | v0.4 | 3/3 | Complete | 2026-03-03 |
 | 19. Sandbox Navigation | v0.4 | 2/2 | Complete | 2026-03-03 |
-| 20. Polish | 2/3 | In Progress|  | - |
+| 20. Polish | v0.4 | 3/3 | Complete | 2026-03-03 |
