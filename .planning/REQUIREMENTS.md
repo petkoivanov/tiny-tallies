@@ -84,37 +84,37 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LLM-01 | — | Pending |
-| LLM-02 | — | Pending |
-| LLM-03 | — | Pending |
-| LLM-04 | — | Pending |
-| LLM-05 | — | Pending |
-| CHAT-01 | — | Pending |
-| CHAT-02 | — | Pending |
-| CHAT-03 | — | Pending |
-| CHAT-04 | — | Pending |
-| CHAT-05 | — | Pending |
-| MODE-01 | — | Pending |
-| MODE-02 | — | Pending |
-| MODE-03 | — | Pending |
-| MODE-04 | — | Pending |
-| MODE-05 | — | Pending |
-| MODE-06 | — | Pending |
-| SAFE-01 | — | Pending |
-| SAFE-02 | — | Pending |
-| SAFE-03 | — | Pending |
-| SAFE-04 | — | Pending |
-| SAFE-05 | — | Pending |
-| SAFE-06 | — | Pending |
-| STATE-01 | — | Pending |
-| STATE-02 | — | Pending |
-| STATE-03 | — | Pending |
+| LLM-01 | Phase 21 | Pending |
+| LLM-02 | Phase 21 | Pending |
+| LLM-03 | Phase 22 | Pending |
+| LLM-04 | Phase 21 | Pending |
+| LLM-05 | Phase 21 | Pending |
+| CHAT-01 | Phase 23 | Pending |
+| CHAT-02 | Phase 23 | Pending |
+| CHAT-03 | Phase 23 | Pending |
+| CHAT-04 | Phase 23 | Pending |
+| CHAT-05 | Phase 23 | Pending |
+| MODE-01 | Phase 23 | Pending |
+| MODE-02 | Phase 24 | Pending |
+| MODE-03 | Phase 24 | Pending |
+| MODE-04 | Phase 24 | Pending |
+| MODE-05 | Phase 24 | Pending |
+| MODE-06 | Phase 24 | Pending |
+| SAFE-01 | Phase 22 | Pending |
+| SAFE-02 | Phase 22 | Pending |
+| SAFE-03 | Phase 22 | Pending |
+| SAFE-04 | Phase 22 | Pending |
+| SAFE-05 | Phase 22 | Pending |
+| SAFE-06 | Phase 22 | Pending |
+| STATE-01 | Phase 21 | Pending |
+| STATE-02 | Phase 21 | Pending |
+| STATE-03 | Phase 21 | Pending |
 
 **Coverage:**
 - v0.5 requirements: 25 total
-- Mapped to phases: 0
-- Unmapped: 25
+- Mapped to phases: 25
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-04*
-*Last updated: 2026-03-04 after initial definition*
+*Last updated: 2026-03-04 after roadmap creation*

@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v0.5
 milestone_name: AI Tutor
-status: planning
-stopped_at: null
-last_updated: "2026-03-03"
-last_activity: 2026-03-03 -- Milestone v0.5 started
+status: ready_to_plan
+stopped_at: Phase 21 ready to plan
+last_updated: "2026-03-04"
+last_activity: 2026-03-04 -- Roadmap created for v0.5 AI Tutor (4 phases, 25 requirements)
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,14 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.5 AI Tutor — defining requirements
+**Current focus:** v0.5 AI Tutor — Phase 21 (LLM Service & Store)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-03 — Milestone v0.5 started
+Phase: 21 of 24 (LLM Service & Store)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-03-04 — Roadmap created for v0.5 AI Tutor
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -44,17 +46,13 @@ Last activity: 2026-03-03 — Milestone v0.5 started
 Full decision log in PROJECT.md Key Decisions table.
 
 Key context carried from v0.4:
-- SkillState type: { eloRating, attempts, correct, lastPracticed?, masteryProbability, consecutiveWrong, masteryLocked, leitnerBox, nextReviewDue, consecutiveCorrectInBox6 }
-- STORE_VERSION = 5 (migrations: v1->v2->v3->v4->v5, v5 adds cpaLevel per skill)
-- BKT masteryLocked for unlocking; Elo threshold removed in Phase 13
-- Session orchestrator: 15 problems (3+9+3), 60/30/10 review/new/challenge mix
-- commitSessionResults handles Elo + BKT + Leitner updates atomically
-- 14 skills across addition/subtraction with cross-operation prerequisite DAG
+- STORE_VERSION = 5 (v5 adds cpaLevel per skill)
+- tutorSlice will be ephemeral (excluded from partialize) -- no STORE_VERSION bump needed
+- Gemini (@google/genai v1.30.0) already in dependencies; upgrade to v1.43.0 recommended
+- ManipulativePanel is in-screen collapsible (not Modal) -- tutor TEACH mode signals expansion
+- LLM must NEVER compute math or reveal answers in HINT mode
+- Non-streaming generateContent is the stable primary path for v0.5 (streaming deferred)
 - 742+ tests passing, TypeScript clean
-- 6 virtual manipulatives with 60fps drag, CPA progression, sandbox, guided mode
-- ManipulativePanel is in-screen collapsible (not Modal) to avoid gesture conflicts
-- Manipulative state is ephemeral (component-local), never persisted to store
-- Gemini (@google/genai) already in dependencies for future LLM layer
 
 ### Pending Todos
 
@@ -66,7 +64,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03
-Stopped at: Milestone v0.5 initialization
+Last session: 2026-03-04
+Stopped at: Roadmap created, ready to plan Phase 21
 Resume file: None
-Resume command: /gsd:new-milestone
+Resume command: /gsd:plan-phase 21

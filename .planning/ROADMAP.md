@@ -6,6 +6,7 @@
 - ✅ **v0.2 UI Polish & Gamification** — Phases 7-10 (shipped 2026-03-03)
 - ✅ **v0.3 Adaptive Learning Engine** — Phases 11-14 (shipped 2026-03-03)
 - ✅ **v0.4 Virtual Manipulatives** — Phases 15-20 (shipped 2026-03-04)
+- 🚧 **v0.5 AI Tutor** — Phases 21-24 (in progress)
 
 ## Phases
 
@@ -53,110 +54,67 @@
 
 </details>
 
-## Phase Details (Archived)
+### v0.5 AI Tutor (In Progress)
 
-### Phase 15: Foundation -- Store Schema, Services, and Mappings
-**Goal**: The system can track CPA stage per skill, determine which manipulative suits each math concept, and compile Reanimated 4 worklet code
-**Depends on**: Phase 14 (v0.3 complete)
-**Requirements**: FOUND-01, FOUND-02, FOUND-04, CPA-01
+- [ ] **Phase 21: LLM Service & Store** - Gemini client, prompt templates, rate limiting, tutor store slice, and core lifecycle hook
+- [ ] **Phase 22: Safety & Compliance** - Output filtering, COPPA data minimization, safety filters, content validation, fallback responses, and VPC gate
+- [ ] **Phase 23: Chat UI & HINT Mode** - Help button, chat bubble UI, response buttons, per-problem reset, offline detection, and Socratic hint delivery
+- [ ] **Phase 24: TEACH, BOOST & Auto-Escalation** - TEACH mode with manipulative integration, BOOST mode scaffolding, auto-escalation state machine, and Bug Library-informed explanations
+
+## Phase Details
+
+### Phase 21: LLM Service & Store
+**Goal**: The app can send prompts to Gemini and receive validated responses, with tutor state managed in an ephemeral store slice that reads from but never writes to session/adaptive state
+**Depends on**: Phase 20 (v0.4 complete)
+**Requirements**: LLM-01, LLM-02, LLM-04, LLM-05, STATE-01, STATE-02, STATE-03
 **Success Criteria** (what must be TRUE):
-  1. Store schema includes cpaLevel per skill with migration from STORE_VERSION 4 to 5 that initializes existing skills to concrete
-  2. Given a skill ID, the system returns the appropriate manipulative type(s) for that concept
-  3. CPA stage for a skill is derived from BKT mastery: P(L) < 0.40 = concrete, 0.40-0.85 = pictorial, >= 0.85 = abstract
-  4. Reanimated 4 worklet code compiles and runs without babel errors
-**Plans**: 2 plans
+  1. Gemini client initializes lazily with API key from expo-secure-store and sends a prompt that returns a validated response
+  2. Prompt templates produce age-appropriate, CPA-stage-aware prompts given a child age bracket, CPA stage, and problem context
+  3. LLM calls abort cleanly via AbortController and enforce an 8-second timeout
+  4. Rate limiter blocks calls exceeding 3/problem, 20/session, or 50/day thresholds and returns a user-friendly message
+  5. Tutor store slice holds chat messages, tutor mode, hint level, and loading/error state without persisting to AsyncStorage or triggering a store migration
+**Plans**: TBD
 
-Plans:
-- [x] 15-01-PLAN.md — CPA types, service, skill-manipulative mapping, and babel config fix
-- [x] 15-02-PLAN.md — Store schema v4->v5 migration and commitSessionResults CPA integration
-
-### Phase 16: Shared Drag Primitives
-**Goal**: A reusable set of drag-and-drop primitives that run snap logic on the UI thread at 60fps, providing the interaction foundation for all 6 manipulatives
-**Depends on**: Phase 15
-**Requirements**: FOUND-03, MANIP-08, MANIP-09, MANIP-10, MANIP-11
+### Phase 22: Safety & Compliance
+**Goal**: Every LLM response passes through deterministic safety checks before reaching the child, and parental consent is required before first AI tutor use
+**Depends on**: Phase 21
+**Requirements**: LLM-03, SAFE-01, SAFE-02, SAFE-03, SAFE-04, SAFE-05, SAFE-06
 **Success Criteria** (what must be TRUE):
-  1. User can drag an item and it snaps to valid zones with spring animation at 60fps (no JS thread lag)
-  2. User can tap to add or remove pieces as an alternative to dragging, with 48dp touch targets
-  3. User can reset any manipulative to its starting state via a reset action
-  4. User receives haptic feedback when items snap or group
-  5. A running count/value display updates on drop events (not during active drag)
-**Plans**: 2 plans
+  1. System instruction enforces safety rules (no answer reveal, age-appropriate language, effort praise only) and Gemini safety filters are set to BLOCK_LOW_AND_ABOVE for all 4 categories
+  2. Post-generation output filter detects and blocks responses that leak the correct answer (number as digit, spelled out, or indirect phrasing)
+  3. Outbound prompts never contain child name, specific age, or profile data -- only math problem, numeric answer, and misconception tag
+  4. Content validator rejects responses exceeding sentence length or vocabulary limits for the child's age bracket, substituting a canned fallback
+  5. When LLM fails, is blocked, times out, or is rate-limited, the child sees a friendly canned fallback response and the session continues uninterrupted
+**Plans**: TBD
 
-Plans:
-- [x] 16-01-PLAN.md — Types, snap math worklets, animation config, haptics, jest mocks, and GestureHandlerRootView
-- [x] 16-02-PLAN.md — DraggableItem, SnapZone, and AnimatedCounter interactive components
-
-### Phase 17: Manipulative Components
-**Goal**: All six virtual manipulatives are fully interactive standalone components that children can directly manipulate to explore math concepts
-**Depends on**: Phase 16
-**Requirements**: MANIP-01, MANIP-02, MANIP-03, MANIP-04, MANIP-05, MANIP-06, MANIP-07
+### Phase 23: Chat UI & HINT Mode
+**Goal**: A child can tap Help during a practice problem and receive Socratic hints through a chat bubble interface that resets per-problem and degrades gracefully offline
+**Depends on**: Phase 22
+**Requirements**: CHAT-01, CHAT-02, CHAT-03, CHAT-04, CHAT-05, MODE-01
 **Success Criteria** (what must be TRUE):
-  1. User can drag base-ten blocks (ones, tens, hundreds) onto a place-value mat, auto-group 10 cubes into a rod, and tap a rod to decompose
-  2. User can drag a marker along a number line and see hop arrows with labeled values
-  3. User can place counters on a ten frame with snap-to-cell behavior and use two-color mode for comparison
-  4. User can shade fraction strip sections and compare fractions by stacking strips vertically
-  5. User can create bar model part-whole layouts with labeled sections and a "?" placeholder
-**Plans**: 4 plans
+  1. Child sees a help button during practice that they can tap to open the tutor chat (button is always visible, never auto-triggers)
+  2. Chat displays tutor messages in styled bubbles and child responds via pre-defined response buttons (no free-text input)
+  3. Tutor delivers Socratic hints that guide thinking without ever revealing the answer
+  4. Chat state resets completely when the problem advances, with any in-flight LLM calls cancelled via AbortController
+  5. When the device is offline, child sees a friendly message explaining help is unavailable and practice continues normally
+**Plans**: TBD
 
-Plans:
-- [x] 17-01-PLAN.md — ManipulativeShell wrapper, Counters (two-color flip), and TenFrame (snap grid)
-- [x] 17-02-PLAN.md — NumberLine (SVG + hop arrows) and FractionStrips (tap-to-shade + stacking)
-- [x] 17-03-PLAN.md — BarModel (draggable dividers + NumberPicker wheel)
-- [x] 17-04-PLAN.md — BaseTenBlocks (auto-group/decompose choreography + place-value mat)
-
-### Phase 18: CPA Progression and Session Integration
-**Goal**: Practice sessions automatically show the right representation (concrete manipulative, pictorial diagram, or abstract numbers) based on the child's mastery of each skill, with an embedded manipulative overlay for hands-on problem solving
-**Depends on**: Phase 15, Phase 17
-**Requirements**: CPA-02, CPA-03, CPA-04, CPA-05, SESS-01, SESS-02, SESS-03
+### Phase 24: TEACH, BOOST & Auto-Escalation
+**Goal**: The tutor automatically escalates from hints to CPA-aware teaching with manipulatives to deep scaffolding based on the child's struggle level, with Bug Library misconception tags informing explanations
+**Depends on**: Phase 23
+**Requirements**: MODE-02, MODE-03, MODE-04, MODE-05, MODE-06
 **Success Criteria** (what must be TRUE):
-  1. User sees interactive manipulatives during practice when their skill mastery is low (concrete mode)
-  2. User sees static visual representations during practice when their skill mastery is moderate (pictorial mode)
-  3. User sees numbers only during practice when their skill mastery is high (abstract mode)
-  4. User can expand and collapse a contextually-selected manipulative overlay during any practice problem
-  5. CPA stage advances automatically after a practice session completes based on updated BKT mastery
-**Plans**: 3 plans
-
-Plans:
-- [x] 18-01-PLAN.md — useCpaMode hook, ManipulativePanel animated drawer, CompactAnswerRow, and CpaModeIcon
-- [x] 18-02-PLAN.md — 6 pictorial SVG diagram renderers and PictorialDiagram dispatcher
-- [x] 18-03-PLAN.md — CpaSessionContent mode renderer, SessionScreen integration, and Results CPA celebration
-
-### Phase 19: Sandbox Navigation
-**Goal**: Children can freely explore any manipulative without problem constraints, accessible from the home screen
-**Depends on**: Phase 17
-**Requirements**: SAND-01, SAND-02, SAND-03
-**Success Criteria** (what must be TRUE):
-  1. User can navigate to a per-manipulative sandbox screen from the home screen
-  2. User can freely interact with each manipulative without time limits, scoring, or problem prompts
-  3. Sandbox state is ephemeral and does not persist across app restarts
-**Plans**: 2 plans
-
-Plans:
-- [x] 19-01-PLAN.md — sandboxSlice, navigation route, SandboxScreen with tooltip, and tests
-- [x] 19-02-PLAN.md — ExploreCard/ExploreGrid components and HomeScreen ScrollView integration
-
-### Phase 20: Polish
-**Goal**: Enhanced manipulative interactions with guided hints, undo capability, and extended modes for multiplication and addition-within-20
-**Depends on**: Phase 17, Phase 18
-**Requirements**: POL-01, POL-02, POL-03, POL-04
-**Success Criteria** (what must be TRUE):
-  1. User sees guided mode highlighting the next suggested action on a manipulative
-  2. User can undo the last action on a manipulative (up to 10 steps)
-  3. User can switch counters to array grid mode for multiplication concepts
-  4. Ten frame auto-spawns a second frame when working on add-within-20 problems
-**Plans**: 4 plans
-
-Plans:
-- [x] 20-01-PLAN.md — Shared infrastructure: useActionHistory hook, GuidedHighlight component, guided steps service, and ManipulativeShell extension
-- [x] 20-02-PLAN.md — Undo wiring across all 6 manipulatives and guided mode session integration
-- [x] 20-03-PLAN.md — Counter array grid mode and TenFrame double-frame pre-spawning
-- [ ] 20-04-PLAN.md — Gap closure: fix BarModel and BaseTenBlocks guided highlight wiring
+  1. When hints are insufficient, tutor auto-escalates to TEACH mode which uses CPA-stage-aware language matching the child's current concrete/pictorial/abstract level
+  2. TEACH mode triggers the ManipulativePanel to expand with the correct manipulative type pre-selected for the current skill
+  3. After continued struggle, tutor auto-escalates to BOOST mode which provides deep scaffolding and programmatic answer reveal after 3+ wrong attempts
+  4. Auto-escalation state machine transitions HINT -> TEACH -> BOOST based on hint count and wrong-answer count, resetting per-problem
+  5. Bug Library misconception tags from the child's wrong answer inform tutor explanations, addressing the specific misunderstanding rather than giving generic feedback
+**Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
-(Phase 19 can run after 17, in parallel with 18)
+Phases execute in numeric order: 21 -> 22 -> 23 -> 24
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -179,4 +137,8 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 17. Manipulative Components | v0.4 | 4/4 | Complete | 2026-03-03 |
 | 18. CPA Progression and Session Integration | v0.4 | 3/3 | Complete | 2026-03-03 |
 | 19. Sandbox Navigation | v0.4 | 2/2 | Complete | 2026-03-03 |
-| 20. Polish | 4/4 | Complete    | 2026-03-04 | 2026-03-03 |
+| 20. Polish | v0.4 | 4/4 | Complete | 2026-03-04 |
+| 21. LLM Service & Store | v0.5 | 0/? | Not started | - |
+| 22. Safety & Compliance | v0.5 | 0/? | Not started | - |
+| 23. Chat UI & HINT Mode | v0.5 | 0/? | Not started | - |
+| 24. TEACH, BOOST & Auto-Escalation | v0.5 | 0/? | Not started | - |
