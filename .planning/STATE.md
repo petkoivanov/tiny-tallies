@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.5
 milestone_name: AI Tutor
 status: executing
-stopped_at: Completed 24-01-PLAN.md
-last_updated: "2026-03-04T14:55:06Z"
-last_activity: 2026-03-04 -- Completed Plan 24-01 (Escalation Engine & Service Foundation)
+stopped_at: Completed 24-02-PLAN.md
+last_updated: "2026-03-04T15:03:24Z"
+last_activity: 2026-03-04 -- Completed Plan 24-02 (useTutor Hook Multi-Mode Wiring)
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 11
-  completed_plans: 9
-  percent: 82
+  completed_plans: 10
+  percent: 91
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 24 of 24 (TEACH, BOOST & Auto-Escalation)
-Plan: 1 of 3 complete
+Plan: 2 of 3 complete
 Status: Executing
-Last activity: 2026-03-04 -- Completed Plan 24-01 (Escalation Engine & Service Foundation)
+Last activity: 2026-03-04 -- Completed Plan 24-02 (useTutor Hook Multi-Mode Wiring)
 
-Progress: [████████░░] 82%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [████████░░] 82%
 | 23    | 01   | 3min     | 2     | 11    |
 | 23    | 02   | 4min     | 2     | 8     |
 | 24    | 01   | 5min     | 2     | 12    |
+| 24    | 02   | 4min     | 1     | 2     |
 
 ## Accumulated Context
 
@@ -98,7 +99,11 @@ v0.5 Phase 24 decisions:
 - runSafetyPipeline BOOST bypass via optional mode parameter -- backward compatible
 - TEACH mode: NEVER reveal final answer, show HOW letting child do last step
 - BOOST mode: MAY reveal answer, focus on WHY, encouraging tone
-- 992 tests passing, TypeScript clean
+- requestTutor is the primary function name; requestHint is an alias for backward compatibility
+- shouldExpandManipulative derived from tutorMode=teach AND manipulativeType!==null (computed, not state)
+- BOOST mode skips incrementHintLevel; only hint/teach modes increment
+- Escalation check reads fresh state via getState() after incrementHintLevel for accurate thresholds
+- 1016 tests passing, TypeScript clean
 
 ### Pending Todos
 
@@ -110,7 +115,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T14:55:06Z
-Stopped at: Completed 24-01-PLAN.md
-Resume file: .planning/phases/24-teach-boost-auto-escalation/24-02-PLAN.md
+Last session: 2026-03-04T15:03:24Z
+Stopped at: Completed 24-02-PLAN.md
+Resume file: .planning/phases/24-teach-boost-auto-escalation/24-03-PLAN.md
 Resume command: /gsd:execute-phase 24
