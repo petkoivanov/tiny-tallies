@@ -182,15 +182,20 @@ describe('useTutor', () => {
     expect(state.tutorMessages[0].text).toBe('Try counting on your fingers!');
   });
 
-  it('requestHint sets tutorError on Gemini failure', async () => {
+  it('requestHint adds fallback message on Gemini failure instead of setting error', async () => {
     mockCallGemini.mockRejectedValue(new Error('Network error'));
+    mockGetCannedFallback.mockReturnValue('Error fallback');
     const { result } = renderHook(() => useTutor(makeProblem()));
 
     await act(async () => {
       await result.current.requestHint();
     });
 
-    expect(result.current.error).toBeTruthy();
+    // Error state should be null -- child sees fallback message, not error banner
+    expect(result.current.error).toBeNull();
+    const state = useAppStore.getState();
+    expect(state.tutorMessages).toHaveLength(1);
+    expect(state.tutorMessages[0].text).toBe('Error fallback');
   });
 
   it('requestHint sets tutorLoading true before call and false after', async () => {

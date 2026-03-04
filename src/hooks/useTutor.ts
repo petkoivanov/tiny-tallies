@@ -6,6 +6,8 @@ import {
   buildHintPrompt,
 } from '@/services/tutor/promptTemplates';
 import { checkRateLimit, getRateLimitMessage } from '@/services/tutor/rateLimiter';
+import { scrubOutboundPii, runSafetyPipeline } from '@/services/tutor/safetyFilter';
+import { getCannedFallback } from '@/services/tutor/safetyConstants';
 import type { AgeBracket, TutorMessage } from '@/services/tutor/types';
 import type { SessionProblem } from '@/services/session/sessionTypes';
 
@@ -55,6 +57,8 @@ export function useTutor(
 
   // Read from childProfileSlice (READ ONLY)
   const childAge = useAppStore((s) => s.childAge);
+  const childName = useAppStore((s) => s.childName);
+  const tutorConsentGranted = useAppStore((s) => s.tutorConsentGranted);
 
   // Get tutor actions
   const addTutorMessage = useAppStore((s) => s.addTutorMessage);
@@ -75,6 +79,12 @@ export function useTutor(
   }, []);
 
   const requestHint = useCallback(async () => {
+    // Guard: consent required before AI tutor access
+    if (!tutorConsentGranted) {
+      setTutorError('consent_required');
+      return;
+    }
+
     // Guard: prevent double-tap
     if (useAppStore.getState().tutorLoading) return;
 
@@ -126,19 +136,59 @@ export function useTutor(
     const systemInstruction = buildSystemInstruction(promptParams);
     const hintPrompt = buildHintPrompt(promptParams);
 
+    // Defense-in-depth: scrub PII from outbound prompts
+    const scrubbed = scrubOutboundPii(
+      systemInstruction,
+      hintPrompt,
+      childName,
+      childAge,
+    );
+
     try {
       const responseText = await callGemini({
-        systemInstruction,
-        userMessage: hintPrompt,
+        systemInstruction: scrubbed.systemInstruction,
+        userMessage: scrubbed.userMessage,
         abortSignal: controller.signal,
       });
 
-      // Only update state if not aborted
+      // Handle safety-blocked response (null from Gemini safety filters)
+      if (responseText === null) {
+        if (!controller.signal.aborted) {
+          addTutorMessage({
+            id: `tutor-fallback-${Date.now()}`,
+            role: 'tutor',
+            text: getCannedFallback('safety_blocked'),
+            timestamp: Date.now(),
+          });
+        }
+        return;
+      }
+
+      // Run deterministic safety pipeline (answer-leak + content validation)
+      const safetyResult = runSafetyPipeline(
+        responseText,
+        currentProblem.problem.correctAnswer,
+        ageBracket,
+      );
+
+      if (!safetyResult.passed) {
+        if (!controller.signal.aborted) {
+          addTutorMessage({
+            id: `tutor-fallback-${Date.now()}`,
+            role: 'tutor',
+            text: getCannedFallback(safetyResult.fallbackCategory),
+            timestamp: Date.now(),
+          });
+        }
+        return;
+      }
+
+      // All safety checks passed -- deliver response to child
       if (!controller.signal.aborted) {
         addTutorMessage({
           id: `tutor-${Date.now()}`,
           role: 'tutor',
-          text: responseText,
+          text: safetyResult.text,
           timestamp: Date.now(),
         });
         incrementCallCount();
@@ -156,9 +206,32 @@ export function useTutor(
         return;
       }
 
-      // Set user-friendly error for non-abort failures
+      // Timeout detection: DOMException (non-abort) or timeout keyword
+      const isTimeout =
+        err instanceof DOMException ||
+        (err instanceof Error &&
+          err.message.toLowerCase().includes('timeout'));
+      if (isTimeout && !controller.signal.aborted) {
+        addTutorMessage({
+          id: `tutor-fallback-${Date.now()}`,
+          role: 'tutor',
+          text: getCannedFallback('timeout'),
+          timestamp: Date.now(),
+        });
+        setTutorError(null);
+        setTutorLoading(false);
+        return;
+      }
+
+      // Generic error: use categorized canned fallback instead of raw error string
       if (!controller.signal.aborted) {
-        setTutorError('Something went wrong. Please try again.');
+        addTutorMessage({
+          id: `tutor-fallback-${Date.now()}`,
+          role: 'tutor',
+          text: getCannedFallback('error'),
+          timestamp: Date.now(),
+        });
+        setTutorError(null);
       }
     } finally {
       // Only clear loading if not aborted/unmounted
@@ -169,6 +242,9 @@ export function useTutor(
   }, [
     currentProblem,
     ageBracket,
+    tutorConsentGranted,
+    childName,
+    childAge,
     addTutorMessage,
     setTutorLoading,
     setTutorError,
