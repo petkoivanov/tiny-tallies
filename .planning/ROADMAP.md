@@ -87,7 +87,10 @@
   2. Each misconception record contains bugTag, skillId, occurrenceCount, status, and timestamps as defined in STATE-02
   3. When a child answers incorrectly and the answer matches a Bug Library pattern, the corresponding bug tag is recorded in the misconception store
   4. Misconception records survive app restart (persisted via AsyncStorage)
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 26-01-PLAN.md — misconceptionSlice with types, store composition, migration, and TDD tests
+- [ ] 26-02-PLAN.md — Wire misconception recording into useSession answer flow
 
 ### Phase 27: Confirmation Engine
 **Goal**: The system distinguishes suspected from confirmed misconceptions using cross-session pattern analysis
@@ -160,7 +163,7 @@
 | 23. Chat UI & HINT Mode | v0.5 | 2/2 | Complete | 2026-03-04 |
 | 24. TEACH, BOOST & Auto-Escalation | v0.5 | 3/3 | Complete | 2026-03-04 |
 | 25. Consent Gate & Minor Fixes | v0.5 | 2/2 | Complete | 2026-03-04 |
-| 26. Misconception Store & Recording | v0.6 | 0/0 | Not started | - |
+| 26. Misconception Store & Recording | v0.6 | 0/2 | In progress | - |
 | 27. Confirmation Engine | v0.6 | 0/0 | Not started | - |
 | 28. Session Mix Adaptation | v0.6 | 0/0 | Not started | - |
 | 29. AI Tutor Misconception Context | v0.6 | 0/0 | Not started | - |
