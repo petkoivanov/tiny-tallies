@@ -70,7 +70,7 @@
 
 **Milestone Goal:** Track misconception patterns across sessions using the 2-then-3 confirmation rule, store misconception history per child, and deliver targeted interventions -- shifting from reactive per-problem feedback to systematic misconception remediation.
 
-- [ ] **Phase 26: Misconception Store & Recording** - Store slice, migration, and per-answer bug tag recording
+- [x] **Phase 26: Misconception Store & Recording** - Store slice, migration, and per-answer bug tag recording (completed 2026-03-04)
 - [ ] **Phase 27: Confirmation Engine** - 2-then-3 confirmation rule and misconception history with status tracking
 - [ ] **Phase 28: Session Mix Adaptation** - Session orchestrator prioritizes skills with confirmed misconceptions
 - [ ] **Phase 29: AI Tutor Misconception Context** - Tutor prompts enriched with cross-session misconception data
@@ -163,7 +163,7 @@ Plans:
 | 23. Chat UI & HINT Mode | v0.5 | 2/2 | Complete | 2026-03-04 |
 | 24. TEACH, BOOST & Auto-Escalation | v0.5 | 3/3 | Complete | 2026-03-04 |
 | 25. Consent Gate & Minor Fixes | v0.5 | 2/2 | Complete | 2026-03-04 |
-| 26. Misconception Store & Recording | 1/2 | In Progress|  | - |
+| 26. Misconception Store & Recording | 2/2 | Complete   | 2026-03-04 | - |
 | 27. Confirmation Engine | v0.6 | 0/0 | Not started | - |
 | 28. Session Mix Adaptation | v0.6 | 0/0 | Not started | - |
 | 29. AI Tutor Misconception Context | v0.6 | 0/0 | Not started | - |
