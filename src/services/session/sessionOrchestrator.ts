@@ -149,6 +149,7 @@ export function generateSessionQueue(
   config: SessionConfig = DEFAULT_SESSION_CONFIG,
   seed: number = Date.now(),
   childAge: number | null = null,
+  confirmedMisconceptionSkillIds: readonly string[] = [],
 ): SessionProblem[] {
   const rng = createRng(seed);
   const unlockedSkillIds = getUnlockedSkills(skillStates);
@@ -156,8 +157,10 @@ export function generateSessionQueue(
   const total = warmupCount + practiceCount + cooldownCount;
   const queue: SessionProblem[] = [];
 
-  // Generate the practice mix using the 60/30/10 algorithm
-  const practiceMix = generatePracticeMix(skillStates, childAge, rng, practiceCount);
+  // Generate the practice mix using the 60/30/10 algorithm with remediation injection
+  const practiceMix = generatePracticeMix(
+    skillStates, childAge, rng, practiceCount, undefined, confirmedMisconceptionSkillIds,
+  );
   const orderedMix = constrainedShuffle(practiceMix, rng);
 
   let practiceIdx = 0;
@@ -181,7 +184,7 @@ export function generateSessionQueue(
         // Challenge: prefer templates above student Elo
         template = selectChallengeTemplate(skillId, skillState.eloRating, rng);
       } else {
-        // Review and new: standard gaussian-targeted selection
+        // Review, new, and remediation: standard gaussian-targeted selection
         template = selectTemplateForSkill(skillId, skillState.eloRating, rng);
       }
     }

@@ -29,6 +29,8 @@ import type {
 } from '../services/session';
 import type { CpaStage } from '../services/cpa/cpaTypes';
 import { getOrCreateSkillState } from '../store/helpers/skillStateHelpers';
+import type { MisconceptionRecord } from '../store/slices/misconceptionSlice';
+import { getConfirmedMisconceptions } from '../store/slices/misconceptionSlice';
 
 /** Duration in ms to show correct/incorrect feedback before auto-advancing */
 export const FEEDBACK_DURATION_MS = 1500;
@@ -61,11 +63,16 @@ export interface UseSessionReturn {
 function initializeSession(
   skillStates: Record<string, SkillState>,
   startSession: () => void,
+  misconceptions: Record<string, MisconceptionRecord>,
 ): { queue: SessionProblem[]; startTime: number } {
   startSession();
   const seed = Date.now();
   const startTime = Date.now();
-  const queue = generateSessionQueue(skillStates, DEFAULT_SESSION_CONFIG, seed);
+  const confirmed = getConfirmedMisconceptions(misconceptions);
+  const uniqueSkillIds = [...new Set(confirmed.map((r) => r.skillId))];
+  const queue = generateSessionQueue(
+    skillStates, DEFAULT_SESSION_CONFIG, seed, null, uniqueSkillIds,
+  );
   return { queue, startTime };
 }
 
@@ -99,6 +106,7 @@ export function useSession(): UseSessionReturn {
   const childAge = useAppStore((s) => s.childAge);
   const recordMisconception = useAppStore((s) => s.recordMisconception);
   const resetSessionDedup = useAppStore((s) => s.resetSessionDedup);
+  const misconceptions = useAppStore((s) => s.misconceptions);
 
   // Synchronous initialization: generate queue on first render, not in useEffect.
   // This ensures currentProblem is available immediately.
@@ -113,7 +121,7 @@ export function useSession(): UseSessionReturn {
   if (!initializedRef.current) {
     initializedRef.current = true;
     resetSessionDedup();
-    const { queue, startTime } = initializeSession(skillStates, startSession);
+    const { queue, startTime } = initializeSession(skillStates, startSession, misconceptions);
     sessionQueueRef.current = queue;
     sessionStartTimeRef.current = startTime;
   }
