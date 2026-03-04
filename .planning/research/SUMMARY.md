@@ -1,17 +1,17 @@
 # Project Research Summary
 
-**Project:** Tiny Tallies — Virtual Manipulatives (v0.4 milestone)
-**Domain:** Interactive math manipulatives for children ages 6-9 (React Native / Expo)
+**Project:** Tiny Tallies v0.5 — AI Tutor Milestone
+**Domain:** LLM-powered conversational tutoring in a children's math learning app (React Native / Expo)
 **Researched:** 2026-03-03
 **Confidence:** HIGH
 
 ## Executive Summary
 
-The v0.4 milestone delivers six virtual math manipulatives (base-ten blocks, number line, ten frames, counters, fraction strips, bar models) that integrate into an existing adaptive learning session flow. Research confirms that all required animation and gesture libraries are already installed — the milestone is entirely implementation work, not infrastructure work. The one pre-flight fix required before any code runs is a `babel.config.js` plugin change: replacing `react-native-reanimated/plugin` with `react-native-worklets/plugin` for Reanimated 4 compatibility. Without this change, worklet-based gesture code will fail at runtime on device even though tests pass.
+The v0.5 AI Tutor milestone adds an on-demand Gemini-powered tutoring layer to the existing session infrastructure. Research confirms this is an **additive integration** — the existing session, adaptive engine (Elo/BKT/Leitner), and virtual manipulatives remain entirely unchanged. The tutor grafts a parallel conversation layer that reads from session state but never writes to it. The recommended approach is to build the service layer first (types, prompts, orchestrator, Gemini client), then the store slice, then the composing hook, then the UI — a strict bottom-up dependency order that keeps each layer independently testable. Zero new npm dependencies are required; every capability needed (Gemini SDK, Zod, NetInfo, Reanimated, Secure Store) is already installed.
 
-The recommended architecture grafts three additive subsystems onto v0.3 without modifying existing session, skill, or scoring code: (1) a shared draggable primitive (`DraggableItem` + `SnapZone`) that runs entirely on the UI thread via Reanimated SharedValues, (2) a CPA progression service that reads existing BKT `P(L)` scores per skill and advances children through concrete → pictorial → abstract stages per-skill (not globally), and (3) a `ManipulativePanel` overlay that embeds contextually selected manipulatives inside the existing session screen. The store schema bump (STORE_VERSION 4 → 5) is required to add `cpaLevel` to each `SkillState` entry and must include a migration function.
+The most important design decisions are non-negotiable guardrails: the LLM must never compute math (always receive the correct answer from the programmatic engine), HINT mode must never reveal the answer (enforced by a deterministic post-generation output filter, not just a system prompt instruction), and COPPA 2025 amendments require a Verifiable Parental Consent gate before any LLM call transmits data to Google. The PNAS 2024 study is the anchor finding here — guardrailed AI produced +127% learning improvement while unguardrailed AI caused -17% decline. Every safety check exists to stay on the right side of that gap.
 
-The two highest-risk implementation areas are the draggable primitive (gesture/animation pitfalls compound across all 6 manipulatives if the base is wrong) and the CPA progression logic (must use BKT `P(L)` not Elo, must be per-skill not per-child). Both must be validated with explicit unit tests before downstream manipulative components are built. Free competitors (Math Learning Center, Toy Theater) offer comparable drag-and-drop manipulatives but none offer adaptive CPA progression, session-embedded manipulatives, or native mobile touch at 60fps — these are the three differentiators that justify the milestone.
+The feature scope is intentionally narrow for v0.5: child-initiated help only (never auto-trigger), text-only interface with pre-defined response buttons (no free-text input for ages 6-9), HINT/TEACH/BOOST three-mode escalation, and manipulative panel integration via a signal-not-direct-control pattern. Voice I/O, tutor analytics, and sandbox-mode tutoring are explicitly deferred. The architecture mirrors the existing ManipulativePanel pattern — an `Animated.View` overlay inside the component tree (not a Modal) with `CpaSessionContent` as the integration point.
 
 ---
 
@@ -19,154 +19,135 @@ The two highest-risk implementation areas are the draggable primitive (gesture/a
 
 ### Recommended Stack
 
-No new packages are required. The installed library set (react-native-gesture-handler 2.28.0, react-native-reanimated 4.1.6, react-native-worklets 0.7.4, react-native-svg 15.12.1, expo-haptics 15.0.8, expo-linear-gradient 15.0.7) covers every manipulative interaction. New Architecture is already enabled (`newArchEnabled: true`), which is required for Reanimated 4.
-
-The only mandatory pre-work is the babel plugin change. All drag-and-drop code must use the Reanimated 4 API patterns: `Gesture.Pan()` (not `PanGestureHandler`), `scheduleOnRN` from `react-native-worklets` (not deprecated `runOnJS`), and `transform: [translateX, translateY]` (never `left`/`top`) for animated positions. SVG-based manipulatives (number line, fraction strips) must use `useAnimatedProps` with `createAnimatedComponent` rather than `useAnimatedStyle` because SVG attributes are props, not style.
+The v0.5 milestone requires **no new npm dependencies**. The Gemini SDK (`@google/genai` v1.30.0, upgrade to v1.43.0 recommended) is already in `package.json`. All supporting libraries — Zod for output validation, NetInfo for offline detection, Secure Store for API key, Reanimated for panel animation, Lucide for icons — are already installed and Expo SDK 54 compatible.
 
 **Core technologies:**
-- `react-native-gesture-handler` 2.28.0: All drag interactions — use `Gesture.Pan()` Gesture API, compose with `Gesture.Race(tap, pan)` for tap/drag conflict resolution
-- `react-native-reanimated` 4.1.6: 60fps UI-thread animations — `useSharedValue`, `withSpring`, `useAnimatedStyle`, `useAnimatedProps`
-- `react-native-worklets` 0.7.4: Worklet runtime — provides babel plugin and `scheduleOnRN` for crossing to RN thread
-- `react-native-svg` 15.12.1: SVG rendering for number lines, fraction strips, bar model bracket lines
-- `expo-haptics` 15.0.8: Tactile feedback on snap (`Light`), group formation (`Success`), no `Heavy`/`Error` per no-punitive-mechanics principle
+- `@google/genai` + Gemini 2.5 Flash: LLM engine — 232 tok/s output, 0.51s TTFT, $0.30/M input; fastest/cheapest model adequate for children's 2-3 sentence hints; upgrade `@google/genai` to v1.43.0 for latest fixes
+- Zustand ephemeral slice (`tutorSlice`): chat state — excluded from `partialize` so it resets on app restart without requiring a store migration; no STORE_VERSION bump needed
+- `ai.models.generateContentStream` (manual history): LLM call pattern — chosen over `ai.chats` convenience API to retain explicit control over context window, prompt injection guards, and per-problem reset; non-streaming (`generateContent`) is recommended as the stable primary path for v0.5 with streaming as a Phase 4 polish enhancement
+- FlatList (not FlashList): chat message list — chat has fewer than 10 messages per problem; FlashList v1.x adds complexity with no virtualization benefit at this scale
 
 ### Expected Features
 
-**Must have (table stakes — v0.4 launch):**
-- Drag-and-drop at 60fps for all 6 manipulative types — children expect objects to be physically movable
-- Snap-to-grid / snap-to-cell — objects that float without snapping feel broken to ages 6-9
-- Running count/value display updating on drop (not during drag — distracting)
-- Tap-to-add / tap-to-remove as fallback — 48dp targets; ages 6-7 cannot reliably drag small objects
-- Auto-group: 10 cubes animate into rod (base-ten blocks); tap rod to break into 10 cubes
-- Hop arrows with labeled values (number line) — without hops, the number line is display-only
-- Two-color counter mode — standard for comparison and subtraction concepts
-- Fraction strip shading + stack comparison — useless without shading; comparison is the primary use case
-- Bar model part-whole layout with "?" label — minimum structure for word problem scaffolding
-- Per-manipulative sandbox screen (standalone free-play)
-- Session-embedded manipulative as collapsible visual aid overlay
-- BKT-driven CPA stage progression (concrete → pictorial → abstract) per skill
-- Manipulative-to-skill mapping table (auto-selects correct manipulative for problem)
-- Haptic feedback on snap and grouping events
-- Reset button on all manipulatives
+**Must have (table stakes):**
+- Child-initiated help button — always visible, never pulsing or auto-triggering; autonomy is critical for math anxiety prevention
+- Socratic hints that never reveal the answer — enforced by deterministic output filter post-generation (not just system prompt instructions alone)
+- Age-appropriate language — prompt templates parameterized by child age bracket (6-7, 8-9) with sentence length and vocabulary constraints baked in
+- Chat bubble UI with pre-defined response buttons — no free-text input; ages 6-7 cannot type reliably and pre-defined buttons eliminate the prompt injection attack surface entirely
+- Per-problem chat reset — tutor state clears on every `currentIndex` change, preventing stale context contamination
+- Offline graceful degradation — NetInfo check before every LLM call; canned fallback response shown; core practice continues uninterrupted
+- Safety guardrails — all 4 Gemini configurable safety filter categories set to `BLOCK_LOW_AND_ABOVE` (default is OFF for Gemini 2.5+ models — an active misconfiguration risk)
+- Error handling — API failures show child-friendly message, never crash the session
 
-**Should have (v0.4 polish — add after core is validated):**
-- Guided mode with next-action highlight — bridges to v0.5 AI tutor without requiring LLM
-- Undo last action — stack-based, max 10 deep; maintains "playing with objects" feel
-- Array grid mode for counters — teaches multiplication as equal groups / area model
-- Double ten frame auto-spawn — required for add-within-20 skill group
+**Should have (differentiators):**
+- Three-mode auto-escalation (HINT -> TEACH -> BOOST) — pure function in `tutorOrchestrator`; most tutors are single-mode
+- Bug Library-informed hints — child's wrong answer matched to `bugId`; tutor explains the specific misconception, not generic "try again"
+- TEACH mode triggers manipulative panel — tutor signals `shouldExpandManipulative`; `CpaSessionContent` responds; tutor never directly controls UI
+- CPA-aware language — prompt adapts to concrete/pictorial/abstract stage visible on screen
+- Effort praise only — system prompt enforces growth mindset language (Dweck 2006); ability praise explicitly forbidden
 
-**Defer (v0.5+):**
-- Pinch-to-zoom on number line for fractions — high complexity, child UX research shows pinch unreliable for ages 6-9
-- ManipulativeEvent logging for AI tutor — no consumer until v0.5 AI Tutor milestone
-- CPA stage badge visible to child — low urgency, surface during v0.5 UI work
-- Fraction circles (pie mode) — fraction strips cover same concepts; avoid scope creep
-
-**Anti-features (do not implement):**
-- Free-draw / whiteboard on manipulative canvas — clutters canvas, breaks skill tracking
-- Voice-controlled placement — unreliable for child voices, COPPA audio capture concerns
-- Multiplayer shared canvas — COPPA blocks real-time sharing; adds infrastructure complexity
-- Auto-animate "watch me solve it" mode — passive viewing does not transfer; violates HINT mode guardrail
-- Unlimited draggable objects (no cap) — JS thread cannot maintain 60fps beyond ~30 objects; cap at 30 with auto-grouping
+**Defer (v0.8+ or later):**
+- Tutor analytics/metrics — parent dashboard milestone (v0.8)
+- Voice input/output — TTS/STT dependencies, COPPA audio implications
+- Free-text chat input
+- Tutor in sandbox/exploration mode
 
 ### Architecture Approach
 
-The architecture is additive: three new subsystems attach to the v0.3 core without touching existing session, Elo, BKT, or Leitner code. The `components/manipulatives/` tree holds 6 self-contained manipulative folders each under 500 lines, plus three shared primitives (`DraggableItem`, `SnapZone`, `AnimatedCounter`). Services live in `src/services/manipulatives/` as pure functions testable without React. State is split: a new `manipSlice` holds sandbox preferences and history; `skillStatesSlice` gains a `cpaLevel` field per skill. STORE_VERSION bumps from 4 to 5 with a migration that initializes `cpaLevel: 'concrete'` for all existing skills. The `ManipulativePanel` renders as an in-screen collapsible panel (not a Modal navigator) to avoid gesture conflicts with React Navigation.
+The integration is strictly additive: approximately 10 new files, 2-3 modified files, no changes to existing session/adaptive/manipulative code. The architecture has four distinct layers built bottom-up: (1) Service layer — `tutorTypes.ts`, `promptTemplates.ts`, `tutorOrchestrator.ts`, `geminiClient.ts` — all pure functions, fully unit-testable with no UI dependency; (2) Store layer — `tutorSlice.ts` added to `appStore.ts` composition, not persisted; (3) Hook layer — `useTutor.ts` composing services and store with AbortController lifecycle management; (4) UI layer — `ChatBubble`, `StreamingText`, `TutorChatPanel`, `TutorHelpButton`, and minimal changes to `CpaSessionContent`.
 
 **Major components:**
-1. `DraggableItem` — reusable pan gesture + SharedValue + snap primitive; the foundation every manipulative builds on
-2. `cpaMappingService` — pure function reading BKT `P(L)` → CPA level; contains the per-skill advancement thresholds
-3. `ManipulativePanel` — session-embedded overlay; dumb component that receives `type`, `config`, `cpaLevel` as props; no store access
-4. `ManipExploreNavigator` + 6 `SandboxScreen` files — free-play exploration screens, isolated from session state
-5. `skillManipMap` — static table mapping `skill_id` → appropriate manipulative types + configuration
+1. `geminiClient.ts` — GoogleGenAI singleton (lazy init, module-scoped), `sendTutorMessage()` with abort support; Zod validation at the system boundary; max 200 output tokens per response
+2. `promptTemplates.ts` — pure functions `buildSystemInstruction()`, `buildHintPrompt()`, `buildTeachPrompt()`, `buildBoostPrompt()`; typed context objects; bug descriptions passed in as resolved strings (not direct bugLibrary imports, keeping dependency direction clean)
+3. `tutorOrchestrator.ts` — pure function `determineMode()` implementing HINT/TEACH/BOOST escalation as a typed discriminated union state machine; reads but never writes session/adaptive state
+4. `tutorSlice.ts` — ephemeral Zustand slice; `chatMessages` as array (not Map) for React re-render compatibility; `hintLevel` counter tracking escalation; not listed in `partialize`
+5. `useTutor.ts` — two-layer AbortController cleanup (explicit on `currentIndex` change + defense-in-depth on unmount); exposes `shouldExpandManipulative` signal to `CpaSessionContent`
+6. `TutorChatPanel.tsx` — `Animated.View` overlay (not Modal, to avoid gesture conflicts with react-native-gesture-handler); max 40% screen height; FlatList for messages
+7. `CpaSessionContent.tsx` (modified) — adds `TutorHelpButton` + `TutorChatPanel` to render tree; reads `shouldExpandManipulative` to trigger existing `ManipulativePanel`; `ManipulativePanel` itself is unmodified
 
 ### Critical Pitfalls
 
-1. **Snap logic on JS thread** — Move ALL snap math into `'worklet'`-annotated functions called from `onEnd` only. Running snap on JS thread causes perceptible lag with 10+ objects on Android. Must be correct in `DraggableItem` before any manipulative is built on top.
+1. **LLM answer leaking in HINT mode** — Post-generation deterministic output filter is required (regex scan for correct answer as a standalone number, spelled out, or in indirect phrasing like "one more than 14"). In HINT mode, do NOT pass the correct answer in the prompt — the LLM cannot leak what it does not know. For BOOST mode (where the answer is eventually revealed), generate the reveal text programmatically, not via LLM. This is a hard requirement — the PNAS study's -17% learning outcome from unguardrailed AI is the consequence of skipping it.
 
-2. **Width/height animation instead of transform** — All draggable positions must use `transform: [{ translateX }, { translateY }]`, never `left`/`top`/`width`/`height`. Layout properties trigger full native layout recalculation every frame — frame drops from 60fps to 30-40fps with 20+ objects. This is architectural and expensive to retrofit.
+2. **COPPA 2025 violation via Gemini API data transmission** — COPPA 2025 amendments (compliance deadline April 22, 2026) require SEPARATE Verifiable Parental Consent for third-party data sharing. The Gemini API is third-party. Use the paid API tier (not Google AI Studio free tier, which may use data for training). Data minimization is mandatory: never send child's name, specific age, or profile data — only math problem, numeric answer, and misconception tag. PII scrubbing layer on all outbound prompts. Written data retention policy must exist before launch.
 
-3. **Gesture conflicts between tap and drag** — Set `minDistance(8)` on Pan gestures and compose with `Gesture.Race(tap, pan)` so taps complete before pan activates. Without this, age-6 children who briefly rest a finger will trigger pan and block tap-to-place interactions.
+3. **Gemini 2.5+ safety filters disabled by default** — All four configurable safety categories (harassment, hate speech, sexually explicit, dangerous content) default to OFF for Gemini 2.5+ models. Must explicitly set all to `BLOCK_LOW_AND_ABOVE`. Post-generation content validator also required: sentence length check (max 8 words/sentence for ages 6-7; 12 for ages 8-9), vocabulary check, negative language scan. Fallback to curated canned response library if validation fails — child must never see a raw LLM failure.
 
-4. **CPA wired to Elo instead of BKT P(L)** — CPA progression must read `skillState.mastery` (BKT `P(L)`), not Elo. Using Elo causes stage oscillation on easy problem streaks. Thresholds: `P(L) < 0.40` → concrete required, `0.40–0.85` → pictorial, `≥ 0.85` → abstract, `≥ 0.95` → mastered.
+4. **Streaming failures on React Native mobile** — `generateContentStream` has known issues on React Native (GitHub #50015): streams hang on background/foreground transitions, network switches, and low-power mode. Use `generateContent` (non-streaming) as the stable primary path for v0.5. Add 8-second hard timeout. Buffer and validate the complete response before any UI display — never stream chunks to the UI before safety validation has run.
 
-5. **CPA as global per-child state** — Store `cpaLevel` in `SkillState` (per-skill), never in `childProfileSlice` (per-child). A child Abstract on addition must start Concrete on newly unlocked subtraction-with-borrowing. Schema decision affects STORE_VERSION bump.
-
-6. **Zustand state captured inside worklets** — Worklets serialize closed-over values at creation, not reactively. Any store-derived config (e.g., age-based snap tolerance) must be bridged through a `useSharedValue` updated via `useEffect`.
-
-7. **Manipulative state leaked into persisted store** — Drag positions, counter placements, and bar layouts are ephemeral. They must live in component-local state or refs only — never in `sessionStateSlice` or `partialize`. The existing `usePreventRemove` navigation guard already prevents mid-session navigation loss.
+5. **Auto-escalation state not resetting between problems** — Tutor state must be scoped to `problemId` via TypeScript discriminated unions (`{ mode: 'idle' } | { mode: 'hint'; level: 1|2|3; problemId: string } | ...`). When `currentProblemIndex` advances, any tutor state with a non-matching `problemId` is automatically invalidated. The tutor escalation system and the existing session frustration guard must coordinate — two independent "child is struggling" detectors giving contradictory responses undermines both systems.
 
 ---
 
 ## Implications for Roadmap
 
-Based on the combined research, the recommended phase structure follows the architecture build order: schema and services first (nothing else can type-check without them), shared primitives second (all 6 manipulatives depend on `DraggableItem`), manipulative components third (parallelizable after primitives), session integration fourth, and sandbox navigation last (standalone; does not block the session-embedded feature).
+Based on combined research, a four-phase structure is strongly recommended. The dependency order is dictated by the bottom-up architecture: services must exist before the store, store before the hook, hook before the UI. All critical safety requirements live in Phase 1 — this is a deliberate design choice, not an arbitrary ordering.
 
-### Phase 1: Foundation — Store Schema and Services
+### Phase 1: Core LLM Service Layer
 
-**Rationale:** Every downstream file imports types from the store and services. These have no dependencies on UI components and can be fully tested immediately. The babel config fix also belongs here as it is required for any worklet code to compile.
-**Delivers:** STORE_VERSION=5 with migration, `cpaLevel` in `SkillState`, `manipSlice`, `cpaMappingService`, `manipulativeSelector`, `skillManipMap`
-**Addresses:** BKT-driven CPA stage progression (table-stakes feature); manipulative-to-skill mapping
-**Avoids:** Pitfalls 4, 5, 6 — CPA per-skill schema established before any component reads it; store migration included
-**Research flag:** Standard patterns — Zustand slice + migration follows existing codebase conventions. Skip research-phase.
+**Rationale:** All safety requirements (answer leak prevention, COPPA data minimization, safety filters, output validation) live in the service layer. Building this first means every subsequent phase inherits safe behavior automatically. This is also the most testable layer — pure functions with no UI dependencies. PITFALLS research is unambiguous: safety is a Phase 1 responsibility, not a "we'll add it later" concern.
 
-### Phase 2: Shared Drag Primitives
+**Delivers:** `tutorTypes.ts`, `promptTemplates.ts`, `tutorOrchestrator.ts`, `geminiClient.ts`, `tutorSlice.ts`, `appStore.ts` update (add tutorSlice composition), `useTutor.ts` (core lifecycle without UI integration), rate limiting (max 3 calls/problem, 20/session), output validation middleware (answer leak + content safety + sentence length), COPPA data minimization layer, AbortController pattern, offline detection via NetInfo
 
-**Rationale:** `DraggableItem`, `SnapZone`, and `AnimatedCounter` are required by all 6 manipulatives. Getting them right (UI-thread worklets, transform-based positioning, tap/drag gesture composition) is the highest-risk implementation step. Validated primitives mean all downstream manipulatives inherit correct behavior.
-**Delivers:** `DraggableItem.tsx`, `SnapZone.tsx`, `AnimatedCounter.tsx` with full gesture test coverage
-**Uses:** `Gesture.Race(tap, pan)`, `useSharedValue`, `withSpring`, `scheduleOnRN`, `overshootClamping: true`
-**Avoids:** Pitfalls 1, 2, 3, 6 — snap worklet, transform positioning, gesture composition, SharedValue bridge for store config
-**Research flag:** Official docs provide clear patterns (HIGH confidence). No research-phase needed; validate with `fireGestureHandler` tests and Android release build FPS check before moving on.
+**Features addressed:** Socratic hints, per-problem reset, offline degradation, safety guardrails, error handling
 
-### Phase 3: Manipulative Components (parallelizable)
+**Pitfalls addressed:** Answer leaking (Pitfall 1), prompt injection (Pitfall 2), COPPA (Pitfall 3), inappropriate content (Pitfall 4), streaming failures (Pitfall 6 — non-streaming path with timeout), API key security, auto-escalation state machine definition (Pitfall 7)
 
-**Rationale:** Build simple-to-complex. `TenFrame` validates the DraggableItem pattern with lowest complexity (View grid + counters). `Counters` adds grouping logic. `BaseTenBlocks` is the most complex (3 piece types, place-value columns, auto-group 10→rod). SVG-based manipulatives (`NumberLine`, `FractionStrips`, `BarModel`) use a different pattern and can be developed in parallel after TenFrame proves the drag primitive.
-**Delivers:** All 6 manipulative components with concrete-mode interactions; sandbox-ready (no session context required yet)
-**Implements:** `BaseTenBlocks`, `NumberLine`, `TenFrame`, `Counters`, `FractionStrips`, `BarModel` component folders
-**Avoids:** Auto-group animation queuing (never play while gesture is active — use `isGestureActive` SharedValue guard)
-**Research flag:** TenFrame and Counters — standard patterns. BaseTenBlocks auto-group logic (10-cube proximity detection + animation sequencing) may benefit from a targeted research spike if design is unclear. NumberLine SVG + Reanimated animated props — established pattern from STACK.md. No full research-phase needed.
+**Research flag:** Standard patterns — Zustand slice and AbortController patterns are well-established in this codebase. Gemini `generateContent` (non-streaming) is the simpler and more stable path. No additional research needed.
 
-### Phase 4: CPA Progression and Session Integration
+### Phase 2: Chat UI and HINT Mode Integration
 
-**Rationale:** Once manipulative components exist as standalone React components, wiring them into the session flow via `ManipulativePanel` and `useManipulative` is additive. CPA level determination is pure-function logic already built in Phase 1 — this phase wires it to the session commit and the session screen render.
-**Delivers:** `ManipulativePanel`, `useManipulative` hook, `SessionScreen` conditional render, `commitSessionResults` CPA advance on session complete
-**Addresses:** Session-embedded visual aid (required milestone feature); BKT-driven CPA auto-advance
-**Avoids:** Pitfall 7 — manipulative state stays ephemeral in component local state; nothing added to `partialize`
-**Research flag:** Session orchestrator integration touches existing code with 557 tests. Review `sessionOrchestrator.ts` closely before changes. No external research needed — integration pattern is internal.
+**Rationale:** With the service layer and safety guarantees in place, build the minimum viable tutor UI delivering HINT mode only. End-to-end user value (child taps Help and gets a hint) is achieved while keeping escalation scope controlled. Allows UX validation before committing to the full escalation design. The COPPA VPC gate and interstitial disclosure also ship here — required before any public testing.
 
-### Phase 5: Sandbox Navigation
+**Delivers:** `ChatBubble.tsx`, `TutorChatPanel.tsx`, `TutorHelpButton.tsx`, `CpaSessionContent.tsx` integration, VPC parental consent gate and interstitial disclosure, pre-defined response buttons (no free-text input), character limit enforcement on bubble display
 
-**Rationale:** Sandbox screens are fully independent of session flow. They can be built last and shipped incrementally without blocking the session-embedded feature. The `ManipExploreNavigator` + 6 `SandboxScreen` files wire the manipulative components (built in Phase 3) into standalone free-play screens.
-**Delivers:** `ManipExploreNavigator`, 6 sandbox screens, HomeScreen entry point, navigation type extensions
-**Addresses:** Per-manipulative sandbox screen (required milestone feature)
-**Avoids:** Sandbox screens must not read session store — only `manipSlice` + `childProfile`
-**Research flag:** Standard React Navigation patterns. No research-phase needed.
+**Features addressed:** Help button (child-initiated), chat bubble UI, age-appropriate language display, pre-defined response buttons
 
-### Phase 6: Polish Features
+**Pitfalls addressed:** Chat UI overwhelming young readers (Pitfall 5 — character limits, no free-text, pre-built response buttons), prompt injection (Pitfall 2 — pre-defined buttons eliminate the injection surface entirely), COPPA VPC gate (Pitfall 3)
 
-**Rationale:** After core interactions are validated, add guided mode (next-action highlight), undo, array grid for counters, and double ten frame. These are v0.4 polish features — they enhance the core but do not block the milestone launch criteria.
-**Delivers:** Guided mode hints, undo stack (max 10), array grid mode for multiplication, double ten frame auto-spawn
-**Addresses:** P2 features from feature prioritization matrix
-**Research flag:** Guided mode requires a problem-type → manipulation-sequence lookup table. If no prior spec exists for this mapping, a design spike is needed before implementation. Flag for planning.
+**Research flag:** TTS for emergent readers is flagged as a "looks done but isn't" risk in PITFALLS. If text-to-speech is targeted for this phase, `expo-speech` needs an Expo SDK 54 compatibility check before committing — not currently in dependencies. Deferring TTS to Phase 4 is the lower-risk option.
+
+### Phase 3: TEACH/BOOST Modes and Manipulative Integration
+
+**Rationale:** Auto-escalation and manipulative integration are the primary differentiators of this tutor. They depend on Phase 1 (orchestrator state machine) and Phase 2 (UI components) being stable. The TEACH mode trigger for the ManipulativePanel — LLM says "try the blocks" and the blocks actually appear — is the feature that makes this tutor unique and distinct from generic chatbots.
+
+**Delivers:** Full `tutorOrchestrator.ts` HINT->TEACH->BOOST escalation, Bug Library `bugId`-to-prompt mapping (`misconceptionPromptMap`), `shouldExpandManipulative` signal integration with `ManipulativePanel`, TEACH mode CPA-stage-aware prompts, BOOST mode programmatic answer reveal, frustration guard coordination, canned response fallback library (minimum 5 variants per hint level per age bracket)
+
+**Features addressed:** Three-mode auto-escalation, Bug Library-informed hints, TEACH mode with manipulative trigger, CPA-aware tutoring, effort praise enforcement
+
+**Pitfalls addressed:** Auto-escalation state bugs (Pitfall 7 — typed state machine with problemId scoping, frustration guard coordination), manipulative integration ("tutor SAYS try the blocks but panel doesn't open" — the most common integration failure mode)
+
+**Research flag:** The orchestrator is a pure function state machine and the manipulative signal pattern mirrors existing code. No additional research needed. Integration testing is essential — explicitly verify that TEACH mode suggestions actually expand the ManipulativePanel with the correct type pre-selected.
+
+### Phase 4: Polish and Streaming Enhancement
+
+**Rationale:** After Phase 3 the tutor is feature-complete and safe. Phase 4 improves perceived quality. Streaming is deliberately deferred here because PITFALLS research explicitly recommends proving the non-streaming path stable first on both iOS and Android. Response caching reduces API costs at scale. TTS narration (if deferred from Phase 2) ships here.
+
+**Delivers:** Streaming response display (conditional on non-streaming stability on both platforms), response caching layer (keyed by templateId + hintLevel + ageGroup + misconceptionTag), canned response library expansion, TTS audio playback for tutor messages, animated loading state (mascot thinking animation vs. static text)
+
+**Features addressed:** Streaming text display, TTS narration, visual mode differentiation (HINT vs TEACH vs BOOST look distinct)
+
+**Pitfalls addressed:** Streaming failures (Pitfall 6 — only enabled after non-streaming validated), Chat UI overwhelming (Pitfall 5 — TTS ensures 6-year-olds can access content)
+
+**Research flag:** Streaming on React Native with `@google/genai` v1.43.0 on RN 0.81 may benefit from a targeted spike before implementation. GitHub issue #50015 indicates this area has been unstable — behavior may have changed in newer SDK versions. Investigate before committing to streaming in this phase.
 
 ### Phase Ordering Rationale
 
-- Schema changes come first because TypeScript strict mode catches schema-dependent bugs immediately across all downstream files
-- Shared primitives before manipulatives because all 6 manipulatives depend on `DraggableItem` — a wrong primitive means 6 wrong manipulatives
-- Session integration after standalone components because `ManipulativePanel` wraps the same components used in sandbox (build standalone first, embed second)
-- Sandbox navigation last because it is completely decoupled from the session-embedded feature and does not block the critical path
-- Polish features last so core interactions can be validated on real devices before adding complexity
+- **Safety first:** Every pitfall rated Critical belongs to Phase 1 or has Phase 1 prerequisites. The PNAS study's -17% learning outcome makes safety a launch blocker, not a post-launch concern.
+- **Services before UI:** Prompt templates and output validation must exist before any response reaches a chat bubble. Testing the service layer in isolation validates the most complex logic before UI complexity is introduced.
+- **HINT before full escalation:** Delivering HINT-only first reduces v0.5 launch scope. TEACH and BOOST are differentiators, not table stakes — the tutor is useful at HINT-only.
+- **Non-streaming before streaming:** React Native streaming is a known failure mode. The 1-3 second latency for non-streaming `generateContent` is acceptable for children's hints, especially with a well-designed animated loading state.
+- **COPPA compliance is a hard external deadline:** The VPC gate and data minimization layer must ship with Phase 1-2. The April 22, 2026 COPPA 2025 compliance deadline is the highest-risk external constraint on the milestone.
 
 ### Research Flags
 
-Phases needing deeper research or design spikes during planning:
-- **Phase 3 (BaseTenBlocks):** The 10-cube proximity detection and auto-group animation sequencing may need a targeted design spike if the interaction choreography is not pre-specified. Evaluate during phase planning.
-- **Phase 6 (Guided Mode):** Requires a problem-type → manipulation-sequence lookup table. This is domain design work (which manipulative actions solve which problem types) that needs explicit specification before coding begins.
+Phases likely needing deeper research during planning:
+- **Phase 2 (TTS integration):** If text-to-speech is targeted for this phase rather than deferred, `expo-speech` compatibility with Expo SDK 54 on both iOS and Android needs verification. Not in current dependencies.
+- **Phase 4 (Streaming on React Native):** React Native streaming behavior with `@google/genai` v1.43.0 on RN 0.81 needs targeted investigation before committing to implementation. GitHub issue #50015 is open and the streaming path has known failure modes on mobile.
 
-Phases with standard, well-documented patterns (skip research-phase):
-- **Phase 1:** Zustand slice + migration follows exact existing codebase conventions
-- **Phase 2:** Official Reanimated 4 + RNGH 2 docs provide complete, verified patterns
-- **Phase 4:** Internal integration following commit-on-complete pattern already used for Elo/BKT/Leitner
-- **Phase 5:** Standard React Navigation nested navigator pattern
+Phases with standard patterns (skip research-phase):
+- **Phase 1 (Service layer):** Zustand slices, Zod validation, AbortController, Gemini `generateContent` non-streaming — all established in this codebase or official SDK docs.
+- **Phase 3 (State machine + manipulative signal):** Orchestrator is a pure function; signal pattern mirrors existing ManipulativePanel logic in CpaSessionContent.
 
 ---
 
@@ -174,46 +155,47 @@ Phases with standard, well-documented patterns (skip research-phase):
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All libraries installed and version-verified against package.json and app.json. Babel plugin change confirmed required by official Reanimated 4 migration guide. `scheduleOnRN` vs `runOnJS` verified from official worklets docs. |
-| Features | HIGH | Table-stakes grounded in competitor analysis (Math Learning Center, Toy Theater, Brainingcamp) plus internal planning docs (04-virtual-manipulatives.md, 03-ai-tutoring-engine.md). CPA thresholds backed by Bruner + NCTM + Fyfe et al. peer-reviewed research. |
-| Architecture | HIGH | All integration points verified against existing codebase (store structure, slice pattern, session orchestrator, commit-on-complete). Build order is dependency-driven with clear rationale. |
-| Pitfalls | HIGH (technical) / MEDIUM (CPA pedagogy) | Gesture/animation pitfalls from official Software Mansion docs + verified codebase patterns. CPA design pitfalls from research literature — well-sourced but interpretive. |
+| Stack | HIGH | All dependencies verified in `package.json`. Gemini 2.5 Flash specs from official benchmarks. Zero new dependencies means zero compatibility risk. Upgrade to `@google/genai` v1.43.0 is optional but low-risk. |
+| Features | HIGH | Grounded in PNAS 2024 study, existing project research docs (03-ai-tutoring-engine.md, 09-child-ux-design.md), and codebase analysis of existing integration points. Anti-features clearly defined from child UX research. |
+| Architecture | HIGH | Verified against actual codebase structure. Component boundaries mirror established patterns (ManipulativePanel, existing hooks, Zustand slice composition). Build order is dependency-graph-derived. 10 new files, 2-3 modified — scope is well-bounded. |
+| Pitfalls | HIGH (safety/COPPA/child UX) / MEDIUM (streaming) | Safety, COPPA, and child UX pitfalls sourced from OWASP, FTC rules, PNAS study, and existing research docs. Streaming pitfalls from community-reported GitHub issues — behavior may differ by SDK version and RN release. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Auto-group animation sequencing (BaseTenBlocks):** Research confirms that the 10-cube → rod animation is required and HIGH complexity, but does not specify the exact interaction choreography (proximity threshold in pixels, animation duration, whether cubes slide to a midpoint or directly to rod position). Needs a design decision before Phase 3 implementation.
-- **Guided mode manipulation sequences:** The feature is designed (subtle highlight of next correct action) but the lookup table mapping problem-type → manipulation-sequence is not specified in any research doc. This is a content design gap, not a technical gap. Must be resolved during Phase 6 planning.
-- **Android 60fps validation threshold:** Research warns that 30 objects at 60fps on mid-range Android is the target but notes this must be validated in a release build. The exact Android device benchmark target is not specified. Suggest defining a reference device (e.g., Samsung Galaxy A-series) during Phase 2 planning.
-- **CPA threshold calibration:** The research specifies `P(L) < 0.40` → concrete, `0.40–0.85` → pictorial, `≥ 0.85` → abstract, but ARCHITECTURE.md uses slightly different thresholds (0.60 and 0.85). PITFALLS.md uses 0.40 and 0.85. Reconcile to a single authoritative threshold table before Phase 1 service implementation.
+- **TTS for emergent readers (ages 6-7):** PITFALLS research flags TTS as essential ("looks done but isn't") for the 6-7 age bracket, but no TTS library is in current dependencies. Decision needed in Phase 2 planning: include TTS in Phase 2 (adds `expo-speech` dependency, needs compatibility check) or defer to Phase 4. Deferring is lower-risk; including it is higher pedagogical value.
+
+- **Gemini API tier for production:** Development must use the paid API tier from day one to match production data policies. COPPA 2025 compliance requires paid tier data protection controls — Google AI Studio free tier may use data for model training, which constitutes a COPPA violation. Coordinate with budget/monetization planning before Phase 1 begins.
+
+- **COPPA VPC gate UX design:** Research establishes that VPC is required before first AI tutor use but does not specify the exact UX flow. Options: (a) integrate into existing parental PIN setup screen, (b) a separate first-use consent interstitial. This design decision affects Phase 2 scope and must be resolved during Phase 2 planning.
+
+- **Canned response fallback library scope:** Research specifies minimum 5 variants per hint level per age bracket as content work, not just engineering. The library must be authored before Phase 3 can ship a reliable fallback path. Schedule this as a parallel content task during Phase 2, not a Phase 3 code task.
+
+- **Rate limiting thresholds:** Research recommends max 3 LLM calls per problem, 20 per session, 50 per day per device. These are conservative estimates for legitimate use. Implement the rate limiter with configurable thresholds (not hardcoded constants) so they can be adjusted based on early usage data without requiring a code deploy.
 
 ---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- `package.json`, `app.json` — installed versions, newArchEnabled flag confirmed
-- [Reanimated 4 Migration Guide](https://docs.swmansion.com/react-native-reanimated/docs/guides/migration-from-3.x/) — babel plugin, scheduleOnRN, withSpring changes
-- [Expo SDK 54 Changelog](https://expo.dev/changelog/sdk-54) — New Architecture status
-- [expo-haptics docs](https://docs.expo.dev/versions/latest/sdk/haptics/) — ImpactFeedbackStyle values
-- [react-native-worklets docs](https://docs.swmansion.com/react-native-worklets/docs/) — babel plugin, scheduleOnRN API
-- [RNGH Gesture Composition docs](https://docs.swmansion.com/react-native-gesture-handler/docs/fundamentals/gesture-composition/)
-- [Reanimated Performance Guide](https://docs.swmansion.com/react-native-reanimated/docs/guides/performance/)
-- `.planning/04-virtual-manipulatives.md` — CPA mode specs, component animation principles
-- `.planning/03-ai-tutoring-engine.md` — CPA progression thresholds, TEACH mode guardrails
-- `.planning/09-child-ux-design.md` — Touch target requirements, working memory limits, pinch gesture concerns
-- Existing codebase (`src/store/`, `src/services/`, `src/navigation/`) — direct inspection
+- `.planning/research/STACK.md` — dependency verification, Gemini 2.5 Flash specs, rationale for no-new-dependencies conclusion
+- `.planning/research/FEATURES.md` — feature prioritization, dependency graph, MVP definition, anti-features
+- `.planning/research/ARCHITECTURE.md` — component boundaries, data flows, code patterns, build order
+- `.planning/research/PITFALLS.md` — safety, COPPA, content safety, streaming, escalation pitfalls with phase mapping
+- [PNAS GPT-4 Tutoring Study 2024](https://doi.org/10.1073/pnas.2405945121) — guardrailed AI +127% vs. unguardrailed -17%
+- [OWASP LLM01:2025 Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/) — injection prevention
+- [FTC COPPA Rule 2025 Amendments](https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa) — compliance requirements including VPC for third-party data sharing
+- [Gemini API Safety Settings](https://ai.google.dev/gemini-api/docs/safety-settings) — filter configuration; default OFF confirmed for 2.5+ models
+- [@google/genai npm](https://www.npmjs.com/package/@google/genai) — v1.43.0 latest, already installed at v1.30.0
+- Existing project research: `.planning/03-ai-tutoring-engine.md`, `.planning/09-child-ux-design.md`, `.planning/12-coppa-privacy.md`
 
 ### Secondary (MEDIUM confidence)
-- [RNGH 2.28 release notes](https://x.com/swmansion/status/1947662341320925570) — gestureHandlerRootHOC deprecation
-- [Concreteness Fading — Fyfe et al., Springer](https://link.springer.com/article/10.1007/s10648-014-9249-3) — CPA research basis
-- [Brainingcamp Accessibility](https://weeklyvoice.com/brainingcamp-sets-new-standard-for-accessibility-in-digital-math-manipulatives/) — competitor reference
-- [Shopify: Making React Native Gestures Feel Natural](https://shopify.engineering/making-react-native-gestures-feel-natural) — gesture engineering patterns
-- [Reanimated + Zustand synchronization discussion](https://github.com/software-mansion/react-native-reanimated/discussions/4685) — shared value bridge pattern
-- [CPA Approach — Maths No Problem](https://mathsnoproblem.com/en/approach/concrete-pictorial-abstract) — pedagogy reference
-- [Math Learning Center App Suite](https://www.mathlearningcenter.org/apps) — competitor feature baseline
-- [Toy Theater Virtual Manipulatives](https://toytheater.com/category/teacher-tools/virtual-manipulatives/) — competitor feature baseline
+- [LLMs and Childhood Safety arxiv 2502.11242](https://arxiv.org/abs/2502.11242) — developmental sensitivity gaps in current LLM safety frameworks
+- [SocraticLM NeurIPS 2024](https://openreview.net/forum?id=qkoZgJhxsA) — Socratic tutoring with LLMs
+- [React Native AbortController issues GitHub #50015](https://github.com/facebook/react-native/issues/50015) — streaming stability on React Native
+- [Gemini 2.5 Flash benchmarks](https://artificialanalysis.ai/models/gemini-2-5-flash) — 232 tok/s, 0.51s TTFT independently benchmarked
+- [EPIC/Fairplay letter to FTC re: Google Gemini and children](https://fairplayforkids.org/wp-content/uploads/2025/05/Letter-to-FTC-re-Google-Gemini_EPIC-and-Fairplay_5.21.25.pdf) — regulatory advocacy context for COPPA exposure
 
 ---
 *Research completed: 2026-03-03*
