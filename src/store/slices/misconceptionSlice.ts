@@ -1,8 +1,13 @@
 import type { StateCreator } from 'zustand';
 import type { AppState } from '../appStore';
 
-/** Status progression: new -> suspected -> confirmed (Phase 27+ upgrades status) */
-export type MisconceptionStatus = 'new' | 'suspected' | 'confirmed';
+/** Status progression: new -> suspected -> confirmed -> resolved */
+export type MisconceptionStatus = 'new' | 'suspected' | 'confirmed' | 'resolved';
+
+/** Cross-session occurrence count to transition from new to suspected */
+export const SUSPECTED_THRESHOLD = 2;
+/** Cross-session occurrence count to transition from suspected to confirmed */
+export const CONFIRMED_THRESHOLD = 3;
 
 /** Aggregate record per bugTag+skillId composite key */
 export interface MisconceptionRecord {
@@ -12,6 +17,8 @@ export interface MisconceptionRecord {
   status: MisconceptionStatus;
   readonly firstSeen: string; // ISO string
   lastSeen: string; // ISO string
+  suspectedAt?: string; // ISO string, set when status transitions to 'suspected'
+  confirmedAt?: string; // ISO string, set when status transitions to 'confirmed'
 }
 
 export interface MisconceptionSlice {
@@ -49,7 +56,7 @@ export const createMisconceptionSlice: StateCreator<
       const now = new Date().toISOString();
       const existing = state.misconceptions[key];
 
-      const record: MisconceptionRecord = existing
+      const base: MisconceptionRecord = existing
         ? {
             ...existing,
             occurrenceCount: existing.occurrenceCount + 1,
@@ -63,6 +70,29 @@ export const createMisconceptionSlice: StateCreator<
             firstSeen: now,
             lastSeen: now,
           };
+
+      // 2-then-3 confirmation rule: check confirmed FIRST so a record
+      // jumping from new to count=3 goes straight to confirmed
+      let record = base;
+      if (
+        record.occurrenceCount >= CONFIRMED_THRESHOLD &&
+        record.status !== 'confirmed'
+      ) {
+        record = {
+          ...record,
+          status: 'confirmed',
+          confirmedAt: record.confirmedAt ?? now,
+        };
+      } else if (
+        record.occurrenceCount >= SUSPECTED_THRESHOLD &&
+        record.status === 'new'
+      ) {
+        record = {
+          ...record,
+          status: 'suspected',
+          suspectedAt: record.suspectedAt ?? now,
+        };
+      }
 
       return {
         misconceptions: {
@@ -90,4 +120,33 @@ export function getMisconceptionsByBugTag(
   bugTag: string,
 ): MisconceptionRecord[] {
   return Object.values(misconceptions).filter((r) => r.bugTag === bugTag);
+}
+
+/** Selector: returns only confirmed misconception records */
+export function getConfirmedMisconceptions(
+  misconceptions: Record<string, MisconceptionRecord>,
+): MisconceptionRecord[] {
+  return Object.values(misconceptions).filter(
+    (r) => r.status === 'confirmed',
+  );
+}
+
+/** Selector: returns only suspected misconception records */
+export function getSuspectedMisconceptions(
+  misconceptions: Record<string, MisconceptionRecord>,
+): MisconceptionRecord[] {
+  return Object.values(misconceptions).filter(
+    (r) => r.status === 'suspected',
+  );
+}
+
+/** Selector: returns counts per status category */
+export function getMisconceptionCounts(
+  misconceptions: Record<string, MisconceptionRecord>,
+): Record<MisconceptionStatus, number> {
+  const counts = { new: 0, suspected: 0, confirmed: 0, resolved: 0 };
+  for (const record of Object.values(misconceptions)) {
+    counts[record.status]++;
+  }
+  return counts;
 }
