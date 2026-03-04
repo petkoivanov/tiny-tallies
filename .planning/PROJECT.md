@@ -36,11 +36,23 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ### Active
 
-**Next Milestone: v0.5 (not yet defined)**
+## Current Milestone: v0.5 AI Tutor
 
-- [ ] AI tutor integration (Gemini, three-mode TEACH/HINT/BOOST)
-- [ ] Misconception detection with Bug Library interventions
-- [ ] Extended gamification (coins, shop, badges)
+**Goal:** Integrate an on-demand AI tutor powered by Gemini that helps children through chat-based Socratic hints, CPA walkthroughs with manipulatives, and deep scaffolding — auto-escalating support based on struggle level.
+
+**Target features:**
+- On-demand help button (child-initiated, never auto-interrupts)
+- Chat bubble conversation UI (resets per-problem)
+- Three tutor modes with auto-escalation: HINT → TEACH → BOOST
+- TEACH mode integrates with v0.4 manipulatives (suggests + guides)
+- Gemini LLM backend (context/explanations only, never computes math)
+- Bug Library misconception tags inform tutor explanations
+- Socratic hints never reveal the answer
+
+- [ ] AI tutor Gemini integration with three-mode TEACH/HINT/BOOST
+- [ ] On-demand chat UI with auto-escalation
+- [ ] Manipulative-integrated teaching walkthroughs
+- [ ] Bug Library-informed targeted explanations
 
 ### Out of Scope
 
@@ -94,8 +106,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tutoring engine design, virtual manipulatives specs, misconception detection patterns, spaced repetition algorithms, gamification design, onboarding/placement testing, child UX design, sound/audio design, math anxiety mitigation, COPPA privacy compliance, problem generation engine.
 
 **Future milestones:**
-- v0.5: AI tutor integration (Gemini, three-mode TEACH/HINT/BOOST)
-- v0.6: Misconception detection system (Bug Library + interventions)
+- v0.6: Misconception detection system (Bug Library + interventions, 2-then-3 confirmation)
 - v0.7: Extended gamification (coins, shop, badges, skill map)
 - v0.8: Social & subscription (family groups, parent dashboard, IAP)
 
@@ -144,4 +155,4 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | ManipulativePanel (in-screen, not Modal) | Avoids gesture conflicts with manipulatives inside panel | ✓ Good — collapsible overlay works cleanly |
 
 ---
-*Last updated: 2026-03-04 after v0.4 milestone*
+*Last updated: 2026-03-03 after v0.5 milestone started*
