@@ -1,6 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 import * as SecureStore from 'expo-secure-store';
 import { geminiResponseSchema } from './types';
+import { GEMINI_SAFETY_SETTINGS } from './safetyConstants';
 
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const TIMEOUT_MS = 8000;
@@ -44,9 +45,13 @@ export interface CallGeminiOptions {
 /**
  * Calls the Gemini API with system instruction and user message.
  * Implements an 8-second timeout and supports external abort signals.
+ * Returns null when the response is safety-blocked (finishReason SAFETY/RECITATION)
+ * or when the response text is empty/undefined.
  * Validates response with Zod schema.
  */
-export async function callGemini(options: CallGeminiOptions): Promise<string> {
+export async function callGemini(
+  options: CallGeminiOptions,
+): Promise<string | null> {
   const client = await getGeminiClient();
 
   const timeoutController = new AbortController();
@@ -82,12 +87,22 @@ export async function callGemini(options: CallGeminiOptions): Promise<string> {
         systemInstruction: options.systemInstruction,
         temperature: 0.7,
         maxOutputTokens: 200,
+        safetySettings: GEMINI_SAFETY_SETTINGS,
       },
       // @ts-expect-error -- httpOptions.signal is supported at runtime
       httpOptions: { signal: combinedSignal },
     });
 
-    const text = response.text ?? '';
+    // Check for safety-blocked responses
+    const finishReason = response.candidates?.[0]?.finishReason;
+    if (finishReason === 'SAFETY' || finishReason === 'RECITATION') {
+      return null;
+    }
+
+    // Handle empty/undefined text as safety block fallback
+    const text = response.text;
+    if (!text) return null;
+
     const parsed = geminiResponseSchema.parse({ text });
     return parsed.text;
   } finally {
