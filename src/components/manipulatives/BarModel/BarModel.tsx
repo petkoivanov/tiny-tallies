@@ -278,19 +278,21 @@ export function BarModel({ testID, guidedTargetId }: BarModelProps) {
         </View>
 
         {/* Section labels below bar */}
-        <View style={styles.labelsRow}>
-          {sections.map((section, index) => {
-            const width = section.widthFraction * barWidth;
-            return (
-              <View
-                key={`label-${section.id}`}
-                style={[styles.labelContainer, { width }]}
-              >
-                <Text style={styles.labelIndex}>{index + 1}</Text>
-              </View>
-            );
-          })}
-        </View>
+        <GuidedHighlight active={guidedTargetId === 'whole-label'}>
+          <View style={styles.labelsRow}>
+            {sections.map((section, index) => {
+              const width = section.widthFraction * barWidth;
+              return (
+                <View
+                  key={`label-${section.id}`}
+                  style={[styles.labelContainer, { width }]}
+                >
+                  <Text style={styles.labelIndex}>{index + 1}</Text>
+                </View>
+              );
+            })}
+          </View>
+        </GuidedHighlight>
       </View>
     </ManipulativeShell>
   );
