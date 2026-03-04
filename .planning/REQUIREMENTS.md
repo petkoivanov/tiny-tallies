@@ -17,11 +17,11 @@ Requirements for AI Tutor milestone. Each maps to roadmap phases.
 
 ### Chat UI
 
-- [ ] **CHAT-01**: Child-initiated help button visible during session (never auto-triggers)
-- [ ] **CHAT-02**: Chat bubble UI with tutor and child message styling
+- [x] **CHAT-01**: Child-initiated help button visible during session (never auto-triggers)
+- [x] **CHAT-02**: Chat bubble UI with tutor and child message styling
 - [ ] **CHAT-03**: Pre-defined response buttons for child input (no free-text)
 - [ ] **CHAT-04**: Per-problem chat reset on problem advance with AbortController cleanup
-- [ ] **CHAT-05**: Offline detection with friendly message when network unavailable
+- [x] **CHAT-05**: Offline detection with friendly message when network unavailable
 
 ### Tutor Modes
 
@@ -89,11 +89,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LLM-03 | Phase 22 | Complete |
 | LLM-04 | Phase 21 | Complete |
 | LLM-05 | Phase 21 | Complete |
-| CHAT-01 | Phase 23 | Pending |
-| CHAT-02 | Phase 23 | Pending |
+| CHAT-01 | Phase 23 | Complete |
+| CHAT-02 | Phase 23 | Complete |
 | CHAT-03 | Phase 23 | Pending |
 | CHAT-04 | Phase 23 | Pending |
-| CHAT-05 | Phase 23 | Pending |
+| CHAT-05 | Phase 23 | Complete |
 | MODE-01 | Phase 23 | Pending |
 | MODE-02 | Phase 24 | Pending |
 | MODE-03 | Phase 24 | Pending |
