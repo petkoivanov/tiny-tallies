@@ -101,7 +101,9 @@ Plans:
   2. After 3 occurrences of the same bug tag for a skill, the misconception status is set to "confirmed"
   3. Misconception history per child includes timestamps for each occurrence and the current confirmation status
   4. Confirmation logic operates across sessions (occurrences from different sessions are aggregated)
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 27-01-PLAN.md — 2-then-3 confirmation rule, status timestamps, and status-filtered selectors (TDD)
 
 ### Phase 28: Session Mix Adaptation
 **Goal**: Practice sessions automatically prioritize skills where the child has confirmed misconceptions
@@ -164,7 +166,7 @@ Plans:
 | 24. TEACH, BOOST & Auto-Escalation | v0.5 | 3/3 | Complete | 2026-03-04 |
 | 25. Consent Gate & Minor Fixes | v0.5 | 2/2 | Complete | 2026-03-04 |
 | 26. Misconception Store & Recording | 2/2 | Complete    | 2026-03-04 | - |
-| 27. Confirmation Engine | v0.6 | 0/0 | Not started | - |
+| 27. Confirmation Engine | v0.6 | 0/1 | Not started | - |
 | 28. Session Mix Adaptation | v0.6 | 0/0 | Not started | - |
 | 29. AI Tutor Misconception Context | v0.6 | 0/0 | Not started | - |
 | 30. Remediation Mini-Sessions | v0.6 | 0/0 | Not started | - |
