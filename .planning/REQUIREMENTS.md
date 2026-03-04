@@ -34,11 +34,11 @@ Requirements for AI Tutor milestone. Each maps to roadmap phases.
 
 ### Safety & Compliance
 
-- [ ] **SAFE-01**: Post-generation output filter scans for answer leaking (regex + rule engine)
-- [ ] **SAFE-02**: COPPA data minimization — never send child name, age, or profile to LLM
-- [ ] **SAFE-03**: Gemini safety filters set to BLOCK_LOW_AND_ABOVE for all 4 categories
-- [ ] **SAFE-04**: Content validation (sentence length, vocabulary level per age bracket)
-- [ ] **SAFE-05**: Canned fallback responses when LLM fails, is blocked, or times out
+- [x] **SAFE-01**: Post-generation output filter scans for answer leaking (regex + rule engine)
+- [x] **SAFE-02**: COPPA data minimization — never send child name, age, or profile to LLM
+- [x] **SAFE-03**: Gemini safety filters set to BLOCK_LOW_AND_ABOVE for all 4 categories
+- [x] **SAFE-04**: Content validation (sentence length, vocabulary level per age bracket)
+- [x] **SAFE-05**: Canned fallback responses when LLM fails, is blocked, or times out
 - [ ] **SAFE-06**: VPC parental consent gate before first AI tutor use
 
 ### Store & State
@@ -100,11 +100,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MODE-04 | Phase 24 | Pending |
 | MODE-05 | Phase 24 | Pending |
 | MODE-06 | Phase 24 | Pending |
-| SAFE-01 | Phase 22 | Pending |
-| SAFE-02 | Phase 22 | Pending |
-| SAFE-03 | Phase 22 | Pending |
-| SAFE-04 | Phase 22 | Pending |
-| SAFE-05 | Phase 22 | Pending |
+| SAFE-01 | Phase 22 | Complete |
+| SAFE-02 | Phase 22 | Complete |
+| SAFE-03 | Phase 22 | Complete |
+| SAFE-04 | Phase 22 | Complete |
+| SAFE-05 | Phase 22 | Complete |
 | SAFE-06 | Phase 22 | Pending |
 | STATE-01 | Phase 21 | Complete |
 | STATE-02 | Phase 21 | Complete |

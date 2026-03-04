@@ -3,29 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.5
 milestone_name: AI Tutor
 status: executing
-stopped_at: Completed 21-03-PLAN.md -- Phase 21 complete
-last_updated: "2026-03-04T06:25:23.690Z"
-last_activity: 2026-03-04 -- Completed Plan 21-03 (useTutor Hook)
+stopped_at: Completed 22-01-PLAN.md
+last_updated: "2026-03-04T12:47:42Z"
+last_activity: 2026-03-04 -- Completed Plan 22-01 (Safety Filter)
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 3
-  completed_plans: 3
----
-
----
-gsd_state_version: 1.0
-milestone: v0.5
-milestone_name: AI Tutor
-status: executing
-stopped_at: Completed 21-03-PLAN.md
-last_updated: "2026-03-04T06:19:24Z"
-last_activity: 2026-03-04 -- Completed Plan 21-03 (useTutor Hook)
-progress:
-  total_phases: 4
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  completed_plans: 1
 ---
 
 # Project State
@@ -35,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.5 AI Tutor -- Phase 21 (LLM Service & Store) COMPLETE
+**Current focus:** v0.5 AI Tutor -- Phase 22 (Safety & Compliance)
 
 ## Current Position
 
-Phase: 21 of 24 (LLM Service & Store) -- COMPLETE
-Plan: 3 of 3 complete
-Status: Phase complete
-Last activity: 2026-03-04 -- Completed Plan 21-03 (useTutor Hook)
+Phase: 22 of 24 (Safety & Compliance)
+Plan: 1 of 3 complete
+Status: Executing
+Last activity: 2026-03-04 -- Completed Plan 22-01 (Safety Filter)
 
-Progress: [##########] 100%
+Progress: [###-------] 33%
 
 ## Performance Metrics
 
@@ -59,6 +44,7 @@ Progress: [##########] 100%
 | 21    | 01   | 2min     | 2     | 5     |
 | 21    | 02   | 7min     | 2     | 7     |
 | 21    | 03   | 7min     | 2     | 9     |
+| 22    | 01   | 6min     | 2     | 5     |
 
 ## Accumulated Context
 
@@ -74,6 +60,12 @@ Key context carried from v0.4:
 - LLM must NEVER compute math or reveal answers in HINT mode
 - Non-streaming generateContent is the stable primary path for v0.5 (streaming deferred)
 - 805 tests passing, TypeScript clean
+
+v0.5 Phase 22 decisions:
+- Type assertions ('VALUE' as EnumType) for @google/genai ESM enums in Jest-testable code
+- Answer-leak detection priority: digit > word > indirect (earlier patterns take precedence)
+- numberToWord covers 0-200 with compound generation for 21-99 and 101-199
+- Vocabulary complexity proxy: word character length (letters only) per age bracket
 
 v0.5 Phase 21 decisions:
 - tutorSlice excluded from partialize -- fully ephemeral, no AsyncStorage persistence
@@ -97,7 +89,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T06:19:24Z
-Stopped at: Completed 21-03-PLAN.md -- Phase 21 complete
+Last session: 2026-03-04T12:47:42Z
+Stopped at: Completed 22-01-PLAN.md
 Resume file: None
-Resume command: /gsd:plan-phase 22
+Resume command: /gsd:execute-phase 22-02
