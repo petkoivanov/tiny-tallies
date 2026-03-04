@@ -3,45 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.5
 milestone_name: AI Tutor
 status: executing
-stopped_at: Phase 24 context gathered
-last_updated: "2026-03-04T14:16:23.343Z"
-last_activity: 2026-03-04 -- Completed Plan 23-01 (Chat UI Components)
+stopped_at: Completed 24-01-PLAN.md
+last_updated: "2026-03-04T14:55:06Z"
+last_activity: 2026-03-04 -- Completed Plan 24-01 (Escalation Engine & Service Foundation)
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
-  percent: 100
----
-
----
-gsd_state_version: 1.0
-milestone: v0.5
-milestone_name: AI Tutor
-status: executing
-stopped_at: Completed 23-01-PLAN.md
-last_updated: "2026-03-04T13:54:14.698Z"
-last_activity: 2026-03-04 -- Completed Plan 22-03 (Safety Pipeline Integration)
-progress:
-  [██████████] 100%
-  completed_phases: 2
-  total_plans: 8
-  completed_plans: 7
----
-
----
-gsd_state_version: 1.0
-milestone: v0.5
-milestone_name: AI Tutor
-status: executing
-stopped_at: Completed 22-03-PLAN.md
-last_updated: "2026-03-04T13:01:23Z"
-last_activity: 2026-03-04 -- Completed Plan 22-03 (Safety Pipeline Integration)
-progress:
-  total_phases: 4
-  completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 11
+  completed_plans: 9
+  percent: 82
 ---
 
 # Project State
@@ -51,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.5 AI Tutor -- Phase 23 (Chat UI & HINT Mode)
+**Current focus:** v0.5 AI Tutor -- Phase 24 (TEACH, BOOST & Auto-Escalation)
 
 ## Current Position
 
-Phase: 23 of 24 (Chat UI & HINT Mode)
-Plan: 1 of 2 complete
+Phase: 24 of 24 (TEACH, BOOST & Auto-Escalation)
+Plan: 1 of 3 complete
 Status: Executing
-Last activity: 2026-03-04 -- Completed Plan 23-01 (Chat UI Components)
+Last activity: 2026-03-04 -- Completed Plan 24-01 (Escalation Engine & Service Foundation)
 
-Progress: [██████████] 96%
+Progress: [████████░░] 82%
 
 ## Performance Metrics
 
@@ -78,8 +48,9 @@ Progress: [██████████] 96%
 | 22    | 01   | 6min     | 2     | 5     |
 | 22    | 02   | 3min     | 2     | 8     |
 | 22    | 03   | 3min     | 1     | 3     |
-| Phase 23 P01 | 3min | 2 tasks | 11 files |
-| Phase 23 P02 | 4min | 2 tasks | 8 files |
+| 23    | 01   | 3min     | 2     | 11    |
+| 23    | 02   | 4min     | 2     | 8     |
+| 24    | 01   | 5min     | 2     | 12    |
 
 ## Accumulated Context
 
@@ -120,6 +91,15 @@ v0.5 Phase 21 decisions:
 - [Phase 23]: Tutor bubble #4338ca / child #166534 for clear role distinction; useNetworkStatus treats null as online
 - [Phase 23]: ResponseButtons fixed 3-button layout; fallback detection via id prefix; ManipulativePanel collapse via chatOpen prop
 
+v0.5 Phase 24 decisions:
+- Escalation thresholds: HINT->TEACH at hintCount>=2 AND wrongAnswerCount>=1; TEACH->BOOST at wrongAnswerCount>=3; BOOST terminal
+- BoostPromptParams is the ONLY type with correctAnswer -- type-safe separation
+- CPA language guidance: concrete=blocks/objects, pictorial=pictures/diagrams, abstract=math notation/algorithms
+- runSafetyPipeline BOOST bypass via optional mode parameter -- backward compatible
+- TEACH mode: NEVER reveal final answer, show HOW letting child do last step
+- BOOST mode: MAY reveal answer, focus on WHY, encouraging tone
+- 992 tests passing, TypeScript clean
+
 ### Pending Todos
 
 None.
@@ -130,7 +110,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T14:16:23.341Z
-Stopped at: Phase 24 context gathered
-Resume file: .planning/phases/24-teach-boost-auto-escalation/24-CONTEXT.md
-Resume command: /gsd:execute-phase 22-03
+Last session: 2026-03-04T14:55:06Z
+Stopped at: Completed 24-01-PLAN.md
+Resume file: .planning/phases/24-teach-boost-auto-escalation/24-02-PLAN.md
+Resume command: /gsd:execute-phase 24

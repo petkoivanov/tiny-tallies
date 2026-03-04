@@ -26,11 +26,11 @@ Requirements for AI Tutor milestone. Each maps to roadmap phases.
 ### Tutor Modes
 
 - [x] **MODE-01**: HINT mode delivers Socratic questions that never reveal the answer
-- [ ] **MODE-02**: TEACH mode walks through concept with CPA-stage-aware language
+- [x] **MODE-02**: TEACH mode walks through concept with CPA-stage-aware language
 - [ ] **MODE-03**: TEACH mode triggers ManipulativePanel expansion with correct manipulative type
-- [ ] **MODE-04**: BOOST mode provides deep scaffolding with programmatic answer reveal after 3+ wrong
-- [ ] **MODE-05**: Auto-escalation state machine (HINT → TEACH → BOOST) based on struggle level
-- [ ] **MODE-06**: Bug Library misconception tag informs tutor explanations
+- [x] **MODE-04**: BOOST mode provides deep scaffolding with programmatic answer reveal after 3+ wrong
+- [x] **MODE-05**: Auto-escalation state machine (HINT → TEACH → BOOST) based on struggle level
+- [x] **MODE-06**: Bug Library misconception tag informs tutor explanations
 
 ### Safety & Compliance
 
@@ -95,11 +95,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHAT-04 | Phase 23 | Complete |
 | CHAT-05 | Phase 23 | Complete |
 | MODE-01 | Phase 23 | Complete |
-| MODE-02 | Phase 24 | Pending |
+| MODE-02 | Phase 24 | Complete |
 | MODE-03 | Phase 24 | Pending |
-| MODE-04 | Phase 24 | Pending |
-| MODE-05 | Phase 24 | Pending |
-| MODE-06 | Phase 24 | Pending |
+| MODE-04 | Phase 24 | Complete |
+| MODE-05 | Phase 24 | Complete |
+| MODE-06 | Phase 24 | Complete |
 | SAFE-01 | Phase 22 | Complete |
 | SAFE-02 | Phase 22 | Complete |
 | SAFE-03 | Phase 22 | Complete |
