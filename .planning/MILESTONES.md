@@ -1,5 +1,22 @@
 # Milestones
 
+## v0.5 AI Tutor (Shipped: 2026-03-04)
+
+**Phases completed:** 5 phases, 13 plans
+**Timeline:** 1 day (2026-03-04)
+**LOC:** ~29,092 TypeScript | 96 files changed (+15,734 / -150)
+**Tests:** 1,051 passing
+
+**Key accomplishments:**
+- Gemini LLM integration with lazy client, rate limiting (3/problem, 20/session, 50/day), AbortController lifecycle, and 8s timeout
+- Multi-layer safety pipeline: consent gate → PII scrubbing → Gemini safety filters (BLOCK_LOW_AND_ABOVE) → answer-leak detection → content validation → canned fallbacks
+- Chat bubble UI with child-initiated HelpButton, ChatPanel bottom sheet, pre-defined ResponseButtons, per-problem reset, and offline handling
+- Three-mode auto-escalation tutor: HINT (Socratic, never reveals answer) → TEACH (CPA-stage-aware with manipulative panel integration) → BOOST (deep scaffolding with programmatic answer reveal after 3+ wrong)
+- Bug Library misconception tags inform tutor explanations, addressing specific misunderstandings rather than giving generic feedback
+- Parental consent gate with PIN verification via expo-secure-store for COPPA compliance (VPC gate before first AI tutor use)
+
+---
+
 ## v0.4 Virtual Manipulatives (Shipped: 2026-03-04)
 
 **Phases completed:** 6 phases, 17 plans

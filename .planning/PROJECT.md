@@ -2,7 +2,7 @@
 
 ## What This Is
 
-An AI-powered math learning mobile app for children ages 6-9 (grades 1-3). Features adaptive daily practice sessions with programmatic problem generation, misconception-based distractors via Bug Library pattern, Elo-based adaptive difficulty, gamification (XP/levels/streaks), polished UI with animated feedback, a full adaptive learning engine (BKT, Leitner spaced repetition, prerequisite graph, smart session orchestration), and six interactive virtual manipulatives with CPA progression (Concrete → Pictorial → Abstract) — making abstract math concepts tangible through direct drag-and-drop manipulation at 60fps. Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
+An AI-powered math learning mobile app for children ages 6-9 (grades 1-3). Features adaptive daily practice sessions with programmatic problem generation, misconception-based distractors via Bug Library pattern, Elo-based adaptive difficulty, gamification (XP/levels/streaks), polished UI with animated feedback, a full adaptive learning engine (BKT, Leitner spaced repetition, prerequisite graph, smart session orchestration), six interactive virtual manipulatives with CPA progression (Concrete → Pictorial → Abstract), and an on-demand AI tutor powered by Gemini that provides Socratic hints, CPA-aware teaching with manipulative integration, and deep scaffolding — auto-escalating support based on struggle level with full COPPA-compliant safety pipeline. Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
 
 ## Core Value
 
@@ -33,26 +33,16 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - ✓ Session-embedded manipulative panel with auto-expand in concrete mode — v0.4
 - ✓ Per-manipulative sandbox screens for free exploration — v0.4
 - ✓ Guided mode highlighting, undo support, counter grid mode, double ten frame — v0.4
+- ✓ Gemini LLM integration with lazy client, rate limiting, AbortController lifecycle — v0.5
+- ✓ Multi-layer safety pipeline (consent → PII scrub → safety filters → answer-leak → content validation → fallbacks) — v0.5
+- ✓ Chat bubble UI with HelpButton, ChatPanel, ResponseButtons, per-problem reset, offline handling — v0.5
+- ✓ Three-mode auto-escalation tutor: HINT → TEACH (CPA + manipulatives) → BOOST — v0.5
+- ✓ Bug Library misconception-informed tutor explanations — v0.5
+- ✓ Parental consent gate with PIN verification for COPPA compliance — v0.5
 
 ### Active
 
-## Current Milestone: v0.5 AI Tutor
-
-**Goal:** Integrate an on-demand AI tutor powered by Gemini that helps children through chat-based Socratic hints, CPA walkthroughs with manipulatives, and deep scaffolding — auto-escalating support based on struggle level.
-
-**Target features:**
-- On-demand help button (child-initiated, never auto-interrupts)
-- Chat bubble conversation UI (resets per-problem)
-- Three tutor modes with auto-escalation: HINT → TEACH → BOOST
-- TEACH mode integrates with v0.4 manipulatives (suggests + guides)
-- Gemini LLM backend (context/explanations only, never computes math)
-- Bug Library misconception tags inform tutor explanations
-- Socratic hints never reveal the answer
-
-- [ ] AI tutor Gemini integration with three-mode TEACH/HINT/BOOST
-- [ ] On-demand chat UI with auto-escalation
-- [ ] Manipulative-integrated teaching walkthroughs
-- [ ] Bug Library-informed targeted explanations
+(None — planning next milestone)
 
 ### Out of Scope
 
@@ -67,7 +57,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ## Context
 
-**Current state:** Shipped v0.4 Virtual Manipulatives with ~21,900 LOC TypeScript. 742+ tests passing. Full adaptive learning pipeline + 6 interactive virtual manipulatives with CPA progression, session integration, sandbox exploration, guided mode, and undo support.
+**Current state:** Shipped v0.5 AI Tutor with ~29,092 LOC TypeScript. 1,051 tests passing. Full adaptive learning pipeline + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor with three-mode auto-escalation (HINT/TEACH/BOOST), Gemini LLM backend, multi-layer safety pipeline, and COPPA-compliant parental consent gate.
 
 **Architecture (implemented through v0.4):**
 - Programmatic math engine: 14 skills across addition/subtraction (Common Core grades 1-3)
@@ -88,17 +78,24 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - Prerequisite skill DAG with BKT-mastery gating and outer fringe algorithm
 - Practice mix: BKT-weighted selection, fallback cascade, constrained shuffle (no adjacent challenges, review-first)
 
+**Architecture (implemented in v0.5):**
+- Gemini LLM integration: lazy singleton client, 8s timeout, AbortController lifecycle
+- Three-mode AI tutor: HINT (Socratic) → TEACH (CPA-aware + manipulatives) → BOOST (scaffolding + answer reveal)
+- Auto-escalation state machine: hintCount/wrongAnswerCount thresholds, per-problem reset
+- Safety pipeline: consent gate → PII scrubbing → Gemini safety filters → answer-leak detection → content validation → canned fallbacks
+- Chat UI: HelpButton, ChatPanel bottom sheet, pre-defined ResponseButtons, per-problem reset, offline handling
+- Rate limiting: 3/problem, 20/session, 50/day configurable thresholds
+- COPPA: parental PIN consent gate via expo-secure-store, no child PII sent to LLM
+
 **Architecture (planned, future milestones):**
-- Hybrid: Programmatic math engine + LLM (Gemini) for context wrapping only
-- Three-mode AI tutor: TEACH / HINT (Socratic, never reveals answer) / BOOST
-- Misconception detection system with Bug Library interventions
+- Misconception detection system with Bug Library interventions (2-then-3 confirmation)
 
 **Tech stack:**
 - React Native 0.81.5 / Expo 54 / TypeScript 5.9 (strict mode)
 - Zustand 5 for state management (domain slices pattern)
 - React Navigation 7 native-stack
 - react-native-gesture-handler + react-native-reanimated (manipulatives, 60fps)
-- Gemini (@google/genai) for LLM tutoring layer (future)
+- Gemini (@google/genai v1.43.0) for LLM tutoring layer
 - Zod for runtime validation at system boundaries
 - Jest + jest-expo + React Native Testing Library
 
@@ -145,7 +142,7 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | BKT-mastery gating (replaces Elo threshold) | True mastery, not just difficulty proxies | ✓ Good — pedagogically sound |
 | No-re-locking policy | Practiced skills stay unlocked even if prereq mastery lost | ✓ Good — avoids frustration |
 | 60/30/10 practice mix | Review/new/challenge with fallback cascade | ✓ Good — structured sessions |
-| Gemini for LLM layer | Already integrated in Tiny Tales; good for context/explanations | — Pending |
+| Gemini for LLM layer | Already integrated in Tiny Tales; good for context/explanations | ✓ Good — lazy singleton, non-streaming, 8s timeout |
 | CPA progression | Research-backed (Singapore Math, NCTM recommended) | ✓ Good — BKT-driven 3-stage with one-way advance |
 | Start Common Core only | Reduce scope; add curricula in later versions | ✓ Good — 14 skills implemented |
 | Ages 6-9 focus | Clearest market gap; manageable content scope | ✓ Good — grade 1-3 content complete |
@@ -153,6 +150,13 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | 60fps drag primitives on UI thread | Reanimated worklets for snap math, no JS bridge lag | ✓ Good — smooth interaction, all 6 manipulatives |
 | Ephemeral manipulative state | Component-local useState, never persisted to store | ✓ Good — clean sandbox, no store bloat |
 | ManipulativePanel (in-screen, not Modal) | Avoids gesture conflicts with manipulatives inside panel | ✓ Good — collapsible overlay works cleanly |
+| Ephemeral tutorSlice (not persisted) | Chat state is session-scoped, no migration needed | ✓ Good — clean lifecycle, STORE_VERSION unchanged for tutor |
+| Multi-layer safety pipeline | Defense-in-depth: consent → PII → filters → leak → validate → fallback | ✓ Good — 6 layers, never leaks answers |
+| Pre-defined ResponseButtons (no free text) | Ages 6-7 can't type; eliminates prompt injection surface | ✓ Good — 3 fixed responses per mode |
+| Auto-escalation state machine | Pure function thresholds (hint≥2+wrong≥1 → TEACH, wrong≥3 → BOOST) | ✓ Good — predictable, testable |
+| BoostPromptParams type-safe answer isolation | Only BOOST mode type contains correctAnswer field | ✓ Good — TypeScript prevents accidental answer exposure |
+| Parental PIN consent gate | COPPA VPC requirement; PIN via expo-secure-store | ✓ Good — persists across restarts, swipe-back prevention |
+| Non-streaming Gemini calls | Simpler implementation, streaming deferred to future | ✓ Good — stable primary path for v0.5 |
 
 ---
-*Last updated: 2026-03-03 after v0.5 milestone started*
+*Last updated: 2026-03-04 after v0.5 milestone*

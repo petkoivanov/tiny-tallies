@@ -128,6 +128,92 @@
 
 ---
 
+## Milestone: v0.4 — Virtual Manipulatives
+
+**Shipped:** 2026-03-04
+**Phases:** 6 (Phases 15-20) | **Plans:** 17
+
+### What Was Built
+- 6 virtual manipulatives (Counters, TenFrame, NumberLine, BaseTenBlocks, FractionStrips, BarModel) with drag-and-drop, snap-to-zone, haptic feedback
+- 60fps drag primitives using Reanimated worklets on UI thread
+- CPA progression system (Concrete → Pictorial → Abstract) driven by BKT mastery with one-way advancement
+- Session-embedded ManipulativePanel with auto-expand in concrete mode
+- Per-manipulative sandbox screens for free exploration
+- Guided mode highlighting, 10-step undo, counter grid mode, double ten frame
+
+### What Worked
+- DraggableItem + SnapZone reusable across all 6 manipulatives — shared primitives architecture
+- Ephemeral component-local state for manipulatives — no store bloat
+- ManipulativePanel as in-screen collapsible (not Modal) — avoids gesture conflicts
+- CPA stage derivation as pure function from BKT mastery — clean data flow
+
+### What Was Inefficient
+- Double ManipulativeShell wrapping in CpaSessionContent (cosmetic dead props issue)
+- Missing guidedSteps subtraction resolvers for 3 manipulatives (graceful degradation accepted)
+
+### Patterns Established
+- UI thread snap math via Reanimated worklets for 60fps interactions
+- ManipulativeShell pattern: shared container with tool customization
+- BKT-informed CPA progression: mastery thresholds drive stage advancement
+- First-visit tooltip pattern with AsyncStorage persistence
+
+### Key Lessons
+1. Reanimated worklets enable 60fps interactions without JS bridge lag — critical for manipulatives
+2. In-screen collapsible panels work better than Modals for gesture-heavy content
+3. Ephemeral component state is the right choice for manipulation state — no persistence needed
+4. Guided mode can gracefully degrade when step resolvers are missing
+
+### Cost Observations
+- Model mix: ~65% opus, ~25% sonnet, ~10% haiku
+- Notable: 17 plans in 1 day — fastest milestone despite complexity, established patterns pay off
+
+---
+
+## Milestone: v0.5 — AI Tutor
+
+**Shipped:** 2026-03-04
+**Phases:** 5 (Phases 21-25) | **Plans:** 13
+
+### What Was Built
+- Gemini LLM client with lazy init, 8s timeout, AbortController lifecycle, rate limiting
+- Multi-layer safety pipeline: consent → PII scrub → safety filters → answer-leak detection → content validation → canned fallbacks
+- Chat bubble UI: HelpButton, ChatPanel bottom sheet, ResponseButtons, per-problem reset, offline handling
+- Three-mode auto-escalation: HINT (Socratic) → TEACH (CPA + manipulatives) → BOOST (scaffolding + answer reveal)
+- Bug Library misconception-informed tutor explanations
+- Parental PIN consent gate with expo-secure-store for COPPA compliance
+
+### What Worked
+- Defense-in-depth safety pattern — 6 layers, none trusts the previous layer
+- Type-safe answer isolation via BoostPromptParams — TypeScript prevents accidental exposure
+- Pure function escalation engine — deterministic, testable state machine
+- Pre-defined ResponseButtons eliminate prompt injection surface entirely
+- Ephemeral tutorSlice pattern — chat state is session-scoped, zero migration overhead
+
+### What Was Inefficient
+- STORE_VERSION test assertion diverged from actual (test expected 5, code had 6) — caught by audit, should have been caught during Phase 22 execution
+- Phase summaries had inconsistent one_liner extraction (null in some) — template compliance varies
+
+### Patterns Established
+- Safety pipeline as composable middleware chain (each step independent, all required)
+- Consent gate as first check in hook entry point — blocks all downstream calls
+- Type-safe prompt parameter isolation (BoostPromptParams vs PromptParams) for answer containment
+- Auto-escalation via pure function + getState() for fresh threshold reads
+- consentPendingRef pattern for cross-screen navigation state tracking
+
+### Key Lessons
+1. Multi-layer safety is essential for child-facing AI — no single layer is sufficient
+2. TypeScript type separation for answer-containing vs answer-free params prevents accidental leaks
+3. Pre-defined response buttons are both safer (no injection) and better UX (ages 6-7 can't type)
+4. Ephemeral store slices are ideal for session-scoped AI state — zero migration burden
+5. Milestone audit before completion caught real gaps (consent gate, stale test) — validates the audit step
+
+### Cost Observations
+- Model mix: ~65% opus (executor), ~25% sonnet (checker, verifier), ~10% haiku (research)
+- Notable: 13 plans in 1 day — LLM integration phases are fast when safety architecture is well-planned upfront
+- Average plan execution: ~4.5min across 13 plans
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -137,19 +223,26 @@
 | v0.1 | 12 | 6 | First milestone — established patterns |
 | v0.2 | 7 | 4 | UI polish, gamification, animations |
 | v0.3 | 15 | 4 | Adaptive learning backbone (BKT, Leitner, prereqs, smart sessions) |
+| v0.4 | 17 | 6 | Virtual manipulatives with CPA progression and 60fps drag |
+| v0.5 | 13 | 5 | AI tutor with 3-mode escalation and safety pipeline |
 
 ### Cumulative Quality
 
-| Milestone | Tests | LOC | Zero-Dep Additions |
-|-----------|-------|-----|-------------------|
+| Milestone | Tests | LOC | New Dependencies |
+|-----------|-------|-----|-----------------|
 | v0.1 | 336 | 6,799 | 0 (no new deps beyond Expo SDK) |
 | v0.2 | 430 | ~8,500 | 0 |
 | v0.3 | 557 | 11,866 | 0 |
+| v0.4 | 742 | ~21,900 | 0 |
+| v0.5 | 1,051 | ~29,092 | @google/genai v1.43.0 |
 
 ### Top Lessons (Verified Across Milestones)
 
-1. Pure function architecture enables fast, reliable testing and clean composition (v0.1, v0.2, v0.3)
+1. Pure function architecture enables fast, reliable testing and clean composition (v0.1-v0.5)
 2. Scope milestones to executable phases only — deferred work belongs in future milestones (v0.1)
 3. Fix broken test infrastructure before building on it — mock issues cascade (v0.2)
 4. Age-bracket lookup is a reusable pattern for child-adaptive systems (v0.3)
-5. Run milestone audits after all phases complete, not during development (v0.3)
+5. Run milestone audits after all phases complete, not during development (v0.3, validated in v0.5)
+6. Reanimated worklets on UI thread are essential for 60fps gesture interactions (v0.4)
+7. Multi-layer safety is non-negotiable for child-facing AI — no single layer suffices (v0.5)
+8. TypeScript type separation prevents accidental answer leaks in AI tutoring (v0.5)
