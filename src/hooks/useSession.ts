@@ -97,6 +97,8 @@ export function useSession(): UseSessionReturn {
   const lastSessionDate = useAppStore((s) => s.lastSessionDate);
   const setWeeklyStreak = useAppStore((s) => s.setWeeklyStreak);
   const childAge = useAppStore((s) => s.childAge);
+  const recordMisconception = useAppStore((s) => s.recordMisconception);
+  const resetSessionDedup = useAppStore((s) => s.resetSessionDedup);
 
   // Synchronous initialization: generate queue on first render, not in useEffect.
   // This ensures currentProblem is available immediately.
@@ -110,6 +112,7 @@ export function useSession(): UseSessionReturn {
 
   if (!initializedRef.current) {
     initializedRef.current = true;
+    resetSessionDedup();
     const { queue, startTime } = initializeSession(skillStates, startSession);
     sessionQueueRef.current = queue;
     sessionStartTimeRef.current = startTime;
@@ -173,6 +176,11 @@ export function useSession(): UseSessionReturn {
         format: 'mc',
         bugId,
       });
+
+      // Record misconception if wrong answer matched a Bug Library pattern
+      if (!isCorrect && bugId) {
+        recordMisconception(bugId, problem.skillId);
+      }
 
       // Update Elo in pending updates
       const skillState = getOrCreateSkillState(skillStates, problem.skillId);
@@ -333,6 +341,7 @@ export function useSession(): UseSessionReturn {
       setWeeklyStreak,
       endSession,
       childAge,
+      recordMisconception,
     ],
   );
 
