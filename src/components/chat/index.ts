@@ -4,3 +4,4 @@ export { TypingIndicator } from './TypingIndicator';
 export { HelpButton } from './HelpButton';
 export { ResponseButtons } from './ResponseButtons';
 export { ChatPanel } from './ChatPanel';
+export { ChatBanner } from './ChatBanner';

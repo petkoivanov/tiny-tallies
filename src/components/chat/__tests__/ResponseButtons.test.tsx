@@ -65,4 +65,45 @@ describe('ResponseButtons', () => {
 
     expect(mockOnResponse).not.toHaveBeenCalled();
   });
+
+  // ---- gotit mode tests ----
+
+  it('renders single "Got it!" button in gotit mode', () => {
+    const { getByText, queryByText } = render(
+      <ResponseButtons onResponse={mockOnResponse} disabled={false} mode="gotit" />,
+    );
+
+    expect(getByText('Got it!')).toBeTruthy();
+    expect(queryByText('I understand!')).toBeNull();
+    expect(queryByText('Tell me more')).toBeNull();
+    expect(queryByText("I'm confused")).toBeNull();
+  });
+
+  it('calls onResponse with "gotit" when Got it! button pressed', () => {
+    const { getByText } = render(
+      <ResponseButtons onResponse={mockOnResponse} disabled={false} mode="gotit" />,
+    );
+
+    fireEvent.press(getByText('Got it!'));
+    expect(mockOnResponse).toHaveBeenCalledWith('gotit');
+  });
+
+  it('disables Got it! button when disabled in gotit mode', () => {
+    const { getByText } = render(
+      <ResponseButtons onResponse={mockOnResponse} disabled={true} mode="gotit" />,
+    );
+
+    fireEvent.press(getByText('Got it!'));
+    expect(mockOnResponse).not.toHaveBeenCalled();
+  });
+
+  it('renders standard 3 buttons when mode is "standard" explicitly', () => {
+    const { getByText } = render(
+      <ResponseButtons onResponse={mockOnResponse} disabled={false} mode="standard" />,
+    );
+
+    expect(getByText('I understand!')).toBeTruthy();
+    expect(getByText('Tell me more')).toBeTruthy();
+    expect(getByText("I'm confused")).toBeTruthy();
+  });
 });

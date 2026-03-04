@@ -2,11 +2,12 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, spacing, typography, layout } from '@/theme';
 
-export type ResponseType = 'understand' | 'more' | 'confused';
+export type ResponseType = 'understand' | 'more' | 'confused' | 'gotit';
 
 interface ResponseButtonsProps {
   onResponse: (type: ResponseType) => void;
   disabled: boolean;
+  mode?: 'standard' | 'gotit';
 }
 
 const BUTTONS: { label: string; type: ResponseType; tint?: string }[] = [
@@ -15,7 +16,26 @@ const BUTTONS: { label: string; type: ResponseType; tint?: string }[] = [
   { label: "I'm confused", type: 'confused' },
 ];
 
-export function ResponseButtons({ onResponse, disabled }: ResponseButtonsProps) {
+export function ResponseButtons({ onResponse, disabled, mode = 'standard' }: ResponseButtonsProps) {
+  if (mode === 'gotit') {
+    return (
+      <View style={styles.container} testID="response-buttons">
+        <Pressable
+          onPress={() => onResponse('gotit')}
+          disabled={disabled}
+          style={[
+            styles.gotitButton,
+            disabled && styles.buttonDisabled,
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Got it!"
+        >
+          <Text style={styles.gotitButtonText}>Got it!</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container} testID="response-buttons">
       {BUTTONS.map((btn) => (
@@ -62,6 +82,20 @@ const styles = StyleSheet.create({
   buttonText: {
     fontFamily: typography.fontFamily.medium,
     fontSize: typography.fontSize.md,
+    color: colors.textPrimary,
+  },
+  gotitButton: {
+    backgroundColor: 'rgba(22, 101, 52, 0.4)',
+    borderRadius: layout.borderRadius.md,
+    minHeight: layout.minTouchTarget,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gotitButtonText: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.lg,
     color: colors.textPrimary,
   },
 });

@@ -28,7 +28,8 @@ interface ChatPanelProps {
   messages: TutorMessage[];
   isLoading: boolean;
   isOnline: boolean;
-  onResponse: (type: 'understand' | 'more' | 'confused' | 'retry') => void;
+  onResponse: (type: 'understand' | 'more' | 'confused' | 'retry' | 'gotit') => void;
+  responseMode?: 'standard' | 'gotit';
 }
 
 /**
@@ -52,6 +53,7 @@ export function ChatPanel({
   isLoading,
   isOnline,
   onResponse,
+  responseMode = 'standard',
 }: ChatPanelProps) {
   const translateY = useSharedValue(PANEL_HEIGHT);
 
@@ -147,6 +149,7 @@ export function ChatPanel({
           <ResponseButtons
             onResponse={onResponse}
             disabled={isLoading}
+            mode={responseMode}
           />
         </View>
       )}
