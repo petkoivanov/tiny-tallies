@@ -445,6 +445,223 @@ describe('generatePracticeMix', () => {
 });
 
 // ---------------------------------------------------------------------------
+// generatePracticeMix -- remediation injection
+// ---------------------------------------------------------------------------
+
+describe('generatePracticeMix remediation', () => {
+  // Skill states with enough review-due skills so remediation can replace review
+  const remediationSkillStates: Record<string, SkillState> = {
+    'addition.single-digit.no-carry': makeSkillState({
+      attempts: 10, correct: 7, masteryProbability: 0.5,
+      nextReviewDue: PAST_DATE, leitnerBox: 3, eloRating: 950,
+    }),
+    'subtraction.single-digit.no-borrow': makeSkillState({
+      attempts: 8, correct: 5, masteryProbability: 0.45,
+      nextReviewDue: PAST_DATE, leitnerBox: 2, eloRating: 930,
+    }),
+    'addition.within-20.no-carry': makeSkillState({
+      attempts: 6, correct: 4, masteryProbability: 0.42,
+      nextReviewDue: PAST_DATE, leitnerBox: 2, eloRating: 940,
+    }),
+    'subtraction.within-20.no-borrow': makeSkillState({
+      attempts: 5, correct: 3, masteryProbability: 0.44,
+      nextReviewDue: PAST_DATE, leitnerBox: 2, eloRating: 920,
+    }),
+    'addition.within-20.with-carry': makeSkillState({
+      attempts: 4, correct: 2, masteryProbability: 0.38,
+      nextReviewDue: PAST_DATE, leitnerBox: 2, eloRating: 910,
+    }),
+    // Misconception targets (confirmed misconception skillIds)
+    'addition.two-digit.no-carry': makeSkillState({
+      attempts: 7, correct: 5, masteryProbability: 0.30,
+      nextReviewDue: PAST_DATE, leitnerBox: 2, eloRating: 900,
+    }),
+    'subtraction.within-20.with-borrow': makeSkillState({
+      attempts: 5, correct: 2, masteryProbability: 0.25,
+      nextReviewDue: PAST_DATE, leitnerBox: 2, eloRating: 880,
+    }),
+    'addition.two-digit.with-carry': makeSkillState({
+      attempts: 3, correct: 1, masteryProbability: 0.20,
+      nextReviewDue: PAST_DATE, leitnerBox: 2, eloRating: 870,
+    }),
+  };
+
+  it('1 confirmed misconception -> 1 remediation item', () => {
+    const rng = createRng(42);
+    const mix = generatePracticeMix(
+      remediationSkillStates, 8, rng, 9, NOW,
+      ['addition.two-digit.no-carry'],
+    );
+    expect(mix).toHaveLength(9);
+    const remediation = mix.filter((m) => m.category === 'remediation');
+    expect(remediation).toHaveLength(1);
+    expect(remediation[0].skillId).toBe('addition.two-digit.no-carry');
+  });
+
+  it('3 confirmed misconceptions -> 3 remediation items', () => {
+    const rng = createRng(42);
+    const confirmed = [
+      'addition.two-digit.no-carry',
+      'subtraction.within-20.with-borrow',
+      'addition.two-digit.with-carry',
+    ];
+    const mix = generatePracticeMix(
+      remediationSkillStates, 8, rng, 9, NOW, confirmed,
+    );
+    expect(mix).toHaveLength(9);
+    const remediation = mix.filter((m) => m.category === 'remediation');
+    expect(remediation).toHaveLength(3);
+    const remSkillIds = remediation.map((r) => r.skillId);
+    for (const id of confirmed) {
+      expect(remSkillIds).toContain(id);
+    }
+  });
+
+  it('5 confirmed misconceptions -> capped at 3 remediation items', () => {
+    const rng = createRng(42);
+    const confirmed = [
+      'addition.two-digit.no-carry',
+      'subtraction.within-20.with-borrow',
+      'addition.two-digit.with-carry',
+      'addition.single-digit.no-carry',
+      'subtraction.single-digit.no-borrow',
+    ];
+    const mix = generatePracticeMix(
+      remediationSkillStates, 8, rng, 9, NOW, confirmed,
+    );
+    expect(mix).toHaveLength(9);
+    const remediation = mix.filter((m) => m.category === 'remediation');
+    expect(remediation).toHaveLength(3);
+  });
+
+  it('remediation slots reduce review count', () => {
+    const rng = createRng(42);
+    const confirmed = [
+      'addition.two-digit.no-carry',
+      'subtraction.within-20.with-borrow',
+      'addition.two-digit.with-carry',
+    ];
+    const mix = generatePracticeMix(
+      remediationSkillStates, 8, rng, 9, NOW, confirmed,
+    );
+    expect(mix).toHaveLength(9);
+    const remediationCount = mix.filter((m) => m.category === 'remediation').length;
+    const reviewCount = mix.filter((m) => m.category === 'review').length;
+    // Default 9 slots: review=5, new=3, challenge=1
+    // With 3 remediation: review should be 5-3=2
+    expect(remediationCount).toBe(3);
+    expect(reviewCount).toBe(2);
+  });
+
+  it('new and challenge slot counts unchanged regardless of remediation', () => {
+    const rng1 = createRng(42);
+    const mixWithout = generatePracticeMix(
+      remediationSkillStates, 8, rng1, 9, NOW, [],
+    );
+    const rng2 = createRng(42);
+    const mixWith = generatePracticeMix(
+      remediationSkillStates, 8, rng2, 9, NOW,
+      ['addition.two-digit.no-carry', 'subtraction.within-20.with-borrow'],
+    );
+
+    const newWithout = mixWithout.filter((m) => m.category === 'new').length;
+    const challengeWithout = mixWithout.filter((m) => m.category === 'challenge').length;
+    const newWith = mixWith.filter((m) => m.category === 'new').length;
+    const challengeWith = mixWith.filter((m) => m.category === 'challenge').length;
+
+    expect(newWith).toBe(newWithout);
+    expect(challengeWith).toBe(challengeWithout);
+  });
+
+  it('empty confirmedMisconceptionSkillIds -> identical to pre-change behavior', () => {
+    const rng1 = createRng(42);
+    const mixDefault = generatePracticeMix(
+      remediationSkillStates, 8, rng1, 9, NOW,
+    );
+    const rng2 = createRng(42);
+    const mixExplicit = generatePracticeMix(
+      remediationSkillStates, 8, rng2, 9, NOW, [],
+    );
+    expect(mixDefault).toEqual(mixExplicit);
+  });
+
+  it('remediation skillIds added to usedSkillIds preventing duplicates', () => {
+    const rng = createRng(42);
+    const confirmed = ['addition.two-digit.no-carry'];
+    const mix = generatePracticeMix(
+      remediationSkillStates, 8, rng, 9, NOW, confirmed,
+    );
+    // The remediation skill should not also appear as a review item
+    const reviewSkillIds = mix
+      .filter((m) => m.category === 'review')
+      .map((m) => m.skillId);
+    // Remediation skillId should not be duplicated in review
+    // (though it could appear via fallback, the preference is unique)
+    const remSkillId = 'addition.two-digit.no-carry';
+    const allOccurrences = mix.filter((m) => m.skillId === remSkillId);
+    // Should appear exactly once (as remediation)
+    expect(allOccurrences).toHaveLength(1);
+    expect(allOccurrences[0].category).toBe('remediation');
+  });
+
+  it('remediation count capped at slots.review (never exceeds available review slots)', () => {
+    // Use practiceCount=3 -> review=2, new=1, challenge=0
+    // With 3 confirmed skills, only 2 remediation slots (limited by review=2)
+    const rng = createRng(42);
+    const confirmed = [
+      'addition.two-digit.no-carry',
+      'subtraction.within-20.with-borrow',
+      'addition.two-digit.with-carry',
+    ];
+    const mix = generatePracticeMix(
+      remediationSkillStates, 8, rng, 3, NOW, confirmed,
+    );
+    expect(mix).toHaveLength(3);
+    const remediation = mix.filter((m) => m.category === 'remediation');
+    // practiceCount=3 -> review=2, so max 2 remediation
+    expect(remediation.length).toBeLessThanOrEqual(2);
+    // Review slots should be 0 (all replaced)
+    const review = mix.filter((m) => m.category === 'review');
+    expect(review.length).toBe(0);
+  });
+
+  it('>3 confirmed skills -> BKT-inverse weighted selection prioritizes lowest mastery', () => {
+    const rng = createRng(42);
+    // 5 confirmed skills with varying mastery
+    const confirmed = [
+      'addition.two-digit.no-carry',        // P(L) = 0.30
+      'subtraction.within-20.with-borrow',   // P(L) = 0.25
+      'addition.two-digit.with-carry',       // P(L) = 0.20
+      'addition.single-digit.no-carry',      // P(L) = 0.50
+      'subtraction.single-digit.no-borrow',  // P(L) = 0.45
+    ];
+    // Run many trials and count selection frequency
+    const selectionCounts: Record<string, number> = {};
+    for (const id of confirmed) selectionCounts[id] = 0;
+
+    for (let seed = 0; seed < 100; seed++) {
+      const trialRng = createRng(seed);
+      const mix = generatePracticeMix(
+        remediationSkillStates, 8, trialRng, 9, NOW, confirmed,
+      );
+      const remediation = mix.filter((m) => m.category === 'remediation');
+      for (const item of remediation) {
+        selectionCounts[item.skillId] = (selectionCounts[item.skillId] ?? 0) + 1;
+      }
+    }
+
+    // The three lowest-mastery skills (0.20, 0.25, 0.30) should appear more often
+    // than the two highest-mastery (0.45, 0.50)
+    const lowestThree = selectionCounts['addition.two-digit.with-carry'] +
+      selectionCounts['subtraction.within-20.with-borrow'] +
+      selectionCounts['addition.two-digit.no-carry'];
+    const highestTwo = selectionCounts['addition.single-digit.no-carry'] +
+      selectionCounts['subtraction.single-digit.no-borrow'];
+    expect(lowestThree).toBeGreaterThan(highestTwo);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // constrainedShuffle
 // ---------------------------------------------------------------------------
 
@@ -533,5 +750,20 @@ describe('constrainedShuffle', () => {
     const result = constrainedShuffle(items, rng);
     // Should still return all items
     expect(result).toHaveLength(2);
+  });
+
+  it('accepts remediation as valid warm-start first slot', () => {
+    const items: Array<{ skillId: string; category: PracticeProblemCategory }> =
+      [
+        { skillId: 'n1', category: 'new' },
+        { skillId: 'c1', category: 'challenge' },
+        { skillId: 'rem1', category: 'remediation' },
+      ];
+
+    const rng = createRng(42);
+    const result = constrainedShuffle(items, rng);
+    // First item should be remediation (the only warm-start candidate)
+    expect(result[0].category).toBe('remediation');
+    expect(result).toHaveLength(3);
   });
 });
