@@ -3,29 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.6
 milestone_name: Misconception Detection
 status: in_progress
-stopped_at: Phase 29 context gathered
-last_updated: "2026-03-04T20:37:22.119Z"
-last_activity: 2026-03-04 -- Phase 28 Plan 01 complete (session mix adaptation)
+stopped_at: "Completed 29-01-PLAN.md"
+last_updated: "2026-03-04T21:19:52Z"
+last_activity: 2026-03-04 -- Phase 29 Plan 01 complete (AI tutor misconception context)
 progress:
   total_phases: 5
-  completed_phases: 3
-  total_plans: 4
-  completed_plans: 4
----
-
----
-gsd_state_version: 1.0
-milestone: v0.6
-milestone_name: Misconception Detection
-status: in_progress
-stopped_at: "Completed 28-01-PLAN.md"
-last_updated: "2026-03-04T20:10:55Z"
-last_activity: 2026-03-04 -- Phase 28 Plan 01 complete (session mix adaptation)
-progress:
-  total_phases: 5
-  completed_phases: 3
-  total_plans: 4
-  completed_plans: 4
+  completed_phases: 4
+  total_plans: 5
+  completed_plans: 5
 ---
 
 # Project State
@@ -35,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** Phase 28 complete -- ready for Phase 29
+**Current focus:** Phase 29 complete -- ready for Phase 30
 
 ## Current Position
 
-Phase: 28 of 30 (Session Mix Adaptation) -- COMPLETE
+Phase: 29 of 30 (AI Tutor Misconception Context) -- COMPLETE
 Plan: 1 of 1 in current phase
 Status: Phase complete
-Last activity: 2026-03-04 -- Phase 28 Plan 01 complete (session mix adaptation)
+Last activity: 2026-03-04 -- Phase 29 Plan 01 complete (AI tutor misconception context)
 
-Progress: [██████░░░░] 60% of v0.6
+Progress: [████████░░] 80% of v0.6
 
 ## Performance Metrics
 
@@ -61,6 +46,7 @@ Progress: [██████░░░░] 60% of v0.6
 | 26-02 | session recording | 4min | 2 | 2 |
 | 27-01 | confirmation engine | 2min | 2 | 2 |
 | 28-01 | session mix adaptation | 7min | 2 | 6 |
+| 29-01 | tutor misconception context | 3min | 2 | 5 |
 
 ## Accumulated Context
 
@@ -79,7 +65,7 @@ Key context for v0.6:
 - Session orchestrator builds 15-problem queues with 60/30/10 mix
 - AI tutor (v0.5) already uses bug tags for per-problem explanations
 - LLM must NEVER compute math or reveal answers in HINT mode
-- 1,103 tests passing, TypeScript clean
+- 1,121 tests passing, TypeScript clean
 - recordMisconception called in useSession handleAnswer on wrong answers with bugId
 - resetSessionDedup called on session initialization
 - 2-then-3 confirmation rule: check confirmed FIRST so count=3 goes straight to confirmed
@@ -92,6 +78,11 @@ Key context for v0.6:
 - Remediation uses standard gaussian-targeted template selection (not challenge)
 - constrainedShuffle warm-start accepts both review and remediation categories
 - Pipeline: useSession reads misconceptions -> extracts unique confirmed skillIds -> generateSessionQueue -> generatePracticeMix
+- Confirmed misconceptions sorted by occurrenceCount descending for prompt inclusion (most frequent = most important)
+- ConfirmedMisconceptionContext type: bugTag + description only (no PII)
+- Per-mode misconception guidance: HINT steers away, TEACH addresses step-by-step, BOOST explains why
+- Cap at 3 confirmed misconceptions per prompt to control prompt length
+- confirmedMisconceptions omitted from promptParams when empty (clean prompts for no-misconception skills)
 
 ### Pending Todos
 
@@ -103,7 +94,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T20:37:22.117Z
-Stopped at: Phase 29 context gathered
-Resume file: .planning/phases/29-ai-tutor-misconception-context/29-CONTEXT.md
-Resume command: /gsd:execute-phase 29
+Last session: 2026-03-04T21:19:52Z
+Stopped at: Completed 29-01-PLAN.md
+Resume file: .planning/phases/29-ai-tutor-misconception-context/29-01-SUMMARY.md
+Resume command: /gsd:execute-phase 30
