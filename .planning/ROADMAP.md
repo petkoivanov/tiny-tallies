@@ -125,7 +125,9 @@ Plans:
   1. When generating tutor prompts, confirmed misconception data (bug tag, skill, confirmation status) is included in the LLM context
   2. The tutor's explanations for problems on skills with confirmed misconceptions address the specific misunderstanding pattern rather than giving generic help
   3. No child PII is included in the misconception context sent to the LLM (COPPA compliance maintained)
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 29-01-PLAN.md — Extend PromptParams with confirmed misconception context, per-mode guidance in prompt builders, store-to-prompt wiring in useTutor
 
 ### Phase 30: Remediation Mini-Sessions
 **Goal**: Children with multiple confirmed misconceptions can enter a focused remediation session that targets those specific gaps
@@ -170,5 +172,5 @@ Plans:
 | 26. Misconception Store & Recording | 2/2 | Complete    | 2026-03-04 | - |
 | 27. Confirmation Engine | 1/1 | Complete    | 2026-03-04 | - |
 | 28. Session Mix Adaptation | 1/1 | Complete    | 2026-03-04 | - |
-| 29. AI Tutor Misconception Context | v0.6 | 0/0 | Not started | - |
+| 29. AI Tutor Misconception Context | v0.6 | 0/1 | Not started | - |
 | 30. Remediation Mini-Sessions | v0.6 | 0/0 | Not started | - |
