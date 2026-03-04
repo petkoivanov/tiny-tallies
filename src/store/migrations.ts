@@ -77,8 +77,13 @@ export function migrateStore(
     state.tutorConsentGranted ??= false;
   }
 
+  if (version < 7) {
+    // v6 -> v7: Add misconception tracking store
+    state.misconceptions ??= {};
+  }
+
   // Future migrations chain here:
-  // if (version < 7) { ... }
+  // if (version < 8) { ... }
 
   return state;
 }
