@@ -19,13 +19,13 @@ Requirements for AI Tutor milestone. Each maps to roadmap phases.
 
 - [x] **CHAT-01**: Child-initiated help button visible during session (never auto-triggers)
 - [x] **CHAT-02**: Chat bubble UI with tutor and child message styling
-- [ ] **CHAT-03**: Pre-defined response buttons for child input (no free-text)
-- [ ] **CHAT-04**: Per-problem chat reset on problem advance with AbortController cleanup
+- [x] **CHAT-03**: Pre-defined response buttons for child input (no free-text)
+- [x] **CHAT-04**: Per-problem chat reset on problem advance with AbortController cleanup
 - [x] **CHAT-05**: Offline detection with friendly message when network unavailable
 
 ### Tutor Modes
 
-- [ ] **MODE-01**: HINT mode delivers Socratic questions that never reveal the answer
+- [x] **MODE-01**: HINT mode delivers Socratic questions that never reveal the answer
 - [ ] **MODE-02**: TEACH mode walks through concept with CPA-stage-aware language
 - [ ] **MODE-03**: TEACH mode triggers ManipulativePanel expansion with correct manipulative type
 - [ ] **MODE-04**: BOOST mode provides deep scaffolding with programmatic answer reveal after 3+ wrong
@@ -91,10 +91,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LLM-05 | Phase 21 | Complete |
 | CHAT-01 | Phase 23 | Complete |
 | CHAT-02 | Phase 23 | Complete |
-| CHAT-03 | Phase 23 | Pending |
-| CHAT-04 | Phase 23 | Pending |
+| CHAT-03 | Phase 23 | Complete |
+| CHAT-04 | Phase 23 | Complete |
 | CHAT-05 | Phase 23 | Complete |
-| MODE-01 | Phase 23 | Pending |
+| MODE-01 | Phase 23 | Complete |
 | MODE-02 | Phase 24 | Pending |
 | MODE-03 | Phase 24 | Pending |
 | MODE-04 | Phase 24 | Pending |

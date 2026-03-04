@@ -58,7 +58,7 @@
 
 - [x] **Phase 21: LLM Service & Store** - Gemini client, prompt templates, rate limiting, tutor store slice, and core lifecycle hook (completed 2026-03-04)
 - [x] **Phase 22: Safety & Compliance** - Output filtering, COPPA data minimization, safety filters, content validation, fallback responses, and VPC gate (completed 2026-03-04)
-- [ ] **Phase 23: Chat UI & HINT Mode** - Help button, chat bubble UI, response buttons, per-problem reset, offline detection, and Socratic hint delivery
+- [x] **Phase 23: Chat UI & HINT Mode** - Help button, chat bubble UI, response buttons, per-problem reset, offline detection, and Socratic hint delivery (completed 2026-03-04)
 - [ ] **Phase 24: TEACH, BOOST & Auto-Escalation** - TEACH mode with manipulative integration, BOOST mode scaffolding, auto-escalation state machine, and Bug Library-informed explanations
 
 ## Phase Details
@@ -105,7 +105,7 @@ Plans:
   3. Tutor delivers Socratic hints that guide thinking without ever revealing the answer
   4. Chat state resets completely when the problem advances, with any in-flight LLM calls cancelled via AbortController
   5. When the device is offline, child sees a friendly message explaining help is unavailable and practice continues normally
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 23-01-PLAN.md — Chat building blocks: HelpButton, ChatBubble, TypingIndicator, ChatMessageList, useNetworkStatus
 - [ ] 23-02-PLAN.md — ResponseButtons, ChatPanel, and SessionScreen integration with full chat flow
@@ -151,5 +151,5 @@ Phases execute in numeric order: 21 -> 22 -> 23 -> 24
 | 20. Polish | v0.4 | 4/4 | Complete | 2026-03-04 |
 | 21. LLM Service & Store | v0.5 | 3/3 | Complete | 2026-03-04 |
 | 22. Safety & Compliance | v0.5 | 3/3 | Complete | 2026-03-04 |
-| 23. Chat UI & HINT Mode | 1/2 | In Progress|  | - |
+| 23. Chat UI & HINT Mode | 2/2 | Complete   | 2026-03-04 | - |
 | 24. TEACH, BOOST & Auto-Escalation | v0.5 | 0/? | Not started | - |
