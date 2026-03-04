@@ -264,13 +264,13 @@ export function BaseTenBlocks({ testID, guidedTargetId }: BaseTenBlocksProps) {
         ) : null}
 
         <View style={styles.tray}>
-          <GuidedHighlight active={guidedTargetId === 'add-hundreds'}>
+          <GuidedHighlight active={guidedTargetId === 'hundreds-column'}>
             <TraySource type="flat" label="100" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} />
           </GuidedHighlight>
-          <GuidedHighlight active={guidedTargetId === 'add-tens'}>
+          <GuidedHighlight active={guidedTargetId === 'tens-column'}>
             <TraySource type="rod" label="10" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} />
           </GuidedHighlight>
-          <GuidedHighlight active={guidedTargetId === 'add-ones'}>
+          <GuidedHighlight active={guidedTargetId === 'ones-column'}>
             <TraySource type="cube" label="1" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} />
           </GuidedHighlight>
         </View>
