@@ -306,4 +306,84 @@ describe('store migrations', () => {
     // v5->v6 consent flag
     expect(result.tutorConsentGranted).toBe(false);
   });
+
+  // v6->v7 migration tests (misconceptions)
+  it('migrateStore from version 6 initializes misconceptions as empty object', () => {
+    const input = { childName: 'Luna', xp: 300, tutorConsentGranted: true };
+    const result = migrateStore(input, 6);
+    expect(result.misconceptions).toEqual({});
+  });
+
+  it('migrateStore from version 6 preserves all existing v6 state', () => {
+    const input = {
+      childName: 'Luna',
+      childAge: 7,
+      childGrade: 2,
+      avatarId: 'cat',
+      tutorConsentGranted: true,
+      xp: 500,
+      level: 5,
+      weeklyStreak: 3,
+      lastSessionDate: '2026-03-01',
+      exploredManipulatives: ['base-ten', 'number-line'],
+      skillStates: {
+        'add-single': {
+          eloRating: 1100, attempts: 20, correct: 15,
+          masteryProbability: 0.7, consecutiveWrong: 0, masteryLocked: false,
+          leitnerBox: 3, nextReviewDue: null, consecutiveCorrectInBox6: 0,
+          cpaLevel: 'pictorial',
+        },
+      },
+    };
+    const result = migrateStore(input, 6);
+
+    // All v6 fields preserved
+    expect(result.childName).toBe('Luna');
+    expect(result.childAge).toBe(7);
+    expect(result.childGrade).toBe(2);
+    expect(result.avatarId).toBe('cat');
+    expect(result.tutorConsentGranted).toBe(true);
+    expect(result.xp).toBe(500);
+    expect(result.level).toBe(5);
+    expect(result.weeklyStreak).toBe(3);
+    expect(result.lastSessionDate).toBe('2026-03-01');
+    expect(result.exploredManipulatives).toEqual(['base-ten', 'number-line']);
+
+    const skills = result.skillStates as Record<string, Record<string, unknown>>;
+    expect(skills['add-single'].eloRating).toBe(1100);
+    expect(skills['add-single'].cpaLevel).toBe('pictorial');
+
+    // New v7 field
+    expect(result.misconceptions).toEqual({});
+  });
+
+  it('migrateStore chains v1->v7 adds misconceptions field alongside all prior fields', () => {
+    const input = {
+      childName: 'Max',
+      skillStates: {
+        'add-double': { eloRating: 1100, attempts: 20, correct: 15 },
+      },
+    };
+    const result = migrateStore(input, 1);
+
+    // v1->v2 defaults
+    expect(result.childAge).toBeNull();
+    expect(result.xp).toBe(0);
+
+    // v2->v3 BKT defaults
+    const skills = result.skillStates as Record<string, Record<string, unknown>>;
+    expect(skills['add-double'].masteryProbability).toBe(0.1);
+
+    // v3->v4 Leitner defaults
+    expect(skills['add-double'].leitnerBox).toBe(1);
+
+    // v4->v5 CPA level
+    expect(skills['add-double'].cpaLevel).toBe('concrete');
+
+    // v5->v6 consent flag
+    expect(result.tutorConsentGranted).toBe(false);
+
+    // v6->v7 misconceptions
+    expect(result.misconceptions).toEqual({});
+  });
 });
