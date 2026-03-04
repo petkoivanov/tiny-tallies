@@ -7,11 +7,13 @@ export interface ChildProfileSlice {
   childAge: number | null;
   childGrade: number | null;
   avatarId: AvatarId | null;
+  tutorConsentGranted: boolean;
   setChildProfile: (
     profile: Partial<
       Pick<ChildProfileSlice, 'childName' | 'childAge' | 'childGrade' | 'avatarId'>
     >,
   ) => void;
+  setTutorConsentGranted: (granted: boolean) => void;
 }
 
 export const createChildProfileSlice: StateCreator<
@@ -24,9 +26,11 @@ export const createChildProfileSlice: StateCreator<
   childAge: null,
   childGrade: null,
   avatarId: null,
+  tutorConsentGranted: false,
   setChildProfile: (profile) =>
     set((state) => ({
       ...state,
       ...profile,
     })),
+  setTutorConsentGranted: (granted) => set({ tutorConsentGranted: granted }),
 });

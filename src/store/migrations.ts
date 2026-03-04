@@ -72,8 +72,13 @@ export function migrateStore(
     state.skillStates = skillStates;
   }
 
+  if (version < 6) {
+    // v5 -> v6: Add parental consent flag for AI tutor
+    state.tutorConsentGranted ??= false;
+  }
+
   // Future migrations chain here:
-  // if (version < 6) { ... }
+  // if (version < 7) { ... }
 
   return state;
 }
