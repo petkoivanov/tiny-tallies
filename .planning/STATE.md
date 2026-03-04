@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.4
 milestone_name: Virtual Manipulatives
 status: complete
-stopped_at: Completed 20-02-PLAN.md (all plans complete)
-last_updated: "2026-03-04T00:01:57Z"
-last_activity: 2026-03-03 -- Completed Plan 20-02 (Undo and Guided Mode)
+stopped_at: Completed 20-04-PLAN.md (all plans complete)
+last_updated: "2026-03-04T00:18:00Z"
+last_activity: 2026-03-03 -- Completed Plan 20-04 (Guided Highlight Gap Closure)
 progress:
   total_phases: 6
   completed_phases: 6
-  total_plans: 16
-  completed_plans: 16
+  total_plans: 17
+  completed_plans: 17
   percent: 100
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.4 Virtual Manipulatives -- Complete (all 16/16 plans)
+**Current focus:** v0.4 Virtual Manipulatives -- Complete (all 17/17 plans)
 
 ## Current Position
 
 Phase: 20 of 20 (Polish)
-Plan: 3 of 3 in current phase (all complete)
+Plan: 4 of 4 in current phase (all complete)
 Status: Complete
-Last activity: 2026-03-03 -- Completed Plan 20-02 (Undo and Guided Mode)
+Last activity: 2026-03-03 -- Completed Plan 20-04 (Guided Highlight Gap Closure)
 
-Progress: [██████████] 100% (16/16 plans)
+Progress: [██████████] 100% (17/17 plans)
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Progress: [██████████] 100% (16/16 plans)
 | 20-01 | Shared infrastructure | 7min | 3 | 12 |
 | 20-03 | Grid mode and double frame | 10min | 2 | 11 |
 | 20-02 | Undo wiring and guided mode | 15min | 2 | 13 |
+| 20-04 | Guided highlight gap closure | 1min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -116,6 +117,7 @@ v0.4 roadmap decisions:
 - [Phase 20-02]: BaseTenBlocks clearTimer() before undo() prevents auto-group race condition
 - [Phase 20-02]: NumberLine liveMarkerValue for drag intermediates, pushMarkerState only on drag end
 - [Phase 20-02]: CpaSessionContent passes guidedTargetId only in concrete mode (null in pictorial/abstract/sandbox)
+- [Phase 20-04]: hundreds-column ID used for flat tray to match column naming convention (col-hundreds), even though resolver does not currently return it
 
 ### Pending Todos
 
@@ -129,7 +131,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T00:01:57.449Z
-Stopped at: Completed 20-02-PLAN.md
+Last session: 2026-03-04T00:18:00Z
+Stopped at: Completed 20-04-PLAN.md
 Resume file: None
 Resume command: /gsd:execute-phase 20
