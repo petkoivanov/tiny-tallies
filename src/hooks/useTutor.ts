@@ -11,7 +11,14 @@ import { checkRateLimit, getRateLimitMessage } from '@/services/tutor/rateLimite
 import { scrubOutboundPii, runSafetyPipeline } from '@/services/tutor/safetyFilter';
 import { getCannedFallback } from '@/services/tutor/safetyConstants';
 import { computeEscalation } from '@/services/tutor/escalationEngine';
-import type { AgeBracket, TutorMessage, TutorMode } from '@/services/tutor/types';
+import { getBugDescription } from '@/services/tutor/bugLookup';
+import type {
+  AgeBracket,
+  ConfirmedMisconceptionContext,
+  TutorMessage,
+  TutorMode,
+} from '@/services/tutor/types';
+import { getMisconceptionsBySkill } from '@/store/slices/misconceptionSlice';
 import type { SessionProblem } from '@/services/session/sessionTypes';
 import type { CpaStage, ManipulativeType } from '@/services/cpa/cpaTypes';
 
@@ -65,6 +72,9 @@ export function useTutor(
   const problemCallCount = useAppStore((s) => s.problemCallCount);
   const sessionCallCount = useAppStore((s) => s.sessionCallCount);
   const dailyCallCount = useAppStore((s) => s.dailyCallCount);
+
+  // Read from misconceptionSlice (READ ONLY)
+  const misconceptions = useAppStore((s) => s.misconceptions);
 
   // Read from childProfileSlice (READ ONLY)
   const childAge = useAppStore((s) => s.childAge);
@@ -145,6 +155,17 @@ export function useTutor(
     // Read current mode from store (may differ from subscribed value)
     const currentMode = useAppStore.getState().tutorMode;
 
+    // Assemble confirmed misconception context for this skill
+    const skillId = currentProblem.problem.skillId;
+    const skillMisconceptions = getMisconceptionsBySkill(misconceptions, skillId)
+      .filter((r) => r.status === 'confirmed')
+      .sort((a, b) => b.occurrenceCount - a.occurrenceCount)
+      .slice(0, 3)
+      .map((r): ConfirmedMisconceptionContext => ({
+        bugTag: r.bugTag,
+        description: getBugDescription(r.bugTag) ?? r.bugTag,
+      }));
+
     // Build prompt params (shared across all modes)
     const promptParams = {
       ageBracket,
@@ -155,6 +176,9 @@ export function useTutor(
       hintLevel: useAppStore.getState().hintLevel,
       wrongAnswer: lastWrongContext?.wrongAnswer,
       bugDescription: lastWrongContext?.bugDescription ?? undefined,
+      ...(skillMisconceptions.length > 0 && {
+        confirmedMisconceptions: skillMisconceptions,
+      }),
     };
 
     // Select prompt builder based on tutorMode
@@ -312,6 +336,7 @@ export function useTutor(
     ageBracket,
     cpaStage,
     lastWrongContext,
+    misconceptions,
     tutorConsentGranted,
     childName,
     childAge,

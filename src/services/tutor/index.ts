@@ -4,6 +4,7 @@ export type {
   TutorMessage,
   PromptParams,
   BoostPromptParams,
+  ConfirmedMisconceptionContext,
   GeminiResponse,
 } from './types';
 export { geminiResponseSchema } from './types';
