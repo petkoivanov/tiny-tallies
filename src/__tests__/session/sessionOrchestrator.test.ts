@@ -672,6 +672,88 @@ describe('sessionOrchestrator', () => {
         expect(q1[i].skillId).toBe(q2[i].skillId);
       }
     });
+
+    it('with confirmedMisconceptionSkillIds produces remediation practice problems', () => {
+      const skillStates: Record<string, SkillState> = {
+        'addition.single-digit.no-carry': makeSkill({
+          eloRating: 950, attempts: 10, correct: 7, masteryProbability: 0.40,
+          leitnerBox: 2 as const, nextReviewDue: null,
+        }),
+        'subtraction.single-digit.no-borrow': makeSkill({
+          eloRating: 920, attempts: 8, correct: 5, masteryProbability: 0.35,
+          leitnerBox: 2 as const, nextReviewDue: null,
+        }),
+      };
+      const confirmed = ['addition.single-digit.no-carry'];
+
+      const queue = generateSessionQueue(
+        skillStates, DEFAULT_SESSION_CONFIG, 42, 8, confirmed,
+      );
+
+      expect(queue).toHaveLength(15);
+      // Practice phase should contain at least one problem for the confirmed skill
+      const practice = queue.filter((p) => p.phase === 'practice');
+      const hasConfirmed = practice.some(
+        (p) => p.skillId === 'addition.single-digit.no-carry',
+      );
+      expect(hasConfirmed).toBe(true);
+    });
+
+    it('without confirmedMisconceptionSkillIds produces standard mix (backward compat)', () => {
+      const q1 = generateSessionQueue({}, DEFAULT_SESSION_CONFIG, 42, 8);
+      const q2 = generateSessionQueue({}, DEFAULT_SESSION_CONFIG, 42, 8, []);
+
+      expect(q1).toHaveLength(15);
+      expect(q2).toHaveLength(15);
+
+      // Same seed + no confirmed misconceptions = identical queues
+      for (let i = 0; i < q1.length; i++) {
+        expect(q1[i].problem.id).toBe(q2[i].problem.id);
+        expect(q1[i].skillId).toBe(q2[i].skillId);
+      }
+    });
+
+    it('remediation problems use standard template selection (not challenge)', () => {
+      // Set up: confirmed misconception on a skill with high enough mastery
+      // to also be in the challenge pool. Verify remediation uses standard selection.
+      const skillStates: Record<string, SkillState> = {
+        'addition.single-digit.no-carry': makeSkill({
+          eloRating: 1050, attempts: 20, correct: 14, masteryProbability: 0.55,
+          leitnerBox: 2 as const, nextReviewDue: null,
+        }),
+        'subtraction.single-digit.no-borrow': makeSkill({
+          eloRating: 900, attempts: 10, correct: 5, masteryProbability: 0.30,
+          leitnerBox: 2 as const, nextReviewDue: null,
+        }),
+      };
+      const confirmed = ['addition.single-digit.no-carry'];
+
+      // Run many trials and verify remediation skill's template selection
+      // is NOT exclusively above-Elo (challenge selection prefers above Elo)
+      let totalTemplateElo = 0;
+      let remediationCount = 0;
+      for (let trial = 0; trial < 50; trial++) {
+        const queue = generateSessionQueue(
+          skillStates, DEFAULT_SESSION_CONFIG, trial * 31, 8, confirmed,
+        );
+        const practice = queue.filter((p) => p.phase === 'practice');
+        for (const p of practice) {
+          if (p.skillId === 'addition.single-digit.no-carry') {
+            totalTemplateElo += p.templateBaseElo;
+            remediationCount++;
+          }
+        }
+      }
+
+      // Remediation uses gaussian-targeted selection, not challenge selection.
+      // Average template Elo should be close to student Elo (1050), not above it.
+      // This is a smoke test: if challenge selection were used, average would be
+      // significantly above 1050.
+      expect(remediationCount).toBeGreaterThan(0);
+      const avgTemplateElo = totalTemplateElo / remediationCount;
+      // Standard selection centers around student Elo; challenge goes above
+      expect(avgTemplateElo).toBeLessThan(1200);
+    });
   });
 
   describe('commitSessionResults', () => {
