@@ -4,12 +4,16 @@ import { callGemini } from '@/services/tutor/geminiClient';
 import {
   buildSystemInstruction,
   buildHintPrompt,
+  buildTeachPrompt,
+  buildBoostPrompt,
 } from '@/services/tutor/promptTemplates';
 import { checkRateLimit, getRateLimitMessage } from '@/services/tutor/rateLimiter';
 import { scrubOutboundPii, runSafetyPipeline } from '@/services/tutor/safetyFilter';
 import { getCannedFallback } from '@/services/tutor/safetyConstants';
-import type { AgeBracket, TutorMessage } from '@/services/tutor/types';
+import { computeEscalation } from '@/services/tutor/escalationEngine';
+import type { AgeBracket, TutorMessage, TutorMode } from '@/services/tutor/types';
 import type { SessionProblem } from '@/services/session/sessionTypes';
+import type { CpaStage, ManipulativeType } from '@/services/cpa/cpaTypes';
 
 /**
  * Derives the age bracket from child age for prompt templates.
@@ -25,15 +29,20 @@ export interface UseTutorReturn {
   messages: TutorMessage[];
   loading: boolean;
   error: string | null;
-  tutorMode: string;
+  tutorMode: TutorMode;
   hintLevel: number;
+  shouldExpandManipulative: boolean;
+  manipulativeType: ManipulativeType | null;
+  requestTutor: () => Promise<void>;
   requestHint: () => Promise<void>;
   resetForProblem: () => void;
 }
 
 /**
- * Composes Gemini client, prompt templates, rate limiter, and tutorSlice
- * into a single React hook for the Chat UI to consume.
+ * Multi-mode tutor orchestrator hook.
+ *
+ * Routes to the correct prompt builder (hint/teach/boost), runs escalation
+ * checks after each delivery, and exposes ManipulativePanel coordination signals.
  *
  * Accepts the current problem as a parameter (from useSession).
  * Reads childAge from the store (READ ONLY -- never writes session/skill state).
@@ -41,6 +50,8 @@ export interface UseTutorReturn {
  */
 export function useTutor(
   currentProblem: SessionProblem | null,
+  cpaInfo?: { stage: CpaStage; manipulativeType: ManipulativeType | null },
+  lastWrongContext?: { wrongAnswer: number; bugDescription: string | null } | null,
 ): UseTutorReturn {
   // AbortController ref for in-flight request tracking
   const abortRef = useRef<AbortController | null>(null);
@@ -67,9 +78,17 @@ export function useTutor(
   const incrementCallCount = useAppStore((s) => s.incrementCallCount);
   const resetProblemTutor = useAppStore((s) => s.resetProblemTutor);
   const incrementHintLevel = useAppStore((s) => s.incrementHintLevel);
+  const setTutorMode = useAppStore((s) => s.setTutorMode);
 
   // Derive age bracket for prompts
   const ageBracket = deriveAgeBracket(childAge);
+
+  // Derive CPA values with backward-compatible defaults
+  const cpaStage = cpaInfo?.stage ?? 'concrete';
+  const manipulativeType = cpaInfo?.manipulativeType ?? null;
+
+  // Compute shouldExpandManipulative: true only in teach mode with a manipulative
+  const shouldExpandManipulative = tutorMode === 'teach' && manipulativeType !== null;
 
   // Defense-in-depth: abort on unmount
   useEffect(() => {
@@ -78,7 +97,7 @@ export function useTutor(
     };
   }, []);
 
-  const requestHint = useCallback(async () => {
+  const requestTutor = useCallback(async () => {
     // Guard: consent required before AI tutor access
     if (!tutorConsentGranted) {
       setTutorError('consent_required');
@@ -123,23 +142,45 @@ export function useTutor(
     setTutorLoading(true);
     setTutorError(null);
 
-    // Build prompts
+    // Read current mode from store (may differ from subscribed value)
+    const currentMode = useAppStore.getState().tutorMode;
+
+    // Build prompt params (shared across all modes)
     const promptParams = {
       ageBracket,
-      cpaStage: 'concrete' as const, // Default; will be enhanced when CPA hook is wired
+      cpaStage,
       problemText: currentProblem.problem.questionText,
       operation: currentProblem.problem.operation,
-      tutorMode: useAppStore.getState().tutorMode,
+      tutorMode: currentMode,
       hintLevel: useAppStore.getState().hintLevel,
+      wrongAnswer: lastWrongContext?.wrongAnswer,
+      bugDescription: lastWrongContext?.bugDescription ?? undefined,
     };
 
+    // Select prompt builder based on tutorMode
+    let userPrompt: string;
+    switch (currentMode) {
+      case 'teach':
+        userPrompt = buildTeachPrompt(promptParams);
+        break;
+      case 'boost':
+        userPrompt = buildBoostPrompt({
+          ...promptParams,
+          correctAnswer: currentProblem.problem.correctAnswer,
+        });
+        break;
+      case 'hint':
+      default:
+        userPrompt = buildHintPrompt(promptParams);
+        break;
+    }
+
     const systemInstruction = buildSystemInstruction(promptParams);
-    const hintPrompt = buildHintPrompt(promptParams);
 
     // Defense-in-depth: scrub PII from outbound prompts
     const scrubbed = scrubOutboundPii(
       systemInstruction,
-      hintPrompt,
+      userPrompt,
       childName,
       childAge,
     );
@@ -165,10 +206,12 @@ export function useTutor(
       }
 
       // Run deterministic safety pipeline (answer-leak + content validation)
+      // Pass mode so BOOST bypasses answer-leak check
       const safetyResult = runSafetyPipeline(
         responseText,
         currentProblem.problem.correctAnswer,
         ageBracket,
+        currentMode,
       );
 
       if (!safetyResult.passed) {
@@ -192,7 +235,32 @@ export function useTutor(
           timestamp: Date.now(),
         });
         incrementCallCount();
-        incrementHintLevel();
+
+        // Increment hint level for hint/teach modes only (BOOST skips it)
+        if (currentMode !== 'boost') {
+          incrementHintLevel();
+        }
+
+        // Run escalation check after successful delivery
+        const escalation = computeEscalation({
+          currentMode: useAppStore.getState().tutorMode,
+          hintCount: useAppStore.getState().hintLevel,
+          wrongAnswerCount: useAppStore.getState().wrongAnswerCount,
+        });
+
+        if (escalation.shouldTransition) {
+          // Abort in-flight request if escalation triggers mode change
+          // (current request already completed, but prevent stale follow-ups)
+          setTutorMode(escalation.nextMode);
+          if (escalation.transitionMessage) {
+            addTutorMessage({
+              id: `tutor-transition-${Date.now()}`,
+              role: 'tutor',
+              text: escalation.transitionMessage,
+              timestamp: Date.now(),
+            });
+          }
+        }
       }
     } catch (err) {
       // Silently ignore abort errors
@@ -242,6 +310,8 @@ export function useTutor(
   }, [
     currentProblem,
     ageBracket,
+    cpaStage,
+    lastWrongContext,
     tutorConsentGranted,
     childName,
     childAge,
@@ -250,6 +320,7 @@ export function useTutor(
     setTutorError,
     incrementCallCount,
     incrementHintLevel,
+    setTutorMode,
   ]);
 
   const resetForProblem = useCallback(() => {
@@ -263,7 +334,10 @@ export function useTutor(
     error,
     tutorMode,
     hintLevel,
-    requestHint,
+    shouldExpandManipulative,
+    manipulativeType,
+    requestTutor,
+    requestHint: requestTutor,
     resetForProblem,
   };
 }
