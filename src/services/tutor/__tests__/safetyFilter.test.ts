@@ -385,4 +385,49 @@ describe('runSafetyPipeline', () => {
       expect(result.fallbackCategory).toBe('answer_leaked');
     }
   });
+
+  describe('BOOST mode bypass', () => {
+    it('skips answer-leak check in boost mode (answer in response passes)', () => {
+      const result = runSafetyPipeline('The answer is 7!', 7, '6-7', 'boost');
+      expect(result).toEqual({ passed: true, text: 'The answer is 7!' });
+    });
+
+    it('still runs content validation in boost mode', () => {
+      // 5 sentences exceeds MAX_SENTENCES of 4
+      const result = runSafetyPipeline(
+        'One. Two. Three. Four. Five.',
+        99,
+        '6-7',
+        'boost',
+      );
+      expect(result.passed).toBe(false);
+      if (!result.passed) {
+        expect(result.fallbackCategory).toBe('content_invalid');
+      }
+    });
+
+    it('runs full pipeline for hint mode (backward compatible)', () => {
+      const result = runSafetyPipeline('The answer is 7!', 7, '6-7', 'hint');
+      expect(result.passed).toBe(false);
+      if (!result.passed) {
+        expect(result.fallbackCategory).toBe('answer_leaked');
+      }
+    });
+
+    it('runs full pipeline for teach mode', () => {
+      const result = runSafetyPipeline('The answer is 7!', 7, '6-7', 'teach');
+      expect(result.passed).toBe(false);
+      if (!result.passed) {
+        expect(result.fallbackCategory).toBe('answer_leaked');
+      }
+    });
+
+    it('runs full pipeline when mode is undefined (backward compatible)', () => {
+      const result = runSafetyPipeline('The answer is 7!', 7, '6-7');
+      expect(result.passed).toBe(false);
+      if (!result.passed) {
+        expect(result.fallbackCategory).toBe('answer_leaked');
+      }
+    });
+  });
 });

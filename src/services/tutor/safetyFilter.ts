@@ -6,7 +6,7 @@
  * scrubOutboundPii runs on OUTBOUND prompts (before callGemini).
  */
 
-import type { AgeBracket } from './types';
+import type { AgeBracket, TutorMode } from './types';
 import type {
   SafetyCheckResult,
   ContentValidationResult,
@@ -177,6 +177,9 @@ export function scrubOutboundPii(
  * Orchestrates the full safety pipeline on an LLM response.
  * Runs checkAnswerLeak first, then validateContent.
  *
+ * When mode is 'boost', skips answer-leak check (BOOST is allowed to reveal answers)
+ * but still runs content validation.
+ *
  * Returns { passed: true, text } if all checks pass,
  * or { passed: false, fallbackCategory, reason } on failure.
  */
@@ -184,18 +187,21 @@ export function runSafetyPipeline(
   response: string,
   correctAnswer: number,
   ageBracket: AgeBracket,
+  mode?: TutorMode,
 ): SafetyPipelineResult {
-  // Step 1: Answer leak detection
-  const answerCheck = checkAnswerLeak(response, correctAnswer);
-  if (!answerCheck.safe) {
-    return {
-      passed: false,
-      fallbackCategory: 'answer_leaked',
-      reason: answerCheck.reason!,
-    };
+  // Step 1: Answer leak detection (skipped in BOOST mode)
+  if (mode !== 'boost') {
+    const answerCheck = checkAnswerLeak(response, correctAnswer);
+    if (!answerCheck.safe) {
+      return {
+        passed: false,
+        fallbackCategory: 'answer_leaked',
+        reason: answerCheck.reason!,
+      };
+    }
   }
 
-  // Step 2: Content validation
+  // Step 2: Content validation (always runs, even in BOOST mode)
   const contentCheck = validateContent(response, ageBracket);
   if (!contentCheck.valid) {
     return {

@@ -17,9 +17,11 @@ export interface TutorSlice {
   incrementHintLevel: () => void;
   setTutorLoading: (loading: boolean) => void;
   setTutorError: (error: string | null) => void;
+  wrongAnswerCount: number;
   resetProblemTutor: () => void;
   resetSessionTutor: () => void;
   incrementCallCount: () => void;
+  incrementWrongAnswerCount: () => void;
 }
 
 function getTodayDate(): string {
@@ -40,6 +42,7 @@ export const createTutorSlice: StateCreator<
   problemCallCount: 0,
   sessionCallCount: 0,
   dailyCallCount: 0,
+  wrongAnswerCount: 0,
   dailyCountDate: getTodayDate(),
   addTutorMessage: (message) =>
     set((state) => ({
@@ -57,6 +60,7 @@ export const createTutorSlice: StateCreator<
       hintLevel: 0,
       tutorError: null,
       problemCallCount: 0,
+      wrongAnswerCount: 0,
     }),
   resetSessionTutor: () =>
     set({
@@ -65,8 +69,11 @@ export const createTutorSlice: StateCreator<
       hintLevel: 0,
       tutorError: null,
       problemCallCount: 0,
+      wrongAnswerCount: 0,
       sessionCallCount: 0,
     }),
+  incrementWrongAnswerCount: () =>
+    set((state) => ({ wrongAnswerCount: state.wrongAnswerCount + 1 })),
   incrementCallCount: () =>
     set((state) => {
       const today = getTodayDate();

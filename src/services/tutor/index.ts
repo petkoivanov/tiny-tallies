@@ -3,6 +3,7 @@ export type {
   AgeBracket,
   TutorMessage,
   PromptParams,
+  BoostPromptParams,
   GeminiResponse,
 } from './types';
 export { geminiResponseSchema } from './types';
@@ -14,7 +15,13 @@ export {
 } from './geminiClient';
 export type { CallGeminiOptions } from './geminiClient';
 
-export { buildSystemInstruction, buildHintPrompt } from './promptTemplates';
+export {
+  buildSystemInstruction,
+  buildHintPrompt,
+  buildTeachPrompt,
+  buildBoostPrompt,
+  WORD_LIMITS,
+} from './promptTemplates';
 
 export {
   RATE_LIMITS,
@@ -45,3 +52,13 @@ export {
   scrubOutboundPii,
   runSafetyPipeline,
 } from './safetyFilter';
+
+export {
+  computeEscalation,
+} from './escalationEngine';
+export type {
+  EscalationInput,
+  EscalationResult,
+} from './escalationEngine';
+
+export { getBugDescription } from './bugLookup';

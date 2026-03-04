@@ -26,6 +26,15 @@ export interface PromptParams {
 }
 
 /**
+ * Extended parameters for BOOST mode prompts.
+ * ONLY type that includes correctAnswer -- type system enforces
+ * that HINT/TEACH never see it.
+ */
+export interface BoostPromptParams extends PromptParams {
+  correctAnswer: number;
+}
+
+/**
  * Zod schema for validating Gemini API responses.
  * Enforces non-empty text with a 1000-char ceiling.
  */

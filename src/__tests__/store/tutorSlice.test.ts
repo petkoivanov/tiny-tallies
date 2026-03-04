@@ -268,4 +268,43 @@ describe('tutorSlice', () => {
       expect(store.getState().sessionCallCount).toBe(4);
     });
   });
+
+  describe('wrongAnswerCount', () => {
+    it('starts at 0', () => {
+      const store = createTestStore();
+      expect(store.getState().wrongAnswerCount).toBe(0);
+    });
+
+    it('increments by 1 via incrementWrongAnswerCount', () => {
+      const store = createTestStore();
+      store.getState().incrementWrongAnswerCount();
+      expect(store.getState().wrongAnswerCount).toBe(1);
+
+      store.getState().incrementWrongAnswerCount();
+      expect(store.getState().wrongAnswerCount).toBe(2);
+
+      store.getState().incrementWrongAnswerCount();
+      expect(store.getState().wrongAnswerCount).toBe(3);
+    });
+
+    it('resets to 0 when resetProblemTutor is called', () => {
+      const store = createTestStore();
+      store.getState().incrementWrongAnswerCount();
+      store.getState().incrementWrongAnswerCount();
+      expect(store.getState().wrongAnswerCount).toBe(2);
+
+      store.getState().resetProblemTutor();
+      expect(store.getState().wrongAnswerCount).toBe(0);
+    });
+
+    it('resets to 0 when resetSessionTutor is called', () => {
+      const store = createTestStore();
+      store.getState().incrementWrongAnswerCount();
+      store.getState().incrementWrongAnswerCount();
+      expect(store.getState().wrongAnswerCount).toBe(2);
+
+      store.getState().resetSessionTutor();
+      expect(store.getState().wrongAnswerCount).toBe(0);
+    });
+  });
 });
