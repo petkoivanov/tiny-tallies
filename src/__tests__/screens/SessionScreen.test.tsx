@@ -131,11 +131,13 @@ jest.mock('@/hooks/useNetworkStatus', () => ({
 // Mock appStore
 const mockAddTutorMessage = jest.fn();
 const mockIncrementWrongAnswerCount = jest.fn();
+let mockTutorConsentGranted = true;
 jest.mock('@/store/appStore', () => ({
   useAppStore: (selector: any) => {
     const state = {
       addTutorMessage: mockAddTutorMessage,
       incrementWrongAnswerCount: mockIncrementWrongAnswerCount,
+      tutorConsentGranted: mockTutorConsentGranted,
     };
     return selector(state);
   },
@@ -238,6 +240,12 @@ jest.mock('@/components/chat', () => {
           >
             <Text>Tell me more</Text>
           </Pressable>
+          <Pressable
+            onPress={() => onResponse('retry')}
+            testID="response-retry"
+          >
+            <Text>Retry</Text>
+          </Pressable>
           {responseMode === 'gotit' && (
             <Pressable
               onPress={() => onResponse('gotit')}
@@ -326,6 +334,7 @@ describe('SessionScreen', () => {
     };
     mockPreventRemoveCallback = null;
     mockIsOnline = true;
+    mockTutorConsentGranted = true;
   });
 
   it('renders problem text and 4 answer options', () => {
@@ -923,5 +932,123 @@ describe('SessionScreen', () => {
 
     // Check responseMode is 'standard'
     expect(getByTestId('chat-response-mode').props.children).toBe('standard');
+  });
+
+  // ---- Consent Gate Tests ----
+
+  describe('consent gate', () => {
+    it('shows consent message when Help tapped without consent', () => {
+      mockTutorConsentGranted = false;
+      mockUseSessionReturn = {
+        ...defaultUseSessionReturn,
+        sessionPhase: 'practice',
+      };
+
+      const { getByTestId } = render(<SessionScreen />);
+      fireEvent.press(getByTestId('help-button'));
+
+      // Should add a consent message to chat
+      expect(mockAddTutorMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          role: 'tutor',
+          text: expect.stringContaining('grown-up'),
+        }),
+      );
+
+      // Should navigate to Consent screen
+      expect(mockNavigate).toHaveBeenCalledWith('Consent');
+
+      // Should NOT call requestHint (consent not granted)
+      expect(mockRequestHint).not.toHaveBeenCalled();
+    });
+
+    it('does not show consent message when consent is granted', () => {
+      mockTutorConsentGranted = true;
+      mockUseSessionReturn = {
+        ...defaultUseSessionReturn,
+        sessionPhase: 'practice',
+      };
+
+      const { getByTestId } = render(<SessionScreen />);
+      fireEvent.press(getByTestId('help-button'));
+
+      // Should NOT add a consent message
+      expect(mockAddTutorMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('grown-up'),
+        }),
+      );
+
+      // Should NOT navigate to Consent
+      expect(mockNavigate).not.toHaveBeenCalledWith('Consent');
+
+      // Should call requestHint (consent granted, online)
+      expect(mockRequestHint).toHaveBeenCalled();
+    });
+
+    it('auto-fires tutor request after consent granted on return', () => {
+      mockTutorConsentGranted = false;
+      mockUseSessionReturn = {
+        ...defaultUseSessionReturn,
+        sessionPhase: 'practice',
+      };
+
+      const { getByTestId, rerender } = render(<SessionScreen />);
+
+      // Tap help -- triggers consent flow, sets consentPendingRef
+      fireEvent.press(getByTestId('help-button'));
+      mockRequestHint.mockClear();
+
+      // Simulate returning from ConsentScreen with consent now granted
+      mockTutorConsentGranted = true;
+      rerender(<SessionScreen />);
+
+      // Should auto-fire requestHint now that consent is granted
+      expect(mockRequestHint).toHaveBeenCalled();
+    });
+  });
+
+  // ---- Retry Offline Guard Tests ----
+
+  describe('retry offline guard', () => {
+    it('retry does not call requestTutor when offline', () => {
+      mockIsOnline = false;
+      mockUseSessionReturn = {
+        ...defaultUseSessionReturn,
+        sessionPhase: 'practice',
+      };
+
+      const { getByTestId } = render(<SessionScreen />);
+
+      // Open chat first
+      fireEvent.press(getByTestId('help-button'));
+      mockRequestTutor.mockClear();
+
+      // Press retry
+      fireEvent.press(getByTestId('response-retry'));
+
+      // Should NOT call requestTutor when offline
+      expect(mockRequestTutor).not.toHaveBeenCalled();
+    });
+
+    it('retry calls requestTutor when online', () => {
+      mockIsOnline = true;
+      mockUseSessionReturn = {
+        ...defaultUseSessionReturn,
+        sessionPhase: 'practice',
+      };
+
+      const { getByTestId } = render(<SessionScreen />);
+
+      // Open chat first
+      fireEvent.press(getByTestId('help-button'));
+      mockRequestTutor.mockClear();
+
+      // Press retry
+      fireEvent.press(getByTestId('response-retry'));
+
+      // Should call requestTutor when online
+      expect(mockRequestTutor).toHaveBeenCalled();
+    });
   });
 });
