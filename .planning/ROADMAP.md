@@ -172,5 +172,5 @@ Plans:
 | 26. Misconception Store & Recording | 2/2 | Complete    | 2026-03-04 | - |
 | 27. Confirmation Engine | 1/1 | Complete    | 2026-03-04 | - |
 | 28. Session Mix Adaptation | 1/1 | Complete    | 2026-03-04 | - |
-| 29. AI Tutor Misconception Context | 1/1 | Complete   | 2026-03-04 | - |
+| 29. AI Tutor Misconception Context | 1/1 | Complete    | 2026-03-04 | - |
 | 30. Remediation Mini-Sessions | v0.6 | 0/0 | Not started | - |
