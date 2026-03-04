@@ -143,12 +143,13 @@ Plans:
   2. User can undo the last action on a manipulative (up to 10 steps)
   3. User can switch counters to array grid mode for multiplication concepts
   4. Ten frame auto-spawns a second frame when working on add-within-20 problems
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
 - [x] 20-01-PLAN.md — Shared infrastructure: useActionHistory hook, GuidedHighlight component, guided steps service, and ManipulativeShell extension
 - [x] 20-02-PLAN.md — Undo wiring across all 6 manipulatives and guided mode session integration
 - [x] 20-03-PLAN.md — Counter array grid mode and TenFrame double-frame pre-spawning
+- [ ] 20-04-PLAN.md — Gap closure: fix BarModel and BaseTenBlocks guided highlight wiring
 
 ## Progress
 
@@ -177,4 +178,4 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 17. Manipulative Components | v0.4 | 4/4 | Complete | 2026-03-03 |
 | 18. CPA Progression and Session Integration | v0.4 | 3/3 | Complete | 2026-03-03 |
 | 19. Sandbox Navigation | v0.4 | 2/2 | Complete | 2026-03-03 |
-| 20. Polish | v0.4 | 3/3 | Complete | 2026-03-03 |
+| 20. Polish | v0.4 | 3/4 | Gap closure | 2026-03-03 |
