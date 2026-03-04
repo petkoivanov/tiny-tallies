@@ -4,7 +4,11 @@
  * content validation limits, and canned fallback responses.
  */
 
-import type { SafetySetting } from '@google/genai';
+import type {
+  HarmCategory,
+  HarmBlockThreshold,
+  SafetySetting,
+} from '@google/genai';
 import type { AgeBracket } from './types';
 import type { FallbackCategory } from './safetyTypes';
 
@@ -12,23 +16,26 @@ import type { FallbackCategory } from './safetyTypes';
  * Safety settings for Gemini API calls.
  * BLOCK_LOW_AND_ABOVE is the most restrictive threshold.
  * Gemini 2.5 defaults to OFF, so explicit configuration is MANDATORY.
+ *
+ * Uses string literals cast to enum types because @google/genai enum
+ * values are string-backed and the module is ESM (not Jest-transformable).
  */
 export const GEMINI_SAFETY_SETTINGS: SafetySetting[] = [
   {
-    category: 'HARM_CATEGORY_HARASSMENT',
-    threshold: 'BLOCK_LOW_AND_ABOVE',
+    category: 'HARM_CATEGORY_HARASSMENT' as HarmCategory,
+    threshold: 'BLOCK_LOW_AND_ABOVE' as HarmBlockThreshold,
   },
   {
-    category: 'HARM_CATEGORY_HATE_SPEECH',
-    threshold: 'BLOCK_LOW_AND_ABOVE',
+    category: 'HARM_CATEGORY_HATE_SPEECH' as HarmCategory,
+    threshold: 'BLOCK_LOW_AND_ABOVE' as HarmBlockThreshold,
   },
   {
-    category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-    threshold: 'BLOCK_LOW_AND_ABOVE',
+    category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT' as HarmCategory,
+    threshold: 'BLOCK_LOW_AND_ABOVE' as HarmBlockThreshold,
   },
   {
-    category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-    threshold: 'BLOCK_LOW_AND_ABOVE',
+    category: 'HARM_CATEGORY_DANGEROUS_CONTENT' as HarmCategory,
+    threshold: 'BLOCK_LOW_AND_ABOVE' as HarmBlockThreshold,
   },
 ];
 
