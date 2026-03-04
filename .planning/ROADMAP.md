@@ -120,7 +120,11 @@ Plans:
   3. After continued struggle, tutor auto-escalates to BOOST mode which provides deep scaffolding and programmatic answer reveal after 3+ wrong attempts
   4. Auto-escalation state machine transitions HINT -> TEACH -> BOOST based on hint count and wrong-answer count, resetting per-problem
   5. Bug Library misconception tags from the child's wrong answer inform tutor explanations, addressing the specific misunderstanding rather than giving generic feedback
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 24-01-PLAN.md — Escalation engine, bug lookup, TEACH/BOOST prompt templates, tutorSlice additions, safety pipeline BOOST bypass
+- [ ] 24-02-PLAN.md — useTutor mode-aware routing, CPA integration, and escalation wiring
+- [ ] 24-03-PLAN.md — ChatBanner, ResponseButtons gotit mode, SessionScreen full orchestration with ManipulativePanel auto-expand and answer highlight
 
 ## Progress
 
@@ -151,5 +155,5 @@ Phases execute in numeric order: 21 -> 22 -> 23 -> 24
 | 20. Polish | v0.4 | 4/4 | Complete | 2026-03-04 |
 | 21. LLM Service & Store | v0.5 | 3/3 | Complete | 2026-03-04 |
 | 22. Safety & Compliance | v0.5 | 3/3 | Complete | 2026-03-04 |
-| 23. Chat UI & HINT Mode | 2/2 | Complete    | 2026-03-04 | - |
-| 24. TEACH, BOOST & Auto-Escalation | v0.5 | 0/? | Not started | - |
+| 23. Chat UI & HINT Mode | v0.5 | 2/2 | Complete | 2026-03-04 |
+| 24. TEACH, BOOST & Auto-Escalation | v0.5 | 0/3 | Not started | - |
