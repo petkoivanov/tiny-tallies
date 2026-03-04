@@ -64,7 +64,7 @@ export interface SessionFeedback {
 }
 
 /** Category tag for practice problems in the 60/30/10 mix */
-export type PracticeProblemCategory = 'review' | 'new' | 'challenge';
+export type PracticeProblemCategory = 'review' | 'new' | 'challenge' | 'remediation';
 
 /** Slot allocation for the practice portion of a session */
 export interface PracticeSlotCounts {

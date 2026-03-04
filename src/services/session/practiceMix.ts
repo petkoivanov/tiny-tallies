@@ -68,6 +68,9 @@ const BKT_WEIGHT_FLOOR = 0.05;
 /** Default P(L) for unpracticed skills */
 const DEFAULT_PL = 0.1;
 
+/** Maximum remediation slots per session (one per unique confirmed misconception skill) */
+const MAX_REMEDIATION_SLOTS = 3;
+
 // ---------------------------------------------------------------------------
 // 1. Slot calculation
 // ---------------------------------------------------------------------------
@@ -263,7 +266,54 @@ function weightedSelect<T extends PoolItem>(
 }
 
 // ---------------------------------------------------------------------------
-// 6. Generate practice mix
+// 6. Remediation skill selection
+// ---------------------------------------------------------------------------
+
+/**
+ * Selects which confirmed-misconception skill IDs to include as remediation slots.
+ *
+ * When the number of confirmed skills is within maxSlots, returns all of them.
+ * When it exceeds maxSlots, uses inverse-BKT weighting to prioritize the
+ * lowest-mastery (weakest) misconception skills -- consistent with review pool
+ * prioritization.
+ *
+ * @param confirmedSkillIds - Skill IDs with confirmed misconceptions
+ * @param skillStates - Map of skillId -> SkillState for BKT mastery lookup
+ * @param rng - Seeded random number generator
+ * @param maxSlots - Maximum number of remediation slots to fill
+ * @returns Array of selected skill IDs (length <= maxSlots)
+ */
+function selectRemediationSkillIds(
+  confirmedSkillIds: readonly string[],
+  skillStates: Record<string, SkillState>,
+  rng: SeededRng,
+  maxSlots: number,
+): string[] {
+  if (confirmedSkillIds.length === 0) return [];
+  if (confirmedSkillIds.length <= maxSlots) return [...confirmedSkillIds];
+
+  // Build pool items with BKT mastery for weighted selection
+  const pool = confirmedSkillIds.map((skillId) => ({
+    skillId,
+    masteryPL: getOrCreateSkillState(skillStates, skillId).masteryProbability,
+  }));
+
+  const selected: string[] = [];
+  const usedIds = new Set<string>();
+
+  for (let i = 0; i < maxSlots; i++) {
+    const item = selectFromPool(pool, rng, usedIds);
+    if (item) {
+      selected.push(item.skillId);
+      usedIds.add(item.skillId);
+    }
+  }
+
+  return selected;
+}
+
+// ---------------------------------------------------------------------------
+// 7. Generate practice mix
 // ---------------------------------------------------------------------------
 
 /**
@@ -282,6 +332,7 @@ function weightedSelect<T extends PoolItem>(
  * @param rng - Seeded random number generator
  * @param practiceCount - Number of practice problems (default 9)
  * @param now - Current timestamp for review status calculation
+ * @param confirmedMisconceptionSkillIds - Skill IDs with confirmed misconceptions for remediation
  * @returns Array of practice mix items (skillId + category)
  */
 export function generatePracticeMix(
@@ -290,6 +341,7 @@ export function generatePracticeMix(
   rng: SeededRng,
   practiceCount: number = 9,
   now?: Date,
+  confirmedMisconceptionSkillIds: readonly string[] = [],
 ): PracticeMixItem[] {
   const slots = computeSlotCounts(practiceCount);
   const reviewPool = buildReviewPool(skillStates, now);
@@ -313,9 +365,23 @@ export function generatePracticeMix(
     return false;
   }
 
-  // Fill review slots
+  // Inject remediation slots (replace review slots, up to MAX_REMEDIATION_SLOTS)
+  const selectedRemediationIds = selectRemediationSkillIds(
+    confirmedMisconceptionSkillIds,
+    skillStates,
+    rng,
+    MAX_REMEDIATION_SLOTS,
+  );
+  const remediationCount = Math.min(selectedRemediationIds.length, slots.review);
+  for (const skillId of selectedRemediationIds.slice(0, remediationCount)) {
+    result.push({ skillId, category: 'remediation' });
+    usedSkillIds.add(skillId);
+  }
+  const adjustedReviewCount = slots.review - remediationCount;
+
+  // Fill review slots (reduced by remediation)
   let unfilledReview = 0;
-  for (let i = 0; i < slots.review; i++) {
+  for (let i = 0; i < adjustedReviewCount; i++) {
     if (!selectAndTrack(reviewPool, 'review')) {
       unfilledReview++;
     }
@@ -388,7 +454,7 @@ export function generatePracticeMix(
 }
 
 // ---------------------------------------------------------------------------
-// 7. Constrained shuffle
+// 8. Constrained shuffle
 // ---------------------------------------------------------------------------
 
 /**
@@ -416,13 +482,15 @@ export function constrainedShuffle(
   // Make a mutable copy
   const arr = [...items];
 
-  // Step 1: Ensure a review item is first
-  const reviewIdx = arr.findIndex((item) => item.category === 'review');
-  if (reviewIdx > 0) {
-    // Swap the found review item to position 0
-    [arr[0], arr[reviewIdx]] = [arr[reviewIdx], arr[0]];
+  // Step 1: Ensure a review or remediation item is first (warm start)
+  const warmStartIdx = arr.findIndex(
+    (item) => item.category === 'review' || item.category === 'remediation',
+  );
+  if (warmStartIdx > 0) {
+    // Swap the found warm-start item to position 0
+    [arr[0], arr[warmStartIdx]] = [arr[warmStartIdx], arr[0]];
   }
-  // If no review items exist, just leave the first item as-is (best-effort)
+  // If no review/remediation items exist, just leave the first item as-is (best-effort)
 
   // Step 2: Fisher-Yates shuffle on remaining items (index 1+)
   for (let i = arr.length - 1; i > 1; i--) {
