@@ -43,9 +43,9 @@ Requirements for AI Tutor milestone. Each maps to roadmap phases.
 
 ### Store & State
 
-- [ ] **STATE-01**: Ephemeral tutorSlice in Zustand (not persisted, no migration needed)
-- [ ] **STATE-02**: Chat messages, tutor mode, hint level, loading/error state in tutorSlice
-- [ ] **STATE-03**: Tutor reads from skill/session state but never writes to it
+- [x] **STATE-01**: Ephemeral tutorSlice in Zustand (not persisted, no migration needed)
+- [x] **STATE-02**: Chat messages, tutor mode, hint level, loading/error state in tutorSlice
+- [x] **STATE-03**: Tutor reads from skill/session state but never writes to it
 
 ## Future Requirements
 
@@ -106,9 +106,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAFE-04 | Phase 22 | Pending |
 | SAFE-05 | Phase 22 | Pending |
 | SAFE-06 | Phase 22 | Pending |
-| STATE-01 | Phase 21 | Pending |
-| STATE-02 | Phase 21 | Pending |
-| STATE-03 | Phase 21 | Pending |
+| STATE-01 | Phase 21 | Complete |
+| STATE-02 | Phase 21 | Complete |
+| STATE-03 | Phase 21 | Complete |
 
 **Coverage:**
 - v0.5 requirements: 25 total
