@@ -2,7 +2,7 @@
 
 ## What This Is
 
-An AI-powered math learning mobile app for children ages 6-9 (grades 1-3). Features adaptive daily practice sessions with programmatic problem generation, misconception-based distractors via Bug Library pattern, Elo-based adaptive difficulty, gamification (XP/levels/streaks), polished UI with animated feedback, and a full adaptive learning engine — Bayesian Knowledge Tracing for mastery estimation, Leitner spaced repetition for optimal review scheduling, prerequisite skill graph with outer fringe for new skill discovery, and smart 60/30/10 session orchestration. Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
+An AI-powered math learning mobile app for children ages 6-9 (grades 1-3). Features adaptive daily practice sessions with programmatic problem generation, misconception-based distractors via Bug Library pattern, Elo-based adaptive difficulty, gamification (XP/levels/streaks), polished UI with animated feedback, a full adaptive learning engine (BKT, Leitner spaced repetition, prerequisite graph, smart session orchestration), and six interactive virtual manipulatives with CPA progression (Concrete → Pictorial → Abstract) — making abstract math concepts tangible through direct drag-and-drop manipulation at 60fps. Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
 
 ## Core Value
 
@@ -28,17 +28,19 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - ✓ Prerequisite skill graph (DAG) with outer fringe algorithm — v0.3
 - ✓ Smart session mix: 60% review / 30% new / 10% challenge — v0.3
 - ✓ BKT-driven mastery thresholds (≥0.95 mastered, <0.40 needs re-teaching) — v0.3
+- ✓ All 6 virtual manipulatives with drag-and-drop, snap-to-zone, haptic feedback — v0.4
+- ✓ CPA progression system (Concrete → Pictorial → Abstract) driven by BKT mastery — v0.4
+- ✓ Session-embedded manipulative panel with auto-expand in concrete mode — v0.4
+- ✓ Per-manipulative sandbox screens for free exploration — v0.4
+- ✓ Guided mode highlighting, undo support, counter grid mode, double ten frame — v0.4
 
 ### Active
 
-**Current Milestone: v0.4 Virtual Manipulatives**
+**Next Milestone: v0.5 (not yet defined)**
 
-- [ ] All 6 virtual manipulatives: base-ten blocks, number lines, ten frames, counters, fraction strips, bar models
-- [ ] CPA progression system (Concrete → Pictorial → Abstract) driven by BKT mastery levels
-- [ ] Fully interactive manipulation: drag-and-drop, snap-to-grid, split/combine with gesture-handler + reanimated
-- [ ] Session-embedded manipulatives as visual aids during problem solving
-- [ ] Per-manipulative standalone sandbox screens for free exploration
-- [ ] Manipulative-to-skill mapping (which manipulative suits which math concepts)
+- [ ] AI tutor integration (Gemini, three-mode TEACH/HINT/BOOST)
+- [ ] Misconception detection with Bug Library interventions
+- [ ] Extended gamification (coins, shop, badges)
 
 ### Out of Scope
 
@@ -53,16 +55,21 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ## Context
 
-**Current state:** Shipped v0.3 Adaptive Learning Engine with 11,866 LOC TypeScript. 557 tests passing. Full adaptive learning pipeline operational — BKT mastery estimation, Leitner spaced repetition, prerequisite skill graph with outer fringe, and smart 60/30/10 session orchestration.
+**Current state:** Shipped v0.4 Virtual Manipulatives with ~21,900 LOC TypeScript. 742+ tests passing. Full adaptive learning pipeline + 6 interactive virtual manipulatives with CPA progression, session integration, sandbox exploration, guided mode, and undo support.
 
-**Architecture (implemented through v0.3):**
+**Architecture (implemented through v0.4):**
 - Programmatic math engine: 14 skills across addition/subtraction (Common Core grades 1-3)
 - Bug Library: 11 misconception patterns with three-phase distractor assembly
 - Elo rating system with variable K-factor (K=40 at start, decaying toward K=16)
 - Gaussian-weighted problem selection targeting 85% success rate
 - Frustration guard (3 consecutive wrong → easier problem)
 - Session orchestrator: 15-problem queue (3 warmup + 9 practice + 3 cooldown) with 60/30/10 review/new/challenge mix
-- Zustand persist with versioned migrations (STORE_VERSION=4) and AsyncStorage
+- Zustand persist with versioned migrations (STORE_VERSION=5) and AsyncStorage
+- 6 virtual manipulatives (Counters, TenFrame, NumberLine, BaseTenBlocks, FractionStrips, BarModel) with 60fps drag primitives
+- CPA progression: BKT-driven concrete/pictorial/abstract stage tracking with one-way advancement
+- ManipulativePanel animated drawer for session-embedded concrete mode; PictorialDiagram SVG renderers for pictorial mode
+- Sandbox free-play screens for all 6 manipulatives with explore grid on home screen
+- Guided mode highlighting (GuidedHighlight + guidedSteps service), 10-step undo (useActionHistory), counter grid mode, double ten frame
 - XP/level progression, weekly streaks, animated feedback and confetti celebrations
 - Bayesian Knowledge Tracing with age-adjusted parameters (3 age brackets)
 - Leitner 6-box spaced repetition with age-adjusted intervals and BKT-informed initial placement
@@ -71,9 +78,8 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 **Architecture (planned, future milestones):**
 - Hybrid: Programmatic math engine + LLM (Gemini) for context wrapping only
-- CPA progression (Concrete → Pictorial → Abstract)
 - Three-mode AI tutor: TEACH / HINT (Socratic, never reveals answer) / BOOST
-- Virtual manipulatives (base-ten blocks, number lines, ten frames, fraction strips)
+- Misconception detection system with Bug Library interventions
 
 **Tech stack:**
 - React Native 0.81.5 / Expo 54 / TypeScript 5.9 (strict mode)
@@ -88,8 +94,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tutoring engine design, virtual manipulatives specs, misconception detection patterns, spaced repetition algorithms, gamification design, onboarding/placement testing, child UX design, sound/audio design, math anxiety mitigation, COPPA privacy compliance, problem generation engine.
 
 **Future milestones:**
-- v0.4: Virtual manipulatives (base-ten blocks, number lines, ten frames, fraction strips)
-- v0.5: AI tutor integration (Gemini, three-mode, CPA progression)
+- v0.5: AI tutor integration (Gemini, three-mode TEACH/HINT/BOOST)
 - v0.6: Misconception detection system (Bug Library + interventions)
 - v0.7: Extended gamification (coins, shop, badges, skill map)
 - v0.8: Social & subscription (family groups, parent dashboard, IAP)
@@ -130,9 +135,13 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | No-re-locking policy | Practiced skills stay unlocked even if prereq mastery lost | ✓ Good — avoids frustration |
 | 60/30/10 practice mix | Review/new/challenge with fallback cascade | ✓ Good — structured sessions |
 | Gemini for LLM layer | Already integrated in Tiny Tales; good for context/explanations | — Pending |
-| CPA progression | Research-backed (Singapore Math, NCTM recommended) | — Pending |
+| CPA progression | Research-backed (Singapore Math, NCTM recommended) | ✓ Good — BKT-driven 3-stage with one-way advance |
 | Start Common Core only | Reduce scope; add curricula in later versions | ✓ Good — 14 skills implemented |
 | Ages 6-9 focus | Clearest market gap; manageable content scope | ✓ Good — grade 1-3 content complete |
 
+| 60fps drag primitives on UI thread | Reanimated worklets for snap math, no JS bridge lag | ✓ Good — smooth interaction, all 6 manipulatives |
+| Ephemeral manipulative state | Component-local useState, never persisted to store | ✓ Good — clean sandbox, no store bloat |
+| ManipulativePanel (in-screen, not Modal) | Avoids gesture conflicts with manipulatives inside panel | ✓ Good — collapsible overlay works cleanly |
+
 ---
-*Last updated: 2026-03-03 after v0.4 milestone start*
+*Last updated: 2026-03-04 after v0.4 milestone*

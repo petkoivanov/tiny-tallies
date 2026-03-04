@@ -1,5 +1,25 @@
 # Milestones
 
+## v0.4 Virtual Manipulatives (Shipped: 2026-03-04)
+
+**Phases completed:** 6 phases, 17 plans
+**Timeline:** 1 day (2026-03-03 → 2026-03-04)
+**LOC:** ~21,900 TypeScript | 166 files changed (+22,150 / -298)
+
+**Key accomplishments:**
+- 6 virtual manipulatives (Counters, TenFrame, NumberLine, BaseTenBlocks, FractionStrips, BarModel) with drag-and-drop, snap-to-zone, and haptic feedback
+- 60fps drag primitives: snap math worklets on UI thread via Reanimated, DraggableItem + SnapZone reusable across all manipulatives
+- CPA progression system: BKT-informed concrete/pictorial/abstract stage tracking with one-way advancement and auto-advance on session complete
+- Session integration: auto-expanded manipulative panel in concrete mode, inline pictorial SVG diagrams, CPA stage routing per skill
+- Sandbox exploration: per-manipulative free-play screens accessible from home screen explore grid with first-visit tooltips
+- Polish: 10-step undo across all 6 manipulatives, guided mode highlighting with pulsing glow, counter array grid mode for multiplication, double ten frame for add-within-20
+
+**Tech debt accepted:**
+- Double ManipulativeShell wrapping in CpaSessionContent (cosmetic — outer shell has dead props)
+- Missing guidedSteps subtraction resolvers for base_ten_blocks, number_line, bar_model (graceful degradation)
+
+---
+
 ## v0.3 Adaptive Learning Engine (Shipped: 2026-03-03)
 
 **Phases completed:** 8 phases, 15 plans
