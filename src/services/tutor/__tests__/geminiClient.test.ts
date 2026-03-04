@@ -26,8 +26,11 @@ function setApiKey(key: string | null): void {
   mockGetItemAsync.mockResolvedValue(key);
 }
 
-function setGenerateContentResponse(text: string): void {
-  mockGenerateContent.mockResolvedValue({ text });
+function setGenerateContentResponse(
+  text: string | undefined,
+  overrides?: { candidates?: Array<{ finishReason?: string }> },
+): void {
+  mockGenerateContent.mockResolvedValue({ text, ...overrides });
 }
 
 // --- Tests ---
@@ -97,14 +100,78 @@ describe('callGemini', () => {
     expect(result).toBe('Try counting on your fingers!');
   });
 
-  it('throws on empty response text (Zod validation)', async () => {
+  it('returns null on empty response text (safety block fallback)', async () => {
     setGenerateContentResponse('');
-    await expect(
-      callGemini({
-        systemInstruction: 'Be helpful',
-        userMessage: 'Help me',
-      }),
-    ).rejects.toThrow();
+    const result = await callGemini({
+      systemInstruction: 'Be helpful',
+      userMessage: 'Help me',
+    });
+    expect(result).toBeNull();
+  });
+
+  it('returns null on undefined response text (safety block fallback)', async () => {
+    setGenerateContentResponse(undefined);
+    const result = await callGemini({
+      systemInstruction: 'Be helpful',
+      userMessage: 'Help me',
+    });
+    expect(result).toBeNull();
+  });
+
+  it('returns null when finishReason is SAFETY', async () => {
+    setGenerateContentResponse('blocked content', {
+      candidates: [{ finishReason: 'SAFETY' }],
+    });
+    const result = await callGemini({
+      systemInstruction: 'Be helpful',
+      userMessage: 'Help me',
+    });
+    expect(result).toBeNull();
+  });
+
+  it('returns null when finishReason is RECITATION', async () => {
+    setGenerateContentResponse('recited content', {
+      candidates: [{ finishReason: 'RECITATION' }],
+    });
+    const result = await callGemini({
+      systemInstruction: 'Be helpful',
+      userMessage: 'Help me',
+    });
+    expect(result).toBeNull();
+  });
+
+  it('returns text normally when finishReason is STOP', async () => {
+    setGenerateContentResponse('Good thinking!', {
+      candidates: [{ finishReason: 'STOP' }],
+    });
+    const result = await callGemini({
+      systemInstruction: 'Be helpful',
+      userMessage: 'Help me',
+    });
+    expect(result).toBe('Good thinking!');
+  });
+
+  it('passes safetySettings in config to generateContent', async () => {
+    await callGemini({
+      systemInstruction: 'Be helpful',
+      userMessage: 'What is 3 + 4?',
+    });
+
+    const callArg = mockGenerateContent.mock.calls[0][0];
+    expect(callArg.config.safetySettings).toBeDefined();
+    expect(callArg.config.safetySettings).toHaveLength(4);
+    // Verify all 4 harm categories are present
+    const categories = callArg.config.safetySettings.map(
+      (s: { category: string }) => s.category,
+    );
+    expect(categories).toContain('HARM_CATEGORY_HARASSMENT');
+    expect(categories).toContain('HARM_CATEGORY_HATE_SPEECH');
+    expect(categories).toContain('HARM_CATEGORY_SEXUALLY_EXPLICIT');
+    expect(categories).toContain('HARM_CATEGORY_DANGEROUS_CONTENT');
+    // All set to BLOCK_LOW_AND_ABOVE
+    for (const setting of callArg.config.safetySettings) {
+      expect(setting.threshold).toBe('BLOCK_LOW_AND_ABOVE');
+    }
   });
 
   it('aborts when external abortSignal fires', async () => {

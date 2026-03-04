@@ -43,6 +43,41 @@ describe('buildSystemInstruction', () => {
     );
     expect(result).toContain('pictorial');
   });
+
+  it('includes "NEVER compute math"', () => {
+    const result = buildSystemInstruction(makeParams());
+    expect(result).toContain('NEVER compute math');
+  });
+
+  it('includes "NEVER say the result"', () => {
+    const result = buildSystemInstruction(makeParams());
+    expect(result).toContain('NEVER say the result');
+  });
+
+  it('includes "guiding questions"', () => {
+    const result = buildSystemInstruction(makeParams());
+    expect(result).toContain('guiding questions');
+  });
+
+  it('includes "age-appropriate"', () => {
+    const result = buildSystemInstruction(makeParams());
+    expect(result).toContain('age-appropriate');
+  });
+
+  it('includes "Never use sarcasm"', () => {
+    const result = buildSystemInstruction(makeParams());
+    expect(result).toContain('Never use sarcasm');
+  });
+
+  it('includes "Never discuss topics outside math"', () => {
+    const result = buildSystemInstruction(makeParams());
+    expect(result).toContain('Never discuss topics outside math');
+  });
+
+  it('includes "Praise effort, not talent"', () => {
+    const result = buildSystemInstruction(makeParams());
+    expect(result).toContain('Praise effort, not talent');
+  });
 });
 
 describe('buildHintPrompt', () => {
