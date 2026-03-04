@@ -15,7 +15,7 @@ Requirements for Misconception Detection milestone. Each maps to roadmap phases.
 
 ### Interventions
 
-- [ ] **INTV-01**: Session mix prioritizes skills with confirmed misconceptions (remediation problems injected into practice)
+- [x] **INTV-01**: Session mix prioritizes skills with confirmed misconceptions (remediation problems injected into practice)
 - [ ] **INTV-02**: AI tutor receives confirmed misconception data in prompt context for targeted explanations
 - [ ] **INTV-03**: Dedicated remediation mini-session when confirmed misconceptions accumulate (e.g., 2+ confirmed)
 
@@ -63,7 +63,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MISC-01 | Phase 26 | Complete |
 | MISC-02 | Phase 27 | Complete |
 | MISC-03 | Phase 27 | Complete |
-| INTV-01 | Phase 28 | Pending |
+| INTV-01 | Phase 28 | Complete |
 | INTV-02 | Phase 29 | Pending |
 | INTV-03 | Phase 30 | Pending |
 

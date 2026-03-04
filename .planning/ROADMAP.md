@@ -72,7 +72,7 @@
 
 - [x] **Phase 26: Misconception Store & Recording** - Store slice, migration, and per-answer bug tag recording (completed 2026-03-04)
 - [x] **Phase 27: Confirmation Engine** - 2-then-3 confirmation rule and misconception history with status tracking (completed 2026-03-04)
-- [ ] **Phase 28: Session Mix Adaptation** - Session orchestrator prioritizes skills with confirmed misconceptions
+- [x] **Phase 28: Session Mix Adaptation** - Session orchestrator prioritizes skills with confirmed misconceptions (completed 2026-03-04)
 - [ ] **Phase 29: AI Tutor Misconception Context** - Tutor prompts enriched with cross-session misconception data
 - [ ] **Phase 30: Remediation Mini-Sessions** - Dedicated remediation flow for accumulated confirmed misconceptions
 
@@ -169,6 +169,6 @@ Plans:
 | 25. Consent Gate & Minor Fixes | v0.5 | 2/2 | Complete | 2026-03-04 |
 | 26. Misconception Store & Recording | 2/2 | Complete    | 2026-03-04 | - |
 | 27. Confirmation Engine | 1/1 | Complete    | 2026-03-04 | - |
-| 28. Session Mix Adaptation | v0.6 | 0/1 | Not started | - |
+| 28. Session Mix Adaptation | 1/1 | Complete   | 2026-03-04 | - |
 | 29. AI Tutor Misconception Context | v0.6 | 0/0 | Not started | - |
 | 30. Remediation Mini-Sessions | v0.6 | 0/0 | Not started | - |
