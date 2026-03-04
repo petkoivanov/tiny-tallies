@@ -89,7 +89,7 @@ Plans:
   3. Outbound prompts never contain child name, specific age, or profile data -- only math problem, numeric answer, and misconception tag
   4. Content validator rejects responses exceeding sentence length or vocabulary limits for the child's age bracket, substituting a canned fallback
   5. When LLM fails, is blocked, times out, or is rate-limited, the child sees a friendly canned fallback response and the session continues uninterrupted
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 Plans:
 - [ ] 22-01-PLAN.md — Safety types, constants, and pure filter functions with tests
 - [ ] 22-02-PLAN.md — Gemini client safety settings, system instruction enhancement, and consent store migration
@@ -147,6 +147,6 @@ Phases execute in numeric order: 21 -> 22 -> 23 -> 24
 | 19. Sandbox Navigation | v0.4 | 2/2 | Complete | 2026-03-03 |
 | 20. Polish | v0.4 | 4/4 | Complete | 2026-03-04 |
 | 21. LLM Service & Store | v0.5 | 3/3 | Complete | 2026-03-04 |
-| 22. Safety & Compliance | 1/3 | In Progress|  | - |
+| 22. Safety & Compliance | 2/3 | In Progress|  | - |
 | 23. Chat UI & HINT Mode | v0.5 | 0/? | Not started | - |
 | 24. TEACH, BOOST & Auto-Escalation | v0.5 | 0/? | Not started | - |

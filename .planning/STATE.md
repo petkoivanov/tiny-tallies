@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.5
 milestone_name: AI Tutor
 status: executing
-stopped_at: Completed 22-01-PLAN.md
-last_updated: "2026-03-04T12:47:42Z"
-last_activity: 2026-03-04 -- Completed Plan 22-01 (Safety Filter)
+stopped_at: Completed 22-02-PLAN.md
+last_updated: "2026-03-04T12:55:37Z"
+last_activity: 2026-03-04 -- Completed Plan 22-02 (Safety Wiring)
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 1
+  total_plans: 6
+  completed_plans: 5
 ---
 
 # Project State
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 22 of 24 (Safety & Compliance)
-Plan: 1 of 3 complete
+Plan: 2 of 3 complete
 Status: Executing
-Last activity: 2026-03-04 -- Completed Plan 22-01 (Safety Filter)
+Last activity: 2026-03-04 -- Completed Plan 22-02 (Safety Wiring)
 
-Progress: [###-------] 33%
+Progress: [######----] 67%
 
 ## Performance Metrics
 
@@ -45,6 +45,7 @@ Progress: [###-------] 33%
 | 21    | 02   | 7min     | 2     | 7     |
 | 21    | 03   | 7min     | 2     | 9     |
 | 22    | 01   | 6min     | 2     | 5     |
+| 22    | 02   | 3min     | 2     | 8     |
 
 ## Accumulated Context
 
@@ -53,7 +54,7 @@ Progress: [###-------] 33%
 Full decision log in PROJECT.md Key Decisions table.
 
 Key context carried from v0.4:
-- STORE_VERSION = 5 (v5 adds cpaLevel per skill)
+- STORE_VERSION = 6 (v6 adds tutorConsentGranted)
 - tutorSlice will be ephemeral (excluded from partialize) -- no STORE_VERSION bump needed
 - Gemini (@google/genai v1.30.0) already in dependencies; upgrade to v1.43.0 recommended
 - ManipulativePanel is in-screen collapsible (not Modal) -- tutor TEACH mode signals expansion
@@ -66,6 +67,9 @@ v0.5 Phase 22 decisions:
 - Answer-leak detection priority: digit > word > indirect (earlier patterns take precedence)
 - numberToWord covers 0-200 with compound generation for 21-99 and 101-199
 - Vocabulary complexity proxy: word character length (letters only) per age bracket
+- callGemini returns null (not throw) on safety-blocked responses for graceful fallback
+- System instruction uses numbered CRITICAL SAFETY RULES block (7 rules + effort-praise)
+- tutorConsentGranted defaults to false -- opt-in required before AI tutor access
 
 v0.5 Phase 21 decisions:
 - tutorSlice excluded from partialize -- fully ephemeral, no AsyncStorage persistence
@@ -89,7 +93,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T12:47:42Z
-Stopped at: Completed 22-01-PLAN.md
+Last session: 2026-03-04T12:55:37.887Z
+Stopped at: Completed 22-02-PLAN.md
 Resume file: None
-Resume command: /gsd:execute-phase 22-02
+Resume command: /gsd:execute-phase 22-03
