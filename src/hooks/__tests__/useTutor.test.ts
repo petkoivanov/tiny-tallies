@@ -8,6 +8,8 @@ jest.mock('@/services/tutor/geminiClient', () => ({
 jest.mock('@/services/tutor/promptTemplates', () => ({
   buildSystemInstruction: jest.fn(() => 'system-instruction'),
   buildHintPrompt: jest.fn(() => 'hint-prompt'),
+  buildTeachPrompt: jest.fn(() => 'teach-prompt'),
+  buildBoostPrompt: jest.fn(() => 'boost-prompt'),
 }));
 jest.mock('@/services/tutor/rateLimiter', () => ({
   checkRateLimit: jest.fn(() => null),
@@ -24,12 +26,21 @@ jest.mock('@/services/tutor/safetyFilter', () => ({
 jest.mock('@/services/tutor/safetyConstants', () => ({
   getCannedFallback: jest.fn(() => 'Friendly fallback message'),
 }));
+jest.mock('@/services/tutor/escalationEngine', () => ({
+  computeEscalation: jest.fn(() => ({
+    nextMode: 'hint',
+    shouldTransition: false,
+    transitionMessage: null,
+  })),
+}));
 
 import { useTutor } from '../useTutor';
 import { callGemini } from '@/services/tutor/geminiClient';
 import {
   buildSystemInstruction,
   buildHintPrompt,
+  buildTeachPrompt,
+  buildBoostPrompt,
 } from '@/services/tutor/promptTemplates';
 import {
   checkRateLimit,
@@ -40,6 +51,7 @@ import {
   runSafetyPipeline,
 } from '@/services/tutor/safetyFilter';
 import { getCannedFallback } from '@/services/tutor/safetyConstants';
+import { computeEscalation } from '@/services/tutor/escalationEngine';
 
 const mockCallGemini = callGemini as jest.MockedFunction<typeof callGemini>;
 const mockCheckRateLimit = checkRateLimit as jest.MockedFunction<
@@ -53,6 +65,12 @@ const mockBuildSystemInstruction =
 const mockBuildHintPrompt = buildHintPrompt as jest.MockedFunction<
   typeof buildHintPrompt
 >;
+const mockBuildTeachPrompt = buildTeachPrompt as jest.MockedFunction<
+  typeof buildTeachPrompt
+>;
+const mockBuildBoostPrompt = buildBoostPrompt as jest.MockedFunction<
+  typeof buildBoostPrompt
+>;
 const mockScrubOutboundPii = scrubOutboundPii as jest.MockedFunction<
   typeof scrubOutboundPii
 >;
@@ -62,9 +80,13 @@ const mockRunSafetyPipeline = runSafetyPipeline as jest.MockedFunction<
 const mockGetCannedFallback = getCannedFallback as jest.MockedFunction<
   typeof getCannedFallback
 >;
+const mockComputeEscalation = computeEscalation as jest.MockedFunction<
+  typeof computeEscalation
+>;
 
 import type { SessionProblem } from '@/services/session/sessionTypes';
 import type { Problem } from '@/services/mathEngine/types';
+import type { CpaStage, ManipulativeType } from '@/services/cpa/cpaTypes';
 
 // Minimal problem shape matching SessionProblem
 function makeProblem(): SessionProblem {
@@ -119,6 +141,11 @@ describe('useTutor', () => {
     setupStore();
     mockCallGemini.mockResolvedValue('Try counting on your fingers!');
     mockCheckRateLimit.mockReturnValue(null);
+    mockComputeEscalation.mockReturnValue({
+      nextMode: 'hint',
+      shouldTransition: false,
+      transitionMessage: null,
+    });
   });
 
   it('requestHint calls checkRateLimit and returns early with child-friendly message when rate limited', async () => {
@@ -537,6 +564,383 @@ describe('useTutor', () => {
       const state = useAppStore.getState();
       expect(state.tutorMessages).toHaveLength(1);
       expect(state.tutorMessages[0].text).toBe('Timeout fallback message');
+    });
+  });
+
+  // --- Mode-aware routing tests (Plan 24-02) ---
+
+  describe('TEACH mode routing', () => {
+    it('calls buildTeachPrompt when tutorMode is teach', async () => {
+      setupStore({ tutorMode: 'teach' });
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      expect(mockBuildTeachPrompt).toHaveBeenCalled();
+      expect(mockBuildHintPrompt).not.toHaveBeenCalled();
+      expect(mockBuildBoostPrompt).not.toHaveBeenCalled();
+    });
+
+    it('passes CPA stage from parameter into prompt params for teach mode', async () => {
+      setupStore({ tutorMode: 'teach' });
+      const cpaInfo: { stage: CpaStage; manipulativeType: ManipulativeType | null } = {
+        stage: 'pictorial',
+        manipulativeType: 'number_line',
+      };
+      const { result } = renderHook(() =>
+        useTutor(makeProblem(), cpaInfo),
+      );
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      expect(mockBuildTeachPrompt).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cpaStage: 'pictorial',
+          tutorMode: 'teach',
+        }),
+      );
+    });
+
+    it('increments hint level on successful teach response', async () => {
+      setupStore({ tutorMode: 'teach' });
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      expect(result.current.hintLevel).toBe(1);
+    });
+  });
+
+  describe('BOOST mode routing', () => {
+    it('calls buildBoostPrompt with correctAnswer when tutorMode is boost', async () => {
+      setupStore({ tutorMode: 'boost' });
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      expect(mockBuildBoostPrompt).toHaveBeenCalledWith(
+        expect.objectContaining({
+          correctAnswer: 7,
+        }),
+      );
+      expect(mockBuildHintPrompt).not.toHaveBeenCalled();
+      expect(mockBuildTeachPrompt).not.toHaveBeenCalled();
+    });
+
+    it('passes mode=boost to runSafetyPipeline for BOOST responses', async () => {
+      setupStore({ tutorMode: 'boost' });
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      expect(mockRunSafetyPipeline).toHaveBeenCalledWith(
+        expect.any(String),
+        7,
+        expect.any(String),
+        'boost',
+      );
+    });
+
+    it('does NOT increment hintLevel on successful BOOST response', async () => {
+      setupStore({ tutorMode: 'boost' });
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      expect(result.current.hintLevel).toBe(0);
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      expect(result.current.hintLevel).toBe(0);
+    });
+  });
+
+  describe('CPA stage integration', () => {
+    it('uses cpaStage from parameter instead of hardcoded concrete', async () => {
+      const cpaInfo: { stage: CpaStage; manipulativeType: ManipulativeType | null } = {
+        stage: 'abstract',
+        manipulativeType: null,
+      };
+      const { result } = renderHook(() =>
+        useTutor(makeProblem(), cpaInfo),
+      );
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      expect(mockBuildSystemInstruction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cpaStage: 'abstract',
+        }),
+      );
+    });
+
+    it('defaults to concrete when cpaInfo not provided', async () => {
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      expect(mockBuildSystemInstruction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cpaStage: 'concrete',
+        }),
+      );
+    });
+  });
+
+  describe('bug description passthrough', () => {
+    it('passes bugDescription and wrongAnswer from lastWrongContext into prompt params', async () => {
+      const lastWrongContext = {
+        wrongAnswer: 5,
+        bugDescription: 'counted on from first operand instead of adding',
+      };
+      const { result } = renderHook(() =>
+        useTutor(makeProblem(), undefined, lastWrongContext),
+      );
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      expect(mockBuildHintPrompt).toHaveBeenCalledWith(
+        expect.objectContaining({
+          wrongAnswer: 5,
+          bugDescription: 'counted on from first operand instead of adding',
+        }),
+      );
+    });
+
+    it('passes undefined for bugDescription when lastWrongContext.bugDescription is null', async () => {
+      const lastWrongContext = {
+        wrongAnswer: 5,
+        bugDescription: null,
+      };
+      const { result } = renderHook(() =>
+        useTutor(makeProblem(), undefined, lastWrongContext),
+      );
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      expect(mockBuildHintPrompt).toHaveBeenCalledWith(
+        expect.objectContaining({
+          wrongAnswer: 5,
+          bugDescription: undefined,
+        }),
+      );
+    });
+  });
+
+  describe('escalation checks', () => {
+    it('runs computeEscalation after successful hint delivery', async () => {
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      expect(mockComputeEscalation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          currentMode: 'hint',
+        }),
+      );
+    });
+
+    it('transitions to teach mode and adds transition message when escalation triggers', async () => {
+      mockComputeEscalation.mockReturnValue({
+        nextMode: 'teach',
+        shouldTransition: true,
+        transitionMessage: 'Let me show you a different way!',
+      });
+
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      const state = useAppStore.getState();
+      expect(state.tutorMode).toBe('teach');
+      // Should have the LLM response message + the transition message
+      const msgs = state.tutorMessages;
+      expect(msgs.length).toBe(2);
+      expect(msgs[1].text).toBe('Let me show you a different way!');
+      expect(msgs[1].role).toBe('tutor');
+    });
+
+    it('transitions to boost mode with boost transition message', async () => {
+      setupStore({ tutorMode: 'teach' });
+      mockComputeEscalation.mockReturnValue({
+        nextMode: 'boost',
+        shouldTransition: true,
+        transitionMessage: 'Let me help you through this one!',
+      });
+
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      const state = useAppStore.getState();
+      expect(state.tutorMode).toBe('boost');
+      const msgs = state.tutorMessages;
+      expect(msgs[msgs.length - 1].text).toBe('Let me help you through this one!');
+    });
+
+    it('does not add transition message when no escalation occurs', async () => {
+      mockComputeEscalation.mockReturnValue({
+        nextMode: 'hint',
+        shouldTransition: false,
+        transitionMessage: null,
+      });
+
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      const state = useAppStore.getState();
+      // Only the LLM response message, no transition message
+      expect(state.tutorMessages).toHaveLength(1);
+    });
+  });
+
+  describe('shouldExpandManipulative signal', () => {
+    it('returns true when mode is teach and manipulativeType is not null', () => {
+      setupStore({ tutorMode: 'teach' });
+      const cpaInfo: { stage: CpaStage; manipulativeType: ManipulativeType | null } = {
+        stage: 'concrete',
+        manipulativeType: 'base_ten_blocks',
+      };
+      const { result } = renderHook(() =>
+        useTutor(makeProblem(), cpaInfo),
+      );
+
+      expect(result.current.shouldExpandManipulative).toBe(true);
+    });
+
+    it('returns false when mode is teach but manipulativeType is null (abstract stage)', () => {
+      setupStore({ tutorMode: 'teach' });
+      const cpaInfo: { stage: CpaStage; manipulativeType: ManipulativeType | null } = {
+        stage: 'abstract',
+        manipulativeType: null,
+      };
+      const { result } = renderHook(() =>
+        useTutor(makeProblem(), cpaInfo),
+      );
+
+      expect(result.current.shouldExpandManipulative).toBe(false);
+    });
+
+    it('returns false when mode is hint regardless of manipulativeType', () => {
+      setupStore({ tutorMode: 'hint' });
+      const cpaInfo: { stage: CpaStage; manipulativeType: ManipulativeType | null } = {
+        stage: 'concrete',
+        manipulativeType: 'base_ten_blocks',
+      };
+      const { result } = renderHook(() =>
+        useTutor(makeProblem(), cpaInfo),
+      );
+
+      expect(result.current.shouldExpandManipulative).toBe(false);
+    });
+
+    it('returns false when mode is boost', () => {
+      setupStore({ tutorMode: 'boost' });
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      expect(result.current.shouldExpandManipulative).toBe(false);
+    });
+  });
+
+  describe('manipulativeType passthrough', () => {
+    it('returns manipulativeType from cpaInfo parameter', () => {
+      const cpaInfo: { stage: CpaStage; manipulativeType: ManipulativeType | null } = {
+        stage: 'concrete',
+        manipulativeType: 'number_line',
+      };
+      const { result } = renderHook(() =>
+        useTutor(makeProblem(), cpaInfo),
+      );
+
+      expect(result.current.manipulativeType).toBe('number_line');
+    });
+
+    it('returns null when cpaInfo is not provided', () => {
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      expect(result.current.manipulativeType).toBeNull();
+    });
+  });
+
+  describe('requestTutor alias', () => {
+    it('requestTutor works the same as requestHint for backward compatibility', async () => {
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      expect(mockCallGemini).toHaveBeenCalled();
+      const state = useAppStore.getState();
+      expect(state.tutorMessages).toHaveLength(1);
+    });
+
+    it('requestHint is an alias that still works', async () => {
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      // requestHint and requestTutor should be the same function
+      expect(result.current.requestHint).toBe(result.current.requestTutor);
+    });
+  });
+
+  describe('safety pipeline mode passthrough', () => {
+    it('passes mode=hint to runSafetyPipeline in hint mode', async () => {
+      setupStore({ tutorMode: 'hint' });
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      expect(mockRunSafetyPipeline).toHaveBeenCalledWith(
+        expect.any(String),
+        7,
+        expect.any(String),
+        'hint',
+      );
+    });
+
+    it('passes mode=teach to runSafetyPipeline in teach mode', async () => {
+      setupStore({ tutorMode: 'teach' });
+      const { result } = renderHook(() => useTutor(makeProblem()));
+
+      await act(async () => {
+        await result.current.requestTutor();
+      });
+
+      expect(mockRunSafetyPipeline).toHaveBeenCalledWith(
+        expect.any(String),
+        7,
+        expect.any(String),
+        'teach',
+      );
     });
   });
 });
