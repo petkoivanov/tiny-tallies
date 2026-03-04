@@ -21,8 +21,8 @@ Requirements for Misconception Detection milestone. Each maps to roadmap phases.
 
 ### Store & State
 
-- [ ] **STATE-01**: misconceptionSlice in Zustand store with persistence (requires STORE_VERSION bump + migration)
-- [ ] **STATE-02**: Misconception records include: bugTag, skillId, occurrenceCount, status (suspected/confirmed), timestamps
+- [x] **STATE-01**: misconceptionSlice in Zustand store with persistence (requires STORE_VERSION bump + migration)
+- [x] **STATE-02**: Misconception records include: bugTag, skillId, occurrenceCount, status (suspected/confirmed), timestamps
 
 ## Future Requirements
 
@@ -58,8 +58,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| STATE-01 | Phase 26 | Pending |
-| STATE-02 | Phase 26 | Pending |
+| STATE-01 | Phase 26 | Complete |
+| STATE-02 | Phase 26 | Complete |
 | MISC-01 | Phase 26 | Pending |
 | MISC-02 | Phase 27 | Pending |
 | MISC-03 | Phase 27 | Pending |
