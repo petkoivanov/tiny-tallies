@@ -147,6 +147,6 @@ Phases execute in numeric order: 21 -> 22 -> 23 -> 24
 | 19. Sandbox Navigation | v0.4 | 2/2 | Complete | 2026-03-03 |
 | 20. Polish | v0.4 | 4/4 | Complete | 2026-03-04 |
 | 21. LLM Service & Store | v0.5 | 3/3 | Complete | 2026-03-04 |
-| 22. Safety & Compliance | 3/3 | Complete   | 2026-03-04 | - |
+| 22. Safety & Compliance | 3/3 | Complete    | 2026-03-04 | - |
 | 23. Chat UI & HINT Mode | v0.5 | 0/? | Not started | - |
 | 24. TEACH, BOOST & Auto-Escalation | v0.5 | 0/? | Not started | - |
