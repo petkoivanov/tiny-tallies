@@ -142,7 +142,7 @@ Phases execute in numeric order: 21 -> 22 -> 23 -> 24
 | 18. CPA Progression and Session Integration | v0.4 | 3/3 | Complete | 2026-03-03 |
 | 19. Sandbox Navigation | v0.4 | 2/2 | Complete | 2026-03-03 |
 | 20. Polish | v0.4 | 4/4 | Complete | 2026-03-04 |
-| 21. LLM Service & Store | 3/3 | Complete   | 2026-03-04 | - |
+| 21. LLM Service & Store | 3/3 | Complete    | 2026-03-04 | - |
 | 22. Safety & Compliance | v0.5 | 0/? | Not started | - |
 | 23. Chat UI & HINT Mode | v0.5 | 0/? | Not started | - |
 | 24. TEACH, BOOST & Auto-Escalation | v0.5 | 0/? | Not started | - |
