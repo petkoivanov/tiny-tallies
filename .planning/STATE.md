@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v0.6
 milestone_name: Misconception Detection
-status: defining_requirements
+status: ready_to_plan
 stopped_at: null
-last_updated: "2026-03-04T18:00:00Z"
-last_activity: 2026-03-04 -- Milestone v0.6 started
+last_updated: "2026-03-04T19:00:00Z"
+last_activity: 2026-03-04 -- v0.6 roadmap created (Phases 26-30)
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,14 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.6 Misconception Detection — defining requirements
+**Current focus:** Phase 26 - Misconception Store & Recording
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-04 — Milestone v0.6 started
+Phase: 26 of 30 (Misconception Store & Recording)
+Plan: 0 of 0 in current phase (not yet planned)
+Status: Ready to plan
+Last activity: 2026-03-04 — v0.6 roadmap created (Phases 26-30)
+
+Progress: [░░░░░░░░░░] 0% of v0.6
 
 ## Performance Metrics
 
@@ -44,16 +46,15 @@ Last activity: 2026-03-04 — Milestone v0.6 started
 
 Full decision log in PROJECT.md Key Decisions table.
 
-Key context:
-- STORE_VERSION = 6 (v6 adds tutorConsentGranted)
-- tutorSlice is ephemeral (excluded from partialize)
-- Gemini @google/genai v1.43.0 with non-streaming generateContent
-- ManipulativePanel is in-screen collapsible (not Modal)
-- LLM must NEVER compute math or reveal answers in HINT mode
-- 1,051 tests passing, TypeScript clean
-- ~29,092 LOC TypeScript
+Key context for v0.6:
+- STORE_VERSION = 6 (will bump to 7 for misconceptionSlice)
+- tutorSlice is ephemeral -- misconceptionSlice WILL need persistence (unlike tutor)
 - Bug Library has 11 misconception patterns with three-phase distractor assembly
 - BKT tracks per-skill mastery with age-adjusted parameters
+- Session orchestrator builds 15-problem queues with 60/30/10 mix
+- AI tutor (v0.5) already uses bug tags for per-problem explanations
+- LLM must NEVER compute math or reveal answers in HINT mode
+- 1,051 tests passing, TypeScript clean, ~29,092 LOC
 
 ### Pending Todos
 
@@ -66,6 +67,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-04
-Stopped at: Milestone v0.6 initialized
+Stopped at: v0.6 roadmap created — ready to plan Phase 26
 Resume file: N/A
-Resume command: /gsd:new-milestone (continue from research/requirements)
+Resume command: /gsd:plan-phase 26

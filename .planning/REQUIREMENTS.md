@@ -58,20 +58,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MISC-01 | — | Pending |
-| MISC-02 | — | Pending |
-| MISC-03 | — | Pending |
-| INTV-01 | — | Pending |
-| INTV-02 | — | Pending |
-| INTV-03 | — | Pending |
-| STATE-01 | — | Pending |
-| STATE-02 | — | Pending |
+| STATE-01 | Phase 26 | Pending |
+| STATE-02 | Phase 26 | Pending |
+| MISC-01 | Phase 26 | Pending |
+| MISC-02 | Phase 27 | Pending |
+| MISC-03 | Phase 27 | Pending |
+| INTV-01 | Phase 28 | Pending |
+| INTV-02 | Phase 29 | Pending |
+| INTV-03 | Phase 30 | Pending |
 
 **Coverage:**
 - v0.6 requirements: 8 total
-- Mapped to phases: 0
-- Unmapped: 8
+- Mapped to phases: 8
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-04*
-*Last updated: 2026-03-04 after initial definition*
+*Last updated: 2026-03-04 after roadmap creation*
