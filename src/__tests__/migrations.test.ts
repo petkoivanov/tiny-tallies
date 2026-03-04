@@ -263,7 +263,19 @@ describe('store migrations', () => {
     expect(skills['incomplete-skill'].cpaLevel).toBe('concrete');
   });
 
-  it('migrateStore chains v1->v5 correctly', () => {
+  it('migrateStore from version 5 adds tutorConsentGranted default false', () => {
+    const input = { childName: 'Luna', xp: 200 };
+    const result = migrateStore(input, 5);
+    expect(result.tutorConsentGranted).toBe(false);
+  });
+
+  it('migrateStore from version 5 preserves existing tutorConsentGranted if present', () => {
+    const input = { childName: 'Luna', xp: 200, tutorConsentGranted: true };
+    const result = migrateStore(input, 5);
+    expect(result.tutorConsentGranted).toBe(true);
+  });
+
+  it('migrateStore chains v1->v6 correctly', () => {
     const input = {
       childName: 'Max',
       skillStates: {
@@ -290,5 +302,8 @@ describe('store migrations', () => {
 
     // v4->v5 CPA level (P(L)=0.1 -> concrete)
     expect(skills['add-double'].cpaLevel).toBe('concrete');
+
+    // v5->v6 consent flag
+    expect(result.tutorConsentGranted).toBe(false);
   });
 });
