@@ -11,6 +11,16 @@ export interface TutorMessage {
 }
 
 /**
+ * Confirmed misconception context for enriching LLM prompts.
+ * Deliberately minimal -- contains only bugTag + human-readable description.
+ * No child PII (name, age, identifying info) is included.
+ */
+export interface ConfirmedMisconceptionContext {
+  bugTag: string;
+  description: string;
+}
+
+/**
  * Parameters for building LLM prompts.
  * CRITICAL: correctAnswer is deliberately excluded -- LLM must NEVER see it.
  */
@@ -21,6 +31,8 @@ export interface PromptParams {
   operation: string;
   wrongAnswer?: number;
   bugDescription?: string;
+  /** Historical confirmed misconceptions for the current skill (max 3). */
+  confirmedMisconceptions?: ConfirmedMisconceptionContext[];
   tutorMode: TutorMode;
   hintLevel: number;
 }

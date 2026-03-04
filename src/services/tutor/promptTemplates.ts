@@ -1,4 +1,9 @@
-import type { PromptParams, BoostPromptParams } from './types';
+import type {
+  PromptParams,
+  BoostPromptParams,
+  ConfirmedMisconceptionContext,
+  TutorMode,
+} from './types';
 
 export const WORD_LIMITS: Record<string, number> = {
   '6-7': 8,
@@ -32,6 +37,30 @@ function getSharedSafetyRules(ruleStart: number): string[] {
     `${ruleStart + 1}. Never use sarcasm, irony, or complex humor.`,
     `${ruleStart + 2}. Never discuss topics outside math.`,
   ];
+}
+
+/** Per-mode guidance text for historical misconception context. */
+const MISCONCEPTION_GUIDANCE: Record<TutorMode, string> = {
+  hint: 'The child has shown these patterns before. Steer them away from these mistakes through your questions without naming the patterns directly.',
+  teach:
+    'The child has shown these patterns before. Address these step by step in your explanation without naming them directly.',
+  boost:
+    'The child has shown these patterns before. Explain why these patterns lead to wrong answers.',
+};
+
+/**
+ * Formats confirmed misconception data for inclusion in prompts.
+ * Caps at 3 entries. Returns empty string if array is empty/undefined.
+ */
+function formatMisconceptionContext(
+  misconceptions: ConfirmedMisconceptionContext[] | undefined,
+  mode: TutorMode,
+): string {
+  if (!misconceptions || misconceptions.length === 0) return '';
+
+  const capped = misconceptions.slice(0, 3);
+  const bullets = capped.map((m) => `- ${m.description}`).join('\n');
+  return `Historical misconception patterns for this skill:\n${bullets}\n${MISCONCEPTION_GUIDANCE[mode]}`;
 }
 
 /**
@@ -146,6 +175,14 @@ export function buildHintPrompt(params: PromptParams): string {
     lines.push(`Possible misconception: ${params.bugDescription}`);
   }
 
+  const misconceptionBlock = formatMisconceptionContext(
+    params.confirmedMisconceptions,
+    'hint',
+  );
+  if (misconceptionBlock) {
+    lines.push(misconceptionBlock);
+  }
+
   lines.push(`This is hint level ${params.hintLevel}. Give a Socratic hint.`);
 
   return lines.join('\n');
@@ -170,6 +207,14 @@ export function buildTeachPrompt(params: PromptParams): string {
     lines.push(
       `The child may have ${params.bugDescription}. Address this without naming it directly.`,
     );
+  }
+
+  const misconceptionBlock = formatMisconceptionContext(
+    params.confirmedMisconceptions,
+    'teach',
+  );
+  if (misconceptionBlock) {
+    lines.push(misconceptionBlock);
   }
 
   lines.push(
@@ -199,6 +244,14 @@ export function buildBoostPrompt(params: BoostPromptParams): string {
     lines.push(
       `The child may have ${params.bugDescription}. Address this without naming it directly.`,
     );
+  }
+
+  const misconceptionBlock = formatMisconceptionContext(
+    params.confirmedMisconceptions,
+    'boost',
+  );
+  if (misconceptionBlock) {
+    lines.push(misconceptionBlock);
   }
 
   lines.push(
