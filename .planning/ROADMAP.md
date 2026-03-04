@@ -113,7 +113,9 @@ Plans:
   1. The session orchestrator injects remediation problems for skills with confirmed misconceptions into the practice queue
   2. Remediation problems appear in the practice segment (not warmup or cooldown), replacing some of the normal 60/30/10 mix
   3. Skills with confirmed misconceptions receive higher selection weight than standard review skills
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 28-01-PLAN.md — Remediation injection into practice mix with category type, threading through session orchestrator and useSession
 
 ### Phase 29: AI Tutor Misconception Context
 **Goal**: The AI tutor knows about a child's confirmed misconceptions and addresses them specifically in explanations
@@ -167,6 +169,6 @@ Plans:
 | 25. Consent Gate & Minor Fixes | v0.5 | 2/2 | Complete | 2026-03-04 |
 | 26. Misconception Store & Recording | 2/2 | Complete    | 2026-03-04 | - |
 | 27. Confirmation Engine | 1/1 | Complete    | 2026-03-04 | - |
-| 28. Session Mix Adaptation | v0.6 | 0/0 | Not started | - |
+| 28. Session Mix Adaptation | v0.6 | 0/1 | Not started | - |
 | 29. AI Tutor Misconception Context | v0.6 | 0/0 | Not started | - |
 | 30. Remediation Mini-Sessions | v0.6 | 0/0 | Not started | - |
