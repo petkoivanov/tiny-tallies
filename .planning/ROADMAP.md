@@ -61,7 +61,7 @@
 - [x] **Phase 23: Chat UI & HINT Mode** - Help button, chat bubble UI, response buttons, per-problem reset, offline detection, and Socratic hint delivery (completed 2026-03-04)
 - [x] **Phase 24: TEACH, BOOST & Auto-Escalation** - TEACH mode with manipulative integration, BOOST mode scaffolding, auto-escalation state machine, and Bug Library-informed explanations (completed 2026-03-04)
 
-- [ ] **Phase 25: Consent Gate & Minor Fixes** - Parental consent screen with PIN verification, navigation wiring, retry offline guard, and stale test fix (gap closure)
+- [x] **Phase 25: Consent Gate & Minor Fixes** - Parental consent screen with PIN verification, navigation wiring, retry offline guard, and stale test fix (gap closure) (completed 2026-03-04)
 
 ## Phase Details
 
@@ -138,7 +138,7 @@ Plans:
   2. After consent is granted, child can tap Help and receive tutor responses (full E2E flow works)
   3. STORE_VERSION test assertion matches actual store version
   4. Retry button in chat respects offline state (no Gemini call when offline)
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 25-01-PLAN.md — PIN service, ConsentScreen, and navigation wiring
 - [ ] 25-02-PLAN.md — SessionScreen consent interception, auto-fire on return, and retry offline guard
@@ -174,4 +174,4 @@ Phases execute in numeric order: 21 -> 22 -> 23 -> 24 -> 25
 | 22. Safety & Compliance | v0.5 | 3/3 | Complete | 2026-03-04 |
 | 23. Chat UI & HINT Mode | v0.5 | 2/2 | Complete | 2026-03-04 |
 | 24. TEACH, BOOST & Auto-Escalation | v0.5 | 3/3 | Complete | 2026-03-04 |
-| 25. Consent Gate & Minor Fixes | 1/2 | In Progress|  | - |
+| 25. Consent Gate & Minor Fixes | 2/2 | Complete   | 2026-03-04 | - |
