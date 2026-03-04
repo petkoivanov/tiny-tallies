@@ -22,13 +22,18 @@ import {
   type SandboxSlice,
   createSandboxSlice,
 } from './slices/sandboxSlice';
+import {
+  type TutorSlice,
+  createTutorSlice,
+} from './slices/tutorSlice';
 import { migrateStore } from './migrations';
 
 export type AppState = ChildProfileSlice &
   SkillStatesSlice &
   SessionStateSlice &
   GamificationSlice &
-  SandboxSlice;
+  SandboxSlice &
+  TutorSlice;
 
 /**
  * Increment + add migration function when changing schema shape.
@@ -44,6 +49,7 @@ export const useAppStore = create<AppState>()(
       ...createSessionStateSlice(...a),
       ...createGamificationSlice(...a),
       ...createSandboxSlice(...a),
+      ...createTutorSlice(...a),
     }),
     {
       name: 'tiny-tallies-store',
