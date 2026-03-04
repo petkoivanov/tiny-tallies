@@ -5,6 +5,7 @@ import HomeScreen from '@/screens/HomeScreen';
 import SessionScreen from '@/screens/SessionScreen';
 import ResultsScreen from '@/screens/ResultsScreen';
 import SandboxScreen from '@/screens/SandboxScreen';
+import ConsentScreen from '@/screens/ConsentScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -25,6 +26,11 @@ export default function AppNavigator() {
       />
       <Stack.Screen name="Results" component={ResultsScreen} />
       <Stack.Screen name="Sandbox" component={SandboxScreen} />
+      <Stack.Screen
+        name="Consent"
+        component={ConsentScreen}
+        options={{ gestureEnabled: false }}
+      />
     </Stack.Navigator>
   );
 }

@@ -22,6 +22,7 @@ export type RootStackParamList = {
     cpaAdvances: Array<{ skillId: string; from: CpaStage; to: CpaStage }>;
   };
   Sandbox: { manipulativeType: ManipulativeType };
+  Consent: { returnTo?: 'Session' } | undefined;
 };
 
 declare global {
