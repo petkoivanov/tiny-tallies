@@ -48,7 +48,16 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ### Active
 
-(Next milestone requirements TBD — run `/gsd:new-milestone`)
+## Current Milestone: v0.7 Gamification
+
+**Goal:** Deep gamification layer — achievement badges, visual skill map, daily challenges, avatar customization, and unlockable themes — building intrinsic motivation through progression and personalization.
+
+**Target features:**
+- Achievement badges (mastery milestones + behavior rewards)
+- Visual skill map (prerequisite DAG tree with mastery visualization)
+- Daily challenges (rotating themed sets + streak/accuracy goals, bonus XP, special badges)
+- Avatar customization (presets with achievement-unlockable special avatars/frames)
+- Themes (UI skins + session cosmetic wrappers, unlocked via achievements)
 
 ### Out of Scope
 
@@ -114,7 +123,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tutoring engine design, virtual manipulatives specs, misconception detection patterns, spaced repetition algorithms, gamification design, onboarding/placement testing, child UX design, sound/audio design, math anxiety mitigation, COPPA privacy compliance, problem generation engine.
 
 **Future milestones:**
-- v0.7: Gamification — achievement badges, skill map, daily challenges (XP + special badges), avatar customization, themes (no coins/economy, no collectibles)
+- v0.7: (current milestone)
 - v0.8: Social & subscription (family groups, parent dashboard, IAP)
 
 ## Constraints
@@ -178,4 +187,4 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | Cap 3 misconceptions per prompt | Controls prompt length, focuses on most frequent | ✓ Good — balanced signal-to-noise |
 
 ---
-*Last updated: 2026-03-05 after v0.6 milestone complete*
+*Last updated: 2026-03-04 after v0.7 milestone started*
