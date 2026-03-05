@@ -191,11 +191,13 @@ Plans:
   3. Session cosmetic wrappers add themed context and art around math problems during play
   4. Theme picker screen allows preview, equip, and shows locked theme badge requirements
   5. Non-default themes are locked until the user earns the corresponding achievement badges
-**Plans:** 2 plans
+**Plans:** 4 plans
 
 Plans:
-- [ ] 36-01-PLAN.md -- Expand avatar constants (14 regular + 5 special + 6 frames), store migration v10->v11, AvatarCircle component, HomeScreen integration
-- [ ] 36-02-PLAN.md -- AvatarPickerScreen with sectioned grid and live preview, CosmeticDetailOverlay, navigation wiring, BadgeUnlockPopup cosmetic text
+- [ ] 37-01-PLAN.md -- Theme types, palettes, ThemeProvider, useTheme hook, theme cosmetics, store migration v12
+- [ ] 37-02-PLAN.md -- Color migration: screens, App.tsx, AppNavigator, session/chat components (21 files)
+- [ ] 37-03-PLAN.md -- Color migration: badges, avatars, home, animations, manipulatives, pictorial (26 files)
+- [ ] 37-04-PLAN.md -- SessionWrapper with per-theme ambient animations, ThemePickerScreen with preview
 
 ## Progress
 
@@ -240,4 +242,4 @@ Phases execute in numeric order: 31 -> 32 -> 33 -> 34 -> 35 -> 36 -> 37
 | 34. Visual Skill Map | 3/3 | Complete    | 2026-03-05 | - |
 | 35. Daily Challenges | 2/2 | Complete    | 2026-03-05 | - |
 | 36. Avatars & Frames | 2/2 | Complete    | 2026-03-05 | - |
-| 37. UI Themes | v0.7 | 0/0 | Not started | - |
+| 37. UI Themes | v0.7 | 0/4 | Not started | - |
