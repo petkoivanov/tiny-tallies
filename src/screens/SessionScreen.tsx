@@ -25,7 +25,7 @@ export default function SessionScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<SessionNavProp>();
   const route = useRoute<SessionRouteProp>();
-  const { mode, remediationSkillIds } = route.params ?? {};
+  const { mode, remediationSkillIds, challengeThemeId } = route.params ?? {};
 
   const {
     currentProblem,
@@ -41,7 +41,7 @@ export default function SessionScreen() {
     handleAnswer,
     handleQuit,
     sessionResult,
-  } = useSession({ mode, remediationSkillIds });
+  } = useSession({ mode, remediationSkillIds, challengeThemeId });
 
   const cpaInfo = useCpaMode(currentProblem?.skillId ?? null);
   const { stage } = cpaInfo;
@@ -121,6 +121,10 @@ export default function SessionScreen() {
         cpaAdvances: sessionResult.feedback?.cpaAdvances ?? [],
         isRemediation: sessionMode === 'remediation',
         newBadges: sessionResult.newBadges,
+        isChallenge: sessionResult.isChallenge,
+        challengeBonusXp: sessionResult.challengeBonusXp,
+        accuracyGoalMet: sessionResult.accuracyGoalMet,
+        streakGoalMet: sessionResult.streakGoalMet,
       });
     }
   }, [isComplete, sessionResult, navigation, sessionMode]);

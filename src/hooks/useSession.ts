@@ -20,6 +20,7 @@ import {
   commitSessionResults,
   DEFAULT_SESSION_CONFIG,
   REMEDIATION_SESSION_CONFIG,
+  CHALLENGE_SESSION_CONFIG,
 } from '../services/session';
 import type {
   SessionPhase,
@@ -35,6 +36,13 @@ import type { MisconceptionRecord } from '../store/slices/misconceptionSlice';
 import { getConfirmedMisconceptions } from '../store/slices/misconceptionSlice';
 import { evaluateBadges } from '../services/achievement';
 import type { BadgeEvaluationSnapshot } from '../services/achievement';
+import {
+  getChallengeSkillIds,
+  evaluateChallengeGoals,
+  CHALLENGE_BONUS_XP,
+  CHALLENGE_THEMES,
+} from '../services/challenge';
+import type { ChallengeCompletion } from '../services/challenge';
 
 /** Duration in ms to show correct/incorrect feedback before auto-advancing */
 export const FEEDBACK_DURATION_MS = 1500;
@@ -71,23 +79,52 @@ function initializeSession(
   misconceptions: Record<string, MisconceptionRecord>,
   mode: SessionMode = 'standard',
   remediationSkillIds?: readonly string[],
-): { queue: SessionProblem[]; startTime: number } {
+  challengeThemeId?: string,
+): { queue: SessionProblem[]; startTime: number; challengeStartDate: string } {
   startSession();
   const seed = Date.now();
   const startTime = Date.now();
 
   const isRemediation = mode === 'remediation';
-  const sessionConfig = isRemediation ? REMEDIATION_SESSION_CONFIG : DEFAULT_SESSION_CONFIG;
+  const isChallenge = mode === 'challenge';
 
-  // For remediation mode, use provided skill IDs; for standard, read from store
-  const confirmedSkillIds = isRemediation && remediationSkillIds
-    ? [...remediationSkillIds]
-    : [...new Set(getConfirmedMisconceptions(misconceptions).map((r) => r.skillId))];
+  const sessionConfig = isChallenge
+    ? CHALLENGE_SESSION_CONFIG
+    : isRemediation
+      ? REMEDIATION_SESSION_CONFIG
+      : DEFAULT_SESSION_CONFIG;
+
+  let confirmedSkillIds: string[];
+
+  if (isChallenge && challengeThemeId) {
+    // Challenge mode: filter skills by theme
+    const theme = CHALLENGE_THEMES.find((t) => t.id === challengeThemeId);
+    confirmedSkillIds = theme
+      ? getChallengeSkillIds(theme, skillStates)
+      : [];
+  } else if (isRemediation && remediationSkillIds) {
+    confirmedSkillIds = [...remediationSkillIds];
+  } else {
+    confirmedSkillIds = [
+      ...new Set(getConfirmedMisconceptions(misconceptions).map((r) => r.skillId)),
+    ];
+  }
+
+  // For challenge mode, use remediationOnly=true to ensure all problems come from filtered skills
+  const useRemediationPath = isRemediation || isChallenge;
 
   const queue = generateSessionQueue(
-    skillStates, sessionConfig, seed, null, confirmedSkillIds, isRemediation,
+    skillStates, sessionConfig, seed, null, confirmedSkillIds, useRemediationPath,
   );
-  return { queue, startTime };
+
+  // Capture date key at init time for date boundary safety
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const challengeStartDate = `${year}-${month}-${day}`;
+
+  return { queue, startTime, challengeStartDate };
 }
 
 /**
@@ -105,10 +142,16 @@ function initializeSession(
 export function useSession(options?: {
   mode?: SessionMode;
   remediationSkillIds?: string[];
+  challengeThemeId?: string;
 }): UseSessionReturn {
   const mode = options?.mode ?? 'standard';
   const remediationSkillIds = options?.remediationSkillIds;
-  const sessionConfig = mode === 'remediation' ? REMEDIATION_SESSION_CONFIG : DEFAULT_SESSION_CONFIG;
+  const challengeThemeId = options?.challengeThemeId;
+  const sessionConfig = mode === 'challenge'
+    ? CHALLENGE_SESSION_CONFIG
+    : mode === 'remediation'
+      ? REMEDIATION_SESSION_CONFIG
+      : DEFAULT_SESSION_CONFIG;
 
   // Store selectors and actions
   const skillStates = useAppStore((s) => s.skillStates);
@@ -129,6 +172,7 @@ export function useSession(options?: {
   const recordRemediationCorrect = useAppStore((s) => s.recordRemediationCorrect);
   const resetSessionDedup = useAppStore((s) => s.resetSessionDedup);
   const misconceptions = useAppStore((s) => s.misconceptions);
+  const completeChallenge = useAppStore((s) => s.completeChallenge);
 
   // Synchronous initialization: generate queue on first render, not in useEffect.
   // This ensures currentProblem is available immediately.
@@ -139,15 +183,19 @@ export function useSession(options?: {
   const totalXpEarnedRef = useRef(0);
   const frustrationStateRef = useRef<FrustrationState>(createFrustrationState());
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const maxStreakRef = useRef(0);
+  const currentStreakRef = useRef(0);
+  const challengeStartDateRef = useRef('');
 
   if (!initializedRef.current) {
     initializedRef.current = true;
     resetSessionDedup();
-    const { queue, startTime } = initializeSession(
-      skillStates, startSession, misconceptions, mode, remediationSkillIds,
+    const { queue, startTime, challengeStartDate } = initializeSession(
+      skillStates, startSession, misconceptions, mode, remediationSkillIds, challengeThemeId,
     );
     sessionQueueRef.current = queue;
     sessionStartTimeRef.current = startTime;
+    challengeStartDateRef.current = challengeStartDate;
   }
 
   // React state (drives UI re-renders)
@@ -288,6 +336,16 @@ export function useSession(options?: {
         newCpaLevel,
       });
 
+      // Track maxStreak (consecutive correct answers)
+      if (isCorrect) {
+        currentStreakRef.current += 1;
+        if (currentStreakRef.current > maxStreakRef.current) {
+          maxStreakRef.current = currentStreakRef.current;
+        }
+      } else {
+        currentStreakRef.current = 0;
+      }
+
       // Calculate XP if correct
       if (isCorrect) {
         totalXpEarnedRef.current += calculateXp(problem.templateBaseElo);
@@ -332,6 +390,48 @@ export function useSession(options?: {
           );
           endSession();
 
+          // Challenge completion flow: evaluate goals, award bonus XP, record completion
+          // Runs BEFORE badge evaluation so challengesCompleted is incremented for badge snapshot
+          let challengeResult: {
+            isChallenge: boolean;
+            challengeBonusXp: number;
+            accuracyGoalMet: boolean;
+            streakGoalMet: boolean;
+          } | undefined;
+
+          if (mode === 'challenge' && challengeThemeId) {
+            const theme = CHALLENGE_THEMES.find((t) => t.id === challengeThemeId);
+            if (theme) {
+              const finalScore = isCorrect ? score + 1 : score;
+              const goals = evaluateChallengeGoals(
+                finalScore,
+                totalProblems,
+                maxStreakRef.current,
+                theme,
+              );
+
+              addXp(CHALLENGE_BONUS_XP);
+
+              const completion: ChallengeCompletion = {
+                themeId: challengeThemeId,
+                score: finalScore,
+                total: totalProblems,
+                accuracyGoalMet: goals.accuracyGoalMet,
+                streakGoalMet: goals.streakGoalMet,
+                bonusXpAwarded: CHALLENGE_BONUS_XP,
+                completedAt: new Date().toISOString(),
+              };
+              completeChallenge(challengeStartDateRef.current, completion);
+
+              challengeResult = {
+                isChallenge: true,
+                challengeBonusXp: CHALLENGE_BONUS_XP,
+                accuracyGoalMet: goals.accuracyGoalMet,
+                streakGoalMet: goals.streakGoalMet,
+              };
+            }
+          }
+
           // Badge evaluation: increment session counter, build snapshot, evaluate
           const currentState = useAppStore.getState();
           currentState.incrementSessionsCompleted();
@@ -342,6 +442,9 @@ export function useSession(options?: {
             sessionsCompleted: useAppStore.getState().sessionsCompleted,
             misconceptions: useAppStore.getState().misconceptions,
             challengesCompleted: useAppStore.getState().challengesCompleted,
+            lastChallengeScore: challengeResult
+              ? { score: isCorrect ? score + 1 : score, total: totalProblems }
+              : undefined,
           };
           const newBadges = evaluateBadges(badgeSnapshot, useAppStore.getState().earnedBadges);
           if (newBadges.length > 0) {
@@ -371,6 +474,7 @@ export function useSession(options?: {
             pendingUpdates: new Map(pendingUpdatesRef.current),
             feedback: feedbackWithCpa,
             newBadges,
+            ...(challengeResult ?? {}),
           });
         } else {
           setCurrentIndex(nextIndex);
@@ -398,6 +502,8 @@ export function useSession(options?: {
       recordMisconception,
       recordRemediationCorrect,
       mode,
+      challengeThemeId,
+      completeChallenge,
     ],
   );
 

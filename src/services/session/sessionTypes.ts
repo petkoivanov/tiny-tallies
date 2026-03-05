@@ -19,13 +19,20 @@ export const DEFAULT_SESSION_CONFIG: Readonly<SessionConfig> = {
   cooldownCount: 3,
 };
 
-/** Session mode: standard practice or focused remediation */
-export type SessionMode = 'standard' | 'remediation';
+/** Session mode: standard practice, focused remediation, or daily challenge */
+export type SessionMode = 'standard' | 'remediation' | 'challenge';
 
 /** Remediation session: 5 practice problems only, no warmup/cooldown */
 export const REMEDIATION_SESSION_CONFIG: Readonly<SessionConfig> = {
   warmupCount: 0,
   practiceCount: 5,
+  cooldownCount: 0,
+};
+
+/** Challenge session: 10 practice problems, no warmup/cooldown */
+export const CHALLENGE_SESSION_CONFIG: Readonly<SessionConfig> = {
+  warmupCount: 0,
+  practiceCount: 10,
   cooldownCount: 0,
 };
 
@@ -92,4 +99,9 @@ export interface SessionResult {
   pendingUpdates: Map<string, PendingSkillUpdate>;
   feedback: SessionFeedback | null;
   newBadges: string[];
+  /** Challenge-specific result fields */
+  isChallenge?: boolean;
+  challengeBonusXp?: number;
+  accuracyGoalMet?: boolean;
+  streakGoalMet?: boolean;
 }
