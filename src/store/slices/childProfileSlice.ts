@@ -1,16 +1,17 @@
 import type { StateCreator } from 'zustand';
 import type { AppState } from '../appStore';
-import type { AvatarId } from '../constants/avatars';
+import type { AllAvatarId, FrameId } from '../constants/avatars';
 
 export interface ChildProfileSlice {
   childName: string | null;
   childAge: number | null;
   childGrade: number | null;
-  avatarId: AvatarId | null;
+  avatarId: AllAvatarId | null;
+  frameId: FrameId | null;
   tutorConsentGranted: boolean;
   setChildProfile: (
     profile: Partial<
-      Pick<ChildProfileSlice, 'childName' | 'childAge' | 'childGrade' | 'avatarId'>
+      Pick<ChildProfileSlice, 'childName' | 'childAge' | 'childGrade' | 'avatarId' | 'frameId'>
     >,
   ) => void;
   setTutorConsentGranted: (granted: boolean) => void;
@@ -26,6 +27,7 @@ export const createChildProfileSlice: StateCreator<
   childAge: null,
   childGrade: null,
   avatarId: null,
+  frameId: null,
   tutorConsentGranted: false,
   setChildProfile: (profile) =>
     set((state) => ({

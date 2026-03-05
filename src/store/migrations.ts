@@ -106,8 +106,13 @@ export function migrateStore(
     state.challengesCompleted ??= 0;
   }
 
+  if (version < 11) {
+    // v10 -> v11: Add avatar frame support
+    state.frameId ??= null;
+  }
+
   // Future migrations chain here:
-  // if (version < 11) { ... }
+  // if (version < 12) { ... }
 
   return state;
 }

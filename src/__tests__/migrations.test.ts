@@ -499,4 +499,76 @@ describe('store migrations', () => {
     expect(result.earnedBadges).toEqual({});
     expect(result.sessionsCompleted).toBe(0);
   });
+
+  // v9->v10 migration tests (daily challenges)
+  it('migrateStore from version 9 initializes challengeCompletions and challengesCompleted', () => {
+    const input = { childName: 'Luna', earnedBadges: {}, sessionsCompleted: 5 };
+    const result = migrateStore(input, 9);
+    expect(result.challengeCompletions).toEqual({});
+    expect(result.challengesCompleted).toBe(0);
+  });
+
+  // v10->v11 migration tests (avatar frames)
+  it('migrateStore from version 10 sets frameId to null', () => {
+    const input = {
+      childName: 'Luna',
+      avatarId: 'fox',
+      earnedBadges: {},
+      sessionsCompleted: 10,
+      challengeCompletions: {},
+      challengesCompleted: 3,
+    };
+    const result = migrateStore(input, 10);
+    expect(result.frameId).toBeNull();
+  });
+
+  it('migrateStore from version 10 preserves existing frameId if present', () => {
+    const input = {
+      childName: 'Luna',
+      frameId: 'gold',
+    };
+    const result = migrateStore(input, 10);
+    expect(result.frameId).toBe('gold');
+  });
+
+  it('migrateStore chains v1->v11 correctly', () => {
+    const input = {
+      childName: 'Max',
+      skillStates: {
+        'add-double': { eloRating: 1100, attempts: 20, correct: 15 },
+      },
+    };
+    const result = migrateStore(input, 1);
+
+    // v1->v2 defaults
+    expect(result.childAge).toBeNull();
+    expect(result.xp).toBe(0);
+
+    // v2->v3 BKT defaults
+    const skills = result.skillStates as Record<string, Record<string, unknown>>;
+    expect(skills['add-double'].masteryProbability).toBe(0.1);
+
+    // v3->v4 Leitner defaults
+    expect(skills['add-double'].leitnerBox).toBe(1);
+
+    // v4->v5 CPA level
+    expect(skills['add-double'].cpaLevel).toBe('concrete');
+
+    // v5->v6 consent flag
+    expect(result.tutorConsentGranted).toBe(false);
+
+    // v6->v7 misconceptions
+    expect(result.misconceptions).toEqual({});
+
+    // v8->v9 achievement system
+    expect(result.earnedBadges).toEqual({});
+    expect(result.sessionsCompleted).toBe(0);
+
+    // v9->v10 daily challenges
+    expect(result.challengeCompletions).toEqual({});
+    expect(result.challengesCompleted).toBe(0);
+
+    // v10->v11 avatar frames
+    expect(result.frameId).toBeNull();
+  });
 });
