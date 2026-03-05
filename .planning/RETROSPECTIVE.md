@@ -214,6 +214,53 @@
 
 ---
 
+## Milestone: v0.6 — Misconception Detection
+
+**Shipped:** 2026-03-05
+**Phases:** 5 (Phases 26-30) | **Plans:** 7
+
+### What Was Built
+- misconceptionSlice with Bug Library tag recording, session deduplication, persistence (STORE_VERSION 6→8)
+- 2-then-3 confirmation engine: suspected at 2, confirmed at 3, with status-filtered selectors
+- Session mix adaptation: remediation problems replace review slots (max 3), BKT-inverse weighted
+- AI tutor misconception context: per-mode guidance in HINT/TEACH/BOOST, no PII, capped at 3
+- Remediation mini-sessions: 5-problem practice targeting confirmed skills, resolution at 3 correct
+- HomeScreen "Practice Tricky Skills" button at 2+ confirmed, Results remediation messaging
+
+### What Worked
+- Slice extension pattern: misconceptionSlice builds cleanly on existing store architecture
+- One-way status transitions (new→suspected→confirmed→resolved) prevent regression bugs
+- Session deduplication (same bugTag+skillId once per session) prevents count inflation
+- Composite key pattern (bugTag::skillId) gives precise per-skill misconception tracking
+- BKT-inverse weighting reuses existing mastery infrastructure for remediation prioritization
+- Small milestone (7 plans) with high pedagogical impact — shifts from reactive to systematic remediation
+
+### What Was Inefficient
+- No milestone audit performed — skipped by user, acceptable for small milestone but breaks pattern
+- SUMMARY.md one_liner fields not populated (null in extraction) — template compliance regressed
+- Research disabled for all phases — workable for this milestone since architecture was well-understood from v0.5 context
+
+### Patterns Established
+- Store migration chaining: v6→v7 (new field), v7→v8 (another new field) across phases within same milestone
+- SessionMode type + remediationOnly flag for session queue variant behavior
+- Status-filtered selectors (getConfirmedMisconceptions) as clean API for downstream consumers
+- Remediation session config as separate constant (not parameterized standard config)
+- Per-mode LLM guidance pattern (same data, different pedagogical framing per tutor mode)
+
+### Key Lessons
+1. Small milestones (5 phases, 7 plans) execute cleanly in 1 day — consider more granular milestones
+2. Store migration chaining within a milestone needs careful version sequencing
+3. One-way status transitions simplify state logic significantly vs bidirectional
+4. Session deduplication is essential for any per-answer recording — prevents runaway counts
+5. Reusing existing session UI for remediation (same SessionScreen, different config) avoids UI duplication
+
+### Cost Observations
+- Model mix: ~70% opus (executor), ~30% sonnet (checker, verifier)
+- Notable: 7 plans across 5 phases, average ~3-4min per plan — fastest per-plan execution
+- Research skipped entirely — context from v0.5 carried forward cleanly
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -225,6 +272,7 @@
 | v0.3 | 15 | 4 | Adaptive learning backbone (BKT, Leitner, prereqs, smart sessions) |
 | v0.4 | 17 | 6 | Virtual manipulatives with CPA progression and 60fps drag |
 | v0.5 | 13 | 5 | AI tutor with 3-mode escalation and safety pipeline |
+| v0.6 | 7 | 5 | Misconception detection, confirmation, remediation pipeline |
 
 ### Cumulative Quality
 
@@ -235,6 +283,7 @@
 | v0.3 | 557 | 11,866 | 0 |
 | v0.4 | 742 | ~21,900 | 0 |
 | v0.5 | 1,051 | ~29,092 | @google/genai v1.43.0 |
+| v0.6 | 1,148 | ~31,380 | 0 |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -246,3 +295,5 @@
 6. Reanimated worklets on UI thread are essential for 60fps gesture interactions (v0.4)
 7. Multi-layer safety is non-negotiable for child-facing AI — no single layer suffices (v0.5)
 8. TypeScript type separation prevents accidental answer leaks in AI tutoring (v0.5)
+9. One-way status transitions simplify state logic vs bidirectional (v0.6)
+10. Session deduplication is essential for any per-answer recording system (v0.6)
