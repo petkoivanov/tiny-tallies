@@ -138,7 +138,10 @@ Plans:
   2. The remediation session contains problems specifically targeting the confirmed misconception skills (not the normal 60/30/10 mix)
   3. Completing remediation problems contributes to reducing misconception occurrence counts (progress toward clearing the misconception)
   4. The remediation flow uses the existing session UI and math engine (no LLM-generated problems)
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 30-01-PLAN.md — Store resolution tracking, remediation config, queue generation, and useSession mode support
+- [ ] 30-02-PLAN.md — HomeScreen entry point, navigation params, SessionScreen threading, Results messaging
 
 ## Progress
 
@@ -173,4 +176,4 @@ Plans:
 | 27. Confirmation Engine | 1/1 | Complete    | 2026-03-04 | - |
 | 28. Session Mix Adaptation | 1/1 | Complete    | 2026-03-04 | - |
 | 29. AI Tutor Misconception Context | 1/1 | Complete    | 2026-03-04 | - |
-| 30. Remediation Mini-Sessions | v0.6 | 0/0 | Not started | - |
+| 30. Remediation Mini-Sessions | v0.6 | 0/2 | Not started | - |
