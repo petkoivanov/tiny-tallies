@@ -143,7 +143,12 @@ Plans:
   2. Each skill node visually reflects its state (locked/unlocked/in-progress/mastered) derived from BKT mastery data
   3. User can tap any skill node to see a detail overlay with mastery percentage, BKT probability, and Leitner box
   4. Nodes animate mastery fill progress, pulse on unlock events, and edges glow for the active learning path
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 34-01-PLAN.md -- Types, layout computation, colors, navigation wiring, SkillMapScreen shell, HomeScreen entry point
+- [ ] 34-02-PLAN.md -- SVG graph rendering (SkillMapNode, SkillMapEdge, SkillMapGraph), entrance animations, outer fringe pulse
+- [ ] 34-03-PLAN.md -- SkillDetailOverlay modal with progress bar, stars, prerequisite checklist
 
 ### Phase 35: Daily Challenges
 **Goal**: Users can play rotating daily challenge sessions with themed skill focus, bonus XP, and special badges -- fully offline, no penalty for skipping
@@ -220,7 +225,7 @@ Phases execute in numeric order: 31 -> 32 -> 33 -> 34 -> 35 -> 36 -> 37
 | 31. Pre-work -- Screen Refactoring | v0.7 | 1/1 | Complete | 2026-03-05 |
 | 32. Achievement System Foundation | v0.7 | 2/2 | Complete | 2026-03-05 |
 | 33. Badge UI & Session Integration | 3/3 | Complete    | 2026-03-05 | - |
-| 34. Visual Skill Map | v0.7 | 0/0 | Not started | - |
+| 34. Visual Skill Map | v0.7 | 0/3 | Not started | - |
 | 35. Daily Challenges | v0.7 | 0/0 | Not started | - |
 | 36. Avatars & Frames | v0.7 | 0/0 | Not started | - |
 | 37. UI Themes | v0.7 | 0/0 | Not started | - |
