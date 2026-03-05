@@ -14,6 +14,27 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
 
+// Mock react-native-reanimated
+jest.mock('react-native-reanimated', () => {
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: {
+      View,
+      Text: require('react-native').Text,
+      createAnimatedComponent: (c: any) => c,
+      call: jest.fn(),
+    },
+    useSharedValue: (init: any) => ({ value: init }),
+    useAnimatedStyle: (fn: () => any) => fn(),
+    withTiming: (v: any) => v,
+    withRepeat: (_v: any) => _v,
+    withSequence: (...args: any[]) => args[args.length - 1],
+    Easing: { linear: (v: any) => v },
+    useReducedMotion: jest.fn(() => false),
+  };
+});
+
 // Mock lucide icons as simple View components
 jest.mock('lucide-react-native', () => {
   const { View } = require('react-native');
@@ -60,6 +81,7 @@ function setMockState(overrides: Record<string, unknown> = {}) {
     markExplored: jest.fn(),
     misconceptions: {},
     earnedBadges: {},
+    frameId: null,
     ...overrides,
   };
 }

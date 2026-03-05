@@ -65,14 +65,15 @@ export type FrameId = (typeof FRAMES)[number]['id'];
  */
 export function resolveAvatar(
   id: string,
-): (typeof AVATARS)[number] | (typeof SPECIAL_AVATARS)[number] | undefined {
+): { id: string; label: string; emoji: string } | undefined {
   return (
-    (AVATARS as readonly { id: string; label: string; emoji: string }[]).find(
-      (a) => a.id === id,
-    ) ??
-    (SPECIAL_AVATARS as readonly { id: string; label: string; emoji: string; badgeId: string }[]).find(
-      (a) => a.id === id,
-    )
+    AVATARS.find((a) => a.id === id) as
+      | { id: string; label: string; emoji: string }
+      | undefined
+  ) ?? (
+    SPECIAL_AVATARS.find((a) => a.id === id) as
+      | { id: string; label: string; emoji: string }
+      | undefined
   );
 }
 

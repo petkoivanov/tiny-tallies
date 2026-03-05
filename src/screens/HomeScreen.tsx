@@ -5,7 +5,8 @@ import { useNavigation } from '@react-navigation/native';
 import { Flame, Check, Focus, GitBranch } from 'lucide-react-native';
 import { colors, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
-import { AVATARS, DEFAULT_AVATAR_ID } from '@/store/constants/avatars';
+import { AVATARS, DEFAULT_AVATAR_ID, SPECIAL_AVATARS, FRAMES, resolveAvatar } from '@/store/constants/avatars';
+import { AvatarCircle } from '@/components/avatars';
 import { calculateLevelFromXp } from '@/services/gamification/levelProgression';
 import { isSameISOWeek } from '@/services/gamification/weeklyStreak';
 import { BADGES } from '@/services/achievement';
@@ -24,6 +25,7 @@ export default function HomeScreen() {
   const lastSessionDate = useAppStore((state) => state.lastSessionDate);
   const misconceptions = useAppStore((state) => state.misconceptions);
   const earnedBadges = useAppStore((state) => state.earnedBadges);
+  const frameId = useAppStore((state) => state.frameId);
 
   const earnedBadgeCount = Object.keys(earnedBadges).length;
 
@@ -46,9 +48,11 @@ export default function HomeScreen() {
       : 0;
   const progressPercent = Math.min(progressFraction * 100, 100);
 
-  const avatar =
-    AVATARS.find((a) => a.id === (avatarId ?? DEFAULT_AVATAR_ID)) ??
-    AVATARS[0];
+  const avatar = resolveAvatar(avatarId ?? DEFAULT_AVATAR_ID) ?? AVATARS[0];
+  const isSpecial = SPECIAL_AVATARS.some((a) => a.id === avatarId);
+  const frameColor = frameId
+    ? FRAMES.find((f) => f.id === frameId)?.color
+    : undefined;
 
   const greeting = childName ? `Hi, ${childName}!` : 'Hi, Mathematician!';
 
@@ -72,8 +76,14 @@ export default function HomeScreen() {
     >
       {/* Profile Section */}
       <View style={styles.profileSection}>
-        <View style={styles.avatarCircle}>
-          <Text style={styles.avatarEmoji}>{avatar.emoji}</Text>
+        <View style={styles.avatarContainer}>
+          <AvatarCircle
+            emoji={avatar.emoji}
+            size={AVATAR_SIZE}
+            frameColor={frameColor}
+            isSpecial={isSpecial}
+            onPress={() => navigation.navigate('AvatarPicker' as never)}
+          />
         </View>
         <Text style={styles.greeting}>{greeting}</Text>
         <Text style={styles.levelBadge}>Level {level}</Text>
@@ -223,17 +233,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.xl,
   },
-  avatarCircle: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: layout.borderRadius.round,
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
+  avatarContainer: {
     marginBottom: spacing.md,
-  },
-  avatarEmoji: {
-    fontSize: 40,
   },
   greeting: {
     fontFamily: typography.fontFamily.bold,
