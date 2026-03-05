@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Flame, Check, Focus } from 'lucide-react-native';
+import { Flame, Check, Focus, GitBranch } from 'lucide-react-native';
 import { colors, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { AVATARS, DEFAULT_AVATAR_ID } from '@/store/constants/avatars';
@@ -136,6 +136,18 @@ export default function HomeScreen() {
           <Text style={styles.badgeCountText}>
             {earnedBadgeCount} / {BADGES.length} Badges
           </Text>
+        </Pressable>
+
+        {/* Skill Map */}
+        <Pressable
+          onPress={() => navigation.navigate('SkillMap')}
+          style={styles.skillMapButton}
+          accessibilityRole="button"
+          accessibilityLabel="View skill map"
+          testID="skill-map-button"
+        >
+          <GitBranch size={20} color={colors.primaryLight} strokeWidth={2} />
+          <Text style={styles.skillMapButtonText}>Skill Map</Text>
         </Pressable>
       </View>
 
@@ -295,6 +307,20 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   badgeCountText: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.md,
+    color: colors.textPrimary,
+  },
+  skillMapButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: layout.borderRadius.lg,
+  },
+  skillMapButtonText: {
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.md,
     color: colors.textPrimary,

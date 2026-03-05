@@ -30,6 +30,7 @@ export type RootStackParamList = {
   };
   Sandbox: { manipulativeType: ManipulativeType };
   BadgeCollection: undefined;
+  SkillMap: undefined;
   Consent: { returnTo?: 'Session' } | undefined;
 };
 

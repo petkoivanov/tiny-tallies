@@ -21,6 +21,7 @@ jest.mock('lucide-react-native', () => {
     Flame: (props: any) => <View testID="flame-icon" {...props} />,
     Check: (props: any) => <View testID="check-icon" {...props} />,
     Focus: (props: any) => <View testID="focus-icon" {...props} />,
+    GitBranch: (props: any) => <View testID="git-branch-icon" {...props} />,
   };
 });
 
@@ -270,5 +271,22 @@ describe('HomeScreen', () => {
     fireEvent.press(getByTestId('badge-count-button'));
 
     expect(mockNavigate).toHaveBeenCalledWith('BadgeCollection');
+  });
+
+  // Skill map button tests
+  it('renders skill map button', () => {
+    setMockState();
+
+    const { getByTestId } = render(<HomeScreen />);
+    expect(getByTestId('skill-map-button')).toBeTruthy();
+  });
+
+  it('skill map button navigates to SkillMap', () => {
+    setMockState();
+
+    const { getByTestId } = render(<HomeScreen />);
+    fireEvent.press(getByTestId('skill-map-button'));
+
+    expect(mockNavigate).toHaveBeenCalledWith('SkillMap');
   });
 });
