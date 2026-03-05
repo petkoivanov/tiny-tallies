@@ -6,10 +6,15 @@
  */
 
 import type { CpaStage, ManipulativeType } from '@/services/cpa/cpaTypes';
+import type { SessionMode } from '@/services/session/sessionTypes';
 
 export type RootStackParamList = {
   Home: undefined;
-  Session: { sessionId: string };
+  Session: {
+    sessionId: string;
+    mode?: SessionMode;
+    remediationSkillIds?: string[];
+  };
   Results: {
     sessionId: string;
     score: number;
@@ -20,6 +25,7 @@ export type RootStackParamList = {
     newLevel: number;
     streakCount: number;
     cpaAdvances: Array<{ skillId: string; from: CpaStage; to: CpaStage }>;
+    isRemediation?: boolean;
   };
   Sandbox: { manipulativeType: ManipulativeType };
   Consent: { returnTo?: 'Session' } | undefined;

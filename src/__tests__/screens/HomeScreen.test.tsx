@@ -20,6 +20,7 @@ jest.mock('lucide-react-native', () => {
   return {
     Flame: (props: any) => <View testID="flame-icon" {...props} />,
     Check: (props: any) => <View testID="check-icon" {...props} />,
+    Focus: (props: any) => <View testID="focus-icon" {...props} />,
   };
 });
 
@@ -50,6 +51,7 @@ function setMockState(overrides: Record<string, unknown> = {}) {
     lastSessionDate: null,
     exploredManipulatives: [],
     markExplored: jest.fn(),
+    misconceptions: {},
     ...overrides,
   };
 }
@@ -122,5 +124,122 @@ describe('HomeScreen', () => {
     // Both exist in the rendered tree
     expect(getByTestId('explore-grid')).toBeTruthy();
     expect(getByLabelText('Start Practice')).toBeTruthy();
+  });
+
+  // Remediation button tests
+  it('hides remediation button when fewer than 2 confirmed misconceptions', () => {
+    setMockState({
+      misconceptions: {
+        'add_no_carry::addition.single': {
+          bugTag: 'add_no_carry',
+          skillId: 'addition.single',
+          occurrenceCount: 3,
+          status: 'confirmed',
+          firstSeen: '2026-01-01',
+          lastSeen: '2026-01-02',
+          remediationCorrectCount: 0,
+        },
+      },
+    });
+
+    const { queryByTestId } = render(<HomeScreen />);
+    expect(queryByTestId('remediation-button')).toBeNull();
+  });
+
+  it('shows remediation button when 2+ confirmed misconceptions exist', () => {
+    setMockState({
+      misconceptions: {
+        'add_no_carry::addition.single': {
+          bugTag: 'add_no_carry',
+          skillId: 'addition.single',
+          occurrenceCount: 3,
+          status: 'confirmed',
+          firstSeen: '2026-01-01',
+          lastSeen: '2026-01-02',
+          remediationCorrectCount: 0,
+        },
+        'sub_no_borrow::subtraction.single': {
+          bugTag: 'sub_no_borrow',
+          skillId: 'subtraction.single',
+          occurrenceCount: 3,
+          status: 'confirmed',
+          firstSeen: '2026-01-01',
+          lastSeen: '2026-01-02',
+          remediationCorrectCount: 0,
+        },
+      },
+    });
+
+    const { getByTestId, getByText } = render(<HomeScreen />);
+    expect(getByTestId('remediation-button')).toBeTruthy();
+    expect(getByText('Practice Tricky Skills')).toBeTruthy();
+    expect(getByText('2 skills need extra practice')).toBeTruthy();
+  });
+
+  it('excludes resolved misconceptions from remediation count', () => {
+    setMockState({
+      misconceptions: {
+        'add_no_carry::addition.single': {
+          bugTag: 'add_no_carry',
+          skillId: 'addition.single',
+          occurrenceCount: 3,
+          status: 'resolved',
+          firstSeen: '2026-01-01',
+          lastSeen: '2026-01-02',
+          remediationCorrectCount: 3,
+          resolvedAt: '2026-01-03',
+        },
+        'sub_no_borrow::subtraction.single': {
+          bugTag: 'sub_no_borrow',
+          skillId: 'subtraction.single',
+          occurrenceCount: 3,
+          status: 'confirmed',
+          firstSeen: '2026-01-01',
+          lastSeen: '2026-01-02',
+          remediationCorrectCount: 0,
+        },
+      },
+    });
+
+    const { queryByTestId } = render(<HomeScreen />);
+    // Only 1 confirmed, so button hidden
+    expect(queryByTestId('remediation-button')).toBeNull();
+  });
+
+  it('navigates to remediation session on remediation button press', () => {
+    setMockState({
+      misconceptions: {
+        'add_no_carry::addition.single': {
+          bugTag: 'add_no_carry',
+          skillId: 'addition.single',
+          occurrenceCount: 3,
+          status: 'confirmed',
+          firstSeen: '2026-01-01',
+          lastSeen: '2026-01-02',
+          remediationCorrectCount: 0,
+        },
+        'sub_no_borrow::subtraction.single': {
+          bugTag: 'sub_no_borrow',
+          skillId: 'subtraction.single',
+          occurrenceCount: 3,
+          status: 'confirmed',
+          firstSeen: '2026-01-01',
+          lastSeen: '2026-01-02',
+          remediationCorrectCount: 0,
+        },
+      },
+    });
+
+    const { getByTestId } = render(<HomeScreen />);
+    fireEvent.press(getByTestId('remediation-button'));
+
+    expect(mockNavigate).toHaveBeenCalledWith('Session', {
+      sessionId: expect.any(String),
+      mode: 'remediation',
+      remediationSkillIds: expect.arrayContaining([
+        'addition.single',
+        'subtraction.single',
+      ]),
+    });
   });
 });

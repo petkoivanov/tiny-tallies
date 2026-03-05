@@ -2,12 +2,13 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Flame, Check } from 'lucide-react-native';
+import { Flame, Check, Focus } from 'lucide-react-native';
 import { colors, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { AVATARS, DEFAULT_AVATAR_ID } from '@/store/constants/avatars';
 import { calculateLevelFromXp } from '@/services/gamification/levelProgression';
 import { isSameISOWeek } from '@/services/gamification/weeklyStreak';
+import { getConfirmedMisconceptions } from '@/store/slices/misconceptionSlice';
 import { ExploreGrid } from '@/components/home';
 
 export default function HomeScreen() {
@@ -20,6 +21,13 @@ export default function HomeScreen() {
   const level = useAppStore((state) => state.level);
   const weeklyStreak = useAppStore((state) => state.weeklyStreak);
   const lastSessionDate = useAppStore((state) => state.lastSessionDate);
+  const misconceptions = useAppStore((state) => state.misconceptions);
+
+  const confirmedMisconceptions = getConfirmedMisconceptions(misconceptions);
+  const showRemediation = confirmedMisconceptions.length >= 2;
+  const remediationSkillIds = [
+    ...new Set(confirmedMisconceptions.map((r) => r.skillId)),
+  ];
 
   const { xpIntoCurrentLevel, xpNeededForNextLevel } =
     calculateLevelFromXp(xp);
@@ -135,6 +143,34 @@ export default function HomeScreen() {
         >
           <Text style={styles.buttonText}>Start Practice</Text>
         </Pressable>
+        {showRemediation && (
+          <Pressable
+            onPress={() =>
+              navigation.navigate('Session', {
+                sessionId: String(Date.now()),
+                mode: 'remediation',
+                remediationSkillIds,
+              })
+            }
+            style={({ pressed }) => [
+              styles.remediationButton,
+              pressed && styles.remediationButtonPressed,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Practice Tricky Skills"
+            testID="remediation-button"
+          >
+            <View style={styles.remediationRow}>
+              <Focus size={20} color={colors.primaryLight} strokeWidth={2} />
+              <Text style={styles.remediationButtonText}>
+                Practice Tricky Skills
+              </Text>
+            </View>
+            <Text style={styles.remediationSubtext}>
+              {confirmedMisconceptions.length} skills need extra practice
+            </Text>
+          </Pressable>
+        )}
       </View>
     </ScrollView>
   );
@@ -247,5 +283,35 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.lg,
     color: colors.textPrimary,
+  },
+  remediationButton: {
+    backgroundColor: colors.surface,
+    borderWidth: 2,
+    borderColor: colors.primaryLight,
+    minHeight: 56,
+    borderRadius: layout.borderRadius.lg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  remediationButtonPressed: {
+    backgroundColor: colors.surfaceLight,
+  },
+  remediationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  remediationButtonText: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.lg,
+    color: colors.primaryLight,
+  },
+  remediationSubtext: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: typography.fontSize.sm,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
   },
 });
