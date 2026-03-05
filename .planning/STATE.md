@@ -3,29 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.7
 milestone_name: Gamification
 status: active
-stopped_at: Phase 32 plans verified
-last_updated: "2026-03-05T03:55:44.361Z"
-last_activity: 2026-03-04 -- Roadmap created for v0.7 Gamification
+stopped_at: Completed 32-01-PLAN.md
+last_updated: "2026-03-05T04:14:00.000Z"
+last_activity: 2026-03-05 -- Completed Phase 32 Plan 01 (badge registry + evaluation engine)
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 3
-  completed_plans: 1
----
-
----
-gsd_state_version: 1.0
-milestone: v0.7
-milestone_name: Gamification
-status: active
-stopped_at: null
-last_updated: "2026-03-04T00:00:00.000Z"
-last_activity: 2026-03-04 -- Roadmap created for v0.7 (7 phases, 29 requirements)
-progress:
-  total_phases: 7
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_plans: 2
 ---
 
 # Project State
@@ -35,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.7 Gamification -- Phase 31 (Pre-work -- Screen Refactoring)
+**Current focus:** v0.7 Gamification -- Phase 32 (Achievement System Foundation)
 
 ## Current Position
 
-Phase: 31 of 37 (Pre-work -- Screen Refactoring)
-Plan: --
-Status: Ready to plan
-Last activity: 2026-03-04 -- Roadmap created for v0.7 Gamification
+Phase: 32 of 37 (Achievement System Foundation)
+Plan: 1 of 2 complete
+Status: Executing
+Last activity: 2026-03-05 -- Completed Phase 32 Plan 01 (badge registry + evaluation engine)
 
-Progress: [░░░░░░░░░░] 0% of v0.7
+Progress: [######░░░░] 67% of Phase 32 (1/2 plans)
 
 ## Performance Metrics
 
@@ -58,10 +43,10 @@ Progress: [░░░░░░░░░░] 0% of v0.7
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
-| -- | -- | -- | -- | -- |
+| 31 | P01 | 6m24s | 2 | 7 |
+| 32 | P01 | 3m24s | 2 | 6 |
 
 ## Accumulated Context
-| Phase 31 P01 | 6m24s | 2 tasks | 7 files |
 
 ### Decisions
 
@@ -76,9 +61,12 @@ Key context for v0.7:
 - Themes must come last (StyleSheet.create is hostile to dynamic theming)
 - Skill map reads existing SKILLS DAG + BKT data, independent of badge system
 - No new npm dependencies required for v0.7
-- 1,148 tests passing, TypeScript clean
+- 1,203 tests passing, TypeScript clean
 - [Phase 31]: Kept lastWrongContext state in SessionScreen, passed setLastWrongContext to hook
 - [Phase 31]: HelpButton pulsing simplified to shouldPulse (hook manages helpUsed internally)
+- [Phase 32 P01]: Badge IDs follow mastery.{skillId} / mastery.category.{op} / mastery.grade.{n} / behavior.{metric}.{tier} convention
+- [Phase 32 P01]: 27 badges total: 14 skill-mastery (gold), 2 category-mastery, 3 grade-mastery, 3 streak, 3 sessions, 2 remediation
+- [Phase 32 P01]: BadgeCategory = 'mastery' | 'behavior' (exploration/remediation realized as behavior badges)
 
 ### Pending Todos
 
@@ -91,7 +79,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05T03:55:44.359Z
-Stopped at: Phase 32 plans verified
-Resume file: .planning/phases/32-achievement-system-foundation/32-01-PLAN.md
-Resume command: /gsd:plan-phase 31
+Last session: 2026-03-05T04:14:00.000Z
+Stopped at: Completed 32-01-PLAN.md
+Resume file: .planning/phases/32-achievement-system-foundation/32-02-PLAN.md
+Resume command: /gsd:execute-phase 32
