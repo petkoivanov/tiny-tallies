@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -18,6 +18,8 @@ import { colors, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { calculateLevelFromXp } from '@/services/gamification/levelProgression';
 import { ConfettiCelebration } from '@/components/animations/ConfettiCelebration';
+import { BadgeUnlockPopup } from '@/components/animations/BadgeUnlockPopup';
+import { BadgesSummary } from '@/components/badges';
 import type { RootStackParamList } from '@/navigation/types';
 import type { CpaStage } from '@/services/cpa/cpaTypes';
 
@@ -76,7 +78,10 @@ export default function ResultsScreen() {
     streakCount,
     cpaAdvances = [],
     isRemediation = false,
+    newBadges = [],
   } = route.params;
+
+  const [showBadgePopup, setShowBadgePopup] = useState(newBadges.length > 0);
 
   const xp = useAppStore((state) => state.xp);
 
@@ -246,6 +251,19 @@ export default function ResultsScreen() {
             </>
           )}
 
+          {/* Badges Earned (conditional) */}
+          <BadgesSummary
+            badgeIds={newBadges}
+            onViewAll={() =>
+              navigation.dispatch(
+                CommonActions.reset({
+                  index: 1,
+                  routes: [{ name: 'Home' }, { name: 'BadgeCollection' }],
+                }),
+              )
+            }
+          />
+
           <View style={styles.divider} />
 
           {/* Time Row */}
@@ -271,6 +289,12 @@ export default function ResultsScreen() {
       </View>
 
       {leveledUp && <ConfettiCelebration />}
+      {showBadgePopup && (
+        <BadgeUnlockPopup
+          badgeIds={newBadges}
+          onComplete={() => setShowBadgePopup(false)}
+        />
+      )}
     </View>
   );
 }

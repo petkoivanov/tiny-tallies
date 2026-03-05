@@ -8,6 +8,7 @@ import { useAppStore } from '@/store/appStore';
 import { AVATARS, DEFAULT_AVATAR_ID } from '@/store/constants/avatars';
 import { calculateLevelFromXp } from '@/services/gamification/levelProgression';
 import { isSameISOWeek } from '@/services/gamification/weeklyStreak';
+import { BADGES } from '@/services/achievement';
 import { getConfirmedMisconceptions } from '@/store/slices/misconceptionSlice';
 import { ExploreGrid } from '@/components/home';
 
@@ -22,6 +23,9 @@ export default function HomeScreen() {
   const weeklyStreak = useAppStore((state) => state.weeklyStreak);
   const lastSessionDate = useAppStore((state) => state.lastSessionDate);
   const misconceptions = useAppStore((state) => state.misconceptions);
+  const earnedBadges = useAppStore((state) => state.earnedBadges);
+
+  const earnedBadgeCount = Object.keys(earnedBadges).length;
 
   const confirmedMisconceptions = getConfirmedMisconceptions(misconceptions);
   const showRemediation = confirmedMisconceptions.length >= 2;
@@ -119,6 +123,20 @@ export default function HomeScreen() {
             </Text>
           )}
         </View>
+
+        {/* Badge Count */}
+        <Pressable
+          onPress={() => navigation.navigate('BadgeCollection')}
+          style={styles.badgeCountButton}
+          accessibilityRole="button"
+          accessibilityLabel={`${earnedBadgeCount} of ${BADGES.length} badges earned. View all badges.`}
+          testID="badge-count-button"
+        >
+          <Text style={styles.badgeCountEmoji}>{'\uD83C\uDFC5'}</Text>
+          <Text style={styles.badgeCountText}>
+            {earnedBadgeCount} / {BADGES.length} Badges
+          </Text>
+        </Pressable>
       </View>
 
       {/* Explore Section */}
@@ -263,6 +281,23 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.textSecondary,
     marginLeft: 28,
+  },
+  badgeCountButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: layout.borderRadius.lg,
+  },
+  badgeCountEmoji: {
+    fontSize: 20,
+  },
+  badgeCountText: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.md,
+    color: colors.textPrimary,
   },
   buttonSection: {
     paddingHorizontal: spacing.lg,

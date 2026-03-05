@@ -24,6 +24,11 @@ jest.mock('lucide-react-native', () => {
   };
 });
 
+// Mock achievement service
+jest.mock('@/services/achievement', () => ({
+  BADGES: Array.from({ length: 27 }, (_, i) => ({ id: `badge-${i}` })),
+}));
+
 // Mock ExploreGrid as a simple View with testID
 jest.mock('@/components/home', () => {
   const { View } = require('react-native');
@@ -52,6 +57,7 @@ function setMockState(overrides: Record<string, unknown> = {}) {
     exploredManipulatives: [],
     markExplored: jest.fn(),
     misconceptions: {},
+    earnedBadges: {},
     ...overrides,
   };
 }
@@ -241,5 +247,28 @@ describe('HomeScreen', () => {
         'subtraction.single',
       ]),
     });
+  });
+
+  // Badge count tests
+  it('shows badge count button with correct count', () => {
+    setMockState({
+      earnedBadges: {
+        'badge-0': { earnedAt: '2026-01-01' },
+        'badge-1': { earnedAt: '2026-01-02' },
+        'badge-2': { earnedAt: '2026-01-03' },
+      },
+    });
+
+    const { getByText } = render(<HomeScreen />);
+    expect(getByText('3 / 27 Badges')).toBeTruthy();
+  });
+
+  it('badge count button navigates to BadgeCollection', () => {
+    setMockState();
+
+    const { getByTestId } = render(<HomeScreen />);
+    fireEvent.press(getByTestId('badge-count-button'));
+
+    expect(mockNavigate).toHaveBeenCalledWith('BadgeCollection');
   });
 });

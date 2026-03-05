@@ -65,6 +65,27 @@ jest.mock('lucide-react-native', () => ({
   Check: () => 'Check',
 }));
 
+// Mock badge components
+jest.mock('@/components/animations/BadgeUnlockPopup', () => {
+  const { View } = require('react-native');
+  return {
+    BadgeUnlockPopup: ({ badgeIds }: any) =>
+      badgeIds.length > 0 ? (
+        <View testID="badge-unlock-popup" />
+      ) : null,
+  };
+});
+
+jest.mock('@/components/badges', () => {
+  const { View } = require('react-native');
+  return {
+    BadgesSummary: ({ badgeIds }: any) =>
+      badgeIds.length > 0 ? (
+        <View testID="badges-summary" />
+      ) : null,
+  };
+});
+
 import ResultsScreen from '@/screens/ResultsScreen';
 
 describe('ResultsScreen', () => {
@@ -335,5 +356,28 @@ describe('ResultsScreen', () => {
     expect(getByTestId('motivational-message').props.children).toBe(
       'Amazing!',
     );
+  });
+
+  // Badge integration tests
+  it('shows badge popup when newBadges present', () => {
+    mockRouteParams = { ...mockRouteParams, newBadges: ['badge-1'] };
+
+    const { getByTestId } = render(<ResultsScreen />);
+    expect(getByTestId('badge-unlock-popup')).toBeTruthy();
+  });
+
+  it('shows badges summary when newBadges present', () => {
+    mockRouteParams = { ...mockRouteParams, newBadges: ['badge-1'] };
+
+    const { getByTestId } = render(<ResultsScreen />);
+    expect(getByTestId('badges-summary')).toBeTruthy();
+  });
+
+  it('does not show badge popup or summary when newBadges is empty', () => {
+    mockRouteParams = { ...mockRouteParams, newBadges: [] };
+
+    const { queryByTestId } = render(<ResultsScreen />);
+    expect(queryByTestId('badge-unlock-popup')).toBeNull();
+    expect(queryByTestId('badges-summary')).toBeNull();
   });
 });
