@@ -386,4 +386,117 @@ describe('store migrations', () => {
     // v6->v7 misconceptions
     expect(result.misconceptions).toEqual({});
   });
+
+  // v8->v9 migration tests (achievement system)
+  it('migrateStore from version 8 initializes earnedBadges as empty object and sessionsCompleted as 0', () => {
+    const input = { childName: 'Luna', xp: 400, misconceptions: {} };
+    const result = migrateStore(input, 8);
+    expect(result.earnedBadges).toEqual({});
+    expect(result.sessionsCompleted).toBe(0);
+  });
+
+  it('migrateStore from version 8 preserves existing earnedBadges if present', () => {
+    const input = {
+      childName: 'Luna',
+      earnedBadges: {
+        'mastery.add-single': { earnedAt: '2026-03-01T00:00:00.000Z' },
+      },
+      sessionsCompleted: 5,
+    };
+    const result = migrateStore(input, 8);
+    expect(result.earnedBadges).toEqual({
+      'mastery.add-single': { earnedAt: '2026-03-01T00:00:00.000Z' },
+    });
+    expect(result.sessionsCompleted).toBe(5);
+  });
+
+  it('migrateStore from version 8 preserves all existing v8 state', () => {
+    const input = {
+      childName: 'Luna',
+      childAge: 7,
+      childGrade: 2,
+      avatarId: 'cat',
+      tutorConsentGranted: true,
+      xp: 500,
+      level: 5,
+      weeklyStreak: 3,
+      lastSessionDate: '2026-03-01',
+      exploredManipulatives: ['base-ten', 'number-line'],
+      skillStates: {
+        'add-single': {
+          eloRating: 1100, attempts: 20, correct: 15,
+          masteryProbability: 0.7, consecutiveWrong: 0, masteryLocked: false,
+          leitnerBox: 3, nextReviewDue: null, consecutiveCorrectInBox6: 0,
+          cpaLevel: 'pictorial',
+        },
+      },
+      misconceptions: {
+        'carry-error::add-double': {
+          bugTag: 'carry-error', skillId: 'add-double',
+          occurrenceCount: 2, status: 'suspected',
+          firstSeen: '2026-03-01', lastSeen: '2026-03-02',
+          remediationCorrectCount: 0,
+        },
+      },
+    };
+    const result = migrateStore(input, 8);
+
+    // All v8 fields preserved
+    expect(result.childName).toBe('Luna');
+    expect(result.childAge).toBe(7);
+    expect(result.childGrade).toBe(2);
+    expect(result.avatarId).toBe('cat');
+    expect(result.tutorConsentGranted).toBe(true);
+    expect(result.xp).toBe(500);
+    expect(result.level).toBe(5);
+    expect(result.weeklyStreak).toBe(3);
+    expect(result.lastSessionDate).toBe('2026-03-01');
+    expect(result.exploredManipulatives).toEqual(['base-ten', 'number-line']);
+
+    const skills = result.skillStates as Record<string, Record<string, unknown>>;
+    expect(skills['add-single'].eloRating).toBe(1100);
+    expect(skills['add-single'].cpaLevel).toBe('pictorial');
+
+    const misconceptions = result.misconceptions as Record<string, Record<string, unknown>>;
+    expect(misconceptions['carry-error::add-double'].bugTag).toBe('carry-error');
+    expect(misconceptions['carry-error::add-double'].status).toBe('suspected');
+
+    // New v9 fields
+    expect(result.earnedBadges).toEqual({});
+    expect(result.sessionsCompleted).toBe(0);
+  });
+
+  it('migrateStore chains v1->v9 correctly', () => {
+    const input = {
+      childName: 'Max',
+      skillStates: {
+        'add-double': { eloRating: 1100, attempts: 20, correct: 15 },
+      },
+    };
+    const result = migrateStore(input, 1);
+
+    // v1->v2 defaults
+    expect(result.childAge).toBeNull();
+    expect(result.xp).toBe(0);
+
+    // v2->v3 BKT defaults
+    const skills = result.skillStates as Record<string, Record<string, unknown>>;
+    expect(skills['add-double'].masteryProbability).toBe(0.1);
+
+    // v3->v4 Leitner defaults
+    expect(skills['add-double'].leitnerBox).toBe(1);
+
+    // v4->v5 CPA level
+    expect(skills['add-double'].cpaLevel).toBe('concrete');
+
+    // v5->v6 consent flag
+    expect(result.tutorConsentGranted).toBe(false);
+
+    // v6->v7 misconceptions
+    expect(result.misconceptions).toEqual({});
+
+    // v8->v9 achievement system
+    expect(result.earnedBadges).toEqual({});
+    expect(result.sessionsCompleted).toBe(0);
+  });
 });

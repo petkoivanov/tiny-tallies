@@ -30,6 +30,10 @@ import {
   type MisconceptionSlice,
   createMisconceptionSlice,
 } from './slices/misconceptionSlice';
+import {
+  type AchievementSlice,
+  createAchievementSlice,
+} from './slices/achievementSlice';
 import { migrateStore } from './migrations';
 
 export type AppState = ChildProfileSlice &
@@ -38,13 +42,14 @@ export type AppState = ChildProfileSlice &
   GamificationSlice &
   SandboxSlice &
   TutorSlice &
-  MisconceptionSlice;
+  MisconceptionSlice &
+  AchievementSlice;
 
 /**
  * Increment + add migration function when changing schema shape.
  * See CLAUDE.md guardrail: never bump version without a corresponding migration.
  */
-export const STORE_VERSION = 8;
+export const STORE_VERSION = 9;
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -56,6 +61,7 @@ export const useAppStore = create<AppState>()(
       ...createSandboxSlice(...a),
       ...createTutorSlice(...a),
       ...createMisconceptionSlice(...a),
+      ...createAchievementSlice(...a),
     }),
     {
       name: 'tiny-tallies-store',
@@ -75,6 +81,8 @@ export const useAppStore = create<AppState>()(
         lastSessionDate: state.lastSessionDate,
         exploredManipulatives: state.exploredManipulatives,
         misconceptions: state.misconceptions,
+        earnedBadges: state.earnedBadges,
+        sessionsCompleted: state.sessionsCompleted,
       }),
     },
   ),

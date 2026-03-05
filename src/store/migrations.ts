@@ -94,8 +94,14 @@ export function migrateStore(
     state.misconceptions = misconceptions;
   }
 
+  if (version < 9) {
+    // v8 -> v9: Add achievement system fields
+    state.earnedBadges ??= {};
+    state.sessionsCompleted ??= 0;
+  }
+
   // Future migrations chain here:
-  // if (version < 9) { ... }
+  // if (version < 10) { ... }
 
   return state;
 }
