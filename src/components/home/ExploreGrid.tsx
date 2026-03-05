@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { colors, spacing, typography } from '@/theme';
+import { useTheme, spacing, typography } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import type { ManipulativeType } from '@/services/cpa/cpaTypes';
 import { ExploreCard } from './ExploreCard';
@@ -23,6 +23,21 @@ const EXPLORE_ITEMS: ExploreItem[] = [
 ];
 
 export function ExploreGrid() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    header: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.xl,
+      color: colors.textPrimary,
+      marginBottom: spacing.md,
+    },
+    grid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.md,
+      justifyContent: 'space-between',
+    },
+  }), [colors]);
   const navigation = useNavigation();
   const exploredManipulatives = useAppStore(
     (state) => state.exploredManipulatives,
@@ -51,18 +66,3 @@ export function ExploreGrid() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  header: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.xl,
-    color: colors.textPrimary,
-    marginBottom: spacing.md,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
-    justifyContent: 'space-between',
-  },
-});

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 import { getBadgeById } from '@/services/achievement';
 import { BADGE_EMOJIS } from '@/components/badges';
 
@@ -25,6 +25,86 @@ export function CosmeticDetailOverlay({
   badgeId,
   itemType,
 }: CosmeticDetailOverlayProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    card: {
+      backgroundColor: colors.background,
+      borderRadius: layout.borderRadius.lg,
+      borderWidth: 2,
+      borderColor: colors.primary,
+      padding: spacing.lg,
+      alignItems: 'center',
+      width: '80%',
+      maxWidth: 320,
+    },
+    closeBtn: {
+      position: 'absolute',
+      top: spacing.sm,
+      right: spacing.sm,
+      width: 32,
+      height: 32,
+      borderRadius: layout.borderRadius.round,
+      backgroundColor: colors.surfaceLight,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    closeBtnText: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.sm,
+    },
+    itemEmoji: {
+      fontSize: 64,
+      textAlign: 'center',
+      marginTop: spacing.sm,
+    },
+    itemLabel: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.xl,
+      marginTop: spacing.sm,
+      textAlign: 'center',
+    },
+    typeLabel: {
+      color: colors.textMuted,
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.sm,
+      textAlign: 'center',
+    },
+    divider: {
+      width: '80%',
+      height: 1,
+      backgroundColor: colors.surfaceLight,
+      marginVertical: spacing.md,
+    },
+    unlockHeader: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.md,
+      textAlign: 'center',
+    },
+    badgeInfo: {
+      color: colors.primaryLight,
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.lg,
+      marginTop: spacing.sm,
+      textAlign: 'center',
+    },
+    progressHint: {
+      color: colors.textMuted,
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.sm,
+      marginTop: spacing.sm,
+      textAlign: 'center',
+    },
+  }), [colors]);
+
   if (!visible) return null;
 
   const badge = getBadgeById(badgeId);
@@ -73,82 +153,3 @@ export function CosmeticDetailOverlay({
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  card: {
-    backgroundColor: colors.background,
-    borderRadius: layout.borderRadius.lg,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    padding: spacing.lg,
-    alignItems: 'center',
-    width: '80%',
-    maxWidth: 320,
-  },
-  closeBtn: {
-    position: 'absolute',
-    top: spacing.sm,
-    right: spacing.sm,
-    width: 32,
-    height: 32,
-    borderRadius: layout.borderRadius.round,
-    backgroundColor: colors.surfaceLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  closeBtnText: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.sm,
-  },
-  itemEmoji: {
-    fontSize: 64,
-    textAlign: 'center',
-    marginTop: spacing.sm,
-  },
-  itemLabel: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.xl,
-    marginTop: spacing.sm,
-    textAlign: 'center',
-  },
-  typeLabel: {
-    color: colors.textMuted,
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.sm,
-    textAlign: 'center',
-  },
-  divider: {
-    width: '80%',
-    height: 1,
-    backgroundColor: colors.surfaceLight,
-    marginVertical: spacing.md,
-  },
-  unlockHeader: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.md,
-    textAlign: 'center',
-  },
-  badgeInfo: {
-    color: colors.primaryLight,
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.lg,
-    marginTop: spacing.sm,
-    textAlign: 'center',
-  },
-  progressHint: {
-    color: colors.textMuted,
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.sm,
-    marginTop: spacing.sm,
-    textAlign: 'center',
-  },
-});

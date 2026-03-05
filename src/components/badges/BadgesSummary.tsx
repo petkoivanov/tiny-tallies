@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, spacing, typography } from '@/theme';
+import { useTheme, spacing, typography } from '@/theme';
 import { getBadgeById } from '@/services/achievement';
 import { BadgeIcon } from './BadgeIcon';
 import { BADGE_EMOJIS } from './badgeEmojis';
@@ -17,6 +17,40 @@ interface BadgesSummaryProps {
  * Returns null when no badges earned (non-punitive design).
  */
 export function BadgesSummary({ badgeIds, onViewAll }: BadgesSummaryProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    divider: {
+      height: 1,
+      backgroundColor: colors.surfaceLight,
+    },
+    header: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.md,
+      color: colors.textSecondary,
+      paddingTop: spacing.md,
+      paddingBottom: spacing.sm,
+    },
+    badgeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      paddingVertical: spacing.xs,
+    },
+    badgeName: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.md,
+      color: colors.textPrimary,
+    },
+    viewAllButton: {
+      paddingVertical: spacing.md,
+    },
+    viewAllText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.sm,
+      color: colors.primaryLight,
+    },
+  }), [colors]);
+
   if (badgeIds.length === 0) {
     return null;
   }
@@ -41,36 +75,3 @@ export function BadgesSummary({ badgeIds, onViewAll }: BadgesSummaryProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  divider: {
-    height: 1,
-    backgroundColor: colors.surfaceLight,
-  },
-  header: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.md,
-    color: colors.textSecondary,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  badgeName: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.md,
-    color: colors.textPrimary,
-  },
-  viewAllButton: {
-    paddingVertical: spacing.md,
-  },
-  viewAllText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.sm,
-    color: colors.primaryLight,
-  },
-});

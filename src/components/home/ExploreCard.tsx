@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 import type { ManipulativeType } from '@/services/cpa/cpaTypes';
 
 interface ExploreCardProps {
@@ -19,6 +19,35 @@ export function ExploreCard({
   isNew,
   onPress,
 }: ExploreCardProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    card: {
+      width: '47%',
+      aspectRatio: 1,
+      borderRadius: layout.borderRadius.lg,
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    emoji: {
+      fontSize: 36,
+    },
+    name: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.md,
+      color: colors.textPrimary,
+    },
+    newDot: {
+      position: 'absolute',
+      top: spacing.sm,
+      right: spacing.sm,
+      width: 10,
+      height: 10,
+      borderRadius: layout.borderRadius.round,
+      backgroundColor: colors.primaryLight,
+    },
+  }), [colors]);
+
   return (
     <Pressable
       onPress={onPress}
@@ -36,31 +65,3 @@ export function ExploreCard({
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    width: '47%',
-    aspectRatio: 1,
-    borderRadius: layout.borderRadius.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  emoji: {
-    fontSize: 36,
-  },
-  name: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.md,
-    color: colors.textPrimary,
-  },
-  newDot: {
-    position: 'absolute',
-    top: spacing.sm,
-    right: spacing.sm,
-    width: 10,
-    height: 10,
-    borderRadius: layout.borderRadius.round,
-    backgroundColor: colors.primaryLight,
-  },
-});

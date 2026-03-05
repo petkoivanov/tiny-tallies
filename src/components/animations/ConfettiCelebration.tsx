@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -8,25 +8,17 @@ import Animated, {
   withRepeat,
   Easing,
 } from 'react-native-reanimated';
-import { colors } from '@/theme';
+import { useTheme } from '@/theme';
+import type { ThemeColors } from '@/theme';
 
 const PARTICLE_COUNT = 24;
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const FALL_DURATION = 2500;
 
-const CELEBRATION_COLORS = [
-  colors.correct,
-  colors.primaryLight,
-  colors.primary,
-  '#fbbf24', // amber
-  '#f472b6', // pink
-  '#34d399', // emerald
-];
-
 interface ParticleConfig {
   x: number;
   size: number;
-  color: string;
+  colorIndex: number;
   delay: number;
 }
 
@@ -36,14 +28,25 @@ function generateParticleConfigs(): ParticleConfig[] {
     configs.push({
       x: Math.random() * SCREEN_WIDTH,
       size: 8 + Math.random() * 6,
-      color: CELEBRATION_COLORS[i % CELEBRATION_COLORS.length],
+      colorIndex: i % 6,
       delay: Math.random() * 800,
     });
   }
   return configs;
 }
 
-function Particle({ config }: { config: ParticleConfig }) {
+function getCelebrationColors(colors: ThemeColors): string[] {
+  return [
+    colors.correct,
+    colors.primaryLight,
+    colors.primary,
+    '#fbbf24', // amber
+    '#f472b6', // pink
+    '#34d399', // emerald
+  ];
+}
+
+function Particle({ config, color }: { config: ParticleConfig; color: string }) {
   const translateY = useSharedValue(-20);
   const opacity = useSharedValue(1);
   const rotation = useSharedValue(0);
@@ -87,7 +90,7 @@ function Particle({ config }: { config: ParticleConfig }) {
           left: config.x,
           width: config.size,
           height: config.size * 1.4,
-          backgroundColor: config.color,
+          backgroundColor: color,
           borderRadius: config.size * 0.2,
         },
         animatedStyle,
@@ -99,10 +102,17 @@ function Particle({ config }: { config: ParticleConfig }) {
 const particleConfigs = generateParticleConfigs();
 
 export function ConfettiCelebration() {
+  const { colors } = useTheme();
+  const celebrationColors = useMemo(() => getCelebrationColors(colors), [colors]);
+
   return (
     <View style={styles.container} pointerEvents="none" testID="confetti-overlay">
       {particleConfigs.map((config, index) => (
-        <Particle key={index} config={config} />
+        <Particle
+          key={index}
+          config={config}
+          color={celebrationColors[config.colorIndex]}
+        />
       ))}
     </View>
   );

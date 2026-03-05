@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { BadgeIcon } from './BadgeIcon';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 import type { BadgeDefinition, UnlockCondition } from '@/services/achievement/badgeTypes';
 
 export interface BadgeDetailOverlayProps {
@@ -48,6 +48,68 @@ export function BadgeDetailOverlay({
   emoji,
   onClose,
 }: BadgeDetailOverlayProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: layout.borderRadius.lg,
+      padding: spacing.lg,
+      alignItems: 'center',
+      width: '80%',
+      maxWidth: 320,
+    },
+    closeBtn: {
+      position: 'absolute',
+      top: spacing.sm,
+      right: spacing.sm,
+      width: 32,
+      height: 32,
+      borderRadius: layout.borderRadius.round,
+      backgroundColor: colors.surfaceLight,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    closeBtnText: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.sm,
+    },
+    name: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.xl,
+      marginTop: spacing.md,
+      textAlign: 'center',
+    },
+    description: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.md,
+      marginTop: spacing.sm,
+      textAlign: 'center',
+    },
+    requirement: {
+      color: colors.textMuted,
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.sm,
+      marginTop: spacing.sm,
+      textAlign: 'center',
+    },
+    earnedDate: {
+      color: colors.primaryLight,
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.sm,
+      marginTop: spacing.md,
+      textAlign: 'center',
+    },
+  }), [colors]);
+
   if (!badge) return null;
 
   return (
@@ -83,64 +145,3 @@ export function BadgeDetailOverlay({
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: layout.borderRadius.lg,
-    padding: spacing.lg,
-    alignItems: 'center',
-    width: '80%',
-    maxWidth: 320,
-  },
-  closeBtn: {
-    position: 'absolute',
-    top: spacing.sm,
-    right: spacing.sm,
-    width: 32,
-    height: 32,
-    borderRadius: layout.borderRadius.round,
-    backgroundColor: colors.surfaceLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  closeBtnText: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.sm,
-  },
-  name: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.xl,
-    marginTop: spacing.md,
-    textAlign: 'center',
-  },
-  description: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.md,
-    marginTop: spacing.sm,
-    textAlign: 'center',
-  },
-  requirement: {
-    color: colors.textMuted,
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.sm,
-    marginTop: spacing.sm,
-    textAlign: 'center',
-  },
-  earnedDate: {
-    color: colors.primaryLight,
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.sm,
-    marginTop: spacing.md,
-    textAlign: 'center',
-  },
-});

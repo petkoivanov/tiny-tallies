@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Animated, StyleSheet, Text } from 'react-native';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 
 interface SandboxTooltipProps {
   message: string;
@@ -8,6 +8,25 @@ interface SandboxTooltipProps {
 }
 
 export function SandboxTooltip({ message, onDismiss }: SandboxTooltipProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      position: 'absolute',
+      top: spacing.lg,
+      alignSelf: 'center',
+      backgroundColor: 'rgba(15, 52, 96, 0.9)',
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      borderRadius: layout.borderRadius.lg,
+      zIndex: 10,
+    },
+    text: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.md,
+      color: colors.textPrimary,
+      textAlign: 'center',
+    },
+  }), [colors]);
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -27,22 +46,3 @@ export function SandboxTooltip({ message, onDismiss }: SandboxTooltipProps) {
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    top: spacing.lg,
-    alignSelf: 'center',
-    backgroundColor: 'rgba(15, 52, 96, 0.9)',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: layout.borderRadius.lg,
-    zIndex: 10,
-  },
-  text: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.md,
-    color: colors.textPrimary,
-    textAlign: 'center',
-  },
-});

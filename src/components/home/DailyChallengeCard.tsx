@@ -1,22 +1,25 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Check } from 'lucide-react-native';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { getTodaysChallenge, getTodayDateKey } from '@/services/challenge';
 import type { ChallengeCompletion } from '@/services/challenge';
+import type { ThemeColors } from '@/theme';
 
 function ActiveChallengeContent({
   emoji,
   name,
   accuracyTarget,
   streakTarget,
+  styles,
 }: {
   emoji: string;
   name: string;
   accuracyTarget: number;
   streakTarget: number;
+  styles: ReturnType<typeof createStyles>;
 }) {
   return (
     <>
@@ -39,10 +42,14 @@ function CompletedChallengeContent({
   emoji,
   name,
   completion,
+  colors,
+  styles,
 }: {
   emoji: string;
   name: string;
   completion: ChallengeCompletion;
+  colors: ThemeColors;
+  styles: ReturnType<typeof createStyles>;
 }) {
   return (
     <>
@@ -95,8 +102,102 @@ function CompletedChallengeContent({
   );
 }
 
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: layout.borderRadius.lg,
+      padding: spacing.lg,
+      borderWidth: 2,
+      borderColor: colors.primaryLight,
+    },
+    cardCompleted: {
+      borderColor: colors.correct,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      marginBottom: spacing.sm,
+    },
+    emoji: {
+      fontSize: 32,
+    },
+    headerText: {
+      flex: 1,
+    },
+    title: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.lg,
+      color: colors.textPrimary,
+    },
+    subtitle: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.sm,
+      color: colors.textSecondary,
+    },
+    completeLabel: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.sm,
+      color: colors.correct,
+    },
+    goalText: {
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.md,
+      color: colors.textSecondary,
+      marginBottom: spacing.sm,
+    },
+    statusText: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.sm,
+      color: colors.textSecondary,
+    },
+    completedStats: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.lg,
+      marginBottom: spacing.sm,
+    },
+    scoreText: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.xl,
+      color: colors.textPrimary,
+    },
+    bonusXpText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.md,
+      color: colors.primaryLight,
+    },
+    goalsRow: {
+      flexDirection: 'row',
+      gap: spacing.lg,
+    },
+    goalItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    goalDot: {
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      backgroundColor: colors.surfaceLight,
+    },
+    goalLabel: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.sm,
+      color: colors.textSecondary,
+    },
+    goalLabelMet: {
+      color: colors.correct,
+    },
+  });
+}
+
 export function DailyChallengeCard() {
   const navigation = useNavigation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const challengeCompletions = useAppStore((s) => s.challengeCompletions);
 
   const todayKey = getTodayDateKey();
@@ -131,6 +232,8 @@ export function DailyChallengeCard() {
           emoji={theme.emoji}
           name={theme.name}
           completion={completion}
+          colors={colors}
+          styles={styles}
         />
       ) : (
         <ActiveChallengeContent
@@ -138,98 +241,9 @@ export function DailyChallengeCard() {
           name={theme.name}
           accuracyTarget={theme.goals.accuracyTarget}
           streakTarget={theme.goals.streakTarget}
+          styles={styles}
         />
       )}
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: layout.borderRadius.lg,
-    padding: spacing.lg,
-    borderWidth: 2,
-    borderColor: colors.primaryLight,
-  },
-  cardCompleted: {
-    borderColor: colors.correct,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  emoji: {
-    fontSize: 32,
-  },
-  headerText: {
-    flex: 1,
-  },
-  title: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.lg,
-    color: colors.textPrimary,
-  },
-  subtitle: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
-  },
-  completeLabel: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.sm,
-    color: colors.correct,
-  },
-  goalText: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.md,
-    color: colors.textSecondary,
-    marginBottom: spacing.sm,
-  },
-  statusText: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
-  },
-  completedStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.lg,
-    marginBottom: spacing.sm,
-  },
-  scoreText: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.xl,
-    color: colors.textPrimary,
-  },
-  bonusXpText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.md,
-    color: colors.primaryLight,
-  },
-  goalsRow: {
-    flexDirection: 'row',
-    gap: spacing.lg,
-  },
-  goalItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  goalDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: colors.surfaceLight,
-  },
-  goalLabel: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
-  },
-  goalLabelMet: {
-    color: colors.correct,
-  },
-});

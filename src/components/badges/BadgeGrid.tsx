@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { BadgeIcon } from './BadgeIcon';
 import { BADGE_EMOJIS } from './badgeEmojis';
 import { getBadgesByCategory } from '@/services/achievement/badgeRegistry';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 import type { BadgeDefinition } from '@/services/achievement/badgeTypes';
 import type { EarnedBadge } from '@/store/slices/achievementSlice';
 
@@ -56,6 +56,47 @@ function getShortRequirement(badge: BadgeDefinition): string {
 }
 
 export function BadgeGrid({ earnedBadges, onBadgePress }: BadgeGridProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    section: {
+      marginBottom: spacing.lg,
+    },
+    sectionTitle: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.lg,
+      marginBottom: spacing.md,
+    },
+    grid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+    },
+    item: {
+      width: '33%',
+      alignItems: 'center',
+      marginBottom: spacing.md,
+      paddingHorizontal: spacing.xs,
+    },
+    badgeName: {
+      fontSize: typography.fontSize.xs,
+      fontFamily: typography.fontFamily.medium,
+      marginTop: spacing.xs,
+      textAlign: 'center',
+    },
+    badgeNameEarned: {
+      color: colors.textPrimary,
+    },
+    badgeNameLocked: {
+      color: colors.textMuted,
+    },
+    requirement: {
+      color: colors.textMuted,
+      fontSize: 10,
+      fontFamily: typography.fontFamily.regular,
+      textAlign: 'center',
+      marginTop: 2,
+    },
+  }), [colors]);
   const sections = buildSections();
 
   return (
@@ -106,44 +147,3 @@ export function BadgeGrid({ earnedBadges, onBadgePress }: BadgeGridProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    marginBottom: spacing.lg,
-  },
-  sectionTitle: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.lg,
-    marginBottom: spacing.md,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  item: {
-    width: '33%',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-    paddingHorizontal: spacing.xs,
-  },
-  badgeName: {
-    fontSize: typography.fontSize.xs,
-    fontFamily: typography.fontFamily.medium,
-    marginTop: spacing.xs,
-    textAlign: 'center',
-  },
-  badgeNameEarned: {
-    color: colors.textPrimary,
-  },
-  badgeNameLocked: {
-    color: colors.textMuted,
-  },
-  requirement: {
-    color: colors.textMuted,
-    fontSize: 10,
-    fontFamily: typography.fontFamily.regular,
-    textAlign: 'center',
-    marginTop: 2,
-  },
-});

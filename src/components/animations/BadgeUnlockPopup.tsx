@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -8,7 +8,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 import { getBadgeById } from '@/services/achievement';
 import { BadgeIcon, BADGE_EMOJIS } from '@/components/badges';
 import { getCosmeticUnlockText } from '@/store/constants/avatars';
@@ -28,6 +28,61 @@ const GLOW_SIZE = 120;
  * Tap to advance through badges, then closes via onComplete.
  */
 export function BadgeUnlockPopup({ badgeIds, onComplete }: BadgeUnlockPopupProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    },
+    card: {
+      alignItems: 'center',
+      padding: spacing.xxl,
+      gap: spacing.md,
+      zIndex: 1,
+    },
+    glow: {
+      position: 'absolute',
+      top: spacing.xxl - 12,
+      width: GLOW_SIZE,
+      height: GLOW_SIZE,
+      borderRadius: layout.borderRadius.round,
+      backgroundColor: colors.primaryLight,
+    },
+    badgeName: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.display,
+      color: colors.textPrimary,
+      textAlign: 'center',
+    },
+    badgeDescription: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.md,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      maxWidth: 260,
+    },
+    cosmeticText: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.sm,
+      color: '#ffd700',
+      textAlign: 'center',
+      maxWidth: 260,
+    },
+    hintText: {
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.sm,
+      color: colors.textSecondary,
+      position: 'absolute',
+      bottom: 80,
+      zIndex: 1,
+    },
+  }), [colors]);
+
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const backdropOpacity = useSharedValue(0);
@@ -127,57 +182,3 @@ export function BadgeUnlockPopup({ badgeIds, onComplete }: BadgeUnlockPopupProps
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  },
-  card: {
-    alignItems: 'center',
-    padding: spacing.xxl,
-    gap: spacing.md,
-    zIndex: 1,
-  },
-  glow: {
-    position: 'absolute',
-    top: spacing.xxl - 12,
-    width: GLOW_SIZE,
-    height: GLOW_SIZE,
-    borderRadius: layout.borderRadius.round,
-    backgroundColor: colors.primaryLight,
-  },
-  badgeName: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.display,
-    color: colors.textPrimary,
-    textAlign: 'center',
-  },
-  badgeDescription: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.md,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    maxWidth: 260,
-  },
-  cosmeticText: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.sm,
-    color: '#ffd700',
-    textAlign: 'center',
-    maxWidth: 260,
-  },
-  hintText: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
-    position: 'absolute',
-    bottom: 80,
-    zIndex: 1,
-  },
-});

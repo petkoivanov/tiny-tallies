@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, layout } from '@/theme';
+import { useTheme, layout } from '@/theme';
 import type { BadgeTier } from '@/services/achievement/badgeTypes';
 
 const DEFAULT_SIZE = 64;
@@ -27,6 +27,19 @@ export interface BadgeIconProps {
  * When earned=true, full opacity with tier-colored border.
  */
 export function BadgeIcon({ emoji, earned, size = DEFAULT_SIZE, tier }: BadgeIconProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    circle: {
+      backgroundColor: colors.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 2,
+    },
+    emoji: {
+      textAlign: 'center',
+    },
+  }), [colors]);
+
   const borderColor = earned
     ? (tier ? TIER_BORDER_COLORS[tier] : colors.primaryLight)
     : colors.surfaceLight;
@@ -51,15 +64,3 @@ export function BadgeIcon({ emoji, earned, size = DEFAULT_SIZE, tier }: BadgeIco
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  circle: {
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-  },
-  emoji: {
-    textAlign: 'center',
-  },
-});

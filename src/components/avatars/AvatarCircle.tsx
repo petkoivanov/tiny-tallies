@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -8,7 +8,7 @@ import Animated, {
   withSequence,
   Easing,
 } from 'react-native-reanimated';
-import { colors } from '@/theme';
+import { useTheme } from '@/theme';
 
 export interface AvatarCircleProps {
   emoji: string;
@@ -27,6 +27,33 @@ export function AvatarCircle({
   isSpecial,
   onPress,
 }: AvatarCircleProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    wrapper: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    touchTarget: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    circle: {
+      backgroundColor: colors.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    emoji: {
+      textAlign: 'center',
+    },
+    sparkleContainer: {
+      position: 'absolute',
+    },
+    sparkle: {
+      position: 'absolute',
+      fontSize: 14,
+    },
+  }), [colors]);
+
   const rotation = useSharedValue(0);
   const sparkleOpacity = useSharedValue(0.4);
 
@@ -141,29 +168,3 @@ export function AvatarCircle({
 
   return content;
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  touchTarget: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  circle: {
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emoji: {
-    textAlign: 'center',
-  },
-  sparkleContainer: {
-    position: 'absolute',
-  },
-  sparkle: {
-    position: 'absolute',
-    fontSize: 14,
-  },
-});
