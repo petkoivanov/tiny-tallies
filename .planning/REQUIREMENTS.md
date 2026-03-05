@@ -85,41 +85,41 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PREP-01 | — | Pending |
-| ACHV-01 | — | Pending |
-| ACHV-02 | — | Pending |
-| ACHV-03 | — | Pending |
-| ACHV-04 | — | Pending |
-| ACHV-05 | — | Pending |
-| ACHV-06 | — | Pending |
-| ACHV-07 | — | Pending |
-| ACHV-08 | — | Pending |
-| SMAP-01 | — | Pending |
-| SMAP-02 | — | Pending |
-| SMAP-03 | — | Pending |
-| SMAP-04 | — | Pending |
-| CHAL-01 | — | Pending |
-| CHAL-02 | — | Pending |
-| CHAL-03 | — | Pending |
-| CHAL-04 | — | Pending |
-| CHAL-05 | — | Pending |
-| CHAL-06 | — | Pending |
-| CHAL-07 | — | Pending |
-| AVTR-01 | — | Pending |
-| AVTR-02 | — | Pending |
-| AVTR-03 | — | Pending |
-| AVTR-04 | — | Pending |
-| THME-01 | — | Pending |
-| THME-02 | — | Pending |
-| THME-03 | — | Pending |
-| THME-04 | — | Pending |
-| THME-05 | — | Pending |
+| PREP-01 | Phase 31 | Pending |
+| ACHV-01 | Phase 32 | Pending |
+| ACHV-02 | Phase 32 | Pending |
+| ACHV-03 | Phase 32 | Pending |
+| ACHV-04 | Phase 33 | Pending |
+| ACHV-05 | Phase 33 | Pending |
+| ACHV-06 | Phase 33 | Pending |
+| ACHV-07 | Phase 33 | Pending |
+| ACHV-08 | Phase 33 | Pending |
+| SMAP-01 | Phase 34 | Pending |
+| SMAP-02 | Phase 34 | Pending |
+| SMAP-03 | Phase 34 | Pending |
+| SMAP-04 | Phase 34 | Pending |
+| CHAL-01 | Phase 35 | Pending |
+| CHAL-02 | Phase 35 | Pending |
+| CHAL-03 | Phase 35 | Pending |
+| CHAL-04 | Phase 35 | Pending |
+| CHAL-05 | Phase 35 | Pending |
+| CHAL-06 | Phase 35 | Pending |
+| CHAL-07 | Phase 35 | Pending |
+| AVTR-01 | Phase 36 | Pending |
+| AVTR-02 | Phase 36 | Pending |
+| AVTR-03 | Phase 36 | Pending |
+| AVTR-04 | Phase 36 | Pending |
+| THME-01 | Phase 37 | Pending |
+| THME-02 | Phase 37 | Pending |
+| THME-03 | Phase 37 | Pending |
+| THME-04 | Phase 37 | Pending |
+| THME-05 | Phase 37 | Pending |
 
 **Coverage:**
 - v0.7 requirements: 29 total
-- Mapped to phases: 0
-- Unmapped: 29 ⚠️
+- Mapped to phases: 29
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-04*
-*Last updated: 2026-03-04 after initial definition*
+*Last updated: 2026-03-04 after roadmap creation*

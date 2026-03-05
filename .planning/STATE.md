@@ -5,9 +5,9 @@ milestone_name: Gamification
 status: active
 stopped_at: null
 last_updated: "2026-03-04T00:00:00.000Z"
-last_activity: 2026-03-04 -- Milestone v0.7 started
+last_activity: 2026-03-04 -- Roadmap created for v0.7 (7 phases, 29 requirements)
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.7 Gamification
+**Current focus:** v0.7 Gamification -- Phase 31 (Pre-work -- Screen Refactoring)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-04 — Milestone v0.7 started
+Phase: 31 of 37 (Pre-work -- Screen Refactoring)
+Plan: --
+Status: Ready to plan
+Last activity: 2026-03-04 -- Roadmap created for v0.7 Gamification
 
 Progress: [░░░░░░░░░░] 0% of v0.7
 
@@ -39,16 +39,11 @@ Progress: [░░░░░░░░░░] 0% of v0.7
 - v0.3: 15 plans in 2 days
 - v0.4: 17 plans in 1 day
 - v0.5: 13 plans in 1 day
+- v0.6: 7 plans in 1 day
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
-| 26-01 | misconceptionSlice | 3min | 2 | 6 |
-| 26-02 | session recording | 4min | 2 | 2 |
-| 27-01 | confirmation engine | 2min | 2 | 2 |
-| 28-01 | session mix adaptation | 7min | 2 | 6 |
-| 29-01 | tutor misconception context | 3min | 2 | 5 |
-| 30-01 | remediation session engine | 8min | 2 | 12 |
-| 30-02 | remediation UI wiring | 4min | 2 | 7 |
+| -- | -- | -- | -- | -- |
 
 ## Accumulated Context
 
@@ -56,47 +51,16 @@ Progress: [░░░░░░░░░░] 0% of v0.7
 
 Full decision log in PROJECT.md Key Decisions table.
 
-Key context for v0.6:
-- STORE_VERSION = 8 (bumped from 7 for remediationCorrectCount field)
-- misconceptionSlice persisted via partialize (sessionRecordedKeys excluded -- ephemeral)
-- Selectors are standalone functions, not slice actions
-- Composite key format: ${bugTag}::${skillId}
-- tutorSlice is ephemeral -- misconceptionSlice WILL need persistence (unlike tutor)
-- Bug Library has 11 misconception patterns with three-phase distractor assembly
-- BKT tracks per-skill mastery with age-adjusted parameters
-- Session orchestrator builds 15-problem queues with 60/30/10 mix
-- AI tutor (v0.5) already uses bug tags for per-problem explanations
-- LLM must NEVER compute math or reveal answers in HINT mode
+Key context for v0.7:
+- STORE_VERSION = 8 (will bump to 9 for achievements, 10 for daily challenges)
+- SessionScreen at 552 lines -- must refactor below 500 before gamification work
+- All gamification cosmetics earned through achievements, zero paywall
+- No coins, no virtual currency, no competitive leaderboards
+- Badge system is the unlock mechanism for avatars, frames, and themes
+- Themes must come last (StyleSheet.create is hostile to dynamic theming)
+- Skill map reads existing SKILLS DAG + BKT data, independent of badge system
+- No new npm dependencies required for v0.7
 - 1,148 tests passing, TypeScript clean
-- recordMisconception called in useSession handleAnswer on wrong answers with bugId
-- resetSessionDedup called on session initialization
-- 2-then-3 confirmation rule: check confirmed FIRST so count=3 goes straight to confirmed
-- suspectedAt/confirmedAt/resolvedAt timestamps use nullish coalescing for idempotent assignment
-- Status transitions: new -> suspected -> confirmed -> resolved (no regression except confirmed->resolved via remediation)
-- getConfirmedMisconceptions, getSuspectedMisconceptions, getMisconceptionCounts selectors exported
-- PracticeProblemCategory now includes 'remediation' alongside review/new/challenge
-- Remediation replaces review slots only (max 3), preserving new and challenge allocations
-- BKT-inverse weighted selection for >3 confirmed misconception skills
-- Remediation uses standard gaussian-targeted template selection (not challenge)
-- constrainedShuffle warm-start accepts both review and remediation categories
-- Pipeline: useSession reads misconceptions -> extracts unique confirmed skillIds -> generateSessionQueue -> generatePracticeMix
-- Confirmed misconceptions sorted by occurrenceCount descending for prompt inclusion (most frequent = most important)
-- ConfirmedMisconceptionContext type: bugTag + description only (no PII)
-- Per-mode misconception guidance: HINT steers away, TEACH addresses step-by-step, BOOST explains why
-- Cap at 3 confirmed misconceptions per prompt to control prompt length
-- confirmedMisconceptions omitted from promptParams when empty (clean prompts for no-misconception skills)
-- REMEDIATION_SESSION_CONFIG: 0 warmup + 5 practice + 0 cooldown
-- SessionMode type: 'standard' | 'remediation'
-- remediationCorrectCount tracked per MisconceptionRecord, RESOLUTION_THRESHOLD = 3
-- recordRemediationCorrect operates on all confirmed records for a skillId
-- generateSessionQueue remediationOnly mode bypasses 60/30/10 mix, fills all slots from confirmed skills
-- useSession accepts optional { mode, remediationSkillIds } with backward compatibility
-- selectRemediationSkillIds exported from practiceMix for remediation-only queue generation
-- Session route params extended with mode and remediationSkillIds for remediation navigation
-- Results route params extended with isRemediation for messaging differentiation
-- HomeScreen shows "Practice Tricky Skills" button when 2+ confirmed misconceptions (non-resolved)
-- Remediation Results show "Great focus!" instead of score-based motivational message
-- isRemediation derived from sessionMode in SessionScreen (single source of truth)
 
 ### Pending Todos
 
@@ -104,11 +68,12 @@ None.
 
 ### Blockers/Concerns
 
-None.
+- Skill map SVG rendering needs performance validation spike on low-end Android (target < 500ms TTI)
+- Theme system `createThemedStyles` factory approach needs validation vs. hook-per-component
 
 ## Session Continuity
 
-Last session: 2026-03-05T01:22:10.000Z
-Stopped at: Completed 30-02-PLAN.md
+Last session: 2026-03-04
+Stopped at: Roadmap created for v0.7 Gamification
 Resume file: None
-Resume command: Milestone v0.6 complete
+Resume command: /gsd:plan-phase 31
