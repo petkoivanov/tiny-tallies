@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v0.7
 milestone_name: Gamification
-status: completed
-stopped_at: Phase 36 context gathered
-last_updated: "2026-03-05T17:32:27.245Z"
-last_activity: 2026-03-05 -- Completed Phase 35 Plan 02 (Challenge session UI)
+status: in-progress
+stopped_at: Completed 36-01 avatar data layer and AvatarCircle
+last_updated: "2026-03-05T19:12:46Z"
+last_activity: 2026-03-05 -- Completed Phase 36 Plan 01 (Avatar data layer and AvatarCircle)
 progress:
   total_phases: 7
   completed_phases: 5
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.7 Gamification -- Phase 35 (Daily Challenges)
+**Current focus:** v0.7 Gamification -- Phase 36 (Avatars & Frames)
 
 ## Current Position
 
-Phase: 35 of 37 (Daily Challenges)
-Plan: 2 of 2 complete
-Status: Complete
-Last activity: 2026-03-05 -- Completed Phase 35 Plan 02 (Challenge session UI)
+Phase: 36 of 37 (Avatars & Frames)
+Plan: 1 of 2 complete
+Status: In Progress
+Last activity: 2026-03-05 -- Completed Phase 36 Plan 01 (Avatar data layer and AvatarCircle)
 
-Progress: [##########] 100% of Phase 35 (2/2 plans)
+Progress: [#####-----] 50% of Phase 36 (1/2 plans)
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [##########] 100% of Phase 35 (2/2 plans)
 | 34 | P03 | 3m50s | 2 | 5 |
 | 35 | P01 | 11m52s | 2 | 15 |
 | Phase 35 PP02 | 11m10s | 2 tasks | 12 files |
+| 36 | P01 | 5m2s | 2 | 11 |
 
 ## Accumulated Context
 
@@ -112,6 +113,10 @@ Key context for v0.7:
 - [Phase 35 P02]: 1,336 tests passing, TypeScript clean (2 pre-existing TS2366 errors in badge UI)
 - [Phase 35]: Challenge mode uses remediationOnly=true path in generateSessionQueue for theme-filtered skills
 - [Phase 35]: commitChallengeCompletion extracted as helper to keep useSession under 500 lines
+- [Phase 36 P01]: STORE_VERSION = 11 with frameId persisted via partialize
+- [Phase 36 P01]: 14 regular + 5 special avatars + 6 frames, all with typed IDs and badge-unlock mapping
+- [Phase 36 P01]: AvatarCircle component: sparkle animation (4s rotation + 1s opacity pulse), optional frame border, conditional Pressable
+- [Phase 36 P01]: resolveAvatar returns widened { id, label, emoji } type for simpler consumer usage
 
 ### Pending Todos
 
@@ -124,7 +129,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05T17:32:27.243Z
-Stopped at: Phase 36 context gathered
-Resume file: .planning/phases/36-avatars-frames/36-CONTEXT.md
-Resume command: /gsd:execute-phase 35
+Last session: 2026-03-05T19:12:46Z
+Stopped at: Completed 36-01 avatar data layer and AvatarCircle
+Resume file: .planning/phases/36-avatars-frames/36-01-SUMMARY.md
+Resume command: /gsd:execute-phase 36
