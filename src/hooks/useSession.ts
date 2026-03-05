@@ -352,6 +352,7 @@ export function useSession(options?: {
             durationMs,
             pendingUpdates: new Map(pendingUpdatesRef.current),
             feedback: feedbackWithCpa,
+            newBadges: [],
           });
         } else {
           setCurrentIndex(nextIndex);

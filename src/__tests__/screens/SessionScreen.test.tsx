@@ -515,6 +515,7 @@ describe('SessionScreen', () => {
           streakCount: 2,
           practicedThisWeek: true,
         },
+        newBadges: [],
       },
     };
 
@@ -557,6 +558,7 @@ describe('SessionScreen', () => {
           streakCount: 1,
           practicedThisWeek: true,
         },
+        newBadges: [],
       },
     };
     mockRouteParams = {
@@ -586,6 +588,7 @@ describe('SessionScreen', () => {
         durationMs: 90000,
         pendingUpdates: new Map(),
         feedback: null,
+        newBadges: [],
       },
     };
 

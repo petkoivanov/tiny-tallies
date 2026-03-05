@@ -26,8 +26,10 @@ export type RootStackParamList = {
     streakCount: number;
     cpaAdvances: Array<{ skillId: string; from: CpaStage; to: CpaStage }>;
     isRemediation?: boolean;
+    newBadges?: string[];
   };
   Sandbox: { manipulativeType: ManipulativeType };
+  BadgeCollection: undefined;
   Consent: { returnTo?: 'Session' } | undefined;
 };
 

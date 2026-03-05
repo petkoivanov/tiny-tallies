@@ -91,4 +91,5 @@ export interface SessionResult {
   durationMs: number;
   pendingUpdates: Map<string, PendingSkillUpdate>;
   feedback: SessionFeedback | null;
+  newBadges: string[];
 }
