@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.6
 milestone_name: Misconception Detection
-status: in_progress
-stopped_at: Completed 30-01-PLAN.md
-last_updated: "2026-03-05T01:16:53.998Z"
-last_activity: 2026-03-04 -- Phase 30 Plan 01 complete (remediation session engine)
+status: complete
+stopped_at: Completed 30-02-PLAN.md
+last_updated: "2026-03-05T01:22:10.000Z"
+last_activity: 2026-03-04 -- Phase 30 complete (remediation mini-sessions)
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -20,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** Phase 30 -- remediation mini-sessions (Plan 01 complete, Plan 02 pending)
+**Current focus:** Milestone v0.6 complete -- all phases finished
 
 ## Current Position
 
 Phase: 30 of 30 (Remediation Mini-Sessions)
-Plan: 1 of 2 in current phase
-Status: Plan 01 complete
-Last activity: 2026-03-04 -- Phase 30 Plan 01 complete (remediation session engine)
+Plan: 2 of 2 in current phase
+Status: Phase 30 complete -- milestone v0.6 complete
+Last activity: 2026-03-04 -- Phase 30 Plan 02 complete (remediation UI wiring)
 
-Progress: [██████████] 96% of v0.6
+Progress: [██████████] 100% of v0.6
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Progress: [██████████] 96% of v0.6
 | 28-01 | session mix adaptation | 7min | 2 | 6 |
 | 29-01 | tutor misconception context | 3min | 2 | 5 |
 | 30-01 | remediation session engine | 8min | 2 | 12 |
+| 30-02 | remediation UI wiring | 4min | 2 | 7 |
 
 ## Accumulated Context
 
@@ -66,7 +67,7 @@ Key context for v0.6:
 - Session orchestrator builds 15-problem queues with 60/30/10 mix
 - AI tutor (v0.5) already uses bug tags for per-problem explanations
 - LLM must NEVER compute math or reveal answers in HINT mode
-- 1,139 tests passing, TypeScript clean
+- 1,148 tests passing, TypeScript clean
 - recordMisconception called in useSession handleAnswer on wrong answers with bugId
 - resetSessionDedup called on session initialization
 - 2-then-3 confirmation rule: check confirmed FIRST so count=3 goes straight to confirmed
@@ -91,6 +92,11 @@ Key context for v0.6:
 - generateSessionQueue remediationOnly mode bypasses 60/30/10 mix, fills all slots from confirmed skills
 - useSession accepts optional { mode, remediationSkillIds } with backward compatibility
 - selectRemediationSkillIds exported from practiceMix for remediation-only queue generation
+- Session route params extended with mode and remediationSkillIds for remediation navigation
+- Results route params extended with isRemediation for messaging differentiation
+- HomeScreen shows "Practice Tricky Skills" button when 2+ confirmed misconceptions (non-resolved)
+- Remediation Results show "Great focus!" instead of score-based motivational message
+- isRemediation derived from sessionMode in SessionScreen (single source of truth)
 
 ### Pending Todos
 
@@ -102,7 +108,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05T01:16:53.996Z
-Stopped at: Completed 30-01-PLAN.md
+Last session: 2026-03-05T01:22:10.000Z
+Stopped at: Completed 30-02-PLAN.md
 Resume file: None
-Resume command: /gsd:execute-phase 30
+Resume command: Milestone v0.6 complete
