@@ -7,7 +7,7 @@
 - ✅ **v0.3 Adaptive Learning Engine** — Phases 11-14 (shipped 2026-03-03)
 - ✅ **v0.4 Virtual Manipulatives** — Phases 15-20 (shipped 2026-03-04)
 - ✅ **v0.5 AI Tutor** — Phases 21-25 (shipped 2026-03-04)
-- 🚧 **v0.6 Misconception Detection** — Phases 26-30 (in progress)
+- ✅ **v0.6 Misconception Detection** — Phases 26-30 (shipped 2026-03-05)
 
 ## Phases
 
@@ -66,82 +66,16 @@
 
 </details>
 
-### 🚧 v0.6 Misconception Detection (In Progress)
+<details>
+<summary>✅ v0.6 Misconception Detection (Phases 26-30) — SHIPPED 2026-03-05</summary>
 
-**Milestone Goal:** Track misconception patterns across sessions using the 2-then-3 confirmation rule, store misconception history per child, and deliver targeted interventions -- shifting from reactive per-problem feedback to systematic misconception remediation.
+- [x] Phase 26: Misconception Store & Recording (2/2 plans) — completed 2026-03-04
+- [x] Phase 27: Confirmation Engine (1/1 plans) — completed 2026-03-04
+- [x] Phase 28: Session Mix Adaptation (1/1 plans) — completed 2026-03-04
+- [x] Phase 29: AI Tutor Misconception Context (1/1 plans) — completed 2026-03-04
+- [x] Phase 30: Remediation Mini-Sessions (2/2 plans) — completed 2026-03-05
 
-- [x] **Phase 26: Misconception Store & Recording** - Store slice, migration, and per-answer bug tag recording (completed 2026-03-04)
-- [x] **Phase 27: Confirmation Engine** - 2-then-3 confirmation rule and misconception history with status tracking (completed 2026-03-04)
-- [x] **Phase 28: Session Mix Adaptation** - Session orchestrator prioritizes skills with confirmed misconceptions (completed 2026-03-04)
-- [x] **Phase 29: AI Tutor Misconception Context** - Tutor prompts enriched with cross-session misconception data (completed 2026-03-04)
-- [x] **Phase 30: Remediation Mini-Sessions** - Dedicated remediation flow for accumulated confirmed misconceptions (completed 2026-03-05)
-
-## Phase Details
-
-### Phase 26: Misconception Store & Recording
-**Goal**: Every wrong answer's Bug Library tag is captured and persisted, surviving app restarts
-**Depends on**: Phase 25 (v0.5 complete)
-**Requirements**: STATE-01, STATE-02, MISC-01
-**Success Criteria** (what must be TRUE):
-  1. A misconceptionSlice exists in the Zustand store with persistence enabled and a store migration from STORE_VERSION 6 to 7
-  2. Each misconception record contains bugTag, skillId, occurrenceCount, status, and timestamps as defined in STATE-02
-  3. When a child answers incorrectly and the answer matches a Bug Library pattern, the corresponding bug tag is recorded in the misconception store
-  4. Misconception records survive app restart (persisted via AsyncStorage)
-**Plans**: 2 plans
-Plans:
-- [ ] 26-01-PLAN.md — misconceptionSlice with types, store composition, migration, and TDD tests
-- [ ] 26-02-PLAN.md — Wire misconception recording into useSession answer flow
-
-### Phase 27: Confirmation Engine
-**Goal**: The system distinguishes suspected from confirmed misconceptions using cross-session pattern analysis
-**Depends on**: Phase 26
-**Requirements**: MISC-02, MISC-03
-**Success Criteria** (what must be TRUE):
-  1. After 2 occurrences of the same bug tag for a skill, the misconception status is set to "suspected"
-  2. After 3 occurrences of the same bug tag for a skill, the misconception status is set to "confirmed"
-  3. Misconception history per child includes timestamps for each occurrence and the current confirmation status
-  4. Confirmation logic operates across sessions (occurrences from different sessions are aggregated)
-**Plans**: 1 plan
-Plans:
-- [ ] 27-01-PLAN.md — 2-then-3 confirmation rule, status timestamps, and status-filtered selectors (TDD)
-
-### Phase 28: Session Mix Adaptation
-**Goal**: Practice sessions automatically prioritize skills where the child has confirmed misconceptions
-**Depends on**: Phase 27
-**Requirements**: INTV-01
-**Success Criteria** (what must be TRUE):
-  1. The session orchestrator injects remediation problems for skills with confirmed misconceptions into the practice queue
-  2. Remediation problems appear in the practice segment (not warmup or cooldown), replacing some of the normal 60/30/10 mix
-  3. Skills with confirmed misconceptions receive higher selection weight than standard review skills
-**Plans**: 1 plan
-Plans:
-- [ ] 28-01-PLAN.md — Remediation injection into practice mix with category type, threading through session orchestrator and useSession
-
-### Phase 29: AI Tutor Misconception Context
-**Goal**: The AI tutor knows about a child's confirmed misconceptions and addresses them specifically in explanations
-**Depends on**: Phase 27
-**Requirements**: INTV-02
-**Success Criteria** (what must be TRUE):
-  1. When generating tutor prompts, confirmed misconception data (bug tag, skill, confirmation status) is included in the LLM context
-  2. The tutor's explanations for problems on skills with confirmed misconceptions address the specific misunderstanding pattern rather than giving generic help
-  3. No child PII is included in the misconception context sent to the LLM (COPPA compliance maintained)
-**Plans**: 1 plan
-Plans:
-- [ ] 29-01-PLAN.md — Extend PromptParams with confirmed misconception context, per-mode guidance in prompt builders, store-to-prompt wiring in useTutor
-
-### Phase 30: Remediation Mini-Sessions
-**Goal**: Children with multiple confirmed misconceptions can enter a focused remediation session that targets those specific gaps
-**Depends on**: Phase 27, Phase 28
-**Requirements**: INTV-03
-**Success Criteria** (what must be TRUE):
-  1. When a child has 2 or more confirmed misconceptions, a remediation mini-session option becomes available
-  2. The remediation session contains problems specifically targeting the confirmed misconception skills (not the normal 60/30/10 mix)
-  3. Completing remediation problems contributes to reducing misconception occurrence counts (progress toward clearing the misconception)
-  4. The remediation flow uses the existing session UI and math engine (no LLM-generated problems)
-**Plans**: 2 plans
-Plans:
-- [ ] 30-01-PLAN.md — Store resolution tracking, remediation config, queue generation, and useSession mode support
-- [ ] 30-02-PLAN.md — HomeScreen entry point, navigation params, SessionScreen threading, Results messaging
+</details>
 
 ## Progress
 
@@ -172,8 +106,8 @@ Plans:
 | 23. Chat UI & HINT Mode | v0.5 | 2/2 | Complete | 2026-03-04 |
 | 24. TEACH, BOOST & Auto-Escalation | v0.5 | 3/3 | Complete | 2026-03-04 |
 | 25. Consent Gate & Minor Fixes | v0.5 | 2/2 | Complete | 2026-03-04 |
-| 26. Misconception Store & Recording | 2/2 | Complete    | 2026-03-04 | - |
-| 27. Confirmation Engine | 1/1 | Complete    | 2026-03-04 | - |
-| 28. Session Mix Adaptation | 1/1 | Complete    | 2026-03-04 | - |
-| 29. AI Tutor Misconception Context | 1/1 | Complete    | 2026-03-04 | - |
-| 30. Remediation Mini-Sessions | 2/2 | Complete    | 2026-03-05 | - |
+| 26. Misconception Store & Recording | v0.6 | 2/2 | Complete | 2026-03-04 |
+| 27. Confirmation Engine | v0.6 | 1/1 | Complete | 2026-03-04 |
+| 28. Session Mix Adaptation | v0.6 | 1/1 | Complete | 2026-03-04 |
+| 29. AI Tutor Misconception Context | v0.6 | 1/1 | Complete | 2026-03-04 |
+| 30. Remediation Mini-Sessions | v0.6 | 2/2 | Complete | 2026-03-05 |

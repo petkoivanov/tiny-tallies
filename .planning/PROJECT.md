@@ -2,7 +2,7 @@
 
 ## What This Is
 
-An AI-powered math learning mobile app for children ages 6-9 (grades 1-3). Features adaptive daily practice sessions with programmatic problem generation, misconception-based distractors via Bug Library pattern, Elo-based adaptive difficulty, gamification (XP/levels/streaks), polished UI with animated feedback, a full adaptive learning engine (BKT, Leitner spaced repetition, prerequisite graph, smart session orchestration), six interactive virtual manipulatives with CPA progression (Concrete → Pictorial → Abstract), and an on-demand AI tutor powered by Gemini that provides Socratic hints, CPA-aware teaching with manipulative integration, and deep scaffolding — auto-escalating support based on struggle level with full COPPA-compliant safety pipeline. Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
+An AI-powered math learning mobile app for children ages 6-9 (grades 1-3). Features adaptive daily practice sessions with programmatic problem generation, misconception-based distractors via Bug Library pattern, Elo-based adaptive difficulty, gamification (XP/levels/streaks), polished UI with animated feedback, a full adaptive learning engine (BKT, Leitner spaced repetition, prerequisite graph, smart session orchestration), six interactive virtual manipulatives with CPA progression (Concrete → Pictorial → Abstract), an on-demand AI tutor powered by Gemini that provides Socratic hints, CPA-aware teaching with manipulative integration, and deep scaffolding — auto-escalating support based on struggle level with full COPPA-compliant safety pipeline, and a cross-session misconception detection system with 2-then-3 confirmation, adaptive session mix, tutor context enrichment, and dedicated remediation mini-sessions. Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
 
 ## Core Value
 
@@ -40,25 +40,15 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - ✓ Bug Library misconception-informed tutor explanations — v0.5
 - ✓ Parental consent gate with PIN verification for COPPA compliance — v0.5
 
+- ✓ Cross-session misconception tracking with 2-then-3 confirmation — v0.6
+- ✓ Misconception history in store with persistence (STORE_VERSION 6→8) — v0.6
+- ✓ Session mix adaptation for confirmed misconceptions (BKT-inverse weighted) — v0.6
+- ✓ AI tutor misconception-aware explanations (per-mode guidance, no PII) — v0.6
+- ✓ Remediation mini-sessions (5-problem dedicated practice, resolution at 3 correct) — v0.6
+
 ### Active
 
-## Current Milestone: v0.6 Misconception Detection
-
-**Goal:** Track misconception patterns across sessions using the 2-then-3 confirmation rule, store misconception history per child, and deliver targeted interventions — shifting from reactive per-problem feedback to systematic misconception remediation.
-
-**Target features:**
-- Cross-session misconception pattern tracking (which Bug Library tags a child triggers over time)
-- 2-then-3 confirmation rule: 2 occurrences = suspected, 3 = confirmed misconception
-- Misconception history persisted in child profile (store)
-- Targeted interventions: session mix prioritization for confirmed misconceptions
-- AI tutor context enrichment with confirmed misconception data
-- Remediation mini-sessions for confirmed misconceptions
-
-- [ ] Cross-session misconception tracking with 2-then-3 confirmation
-- [ ] Misconception history in store with persistence
-- [ ] Session mix adaptation for confirmed misconceptions
-- [ ] AI tutor misconception-aware explanations
-- [ ] Remediation flow for confirmed misconceptions
+(Next milestone requirements TBD — run `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -73,7 +63,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ## Context
 
-**Current state:** Shipped v0.5 AI Tutor with ~29,092 LOC TypeScript. 1,051 tests passing. Full adaptive learning pipeline + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor with three-mode auto-escalation (HINT/TEACH/BOOST), Gemini LLM backend, multi-layer safety pipeline, and COPPA-compliant parental consent gate.
+**Current state:** Shipped v0.6 Misconception Detection with ~31,380 LOC TypeScript. 1,148 tests passing. Full adaptive learning pipeline + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor with three-mode auto-escalation (HINT/TEACH/BOOST), Gemini LLM backend, multi-layer safety pipeline, COPPA-compliant parental consent gate, and cross-session misconception detection with confirmation engine, adaptive session mix, tutor context enrichment, and remediation mini-sessions.
 
 **Architecture (implemented through v0.4):**
 - Programmatic math engine: 14 skills across addition/subtraction (Common Core grades 1-3)
@@ -103,12 +93,17 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - Rate limiting: 3/problem, 20/session, 50/day configurable thresholds
 - COPPA: parental PIN consent gate via expo-secure-store, no child PII sent to LLM
 
-**Architecture (planned, future milestones):**
-- Misconception detection system with Bug Library interventions (2-then-3 confirmation)
+**Architecture (implemented in v0.6):**
+- misconceptionSlice: persisted Zustand slice with MisconceptionRecord (bugTag, skillId, occurrenceCount, status, timestamps, remediationCorrectCount)
+- 2-then-3 confirmation engine: suspected at 2, confirmed at 3, resolved after 3 remediation correct answers
+- Session mix adaptation: remediation category replaces review slots (max 3), BKT-inverse weighted skill selection for >3 confirmed
+- AI tutor misconception context: ConfirmedMisconceptionContext (bugTag + description, no PII), per-mode guidance, capped at 3 per prompt
+- Remediation mini-sessions: REMEDIATION_SESSION_CONFIG (0+5+0), remediationOnly queue mode, HomeScreen entry at 2+ confirmed
+- STORE_VERSION 8 with v6→v7 (misconceptions map) and v7→v8 (remediationCorrectCount) migrations
 
 **Tech stack:**
 - React Native 0.81.5 / Expo 54 / TypeScript 5.9 (strict mode)
-- Zustand 5 for state management (domain slices pattern)
+- Zustand 5 for state management (domain slices pattern, STORE_VERSION=8)
 - React Navigation 7 native-stack
 - react-native-gesture-handler + react-native-reanimated (manipulatives, 60fps)
 - Gemini (@google/genai v1.43.0) for LLM tutoring layer
@@ -172,6 +167,15 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | BoostPromptParams type-safe answer isolation | Only BOOST mode type contains correctAnswer field | ✓ Good — TypeScript prevents accidental answer exposure |
 | Parental PIN consent gate | COPPA VPC requirement; PIN via expo-secure-store | ✓ Good — persists across restarts, swipe-back prevention |
 | Non-streaming Gemini calls | Simpler implementation, streaming deferred to future | ✓ Good — stable primary path for v0.5 |
+| 2-then-3 confirmation rule | 2=suspected, 3=confirmed; balances false positives vs early detection | ✓ Good — simple, pedagogically sound |
+| Composite key (bugTag::skillId) | Misconceptions are skill-specific, not global | ✓ Good — precise tracking |
+| Session deduplication | Same misconception counted at most once per session | ✓ Good — prevents inflated counts from repeated errors |
+| One-way status transitions (new→suspected→confirmed→resolved) | No regression — once confirmed, stays confirmed until remediated | ✓ Good — stable progression |
+| Remediation replaces review slots only (max 3) | Preserves new/challenge allocations; keeps sessions balanced | ✓ Good — targeted without overwhelming |
+| BKT-inverse weighted remediation selection | Lowest-mastery misconception skills prioritized | ✓ Good — focuses on biggest gaps |
+| Resolution threshold of 3 correct | Three correct answers in remediation clears confirmed→resolved | ✓ Good — achievable but meaningful |
+| Per-mode misconception guidance in tutor | HINT steers away, TEACH addresses step-by-step, BOOST explains why | ✓ Good — pedagogically differentiated |
+| Cap 3 misconceptions per prompt | Controls prompt length, focuses on most frequent | ✓ Good — balanced signal-to-noise |
 
 ---
-*Last updated: 2026-03-04 after v0.6 milestone started*
+*Last updated: 2026-03-05 after v0.6 milestone complete*

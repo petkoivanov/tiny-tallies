@@ -1,5 +1,22 @@
 # Milestones
 
+## v0.6 Misconception Detection (Shipped: 2026-03-05)
+
+**Phases completed:** 5 phases, 7 plans, 14 tasks
+**Timeline:** 1 day (2026-03-04 → 2026-03-05)
+**LOC:** ~31,380 TypeScript | 44 commits
+**Tests:** 1,148 passing
+
+**Key accomplishments:**
+- Misconception detection pipeline: Bug Library tags recorded on every wrong answer, deduplicated per session, persisted across sessions with store migration v6→v8
+- 2-then-3 confirmation engine: suspected at 2 occurrences, confirmed at 3, with status-filtered selectors and cross-session aggregation
+- Adaptive session mix: confirmed misconceptions auto-inject remediation problems into practice queue (replacing review slots, BKT-inverse weighted selection)
+- AI tutor misconception context: all three modes (HINT/TEACH/BOOST) receive confirmed misconception data with mode-specific pedagogical guidance (no PII)
+- Remediation mini-sessions: dedicated 5-problem practice targeting confirmed misconception skills, with resolution tracking (3 correct → resolved)
+- HomeScreen "Practice Tricky Skills" entry point visible when 2+ confirmed misconceptions, with remediation-specific Results messaging
+
+---
+
 ## v0.5 AI Tutor (Shipped: 2026-03-04)
 
 **Phases completed:** 5 phases, 13 plans
