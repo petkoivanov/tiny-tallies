@@ -33,11 +33,11 @@ Requirements for gamification milestone. Each maps to roadmap phases.
 
 - [x] **CHAL-01**: Daily challenge system with theme + skill filter + goal type definitions
 - [x] **CHAL-02**: Challenges rotate daily via date-seeded PRNG (fully offline)
-- [ ] **CHAL-03**: User can play themed challenge sets (Addition Adventure, Subtraction Sprint, etc.)
-- [ ] **CHAL-04**: User can attempt streak/accuracy goals with bonus XP rewards
+- [x] **CHAL-03**: User can play themed challenge sets (Addition Adventure, Subtraction Sprint, etc.)
+- [x] **CHAL-04**: User can attempt streak/accuracy goals with bonus XP rewards
 - [x] **CHAL-05**: Challenge-specific special badges awarded on completion
-- [ ] **CHAL-06**: Daily challenge card on home screen with progress display
-- [ ] **CHAL-07**: Non-punitive design (no "missed" messaging, zero penalty for skipping)
+- [x] **CHAL-06**: Daily challenge card on home screen with progress display
+- [x] **CHAL-07**: Non-punitive design (no "missed" messaging, zero penalty for skipping)
 
 ### Avatars & Frames
 
@@ -100,11 +100,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SMAP-04 | Phase 34 | Complete |
 | CHAL-01 | Phase 35 | Complete |
 | CHAL-02 | Phase 35 | Complete |
-| CHAL-03 | Phase 35 | Pending |
-| CHAL-04 | Phase 35 | Pending |
+| CHAL-03 | Phase 35 | Complete |
+| CHAL-04 | Phase 35 | Complete |
 | CHAL-05 | Phase 35 | Complete |
-| CHAL-06 | Phase 35 | Pending |
-| CHAL-07 | Phase 35 | Pending |
+| CHAL-06 | Phase 35 | Complete |
+| CHAL-07 | Phase 35 | Complete |
 | AVTR-01 | Phase 36 | Pending |
 | AVTR-02 | Phase 36 | Pending |
 | AVTR-03 | Phase 36 | Pending |

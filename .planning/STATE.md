@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.7
 milestone_name: Gamification
-status: in-progress
-stopped_at: Completed 35-01-PLAN.md
-last_updated: "2026-03-05T16:34:13.000Z"
+status: executing
+stopped_at: Completed 35-02-PLAN.md
+last_updated: "2026-03-05T17:16:11.048Z"
 last_activity: 2026-03-05 -- Completed Phase 35 Plan 01 (Challenge service layer)
 progress:
   total_phases: 7
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 11
-  completed_plans: 10
-  percent: 100
+  completed_plans: 11
+  percent: 50
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 35 of 37 (Daily Challenges)
-Plan: 1 of 2 complete
-Status: In Progress
-Last activity: 2026-03-05 -- Completed Phase 35 Plan 01 (Challenge service layer)
+Plan: 2 of 2 complete
+Status: Complete
+Last activity: 2026-03-05 -- Completed Phase 35 Plan 02 (Challenge session UI)
 
-Progress: [#####-----] 50% of Phase 35 (1/2 plans)
+Progress: [##########] 100% of Phase 35 (2/2 plans)
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [#####-----] 50% of Phase 35 (1/2 plans)
 | 34 | P02 | 6m32s | 2 | 7 |
 | 34 | P03 | 3m50s | 2 | 5 |
 | 35 | P01 | 11m52s | 2 | 15 |
+| Phase 35 PP02 | 11m10s | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,11 @@ Key context for v0.7:
 - [Phase 35 P01]: STORE_VERSION = 10 with challengeCompletions and challengesCompleted persisted via partialize
 - [Phase 35 P01]: 4 challenge badges (challenges-completed and perfect-challenge condition types), 31 badges total
 - [Phase 35 P01]: 1,314 tests passing, TypeScript clean (2 pre-existing TS2366 errors in badge UI)
+- [Phase 35 P02]: Challenge mode reuses remediationOnly=true path for theme-filtered 10-problem sessions
+- [Phase 35 P02]: commitChallengeCompletion extracted as helper to keep useSession under 500 lines
+- [Phase 35 P02]: 1,336 tests passing, TypeScript clean (2 pre-existing TS2366 errors in badge UI)
+- [Phase 35]: Challenge mode uses remediationOnly=true path in generateSessionQueue for theme-filtered skills
+- [Phase 35]: commitChallengeCompletion extracted as helper to keep useSession under 500 lines
 
 ### Pending Todos
 
@@ -118,7 +124,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05T16:34:13.000Z
-Stopped at: Completed 35-01-PLAN.md
-Resume file: .planning/phases/35-daily-challenges/35-02-PLAN.md
+Last session: 2026-03-05T17:16:11.046Z
+Stopped at: Completed 35-02-PLAN.md
+Resume file: None
 Resume command: /gsd:execute-phase 35

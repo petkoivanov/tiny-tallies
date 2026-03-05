@@ -86,7 +86,7 @@
 - [x] **Phase 32: Achievement System Foundation** - Badge registry, evaluation engine, and store persistence (data layer) (completed 2026-03-05)
 - [x] **Phase 33: Badge UI & Session Integration** - Badge display components, popup animations, and Results/Home screen wiring (completed 2026-03-05)
 - [x] **Phase 34: Visual Skill Map** - Interactive DAG visualization of prerequisite skills with mastery states (completed 2026-03-05)
-- [ ] **Phase 35: Daily Challenges** - Date-seeded themed challenge sessions with bonus XP and non-punitive design
+- [x] **Phase 35: Daily Challenges** - Date-seeded themed challenge sessions with bonus XP and non-punitive design (completed 2026-03-05)
 - [ ] **Phase 36: Avatars & Frames** - Expanded avatar pool with achievement-unlockable special avatars and frame decorations
 - [ ] **Phase 37: UI Themes** - Dynamic color theming with ThemeProvider, theme picker, and session cosmetic wrappers
 
@@ -160,7 +160,7 @@ Plans:
   3. User can attempt streak/accuracy goals with bonus XP rewards and challenge-specific special badges on completion
   4. Home screen displays a daily challenge card showing today's challenge with progress
   5. Skipping or missing a challenge produces zero negative messaging and no penalty (non-punitive design)
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 35-01-PLAN.md -- Challenge service (types, themes, date-seeded rotation, skill filtering), store slice with v10 migration, badge extension (4 challenge badges)
@@ -230,6 +230,6 @@ Phases execute in numeric order: 31 -> 32 -> 33 -> 34 -> 35 -> 36 -> 37
 | 32. Achievement System Foundation | v0.7 | 2/2 | Complete | 2026-03-05 |
 | 33. Badge UI & Session Integration | 3/3 | Complete    | 2026-03-05 | - |
 | 34. Visual Skill Map | 3/3 | Complete    | 2026-03-05 | - |
-| 35. Daily Challenges | 1/2 | In Progress|  | - |
+| 35. Daily Challenges | 2/2 | Complete   | 2026-03-05 | - |
 | 36. Avatars & Frames | v0.7 | 0/0 | Not started | - |
 | 37. UI Themes | v0.7 | 0/0 | Not started | - |
