@@ -111,8 +111,13 @@ export function migrateStore(
     state.frameId ??= null;
   }
 
+  if (version < 12) {
+    // v11 -> v12: Add theme selection to child profile
+    state.themeId ??= 'dark';
+  }
+
   // Future migrations chain here:
-  // if (version < 12) { ... }
+  // if (version < 13) { ... }
 
   return state;
 }

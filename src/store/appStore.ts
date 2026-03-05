@@ -54,7 +54,7 @@ export type AppState = ChildProfileSlice &
  * Increment + add migration function when changing schema shape.
  * See CLAUDE.md guardrail: never bump version without a corresponding migration.
  */
-export const STORE_VERSION = 11;
+export const STORE_VERSION = 12;
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -80,6 +80,7 @@ export const useAppStore = create<AppState>()(
         childGrade: state.childGrade,
         avatarId: state.avatarId,
         frameId: state.frameId,
+        themeId: state.themeId,
         tutorConsentGranted: state.tutorConsentGranted,
         skillStates: state.skillStates,
         xp: state.xp,
