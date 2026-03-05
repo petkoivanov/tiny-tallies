@@ -8,6 +8,8 @@ export type MisconceptionStatus = 'new' | 'suspected' | 'confirmed' | 'resolved'
 export const SUSPECTED_THRESHOLD = 2;
 /** Cross-session occurrence count to transition from suspected to confirmed */
 export const CONFIRMED_THRESHOLD = 3;
+/** Remediation correct answers needed to resolve a confirmed misconception */
+export const RESOLUTION_THRESHOLD = 3;
 
 /** Aggregate record per bugTag+skillId composite key */
 export interface MisconceptionRecord {
@@ -19,6 +21,8 @@ export interface MisconceptionRecord {
   lastSeen: string; // ISO string
   suspectedAt?: string; // ISO string, set when status transitions to 'suspected'
   confirmedAt?: string; // ISO string, set when status transitions to 'confirmed'
+  remediationCorrectCount: number; // correct answers in remediation sessions
+  resolvedAt?: string; // ISO string, set when status transitions to 'resolved'
 }
 
 export interface MisconceptionSlice {
@@ -27,6 +31,7 @@ export interface MisconceptionSlice {
   /** Ephemeral session dedup — NOT persisted */
   sessionRecordedKeys: string[];
   recordMisconception: (bugTag: string, skillId: string) => void;
+  recordRemediationCorrect: (skillId: string) => void;
   resetSessionDedup: () => void;
 }
 
@@ -69,6 +74,7 @@ export const createMisconceptionSlice: StateCreator<
             status: 'new',
             firstSeen: now,
             lastSeen: now,
+            remediationCorrectCount: 0,
           };
 
       // 2-then-3 confirmation rule: check confirmed FIRST so a record
@@ -101,6 +107,37 @@ export const createMisconceptionSlice: StateCreator<
         },
         sessionRecordedKeys: [...state.sessionRecordedKeys, key],
       };
+    }),
+
+  recordRemediationCorrect: (skillId) =>
+    set((state) => {
+      const updatedMisconceptions = { ...state.misconceptions };
+      let changed = false;
+
+      for (const key of Object.keys(updatedMisconceptions)) {
+        const record = updatedMisconceptions[key];
+        if (record.skillId !== skillId || record.status !== 'confirmed') continue;
+
+        changed = true;
+        const now = new Date().toISOString();
+        const newCount = record.remediationCorrectCount + 1;
+
+        if (newCount >= RESOLUTION_THRESHOLD) {
+          updatedMisconceptions[key] = {
+            ...record,
+            remediationCorrectCount: newCount,
+            status: 'resolved',
+            resolvedAt: record.resolvedAt ?? now,
+          };
+        } else {
+          updatedMisconceptions[key] = {
+            ...record,
+            remediationCorrectCount: newCount,
+          };
+        }
+      }
+
+      return changed ? { misconceptions: updatedMisconceptions } : state;
     }),
 
   resetSessionDedup: () => set({ sessionRecordedKeys: [] }),

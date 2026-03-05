@@ -82,8 +82,20 @@ export function migrateStore(
     state.misconceptions ??= {};
   }
 
+  if (version < 8) {
+    // v7 -> v8: Add remediationCorrectCount to existing misconception records
+    const misconceptions = (state.misconceptions ?? {}) as Record<
+      string,
+      Record<string, unknown>
+    >;
+    for (const key of Object.keys(misconceptions)) {
+      misconceptions[key].remediationCorrectCount ??= 0;
+    }
+    state.misconceptions = misconceptions;
+  }
+
   // Future migrations chain here:
-  // if (version < 8) { ... }
+  // if (version < 9) { ... }
 
   return state;
 }

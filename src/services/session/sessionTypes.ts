@@ -19,6 +19,16 @@ export const DEFAULT_SESSION_CONFIG: Readonly<SessionConfig> = {
   cooldownCount: 3,
 };
 
+/** Session mode: standard practice or focused remediation */
+export type SessionMode = 'standard' | 'remediation';
+
+/** Remediation session: 5 practice problems only, no warmup/cooldown */
+export const REMEDIATION_SESSION_CONFIG: Readonly<SessionConfig> = {
+  warmupCount: 0,
+  practiceCount: 5,
+  cooldownCount: 0,
+};
+
 /** A single problem in the session queue with phase and presentation metadata */
 export interface SessionProblem {
   readonly problem: Problem;
