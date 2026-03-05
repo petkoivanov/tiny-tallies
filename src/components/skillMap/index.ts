@@ -17,3 +17,4 @@ export {
 export { SkillMapNode } from './SkillMapNode';
 export { SkillMapEdge } from './SkillMapEdge';
 export { SkillMapGraph } from './SkillMapGraph';
+export { SkillDetailOverlay } from './SkillDetailOverlay';

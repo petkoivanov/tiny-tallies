@@ -66,6 +66,7 @@ jest.mock('lucide-react-native', () => {
     ChevronLeft: (props: any) => (
       <View testID="chevron-left-icon" {...props} />
     ),
+    Star: (props: any) => <View testID="star-icon" {...props} />,
   };
 });
 
@@ -162,5 +163,64 @@ describe('SkillMapScreen', () => {
     // Tap targets for 14 skill nodes should exist
     const tapTargets = getAllByTestId(/^node-tap-/);
     expect(tapTargets).toHaveLength(14);
+  });
+
+  it('opens detail overlay when node is tapped', () => {
+    const { getByTestId, queryByText, getByText } = render(
+      <SkillMapScreen />,
+    );
+
+    const container = getByTestId('skill-map-container');
+
+    // Trigger layout event
+    act(() => {
+      fireEvent(container, 'layout', {
+        nativeEvent: { layout: { width: 400, height: 700 } },
+      });
+    });
+
+    // No overlay content visible initially
+    expect(queryByText('Add within 10')).toBeNull();
+
+    // Tap the first addition skill node
+    const tapTarget = getByTestId('node-tap-addition.single-digit.no-carry');
+    act(() => {
+      fireEvent.press(tapTarget);
+    });
+
+    // Overlay should now show the skill name
+    expect(getByText('Add within 10')).toBeTruthy();
+  });
+
+  it('closes detail overlay when backdrop pressed', () => {
+    const { getByTestId, queryByText, getByText } = render(
+      <SkillMapScreen />,
+    );
+
+    const container = getByTestId('skill-map-container');
+
+    // Trigger layout event
+    act(() => {
+      fireEvent(container, 'layout', {
+        nativeEvent: { layout: { width: 400, height: 700 } },
+      });
+    });
+
+    // Open the overlay
+    const tapTarget = getByTestId('node-tap-addition.single-digit.no-carry');
+    act(() => {
+      fireEvent.press(tapTarget);
+    });
+
+    expect(getByText('Add within 10')).toBeTruthy();
+
+    // Press backdrop to close
+    const backdrop = getByTestId('overlay-backdrop');
+    act(() => {
+      fireEvent.press(backdrop);
+    });
+
+    // Overlay should be dismissed
+    expect(queryByText('Add within 10')).toBeNull();
   });
 });

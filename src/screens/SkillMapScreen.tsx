@@ -16,6 +16,7 @@ import { useAppStore } from '@/store/appStore';
 import { getOuterFringe } from '@/services/adaptive/prerequisiteGating';
 import { colors, spacing, typography, layout } from '@/theme';
 import { SkillMapGraph } from '@/components/skillMap/SkillMapGraph';
+import { SkillDetailOverlay } from '@/components/skillMap/SkillDetailOverlay';
 
 export default function SkillMapScreen() {
   const insets = useSafeAreaInsets();
@@ -42,9 +43,6 @@ export default function SkillMapScreen() {
 
   const hasDimensions = containerSize.width > 0 && containerSize.height > 0;
   const canRender = hasDimensions && ready;
-
-  // selectedSkillId will be used by Plan 03's detail overlay
-  void selectedSkillId;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -84,6 +82,13 @@ export default function SkillMapScreen() {
           />
         )}
       </View>
+
+      {/* Detail overlay (renders above everything via React Native Modal) */}
+      <SkillDetailOverlay
+        skillId={selectedSkillId}
+        skillStates={skillStates}
+        onClose={() => setSelectedSkillId(null)}
+      />
     </View>
   );
 }
