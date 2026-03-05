@@ -9,7 +9,7 @@ Requirements for gamification milestone. Each maps to roadmap phases.
 
 ### Prep
 
-- [ ] **PREP-01**: SessionScreen refactored below 500-line guardrail (currently 552 lines)
+- [x] **PREP-01**: SessionScreen refactored below 500-line guardrail (currently 552 lines)
 
 ### Achievements
 
@@ -85,7 +85,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PREP-01 | Phase 31 | Pending |
+| PREP-01 | Phase 31 | Complete |
 | ACHV-01 | Phase 32 | Pending |
 | ACHV-02 | Phase 32 | Pending |
 | ACHV-03 | Phase 32 | Pending |

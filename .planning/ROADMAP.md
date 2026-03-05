@@ -82,7 +82,7 @@
 
 **Milestone Goal:** Deep gamification layer -- achievement badges, visual skill map, daily challenges, avatar customization, and unlockable themes -- building intrinsic motivation through progression and personalization.
 
-- [ ] **Phase 31: Pre-work -- Screen Refactoring** - Refactor SessionScreen below 500-line guardrail before adding gamification code
+- [x] **Phase 31: Pre-work -- Screen Refactoring** - Refactor SessionScreen below 500-line guardrail before adding gamification code (completed 2026-03-05)
 - [ ] **Phase 32: Achievement System Foundation** - Badge registry, evaluation engine, and store persistence (data layer)
 - [ ] **Phase 33: Badge UI & Session Integration** - Badge display components, popup animations, and Results/Home screen wiring
 - [ ] **Phase 34: Visual Skill Map** - Interactive DAG visualization of prerequisite skills with mastery states
@@ -99,7 +99,7 @@
 **Success Criteria** (what must be TRUE):
   1. SessionScreen file is under 500 lines with no behavioral changes to existing functionality
   2. Extracted components and hooks are individually importable and tested
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 31-01-PLAN.md -- Extract useChatOrchestration hook + SessionHeader component, refactor SessionScreen, update tests
@@ -208,7 +208,7 @@ Phases execute in numeric order: 31 -> 32 -> 33 -> 34 -> 35 -> 36 -> 37
 | 28. Session Mix Adaptation | v0.6 | 1/1 | Complete | 2026-03-04 |
 | 29. AI Tutor Misconception Context | v0.6 | 1/1 | Complete | 2026-03-04 |
 | 30. Remediation Mini-Sessions | v0.6 | 2/2 | Complete | 2026-03-05 |
-| 31. Pre-work -- Screen Refactoring | v0.7 | 0/1 | In progress | - |
+| 31. Pre-work -- Screen Refactoring | 1/1 | Complete   | 2026-03-05 | - |
 | 32. Achievement System Foundation | v0.7 | 0/0 | Not started | - |
 | 33. Badge UI & Session Integration | v0.7 | 0/0 | Not started | - |
 | 34. Visual Skill Map | v0.7 | 0/0 | Not started | - |
