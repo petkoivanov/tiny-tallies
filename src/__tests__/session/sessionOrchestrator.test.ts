@@ -5,6 +5,7 @@ import {
   selectEasiestTemplate,
   commitSessionResults,
   DEFAULT_SESSION_CONFIG,
+  REMEDIATION_SESSION_CONFIG,
   STRENGTH_BASELINE,
 } from '@/services/session';
 import type { PendingSkillUpdate } from '@/services/session';
@@ -1215,6 +1216,98 @@ describe('sessionOrchestrator', () => {
       expect(mocks.updateSkillState).toHaveBeenCalledWith('skill-abstract', expect.objectContaining({
         cpaLevel: 'abstract',
       }));
+    });
+  });
+
+  describe('remediation-only mode', () => {
+    it('produces exactly 5 problems with REMEDIATION_SESSION_CONFIG and remediationOnly=true', () => {
+      const skillStates: Record<string, SkillState> = {
+        'add-2digit': { eloRating: 1000, attempts: 10, correct: 7, lastPracticed: null, ...bkt },
+        'sub-2digit': { eloRating: 900, attempts: 8, correct: 4, lastPracticed: null, ...bkt },
+        'mul-single': { eloRating: 800, attempts: 6, correct: 3, lastPracticed: null, ...bkt },
+      };
+
+      const queue = generateSessionQueue(
+        skillStates,
+        REMEDIATION_SESSION_CONFIG,
+        42,
+        null,
+        ['add-2digit', 'sub-2digit', 'mul-single'],
+        true,
+      );
+
+      expect(queue).toHaveLength(5);
+    });
+
+    it('all 5 problems are in practice phase (no warmup/cooldown)', () => {
+      const skillStates: Record<string, SkillState> = {
+        'add-2digit': { eloRating: 1000, attempts: 10, correct: 7, lastPracticed: null, ...bkt },
+        'sub-2digit': { eloRating: 900, attempts: 8, correct: 4, lastPracticed: null, ...bkt },
+      };
+
+      const queue = generateSessionQueue(
+        skillStates,
+        REMEDIATION_SESSION_CONFIG,
+        42,
+        null,
+        ['add-2digit', 'sub-2digit'],
+        true,
+      );
+
+      expect(queue).toHaveLength(5);
+      for (const problem of queue) {
+        expect(problem.phase).toBe('practice');
+      }
+    });
+
+    it('all practice problems come from confirmedMisconceptionSkillIds', () => {
+      const skillStates: Record<string, SkillState> = {
+        'add-2digit': { eloRating: 1000, attempts: 10, correct: 7, lastPracticed: null, ...bkt },
+        'sub-2digit': { eloRating: 900, attempts: 8, correct: 4, lastPracticed: null, ...bkt },
+        'mul-single': { eloRating: 800, attempts: 6, correct: 3, lastPracticed: null, ...bkt },
+        'div-single': { eloRating: 1100, attempts: 12, correct: 9, lastPracticed: null, ...bkt },
+      };
+
+      const remediationSkillIds = ['add-2digit', 'sub-2digit'];
+
+      const queue = generateSessionQueue(
+        skillStates,
+        REMEDIATION_SESSION_CONFIG,
+        42,
+        null,
+        remediationSkillIds,
+        true,
+      );
+
+      expect(queue).toHaveLength(5);
+      for (const problem of queue) {
+        expect(remediationSkillIds).toContain(problem.skillId);
+      }
+    });
+
+    it('each confirmed skill gets at least 1 problem when <= 5 skills', () => {
+      const skillStates: Record<string, SkillState> = {
+        'add-2digit': { eloRating: 1000, attempts: 10, correct: 7, lastPracticed: null, ...bkt },
+        'sub-2digit': { eloRating: 900, attempts: 8, correct: 4, lastPracticed: null, ...bkt },
+        'mul-single': { eloRating: 800, attempts: 6, correct: 3, lastPracticed: null, ...bkt },
+      };
+
+      const remediationSkillIds = ['add-2digit', 'sub-2digit', 'mul-single'];
+
+      const queue = generateSessionQueue(
+        skillStates,
+        REMEDIATION_SESSION_CONFIG,
+        42,
+        null,
+        remediationSkillIds,
+        true,
+      );
+
+      expect(queue).toHaveLength(5);
+      const usedSkills = new Set(queue.map((p) => p.skillId));
+      for (const skillId of remediationSkillIds) {
+        expect(usedSkills).toContain(skillId);
+      }
     });
   });
 });
