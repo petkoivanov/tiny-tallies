@@ -33,6 +33,8 @@ import type { CpaStage } from '../services/cpa/cpaTypes';
 import { getOrCreateSkillState } from '../store/helpers/skillStateHelpers';
 import type { MisconceptionRecord } from '../store/slices/misconceptionSlice';
 import { getConfirmedMisconceptions } from '../store/slices/misconceptionSlice';
+import { evaluateBadges } from '../services/achievement';
+import type { BadgeEvaluationSnapshot } from '../services/achievement';
 
 /** Duration in ms to show correct/incorrect feedback before auto-advancing */
 export const FEEDBACK_DURATION_MS = 1500;
@@ -330,6 +332,21 @@ export function useSession(options?: {
           );
           endSession();
 
+          // Badge evaluation: increment session counter, build snapshot, evaluate
+          const currentState = useAppStore.getState();
+          currentState.incrementSessionsCompleted();
+
+          const badgeSnapshot: BadgeEvaluationSnapshot = {
+            skillStates: useAppStore.getState().skillStates,
+            weeklyStreak: useAppStore.getState().weeklyStreak,
+            sessionsCompleted: useAppStore.getState().sessionsCompleted,
+            misconceptions: useAppStore.getState().misconceptions,
+          };
+          const newBadges = evaluateBadges(badgeSnapshot, useAppStore.getState().earnedBadges);
+          if (newBadges.length > 0) {
+            useAppStore.getState().addEarnedBadges(newBadges);
+          }
+
           // Compute CPA advances by comparing snapshot with pending updates
           const cpaAdvances: Array<{ skillId: string; from: CpaStage; to: CpaStage }> = [];
           pendingUpdatesRef.current.forEach((update, skillId) => {
@@ -352,7 +369,7 @@ export function useSession(options?: {
             durationMs,
             pendingUpdates: new Map(pendingUpdatesRef.current),
             feedback: feedbackWithCpa,
-            newBadges: [],
+            newBadges,
           });
         } else {
           setCurrentIndex(nextIndex);

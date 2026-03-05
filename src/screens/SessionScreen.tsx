@@ -120,6 +120,7 @@ export default function SessionScreen() {
         streakCount: sessionResult.feedback?.streakCount ?? 0,
         cpaAdvances: sessionResult.feedback?.cpaAdvances ?? [],
         isRemediation: sessionMode === 'remediation',
+        newBadges: sessionResult.newBadges,
       });
     }
   }, [isComplete, sessionResult, navigation, sessionMode]);
