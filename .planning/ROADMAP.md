@@ -84,7 +84,7 @@
 
 - [x] **Phase 31: Pre-work -- Screen Refactoring** - Refactor SessionScreen below 500-line guardrail before adding gamification code (completed 2026-03-05)
 - [x] **Phase 32: Achievement System Foundation** - Badge registry, evaluation engine, and store persistence (data layer) (completed 2026-03-05)
-- [ ] **Phase 33: Badge UI & Session Integration** - Badge display components, popup animations, and Results/Home screen wiring
+- [x] **Phase 33: Badge UI & Session Integration** - Badge display components, popup animations, and Results/Home screen wiring (completed 2026-03-05)
 - [ ] **Phase 34: Visual Skill Map** - Interactive DAG visualization of prerequisite skills with mastery states
 - [ ] **Phase 35: Daily Challenges** - Date-seeded themed challenge sessions with bonus XP and non-punitive design
 - [ ] **Phase 36: Avatars & Frames** - Expanded avatar pool with achievement-unlockable special avatars and frame decorations
@@ -127,7 +127,7 @@ Plans:
   2. User sees a celebration popup animation when a new badge is unlocked after a session
   3. User can view a badge grid screen showing earned badges and locked badges with their unlock requirements
   4. Results screen displays all newly earned badges from the just-completed session
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 33-01-PLAN.md -- Session integration wiring, navigation types, BadgeIcon component, and BADGE_EMOJIS map
@@ -219,7 +219,7 @@ Phases execute in numeric order: 31 -> 32 -> 33 -> 34 -> 35 -> 36 -> 37
 | 30. Remediation Mini-Sessions | v0.6 | 2/2 | Complete | 2026-03-05 |
 | 31. Pre-work -- Screen Refactoring | v0.7 | 1/1 | Complete | 2026-03-05 |
 | 32. Achievement System Foundation | v0.7 | 2/2 | Complete | 2026-03-05 |
-| 33. Badge UI & Session Integration | 1/3 | In Progress|  | - |
+| 33. Badge UI & Session Integration | 3/3 | Complete   | 2026-03-05 | - |
 | 34. Visual Skill Map | v0.7 | 0/0 | Not started | - |
 | 35. Daily Challenges | v0.7 | 0/0 | Not started | - |
 | 36. Avatars & Frames | v0.7 | 0/0 | Not started | - |
