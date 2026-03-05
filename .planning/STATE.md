@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.7
 milestone_name: Gamification
-status: completed
-stopped_at: Phase 37 context gathered
-last_updated: "2026-03-05T19:31:50.068Z"
-last_activity: 2026-03-05 -- Completed Phase 36 Plan 02 (Avatar picker screen)
+status: executing
+stopped_at: Completed 37-01-PLAN.md
+last_updated: "2026-03-05T20:20:11.992Z"
+last_activity: 2026-03-05 -- Completed Phase 37 Plan 01 (Theme foundation)
 progress:
   total_phases: 7
   completed_phases: 6
-  total_plans: 13
-  completed_plans: 13
-  percent: 100
+  total_plans: 17
+  completed_plans: 14
+  percent: 25
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.7 Gamification -- Phase 36 (Avatars & Frames)
+**Current focus:** v0.7 Gamification -- Phase 37 (UI Themes)
 
 ## Current Position
 
-Phase: 36 of 37 (Avatars & Frames)
-Plan: 2 of 2 complete
-Status: Complete
-Last activity: 2026-03-05 -- Completed Phase 36 Plan 02 (Avatar picker screen)
+Phase: 37 of 37 (UI Themes)
+Plan: 1 of 4 complete
+Status: In Progress
+Last activity: 2026-03-05 -- Completed Phase 37 Plan 01 (Theme foundation)
 
-Progress: [##########] 100% of Phase 36 (2/2 plans)
+Progress: [##........] 25% of Phase 37 (1/4 plans)
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [##########] 100% of Phase 36 (2/2 plans)
 | Phase 35 PP02 | 11m10s | 2 tasks | 12 files |
 | 36 | P01 | 5m2s | 2 | 11 |
 | Phase 36 P02 | 4m16s | 2 tasks | 10 files |
+| 37 | P01 | 3m5s | 2 | 9 |
 
 ## Accumulated Context
 
@@ -121,6 +122,12 @@ Key context for v0.7:
 - [Phase 36]: BADGE_EMOJIS lookup for overlay badge display (BadgeDefinition has no emoji field)
 - [Phase 36]: Frame unequip via re-tap toggle for intuitive UX
 - [Phase 36]: 1380 tests passing, TypeScript clean (2 pre-existing TS2366 errors in badge UI)
+- [Phase 37 P01]: STORE_VERSION = 12 with themeId persisted via partialize
+- [Phase 37 P01]: Static colors export removed from theme/index.ts, replaced with ThemeProvider + useTheme() hook
+- [Phase 37 P01]: 5 theme palettes (dark, ocean, forest, sunset, space) with 12 color tokens each
+- [Phase 37 P01]: Feedback colors (correct/incorrect) universal across all themes
+- [Phase 37 P01]: THEME_COSMETICS with 4 badge-gated themes following SPECIAL_AVATARS/FRAMES pattern
+- [Phase 37 P01]: 1399 tests (19 new), TypeScript has expected errors from removed static colors export (45+ consumers need migration in Plans 02/03)
 
 ### Pending Todos
 
@@ -133,7 +140,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05T19:31:50.066Z
-Stopped at: Phase 37 context gathered
-Resume file: .planning/phases/37-ui-themes/37-CONTEXT.md
-Resume command: /gsd:execute-phase 36
+Last session: 2026-03-05T20:20:01.099Z
+Stopped at: Completed 37-01-PLAN.md
+Resume file: None
+Resume command: /gsd:execute-phase 37

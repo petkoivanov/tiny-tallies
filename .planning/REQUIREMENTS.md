@@ -48,11 +48,11 @@ Requirements for gamification milestone. Each maps to roadmap phases.
 
 ### Themes
 
-- [ ] **THME-01**: ThemeProvider with React Context for dynamic app-wide color theming
-- [ ] **THME-02**: User can select from 3-5 UI color themes (default dark, ocean, forest, sunset, space)
+- [x] **THME-01**: ThemeProvider with React Context for dynamic app-wide color theming
+- [x] **THME-02**: User can select from 3-5 UI color themes (default dark, ocean, forest, sunset, space)
 - [ ] **THME-03**: Session cosmetic wrappers add themed context/art around math problems
 - [ ] **THME-04**: Theme picker screen to preview, equip, and see locked theme requirements
-- [ ] **THME-05**: Themes unlocked via achievement badges
+- [x] **THME-05**: Themes unlocked via achievement badges
 
 ## v0.8 Requirements
 
@@ -109,11 +109,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AVTR-02 | Phase 36 | Complete |
 | AVTR-03 | Phase 36 | Complete |
 | AVTR-04 | Phase 36 | Complete |
-| THME-01 | Phase 37 | Pending |
-| THME-02 | Phase 37 | Pending |
+| THME-01 | Phase 37 | Complete |
+| THME-02 | Phase 37 | Complete |
 | THME-03 | Phase 37 | Pending |
 | THME-04 | Phase 37 | Pending |
-| THME-05 | Phase 37 | Pending |
+| THME-05 | Phase 37 | Complete |
 
 **Coverage:**
 - v0.7 requirements: 29 total
