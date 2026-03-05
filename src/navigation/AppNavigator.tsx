@@ -9,16 +9,19 @@ import ConsentScreen from '@/screens/ConsentScreen';
 import BadgeCollectionScreen from '@/screens/BadgeCollectionScreen';
 import SkillMapScreen from '@/screens/SkillMapScreen';
 import AvatarPickerScreen from '@/screens/AvatarPickerScreen';
+import { useTheme } from '@/theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
+  const { colors } = useTheme();
+
   return (
     <Stack.Navigator
       initialRouteName="Home"
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: '#1a1a2e' },
+        contentStyle: { backgroundColor: colors.background },
       }}
     >
       <Stack.Screen name="Home" component={HomeScreen} />

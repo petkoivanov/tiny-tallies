@@ -12,6 +12,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AppNavigator from '@/navigation/AppNavigator';
+import { ThemeProvider } from '@/theme';
 
 // Prevent splash screen from hiding before fonts load (module-level per Expo docs)
 SplashScreen.preventAutoHideAsync();
@@ -37,10 +38,12 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <NavigationContainer>
-          <StatusBar style="light" />
-          <AppNavigator />
-        </NavigationContainer>
+        <ThemeProvider>
+          <NavigationContainer>
+            <StatusBar style="light" />
+            <AppNavigator />
+          </NavigationContainer>
+        </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

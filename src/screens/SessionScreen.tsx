@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -8,7 +8,7 @@ import {
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
-import { colors, spacing, typography } from '@/theme';
+import { useTheme, spacing, typography } from '@/theme';
 import { useSession } from '@/hooks/useSession';
 import { useCpaMode } from '@/hooks/useCpaMode';
 import { useTutor } from '@/hooks/useTutor';
@@ -25,6 +25,7 @@ export default function SessionScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<SessionNavProp>();
   const route = useRoute<SessionRouteProp>();
+  const { colors } = useTheme();
   const { mode, remediationSkillIds, challengeThemeId } = route.params ?? {};
 
   const {
@@ -129,6 +130,26 @@ export default function SessionScreen() {
     }
   }, [isComplete, sessionResult, navigation, sessionMode]);
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+    },
+    problemText: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.display,
+      color: colors.textPrimary,
+      marginBottom: spacing.xl,
+      textAlign: 'center',
+    },
+  }), [colors]);
+
   // Loading state (should not happen due to synchronous init, but defensive)
   if (!currentProblem && !isComplete) {
     return (
@@ -209,23 +230,3 @@ export default function SessionScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  problemText: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.display,
-    color: colors.textPrimary,
-    marginBottom: spacing.xl,
-    textAlign: 'center',
-  },
-});

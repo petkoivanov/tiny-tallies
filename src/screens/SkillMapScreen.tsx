@@ -14,13 +14,14 @@ import { ChevronLeft } from 'lucide-react-native';
 
 import { useAppStore } from '@/store/appStore';
 import { getOuterFringe } from '@/services/adaptive/prerequisiteGating';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 import { SkillMapGraph } from '@/components/skillMap/SkillMapGraph';
 import { SkillDetailOverlay } from '@/components/skillMap/SkillDetailOverlay';
 
 export default function SkillMapScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { colors } = useTheme();
 
   const skillStates = useAppStore((state) => state.skillStates);
 
@@ -43,6 +44,47 @@ export default function SkillMapScreen() {
 
   const hasDimensions = containerSize.width > 0 && containerSize.height > 0;
   const canRender = hasDimensions && ready;
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      height: 56,
+    },
+    backButton: {
+      width: layout.minTouchTarget,
+      height: layout.minTouchTarget,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    headerTitle: {
+      flex: 1,
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.xl,
+      color: colors.textPrimary,
+      textAlign: 'center',
+    },
+    headerSpacer: {
+      width: layout.minTouchTarget,
+    },
+    graphContainer: {
+      flex: 1,
+      position: 'relative',
+    },
+    loadingText: {
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.md,
+      color: colors.textMuted,
+      textAlign: 'center',
+      marginTop: spacing.xxl,
+    },
+  }), [colors]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -92,44 +134,3 @@ export default function SkillMapScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    height: 56,
-  },
-  backButton: {
-    width: layout.minTouchTarget,
-    height: layout.minTouchTarget,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    flex: 1,
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.xl,
-    color: colors.textPrimary,
-    textAlign: 'center',
-  },
-  headerSpacer: {
-    width: layout.minTouchTarget,
-  },
-  graphContainer: {
-    flex: 1,
-    position: 'relative',
-  },
-  loadingText: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.md,
-    color: colors.textMuted,
-    textAlign: 'center',
-    marginTop: spacing.xxl,
-  },
-});

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -14,7 +14,8 @@ import {
 } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { Flame, Check } from 'lucide-react-native';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
+import type { ThemeColors } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { calculateLevelFromXp } from '@/services/gamification/levelProgression';
 import { ConfettiCelebration } from '@/components/animations/ConfettiCelebration';
@@ -48,7 +49,7 @@ function getMotivationalMessage(scorePercent: number): string {
   return 'Nice effort!';
 }
 
-function getMotivationalColor(scorePercent: number): string {
+function getMotivationalColor(scorePercent: number, colors: ThemeColors): string {
   if (scorePercent >= 90) return colors.correct;
   if (scorePercent >= 70) return colors.primaryLight;
   return colors.textPrimary;
@@ -58,6 +59,7 @@ export default function ResultsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const route = useRoute<ResultsRouteProp>();
+  const { colors } = useTheme();
 
   const {
     score,
@@ -89,7 +91,7 @@ export default function ResultsScreen() {
     : getMotivationalMessage(scorePercent);
   const motivationalColor = isRemediation
     ? colors.primaryLight
-    : getMotivationalColor(scorePercent);
+    : getMotivationalColor(scorePercent, colors);
 
   const progressFraction =
     xpNeededForNextLevel > 0
@@ -134,6 +136,181 @@ export default function ResultsScreen() {
       }),
     );
   };
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+    },
+    motivationalMessage: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.display,
+      textAlign: 'center',
+      marginBottom: spacing.xs,
+    },
+    subtitle: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.lg,
+      color: colors.textSecondary,
+      marginBottom: spacing.xl,
+      textAlign: 'center',
+    },
+    statsCard: {
+      backgroundColor: colors.surface,
+      borderRadius: layout.borderRadius.lg,
+      paddingVertical: spacing.lg,
+      paddingHorizontal: spacing.xl,
+      width: '100%',
+      maxWidth: 320,
+      marginBottom: spacing.xxl,
+    },
+    statRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+    },
+    statLabel: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.md,
+      color: colors.textSecondary,
+    },
+    scoreText: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.xl,
+      color: colors.textPrimary,
+    },
+    scoreCorrect: {
+      color: colors.correct,
+    },
+    scoreSeparator: {
+      color: colors.textSecondary,
+    },
+    xpText: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.xl,
+      color: colors.primaryLight,
+    },
+    xpBarContainer: {
+      paddingVertical: spacing.md,
+      gap: spacing.sm,
+    },
+    xpBarLabel: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.sm,
+      color: colors.textSecondary,
+    },
+    xpBarBackground: {
+      width: '100%',
+      height: 10,
+      borderRadius: layout.borderRadius.round,
+      backgroundColor: colors.surfaceLight,
+      overflow: 'hidden',
+    },
+    xpBarFill: {
+      height: '100%',
+      borderRadius: layout.borderRadius.round,
+      backgroundColor: colors.primary,
+      minWidth: 0,
+    },
+    streakRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      paddingVertical: spacing.md,
+    },
+    streakText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.md,
+      color: colors.textPrimary,
+      flex: 1,
+    },
+    cpaRow: {
+      paddingVertical: spacing.md,
+      alignItems: 'center',
+    },
+    cpaText: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.md,
+      color: colors.primaryLight,
+      textAlign: 'center',
+    },
+    levelUpRow: {
+      paddingVertical: spacing.md,
+      alignItems: 'center',
+    },
+    levelUpText: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.lg,
+      color: colors.primaryLight,
+    },
+    challengeSection: {
+      paddingVertical: spacing.md,
+      gap: spacing.sm,
+    },
+    challengeTitle: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.md,
+      color: colors.primaryLight,
+    },
+    challengeBonusText: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.lg,
+      color: colors.correct,
+    },
+    challengeGoals: {
+      gap: spacing.xs,
+    },
+    challengeGoalRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    challengeGoalIcon: {
+      fontSize: 16,
+    },
+    challengeGoalText: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.sm,
+      color: colors.textSecondary,
+    },
+    challengeGoalMet: {
+      color: colors.correct,
+    },
+    timeText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.lg,
+      color: colors.textPrimary,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: colors.surfaceLight,
+    },
+    button: {
+      backgroundColor: colors.primary,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.xl,
+      borderRadius: layout.borderRadius.lg,
+      minHeight: layout.minTouchTarget,
+      minWidth: 200,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    buttonPressed: {
+      backgroundColor: colors.primaryDark,
+    },
+    buttonText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.lg,
+      color: colors.textPrimary,
+    },
+  }), [colors]);
 
   return (
     <View
@@ -323,178 +500,3 @@ export default function ResultsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  motivationalMessage: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.display,
-    textAlign: 'center',
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.lg,
-    color: colors.textSecondary,
-    marginBottom: spacing.xl,
-    textAlign: 'center',
-  },
-  statsCard: {
-    backgroundColor: colors.surface,
-    borderRadius: layout.borderRadius.lg,
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.xl,
-    width: '100%',
-    maxWidth: 320,
-    marginBottom: spacing.xxl,
-  },
-  statRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-  },
-  statLabel: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.md,
-    color: colors.textSecondary,
-  },
-  scoreText: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.xl,
-    color: colors.textPrimary,
-  },
-  scoreCorrect: {
-    color: colors.correct,
-  },
-  scoreSeparator: {
-    color: colors.textSecondary,
-  },
-  xpText: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.xl,
-    color: colors.primaryLight,
-  },
-  xpBarContainer: {
-    paddingVertical: spacing.md,
-    gap: spacing.sm,
-  },
-  xpBarLabel: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
-  },
-  xpBarBackground: {
-    width: '100%',
-    height: 10,
-    borderRadius: layout.borderRadius.round,
-    backgroundColor: colors.surfaceLight,
-    overflow: 'hidden',
-  },
-  xpBarFill: {
-    height: '100%',
-    borderRadius: layout.borderRadius.round,
-    backgroundColor: colors.primary,
-    minWidth: 0,
-  },
-  streakRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.md,
-  },
-  streakText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.md,
-    color: colors.textPrimary,
-    flex: 1,
-  },
-  cpaRow: {
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-  },
-  cpaText: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.md,
-    color: colors.primaryLight,
-    textAlign: 'center',
-  },
-  levelUpRow: {
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-  },
-  levelUpText: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.lg,
-    color: colors.primaryLight,
-  },
-  challengeSection: {
-    paddingVertical: spacing.md,
-    gap: spacing.sm,
-  },
-  challengeTitle: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.md,
-    color: colors.primaryLight,
-  },
-  challengeBonusText: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.lg,
-    color: colors.correct,
-  },
-  challengeGoals: {
-    gap: spacing.xs,
-  },
-  challengeGoalRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  challengeGoalIcon: {
-    fontSize: 16,
-  },
-  challengeGoalText: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
-  },
-  challengeGoalMet: {
-    color: colors.correct,
-  },
-  timeText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.lg,
-    color: colors.textPrimary,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: colors.surfaceLight,
-  },
-  button: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xl,
-    borderRadius: layout.borderRadius.lg,
-    minHeight: layout.minTouchTarget,
-    minWidth: 200,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonPressed: {
-    backgroundColor: colors.primaryDark,
-  },
-  buttonText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.lg,
-    color: colors.textPrimary,
-  },
-});

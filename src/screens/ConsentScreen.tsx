@@ -9,7 +9,7 @@
  * in the store and navigates back.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -21,7 +21,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Shield, Delete } from 'lucide-react-native';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import {
   hasParentalPin,
@@ -41,9 +41,12 @@ const SAFEGUARDS = [
   'You can turn this off anytime',
 ];
 
+const BUTTON_SIZE = 64;
+
 export default function ConsentScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { colors } = useTheme();
   const setTutorConsentGranted = useAppStore(
     (s) => s.setTutorConsentGranted,
   );
@@ -138,6 +141,138 @@ export default function ConsentScreen() {
     setDisplayPin(pinRef.current);
   }, []);
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      paddingHorizontal: spacing.lg,
+      alignItems: 'center',
+    },
+    loadingContainer: {
+      flex: 1,
+      backgroundColor: colors.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    header: {
+      alignItems: 'center',
+      marginTop: spacing.xl,
+      marginBottom: spacing.lg,
+      gap: spacing.sm,
+    },
+    title: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.xl,
+      color: colors.textPrimary,
+    },
+    infoSection: {
+      width: '100%',
+      backgroundColor: colors.surface,
+      borderRadius: layout.borderRadius.lg,
+      padding: spacing.lg,
+      marginBottom: spacing.xl,
+    },
+    infoText: {
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.md,
+      color: colors.textSecondary,
+      lineHeight: 24,
+      marginBottom: spacing.md,
+    },
+    bulletRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      marginBottom: spacing.sm,
+      paddingLeft: spacing.xs,
+    },
+    bulletDot: {
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.md,
+      color: colors.primary,
+      marginRight: spacing.sm,
+      lineHeight: 24,
+    },
+    bulletText: {
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.md,
+      color: colors.textSecondary,
+      flex: 1,
+      lineHeight: 24,
+    },
+    pinSection: {
+      alignItems: 'center',
+      width: '100%',
+    },
+    pinTitle: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.lg,
+      color: colors.textPrimary,
+      marginBottom: spacing.xs,
+    },
+    pinSubtitle: {
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.sm,
+      color: colors.textMuted,
+      marginBottom: spacing.md,
+    },
+    dotsRow: {
+      flexDirection: 'row',
+      gap: spacing.md,
+      marginVertical: spacing.lg,
+    },
+    dot: {
+      width: 16,
+      height: 16,
+      borderRadius: layout.borderRadius.round,
+      borderWidth: 2,
+    },
+    dotFilled: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    dotEmpty: {
+      backgroundColor: 'transparent',
+      borderColor: colors.surface,
+    },
+    errorText: {
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.sm,
+      color: colors.incorrect,
+      marginBottom: spacing.md,
+      textAlign: 'center',
+    },
+    numPad: {
+      gap: spacing.md,
+      marginTop: spacing.md,
+    },
+    numRow: {
+      flexDirection: 'row',
+      gap: spacing.md,
+      justifyContent: 'center',
+    },
+    numButton: {
+      width: BUTTON_SIZE,
+      height: BUTTON_SIZE,
+      borderRadius: layout.borderRadius.round,
+      backgroundColor: colors.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+      minWidth: layout.minTouchTarget,
+      minHeight: layout.minTouchTarget,
+    },
+    numButtonPlaceholder: {
+      width: BUTTON_SIZE,
+      height: BUTTON_SIZE,
+    },
+    numButtonText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.xl,
+      color: colors.textPrimary,
+    },
+  }), [colors]);
+
   if (mode === 'loading') {
     return (
       <View
@@ -222,25 +357,52 @@ export default function ConsentScreen() {
           {/* Row 1: 1 2 3 */}
           <View style={styles.numRow}>
             {['1', '2', '3'].map((d) => (
-              <NumButton key={d} digit={d} onPress={handleDigitPress} />
+              <Pressable
+                key={d}
+                style={styles.numButton}
+                onPress={() => handleDigitPress(d)}
+                accessibilityRole="button"
+              >
+                <Text style={styles.numButtonText}>{d}</Text>
+              </Pressable>
             ))}
           </View>
           {/* Row 2: 4 5 6 */}
           <View style={styles.numRow}>
             {['4', '5', '6'].map((d) => (
-              <NumButton key={d} digit={d} onPress={handleDigitPress} />
+              <Pressable
+                key={d}
+                style={styles.numButton}
+                onPress={() => handleDigitPress(d)}
+                accessibilityRole="button"
+              >
+                <Text style={styles.numButtonText}>{d}</Text>
+              </Pressable>
             ))}
           </View>
           {/* Row 3: 7 8 9 */}
           <View style={styles.numRow}>
             {['7', '8', '9'].map((d) => (
-              <NumButton key={d} digit={d} onPress={handleDigitPress} />
+              <Pressable
+                key={d}
+                style={styles.numButton}
+                onPress={() => handleDigitPress(d)}
+                accessibilityRole="button"
+              >
+                <Text style={styles.numButtonText}>{d}</Text>
+              </Pressable>
             ))}
           </View>
           {/* Row 4: empty 0 backspace */}
           <View style={styles.numRow}>
             <View style={styles.numButtonPlaceholder} />
-            <NumButton digit="0" onPress={handleDigitPress} />
+            <Pressable
+              style={styles.numButton}
+              onPress={() => handleDigitPress('0')}
+              accessibilityRole="button"
+            >
+              <Text style={styles.numButtonText}>0</Text>
+            </Pressable>
             <Pressable
               style={styles.numButton}
               onPress={handleBackspace}
@@ -255,158 +417,3 @@ export default function ConsentScreen() {
     </ScrollView>
   );
 }
-
-// --- Sub-components ---
-
-interface NumButtonProps {
-  digit: string;
-  onPress: (digit: string) => void;
-}
-
-function NumButton({ digit, onPress }: NumButtonProps) {
-  return (
-    <Pressable
-      style={styles.numButton}
-      onPress={() => onPress(digit)}
-      accessibilityRole="button"
-    >
-      <Text style={styles.numButtonText}>{digit}</Text>
-    </Pressable>
-  );
-}
-
-// --- Styles ---
-
-const BUTTON_SIZE = 64;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    paddingHorizontal: spacing.lg,
-    alignItems: 'center',
-  },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    alignItems: 'center',
-    marginTop: spacing.xl,
-    marginBottom: spacing.lg,
-    gap: spacing.sm,
-  },
-  title: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.xl,
-    color: colors.textPrimary,
-  },
-  infoSection: {
-    width: '100%',
-    backgroundColor: colors.surface,
-    borderRadius: layout.borderRadius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.xl,
-  },
-  infoText: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.md,
-    color: colors.textSecondary,
-    lineHeight: 24,
-    marginBottom: spacing.md,
-  },
-  bulletRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: spacing.sm,
-    paddingLeft: spacing.xs,
-  },
-  bulletDot: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.md,
-    color: colors.primary,
-    marginRight: spacing.sm,
-    lineHeight: 24,
-  },
-  bulletText: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.md,
-    color: colors.textSecondary,
-    flex: 1,
-    lineHeight: 24,
-  },
-  pinSection: {
-    alignItems: 'center',
-    width: '100%',
-  },
-  pinTitle: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.lg,
-    color: colors.textPrimary,
-    marginBottom: spacing.xs,
-  },
-  pinSubtitle: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.sm,
-    color: colors.textMuted,
-    marginBottom: spacing.md,
-  },
-  dotsRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginVertical: spacing.lg,
-  },
-  dot: {
-    width: 16,
-    height: 16,
-    borderRadius: layout.borderRadius.round,
-    borderWidth: 2,
-  },
-  dotFilled: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  dotEmpty: {
-    backgroundColor: 'transparent',
-    borderColor: colors.surface,
-  },
-  errorText: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.sm,
-    color: colors.incorrect,
-    marginBottom: spacing.md,
-    textAlign: 'center',
-  },
-  numPad: {
-    gap: spacing.md,
-    marginTop: spacing.md,
-  },
-  numRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    justifyContent: 'center',
-  },
-  numButton: {
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
-    borderRadius: layout.borderRadius.round,
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    minWidth: layout.minTouchTarget,
-    minHeight: layout.minTouchTarget,
-  },
-  numButtonPlaceholder: {
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
-  },
-  numButtonText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.xl,
-    color: colors.textPrimary,
-  },
-});

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -8,7 +8,7 @@ import { BadgeGrid } from '@/components/badges/BadgeGrid';
 import { BadgeDetailOverlay } from '@/components/badges/BadgeDetailOverlay';
 import { BADGE_EMOJIS } from '@/components/badges/badgeEmojis';
 import { BADGES } from '@/services/achievement/badgeRegistry';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 import type { BadgeDefinition } from '@/services/achievement/badgeTypes';
 
 const TOTAL_BADGES = BADGES.length;
@@ -16,6 +16,7 @@ const TOTAL_BADGES = BADGES.length;
 export default function BadgeCollectionScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { colors } = useTheme();
   const earnedBadges = useAppStore((s) => s.earnedBadges);
   const [selectedBadge, setSelectedBadge] = useState<BadgeDefinition | null>(
     null,
@@ -30,6 +31,48 @@ export default function BadgeCollectionScreen() {
   const handleCloseOverlay = useCallback(() => {
     setSelectedBadge(null);
   }, []);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    backButton: {
+      width: layout.minTouchTarget,
+      height: layout.minTouchTarget,
+      borderRadius: layout.borderRadius.round,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    headerText: {
+      flex: 1,
+      marginLeft: spacing.sm,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.xl,
+    },
+    subtitle: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.sm,
+      marginTop: 2,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: spacing.md,
+      paddingBottom: spacing.xxl,
+    },
+  }), [colors]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -75,45 +118,3 @@ export default function BadgeCollectionScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  backButton: {
-    width: layout.minTouchTarget,
-    height: layout.minTouchTarget,
-    borderRadius: layout.borderRadius.round,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerText: {
-    flex: 1,
-    marginLeft: spacing.sm,
-  },
-  title: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.xl,
-  },
-  subtitle: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.sm,
-    marginTop: 2,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.xxl,
-  },
-});

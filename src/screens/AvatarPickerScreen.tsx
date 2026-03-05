@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Lock } from 'lucide-react-native';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import {
   AVATARS,
@@ -30,6 +30,7 @@ const PREVIEW_SIZE = 80;
 export default function AvatarPickerScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { colors } = useTheme();
 
   const storeAvatarId = useAppStore((s) => s.avatarId);
   const storeFrameId = useAppStore((s) => s.frameId);
@@ -56,6 +57,92 @@ export default function AvatarPickerScreen() {
     setChildProfile({ avatarId: previewAvatarId, frameId: previewFrameId });
     navigation.goBack();
   };
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    scrollContent: {
+      paddingHorizontal: spacing.md,
+    },
+    previewSection: {
+      alignItems: 'center',
+      paddingVertical: spacing.lg,
+    },
+    previewLabel: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.lg,
+      marginTop: spacing.sm,
+    },
+    sectionHeader: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.lg,
+      marginTop: spacing.lg,
+      marginBottom: spacing.sm,
+    },
+    grid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    gridItem: {
+      width: `${100 / GRID_COLUMNS - 2}%` as unknown as number,
+      minWidth: 72,
+      alignItems: 'center',
+      padding: spacing.xs,
+      borderRadius: layout.borderRadius.md,
+      borderWidth: 2,
+      borderColor: 'transparent',
+      position: 'relative',
+    },
+    selectedItem: {
+      borderColor: colors.primary,
+      backgroundColor: colors.surfaceLight,
+    },
+    lockOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    framePreview: {
+      width: AVATAR_ITEM_SIZE,
+      height: AVATAR_ITEM_SIZE,
+      borderRadius: AVATAR_ITEM_SIZE / 2,
+      borderWidth: 3,
+      backgroundColor: colors.surface,
+    },
+    frameLabel: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.xs,
+      marginTop: spacing.xs,
+      textAlign: 'center',
+    },
+    saveContainer: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      paddingHorizontal: spacing.md,
+      paddingTop: spacing.sm,
+      backgroundColor: colors.background,
+    },
+    saveButton: {
+      backgroundColor: '#84cc16',
+      height: 48,
+      borderRadius: layout.borderRadius.md,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    saveButtonText: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.lg,
+    },
+  }), [colors]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -204,89 +291,3 @@ export default function AvatarPickerScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scrollContent: {
-    paddingHorizontal: spacing.md,
-  },
-  previewSection: {
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
-  },
-  previewLabel: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.lg,
-    marginTop: spacing.sm,
-  },
-  sectionHeader: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.lg,
-    marginTop: spacing.lg,
-    marginBottom: spacing.sm,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  gridItem: {
-    width: `${100 / GRID_COLUMNS - 2}%` as unknown as number,
-    minWidth: 72,
-    alignItems: 'center',
-    padding: spacing.xs,
-    borderRadius: layout.borderRadius.md,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    position: 'relative',
-  },
-  selectedItem: {
-    borderColor: colors.primary,
-    backgroundColor: colors.surfaceLight,
-  },
-  lockOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  framePreview: {
-    width: AVATAR_ITEM_SIZE,
-    height: AVATAR_ITEM_SIZE,
-    borderRadius: AVATAR_ITEM_SIZE / 2,
-    borderWidth: 3,
-    backgroundColor: colors.surface,
-  },
-  frameLabel: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.xs,
-    marginTop: spacing.xs,
-    textAlign: 'center',
-  },
-  saveContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    backgroundColor: colors.background,
-  },
-  saveButton: {
-    backgroundColor: '#84cc16',
-    height: 48,
-    borderRadius: layout.borderRadius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.lg,
-  },
-});

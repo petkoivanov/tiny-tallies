@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { ArrowLeft } from 'lucide-react-native';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import type { RootStackParamList } from '@/navigation/types';
 import type { ManipulativeType } from '@/services/cpa/cpaTypes';
@@ -63,6 +63,7 @@ export default function SandboxScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, 'Sandbox'>>();
+  const { colors } = useTheme();
   const { manipulativeType } = route.params;
 
   const exploredManipulatives = useAppStore(
@@ -81,6 +82,38 @@ export default function SandboxScreen() {
   }, [manipulativeType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const displayName = DISPLAY_NAMES[manipulativeType];
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    backButton: {
+      width: layout.minTouchTarget,
+      height: layout.minTouchTarget,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    headerTitle: {
+      flex: 1,
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.xl,
+      color: colors.textPrimary,
+      textAlign: 'center',
+    },
+    headerSpacer: {
+      width: layout.minTouchTarget,
+    },
+    workspace: {
+      flex: 1,
+    },
+  }), [colors]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -111,35 +144,3 @@ export default function SandboxScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  backButton: {
-    width: layout.minTouchTarget,
-    height: layout.minTouchTarget,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    flex: 1,
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.xl,
-    color: colors.textPrimary,
-    textAlign: 'center',
-  },
-  headerSpacer: {
-    width: layout.minTouchTarget,
-  },
-  workspace: {
-    flex: 1,
-  },
-});

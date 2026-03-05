@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Flame, Check, Focus, GitBranch } from 'lucide-react-native';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { AVATARS, DEFAULT_AVATAR_ID, SPECIAL_AVATARS, FRAMES, resolveAvatar } from '@/store/constants/avatars';
 import { AvatarCircle } from '@/components/avatars';
@@ -16,6 +16,7 @@ import { ExploreGrid, DailyChallengeCard } from '@/components/home';
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { colors } = useTheme();
 
   const childName = useAppStore((state) => state.childName);
   const avatarId = useAppStore((state) => state.avatarId);
@@ -65,6 +66,170 @@ export default function HomeScreen() {
     !practicedThisWeek && weeklyStreak > 0
       ? 'Ready to keep your streak going?'
       : null;
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    profileSection: {
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.xl,
+    },
+    avatarContainer: {
+      marginBottom: spacing.md,
+    },
+    greeting: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.display,
+      color: colors.textPrimary,
+      textAlign: 'center',
+      marginBottom: spacing.xs,
+    },
+    levelBadge: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.xl,
+      color: colors.primaryLight,
+      marginBottom: spacing.xl,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    statsSection: {
+      paddingHorizontal: spacing.lg,
+      gap: spacing.xl,
+    },
+    exploreSection: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.lg,
+    },
+    xpContainer: {
+      gap: spacing.sm,
+    },
+    xpText: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.md,
+      color: colors.textSecondary,
+    },
+    xpBarBackground: {
+      width: '100%',
+      height: 12,
+      borderRadius: layout.borderRadius.round,
+      backgroundColor: colors.surface,
+      overflow: 'hidden',
+    },
+    xpBarFill: {
+      height: '100%',
+      borderRadius: layout.borderRadius.round,
+      backgroundColor: colors.primary,
+      minWidth: 0,
+    },
+    streakContainer: {
+      gap: spacing.xs,
+    },
+    streakRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    streakText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.lg,
+      color: colors.textPrimary,
+    },
+    streakNudge: {
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.sm,
+      color: colors.textSecondary,
+      marginLeft: 28,
+    },
+    badgeCountButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      backgroundColor: colors.surface,
+      borderRadius: layout.borderRadius.lg,
+    },
+    badgeCountEmoji: {
+      fontSize: 20,
+    },
+    badgeCountText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.md,
+      color: colors.textPrimary,
+    },
+    skillMapButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      backgroundColor: colors.surface,
+      borderRadius: layout.borderRadius.lg,
+    },
+    skillMapButtonText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.md,
+      color: colors.textPrimary,
+    },
+    challengeSection: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.lg,
+    },
+    buttonSection: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.lg,
+      paddingTop: spacing.md,
+    },
+    button: {
+      backgroundColor: colors.primary,
+      minHeight: 56,
+      borderRadius: layout.borderRadius.lg,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    buttonPressed: {
+      backgroundColor: colors.primaryDark,
+    },
+    buttonText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.lg,
+      color: colors.textPrimary,
+    },
+    remediationButton: {
+      backgroundColor: colors.surface,
+      borderWidth: 2,
+      borderColor: colors.primaryLight,
+      minHeight: 56,
+      borderRadius: layout.borderRadius.lg,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: spacing.md,
+      paddingVertical: spacing.md,
+    },
+    remediationButtonPressed: {
+      backgroundColor: colors.surfaceLight,
+    },
+    remediationRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    remediationButtonText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.lg,
+      color: colors.primaryLight,
+    },
+    remediationSubtext: {
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.sm,
+      color: colors.textSecondary,
+      marginTop: spacing.xs,
+    },
+  }), [colors]);
 
   return (
     <ScrollView
@@ -222,167 +387,3 @@ export default function HomeScreen() {
 }
 
 const AVATAR_SIZE = 80;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  profileSection: {
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-  },
-  avatarContainer: {
-    marginBottom: spacing.md,
-  },
-  greeting: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.display,
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: spacing.xs,
-  },
-  levelBadge: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.xl,
-    color: colors.primaryLight,
-    marginBottom: spacing.xl,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  statsSection: {
-    paddingHorizontal: spacing.lg,
-    gap: spacing.xl,
-  },
-  exploreSection: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-  },
-  xpContainer: {
-    gap: spacing.sm,
-  },
-  xpText: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.md,
-    color: colors.textSecondary,
-  },
-  xpBarBackground: {
-    width: '100%',
-    height: 12,
-    borderRadius: layout.borderRadius.round,
-    backgroundColor: colors.surface,
-    overflow: 'hidden',
-  },
-  xpBarFill: {
-    height: '100%',
-    borderRadius: layout.borderRadius.round,
-    backgroundColor: colors.primary,
-    minWidth: 0,
-  },
-  streakContainer: {
-    gap: spacing.xs,
-  },
-  streakRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  streakText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.lg,
-    color: colors.textPrimary,
-  },
-  streakNudge: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
-    marginLeft: 28,
-  },
-  badgeCountButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: layout.borderRadius.lg,
-  },
-  badgeCountEmoji: {
-    fontSize: 20,
-  },
-  badgeCountText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.md,
-    color: colors.textPrimary,
-  },
-  skillMapButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: layout.borderRadius.lg,
-  },
-  skillMapButtonText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.md,
-    color: colors.textPrimary,
-  },
-  challengeSection: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-  },
-  buttonSection: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
-    paddingTop: spacing.md,
-  },
-  button: {
-    backgroundColor: colors.primary,
-    minHeight: 56,
-    borderRadius: layout.borderRadius.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonPressed: {
-    backgroundColor: colors.primaryDark,
-  },
-  buttonText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.lg,
-    color: colors.textPrimary,
-  },
-  remediationButton: {
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.primaryLight,
-    minHeight: 56,
-    borderRadius: layout.borderRadius.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: spacing.md,
-    paddingVertical: spacing.md,
-  },
-  remediationButtonPressed: {
-    backgroundColor: colors.surfaceLight,
-  },
-  remediationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  remediationButtonText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.lg,
-    color: colors.primaryLight,
-  },
-  remediationSubtext: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-  },
-});
