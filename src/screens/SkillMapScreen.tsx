@@ -1,18 +1,50 @@
-import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+/**
+ * Skill Map screen displaying the interactive skill tree visualization.
+ *
+ * Reads BKT skill states from Zustand, computes outer fringe IDs, and
+ * renders the SkillMapGraph component after layout dimensions are known.
+ * Uses InteractionManager to defer graph rendering until after the
+ * navigation transition completes (prevents entrance animation conflicts).
+ */
+import React, { useEffect, useMemo, useState } from 'react';
+import { InteractionManager, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft } from 'lucide-react-native';
+
+import { useAppStore } from '@/store/appStore';
+import { getOuterFringe } from '@/services/adaptive/prerequisiteGating';
 import { colors, spacing, typography, layout } from '@/theme';
+import { SkillMapGraph } from '@/components/skillMap/SkillMapGraph';
 
 export default function SkillMapScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
+  const skillStates = useAppStore((state) => state.skillStates);
+
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const [_selectedSkillId, _setSelectedSkillId] = useState<string | null>(null);
+  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+
+  // Defer rendering until navigation transition completes
+  useEffect(() => {
+    const handle = InteractionManager.runAfterInteractions(() => {
+      setReady(true);
+    });
+    return () => handle.cancel();
+  }, []);
+
+  const outerFringeIds = useMemo(
+    () => getOuterFringe(skillStates),
+    [skillStates],
+  );
 
   const hasDimensions = containerSize.width > 0 && containerSize.height > 0;
+  const canRender = hasDimensions && ready;
+
+  // selectedSkillId will be used by Plan 03's detail overlay
+  void selectedSkillId;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -34,38 +66,22 @@ export default function SkillMapScreen() {
       {/* Graph Container */}
       <View
         style={styles.graphContainer}
+        testID="skill-map-container"
         onLayout={(e) => {
           const { width, height } = e.nativeEvent.layout;
           setContainerSize({ width, height });
         }}
       >
-        {!hasDimensions ? (
+        {!canRender ? (
           <Text style={styles.loadingText}>Loading skill map...</Text>
         ) : (
-          <>
-            {/* Column Headers */}
-            <View style={styles.columnHeaders}>
-              <Text style={[styles.columnLabel, styles.columnLabelLeft]}>
-                Addition
-              </Text>
-              <Text style={[styles.columnLabel, styles.columnLabelRight]}>
-                Subtraction
-              </Text>
-            </View>
-
-            {/* Grade Indicators */}
-            <View style={styles.gradeIndicators}>
-              <Text style={styles.gradeLabel}>Grade 1</Text>
-              <Text style={styles.gradeLabel}>Grade 2</Text>
-              <Text style={styles.gradeLabel}>Grade 3</Text>
-            </View>
-
-            {/* Skill Map Container (Plan 02 replaces with SkillMapGraph) */}
-            <View
-              testID="skill-map-container"
-              style={styles.skillMapPlaceholder}
-            />
-          </>
+          <SkillMapGraph
+            width={containerSize.width}
+            height={containerSize.height}
+            skillStates={skillStates}
+            outerFringeIds={outerFringeIds}
+            onNodePress={setSelectedSkillId}
+          />
         )}
       </View>
     </View>
@@ -110,47 +126,5 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: 'center',
     marginTop: spacing.xxl,
-  },
-  columnHeaders: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 1,
-  },
-  columnLabel: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
-  },
-  columnLabelLeft: {
-    width: '30%',
-    textAlign: 'center',
-  },
-  columnLabelRight: {
-    width: '30%',
-    textAlign: 'center',
-  },
-  gradeIndicators: {
-    position: 'absolute',
-    left: spacing.xs,
-    top: spacing.xl,
-    bottom: spacing.xl,
-    justifyContent: 'space-around',
-    zIndex: 1,
-  },
-  gradeLabel: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.xs,
-    color: colors.textMuted,
-    transform: [{ rotate: '-90deg' }],
-    width: 60,
-  },
-  skillMapPlaceholder: {
-    flex: 1,
   },
 });

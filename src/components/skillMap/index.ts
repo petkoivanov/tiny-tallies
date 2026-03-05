@@ -13,3 +13,7 @@ export {
   computeNodePositions,
   computeEdgePaths,
 } from './skillMapLayout';
+
+export { SkillMapNode } from './SkillMapNode';
+export { SkillMapEdge } from './SkillMapEdge';
+export { SkillMapGraph } from './SkillMapGraph';
