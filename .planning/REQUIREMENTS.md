@@ -27,7 +27,7 @@ Requirements for gamification milestone. Each maps to roadmap phases.
 - [x] **SMAP-01**: User can view prerequisite DAG as interactive visual tree/graph
 - [x] **SMAP-02**: Skill nodes show locked/unlocked/in-progress/mastered states from BKT
 - [ ] **SMAP-03**: User can tap node for detail overlay (mastery %, BKT probability, Leitner box)
-- [ ] **SMAP-04**: Nodes animate mastery fill, pulse on unlock, edges glow for active path
+- [x] **SMAP-04**: Nodes animate mastery fill, pulse on unlock, edges glow for active path
 
 ### Daily Challenges
 
@@ -97,7 +97,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SMAP-01 | Phase 34 | Complete |
 | SMAP-02 | Phase 34 | Complete |
 | SMAP-03 | Phase 34 | Pending |
-| SMAP-04 | Phase 34 | Pending |
+| SMAP-04 | Phase 34 | Complete |
 | CHAL-01 | Phase 35 | Pending |
 | CHAL-02 | Phase 35 | Pending |
 | CHAL-03 | Phase 35 | Pending |
