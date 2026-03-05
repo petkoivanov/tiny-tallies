@@ -6,12 +6,14 @@ export interface GamificationSlice {
   level: number;
   weeklyStreak: number;
   lastSessionDate: string | null;
+  sessionsCompleted: number;
   addXp: (amount: number) => void;
   setLevel: (level: number) => void;
   setLastSessionDate: (date: string) => void;
   setWeeklyStreak: (streak: number) => void;
   incrementStreak: () => void;
   resetStreak: () => void;
+  incrementSessionsCompleted: () => void;
 }
 
 export const createGamificationSlice: StateCreator<
@@ -24,6 +26,7 @@ export const createGamificationSlice: StateCreator<
   level: 1,
   weeklyStreak: 0,
   lastSessionDate: null,
+  sessionsCompleted: 0,
   addXp: (amount) => set((state) => ({ xp: state.xp + amount })),
   setLevel: (level) => set({ level }),
   setLastSessionDate: (date) => set({ lastSessionDate: date }),
@@ -31,4 +34,6 @@ export const createGamificationSlice: StateCreator<
   incrementStreak: () =>
     set((state) => ({ weeklyStreak: state.weeklyStreak + 1 })),
   resetStreak: () => set({ weeklyStreak: 0 }),
+  incrementSessionsCompleted: () =>
+    set((state) => ({ sessionsCompleted: state.sessionsCompleted + 1 })),
 });
