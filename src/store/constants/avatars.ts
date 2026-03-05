@@ -1,3 +1,5 @@
+import { THEME_COSMETICS } from './themes';
+
 /**
  * Avatar constants for child profile selection.
  * 14 animal avatars (regular) + 5 special avatars (badge-unlocked) + 6 frames.
@@ -90,6 +92,11 @@ export function getCosmeticUnlockText(badgeId: string): string | null {
   const frame = FRAMES.find((f) => f.badgeId === badgeId);
   if (frame) {
     return `Unlocks ${frame.label} frame`;
+  }
+
+  const theme = THEME_COSMETICS.find((t) => t.badgeId === badgeId);
+  if (theme) {
+    return `Unlocks ${theme.label} ${theme.emoji} theme`;
   }
 
   return null;

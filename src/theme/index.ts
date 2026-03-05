@@ -1,31 +1,30 @@
 /**
- * Theme constants for Tiny Tallies.
+ * Theme system for Tiny Tallies.
  *
- * Single source of truth for colors, spacing, typography, and layout.
- * Deep navy backgrounds with bright accents for child-friendly dark theme.
+ * ThemeProvider delivers dynamic colors via React Context.
+ * Static spacing, typography, and layout constants remain unchanged.
  */
+import React, { createContext, useContext } from 'react';
 
-export const colors = {
-  // Backgrounds
-  background: '#1a1a2e',
-  backgroundLight: '#16213e',
-  surface: '#0f3460',
-  surfaceLight: '#1a4a7a',
+import { useAppStore } from '@/store/appStore';
 
-  // Primary
-  primary: '#6366f1',
-  primaryLight: '#818cf8',
-  primaryDark: '#4f46e5',
+import { THEMES } from './colors';
+import type { ThemeColors, ThemeId } from './colors';
 
-  // Feedback
-  correct: '#84cc16',
-  incorrect: '#f87171',
+export { THEMES } from './colors';
+export type { ThemeColors, ThemeId } from './colors';
 
-  // Text
-  textPrimary: '#ffffff',
-  textSecondary: '#cbd5e1',
-  textMuted: '#64748b',
-} as const;
+const ThemeContext = createContext<ThemeColors>(THEMES.dark);
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const themeId = useAppStore((s) => s.themeId) ?? 'dark';
+  const colors = THEMES[themeId as ThemeId] ?? THEMES.dark;
+  return React.createElement(ThemeContext.Provider, { value: colors }, children);
+}
+
+export function useTheme(): { colors: ThemeColors } {
+  return { colors: useContext(ThemeContext) };
+}
 
 export const spacing = {
   xs: 4,
