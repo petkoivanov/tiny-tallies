@@ -3,29 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.6
 milestone_name: Misconception Detection
 status: in_progress
-stopped_at: Phase 30 context gathered
-last_updated: "2026-03-05T00:32:27.127Z"
-last_activity: 2026-03-04 -- Phase 29 Plan 01 complete (AI tutor misconception context)
+stopped_at: Completed 30-01-PLAN.md
+last_updated: "2026-03-05T01:16:53.998Z"
+last_activity: 2026-03-04 -- Phase 30 Plan 01 complete (remediation session engine)
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 5
-  completed_plans: 5
----
-
----
-gsd_state_version: 1.0
-milestone: v0.6
-milestone_name: Misconception Detection
-status: in_progress
-stopped_at: "Completed 29-01-PLAN.md"
-last_updated: "2026-03-04T21:19:52Z"
-last_activity: 2026-03-04 -- Phase 29 Plan 01 complete (AI tutor misconception context)
-progress:
-  total_phases: 5
-  completed_phases: 4
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 7
+  completed_plans: 6
 ---
 
 # Project State
@@ -35,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** Phase 29 complete -- ready for Phase 30
+**Current focus:** Phase 30 -- remediation mini-sessions (Plan 01 complete, Plan 02 pending)
 
 ## Current Position
 
-Phase: 29 of 30 (AI Tutor Misconception Context) -- COMPLETE
-Plan: 1 of 1 in current phase
-Status: Phase complete
-Last activity: 2026-03-04 -- Phase 29 Plan 01 complete (AI tutor misconception context)
+Phase: 30 of 30 (Remediation Mini-Sessions)
+Plan: 1 of 2 in current phase
+Status: Plan 01 complete
+Last activity: 2026-03-04 -- Phase 30 Plan 01 complete (remediation session engine)
 
-Progress: [████████░░] 80% of v0.6
+Progress: [██████████] 96% of v0.6
 
 ## Performance Metrics
 
@@ -62,6 +47,7 @@ Progress: [████████░░] 80% of v0.6
 | 27-01 | confirmation engine | 2min | 2 | 2 |
 | 28-01 | session mix adaptation | 7min | 2 | 6 |
 | 29-01 | tutor misconception context | 3min | 2 | 5 |
+| 30-01 | remediation session engine | 8min | 2 | 12 |
 
 ## Accumulated Context
 
@@ -70,7 +56,7 @@ Progress: [████████░░] 80% of v0.6
 Full decision log in PROJECT.md Key Decisions table.
 
 Key context for v0.6:
-- STORE_VERSION = 7 (bumped from 6 for misconceptionSlice)
+- STORE_VERSION = 8 (bumped from 7 for remediationCorrectCount field)
 - misconceptionSlice persisted via partialize (sessionRecordedKeys excluded -- ephemeral)
 - Selectors are standalone functions, not slice actions
 - Composite key format: ${bugTag}::${skillId}
@@ -80,12 +66,12 @@ Key context for v0.6:
 - Session orchestrator builds 15-problem queues with 60/30/10 mix
 - AI tutor (v0.5) already uses bug tags for per-problem explanations
 - LLM must NEVER compute math or reveal answers in HINT mode
-- 1,121 tests passing, TypeScript clean
+- 1,139 tests passing, TypeScript clean
 - recordMisconception called in useSession handleAnswer on wrong answers with bugId
 - resetSessionDedup called on session initialization
 - 2-then-3 confirmation rule: check confirmed FIRST so count=3 goes straight to confirmed
-- suspectedAt/confirmedAt timestamps use nullish coalescing for idempotent assignment
-- Status transitions are one-way: new -> suspected -> confirmed (no regression)
+- suspectedAt/confirmedAt/resolvedAt timestamps use nullish coalescing for idempotent assignment
+- Status transitions: new -> suspected -> confirmed -> resolved (no regression except confirmed->resolved via remediation)
 - getConfirmedMisconceptions, getSuspectedMisconceptions, getMisconceptionCounts selectors exported
 - PracticeProblemCategory now includes 'remediation' alongside review/new/challenge
 - Remediation replaces review slots only (max 3), preserving new and challenge allocations
@@ -98,6 +84,13 @@ Key context for v0.6:
 - Per-mode misconception guidance: HINT steers away, TEACH addresses step-by-step, BOOST explains why
 - Cap at 3 confirmed misconceptions per prompt to control prompt length
 - confirmedMisconceptions omitted from promptParams when empty (clean prompts for no-misconception skills)
+- REMEDIATION_SESSION_CONFIG: 0 warmup + 5 practice + 0 cooldown
+- SessionMode type: 'standard' | 'remediation'
+- remediationCorrectCount tracked per MisconceptionRecord, RESOLUTION_THRESHOLD = 3
+- recordRemediationCorrect operates on all confirmed records for a skillId
+- generateSessionQueue remediationOnly mode bypasses 60/30/10 mix, fills all slots from confirmed skills
+- useSession accepts optional { mode, remediationSkillIds } with backward compatibility
+- selectRemediationSkillIds exported from practiceMix for remediation-only queue generation
 
 ### Pending Todos
 
@@ -109,7 +102,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05T00:32:27.124Z
-Stopped at: Phase 30 context gathered
-Resume file: .planning/phases/30-remediation-mini-sessions/30-CONTEXT.md
+Last session: 2026-03-05T01:16:53.996Z
+Stopped at: Completed 30-01-PLAN.md
+Resume file: None
 Resume command: /gsd:execute-phase 30
