@@ -44,6 +44,36 @@ import {
 } from '../services/challenge';
 import type { ChallengeCompletion } from '../services/challenge';
 
+/** Commits challenge completion: evaluates goals, awards bonus XP, records to store. */
+function commitChallengeCompletion(
+  themeId: string, finalScore: number, totalProblems: number, maxStreak: number,
+  dateKey: string, addXp: (amount: number) => void,
+  completeChallenge: (dateKey: string, completion: ChallengeCompletion) => void,
+): { isChallenge: boolean; challengeBonusXp: number; accuracyGoalMet: boolean; streakGoalMet: boolean } | undefined {
+  const theme = CHALLENGE_THEMES.find((t) => t.id === themeId);
+  if (!theme) return undefined;
+
+  const goals = evaluateChallengeGoals(finalScore, totalProblems, maxStreak, theme);
+  addXp(CHALLENGE_BONUS_XP);
+
+  completeChallenge(dateKey, {
+    themeId,
+    score: finalScore,
+    total: totalProblems,
+    accuracyGoalMet: goals.accuracyGoalMet,
+    streakGoalMet: goals.streakGoalMet,
+    bonusXpAwarded: CHALLENGE_BONUS_XP,
+    completedAt: new Date().toISOString(),
+  });
+
+  return {
+    isChallenge: true,
+    challengeBonusXp: CHALLENGE_BONUS_XP,
+    accuracyGoalMet: goals.accuracyGoalMet,
+    streakGoalMet: goals.streakGoalMet,
+  };
+}
+
 /** Duration in ms to show correct/incorrect feedback before auto-advancing */
 export const FEEDBACK_DURATION_MS = 1500;
 
@@ -68,11 +98,7 @@ export interface UseSessionReturn {
   sessionResult: SessionResult | null;
 }
 
-/**
- * Generates the initial session queue and marks the session as active in the store.
- * Extracted as a helper so it runs synchronously during ref initialization,
- * making the queue available on the very first render.
- */
+/** Generates session queue synchronously during ref initialization. */
 function initializeSession(
   skillStates: Record<string, SkillState>,
   startSession: () => void,
@@ -94,51 +120,24 @@ function initializeSession(
       ? REMEDIATION_SESSION_CONFIG
       : DEFAULT_SESSION_CONFIG;
 
-  let confirmedSkillIds: string[];
-
-  if (isChallenge && challengeThemeId) {
-    // Challenge mode: filter skills by theme
-    const theme = CHALLENGE_THEMES.find((t) => t.id === challengeThemeId);
-    confirmedSkillIds = theme
-      ? getChallengeSkillIds(theme, skillStates)
-      : [];
-  } else if (isRemediation && remediationSkillIds) {
-    confirmedSkillIds = [...remediationSkillIds];
-  } else {
-    confirmedSkillIds = [
-      ...new Set(getConfirmedMisconceptions(misconceptions).map((r) => r.skillId)),
-    ];
-  }
-
-  // For challenge mode, use remediationOnly=true to ensure all problems come from filtered skills
-  const useRemediationPath = isRemediation || isChallenge;
+  const confirmedSkillIds: string[] = isChallenge && challengeThemeId
+    ? (CHALLENGE_THEMES.find((t) => t.id === challengeThemeId)
+        ? getChallengeSkillIds(CHALLENGE_THEMES.find((t) => t.id === challengeThemeId)!, skillStates) : [])
+    : isRemediation && remediationSkillIds
+      ? [...remediationSkillIds]
+      : [...new Set(getConfirmedMisconceptions(misconceptions).map((r) => r.skillId))];
 
   const queue = generateSessionQueue(
-    skillStates, sessionConfig, seed, null, confirmedSkillIds, useRemediationPath,
+    skillStates, sessionConfig, seed, null, confirmedSkillIds, isRemediation || isChallenge,
   );
 
-  // Capture date key at init time for date boundary safety
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const challengeStartDate = `${year}-${month}-${day}`;
-
+  // Capture date key at init for date boundary safety
+  const d = new Date();
+  const challengeStartDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   return { queue, startTime, challengeStartDate };
 }
 
-/**
- * Session lifecycle hook that composes the session orchestrator with store actions.
- *
- * Manages: problem queue, answer handling, feedback timing, Elo/XP accumulation,
- * and commit-on-complete semantics (quit discards all updates).
- *
- * State design:
- * - Problem queue stored in useRef (ephemeral, not in Zustand store)
- * - Elo/XP accumulate in refs during session, committed only on completion
- * - FrustrationState tracked in ref (session-scoped, not used for queue in v0.1)
- * - Feedback timer cleaned up on unmount (defense-in-depth)
- */
+/** Session lifecycle hook: queue, answer handling, feedback, Elo/XP, commit-on-complete. */
 export function useSession(options?: {
   mode?: SessionMode;
   remediationSkillIds?: string[];
@@ -153,7 +152,6 @@ export function useSession(options?: {
       ? REMEDIATION_SESSION_CONFIG
       : DEFAULT_SESSION_CONFIG;
 
-  // Store selectors and actions
   const skillStates = useAppStore((s) => s.skillStates);
   const startSession = useAppStore((s) => s.startSession);
   const endSession = useAppStore((s) => s.endSession);
@@ -174,8 +172,7 @@ export function useSession(options?: {
   const misconceptions = useAppStore((s) => s.misconceptions);
   const completeChallenge = useAppStore((s) => s.completeChallenge);
 
-  // Synchronous initialization: generate queue on first render, not in useEffect.
-  // This ensures currentProblem is available immediately.
+  // Synchronous init: queue available on first render
   const initializedRef = useRef(false);
   const sessionQueueRef = useRef<SessionProblem[]>([]);
   const sessionStartTimeRef = useRef(0);
@@ -198,7 +195,6 @@ export function useSession(options?: {
     challengeStartDateRef.current = challengeStartDate;
   }
 
-  // React state (drives UI re-renders)
   const [currentIndex, setCurrentIndex] = useState(0);
   const [feedbackState, setFeedbackState] = useState<FeedbackState | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -211,7 +207,7 @@ export function useSession(options?: {
     sessionConfig.practiceCount +
     sessionConfig.cooldownCount;
 
-  // Cleanup feedback timer on unmount (defense-in-depth)
+  // Cleanup feedback timer on unmount
   useEffect(() => {
     return () => {
       if (feedbackTimerRef.current !== null) {
@@ -221,7 +217,6 @@ export function useSession(options?: {
     };
   }, []);
 
-  // Derived values
   const currentProblem = isComplete ? null : (sessionQueueRef.current[currentIndex] ?? null);
   const sessionPhase = getSessionPhase(currentIndex, sessionConfig);
   const correctAnswer = currentProblem?.problem.correctAnswer ?? null;
@@ -336,30 +331,20 @@ export function useSession(options?: {
         newCpaLevel,
       });
 
-      // Track maxStreak (consecutive correct answers)
+      // Track maxStreak and XP
       if (isCorrect) {
         currentStreakRef.current += 1;
-        if (currentStreakRef.current > maxStreakRef.current) {
-          maxStreakRef.current = currentStreakRef.current;
-        }
+        maxStreakRef.current = Math.max(maxStreakRef.current, currentStreakRef.current);
+        totalXpEarnedRef.current += calculateXp(problem.templateBaseElo);
+        setScore((prev) => prev + 1);
       } else {
         currentStreakRef.current = 0;
       }
 
-      // Calculate XP if correct
-      if (isCorrect) {
-        totalXpEarnedRef.current += calculateXp(problem.templateBaseElo);
-        setScore((prev) => prev + 1);
-      }
-
-      // Update frustration state
       frustrationStateRef.current = updateFrustrationState(
-        frustrationStateRef.current,
-        problem.skillId,
-        isCorrect,
-      );
+        frustrationStateRef.current, problem.skillId, isCorrect);
 
-      // Schedule auto-advance after feedback duration
+      // Schedule auto-advance
       feedbackTimerRef.current = setTimeout(() => {
         feedbackTimerRef.current = null;
         setFeedbackState(null);
@@ -390,47 +375,14 @@ export function useSession(options?: {
           );
           endSession();
 
-          // Challenge completion flow: evaluate goals, award bonus XP, record completion
-          // Runs BEFORE badge evaluation so challengesCompleted is incremented for badge snapshot
-          let challengeResult: {
-            isChallenge: boolean;
-            challengeBonusXp: number;
-            accuracyGoalMet: boolean;
-            streakGoalMet: boolean;
-          } | undefined;
-
-          if (mode === 'challenge' && challengeThemeId) {
-            const theme = CHALLENGE_THEMES.find((t) => t.id === challengeThemeId);
-            if (theme) {
-              const finalScore = isCorrect ? score + 1 : score;
-              const goals = evaluateChallengeGoals(
-                finalScore,
-                totalProblems,
-                maxStreakRef.current,
-                theme,
-              );
-
-              addXp(CHALLENGE_BONUS_XP);
-
-              const completion: ChallengeCompletion = {
-                themeId: challengeThemeId,
-                score: finalScore,
-                total: totalProblems,
-                accuracyGoalMet: goals.accuracyGoalMet,
-                streakGoalMet: goals.streakGoalMet,
-                bonusXpAwarded: CHALLENGE_BONUS_XP,
-                completedAt: new Date().toISOString(),
-              };
-              completeChallenge(challengeStartDateRef.current, completion);
-
-              challengeResult = {
-                isChallenge: true,
-                challengeBonusXp: CHALLENGE_BONUS_XP,
-                accuracyGoalMet: goals.accuracyGoalMet,
-                streakGoalMet: goals.streakGoalMet,
-              };
-            }
-          }
+          // Challenge completion: runs before badge eval so challengesCompleted is incremented
+          const finalScore = isCorrect ? score + 1 : score;
+          const challengeResult = mode === 'challenge' && challengeThemeId
+            ? commitChallengeCompletion(
+                challengeThemeId, finalScore, totalProblems, maxStreakRef.current,
+                challengeStartDateRef.current, addXp, completeChallenge,
+              )
+            : undefined;
 
           // Badge evaluation: increment session counter, build snapshot, evaluate
           const currentState = useAppStore.getState();
@@ -443,7 +395,7 @@ export function useSession(options?: {
             misconceptions: useAppStore.getState().misconceptions,
             challengesCompleted: useAppStore.getState().challengesCompleted,
             lastChallengeScore: challengeResult
-              ? { score: isCorrect ? score + 1 : score, total: totalProblems }
+              ? { score: finalScore, total: totalProblems }
               : undefined,
           };
           const newBadges = evaluateBadges(badgeSnapshot, useAppStore.getState().earnedBadges);

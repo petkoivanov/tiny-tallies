@@ -25,11 +25,9 @@ import type { CpaStage } from '@/services/cpa/cpaTypes';
 
 type ResultsRouteProp = RouteProp<RootStackParamList, 'Results'>;
 
-/** Get celebration message for CPA stage advances */
 function getCpaAdvanceMessage(
   advances: Array<{ skillId: string; from: CpaStage; to: CpaStage }>,
 ): string {
-  // Use highest stage advance for the message
   const hasAbstract = advances.some((a) => a.to === 'abstract');
   if (hasAbstract) {
     return 'Amazing! You can solve with just numbers now!';
@@ -37,26 +35,19 @@ function getCpaAdvanceMessage(
   return 'You leveled up! Now you can solve with pictures!';
 }
 
-/** Format duration in milliseconds to "Xm Ys" display */
 function formatDuration(durationMs: number): string {
   const totalSeconds = Math.floor(durationMs / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-
-  if (minutes === 0) {
-    return `${seconds}s`;
-  }
-  return `${minutes}m ${seconds}s`;
+  return minutes === 0 ? `${seconds}s` : `${minutes}m ${seconds}s`;
 }
 
-/** Dynamic motivational message based on score percentage */
 function getMotivationalMessage(scorePercent: number): string {
   if (scorePercent >= 90) return 'Amazing!';
   if (scorePercent >= 70) return 'Great job!';
   return 'Nice effort!';
 }
 
-/** Color for the motivational message based on score percentage */
 function getMotivationalColor(scorePercent: number): string {
   if (scorePercent >= 90) return colors.correct;
   if (scorePercent >= 70) return colors.primaryLight;
@@ -79,6 +70,10 @@ export default function ResultsScreen() {
     cpaAdvances = [],
     isRemediation = false,
     newBadges = [],
+    isChallenge = false,
+    challengeBonusXp = 0,
+    accuracyGoalMet = false,
+    streakGoalMet = false,
   } = route.params;
 
   const [showBadgePopup, setShowBadgePopup] = useState(newBadges.length > 0);
@@ -117,9 +112,7 @@ export default function ResultsScreen() {
     transform: [{ scale: levelUpScale.value }],
   }));
 
-  // CPA advance bounce animation
   const cpaScale = useSharedValue(cpaAdvances.length > 0 ? 0.5 : 1);
-
   useEffect(() => {
     if (cpaAdvances.length > 0) {
       cpaScale.value = withDelay(
@@ -150,7 +143,6 @@ export default function ResultsScreen() {
       ]}
     >
       <View style={styles.content}>
-        {/* Motivational Message */}
         <Text
           style={[styles.motivationalMessage, { color: motivationalColor }]}
           testID="motivational-message"
@@ -158,16 +150,13 @@ export default function ResultsScreen() {
           {motivationalMessage}
         </Text>
 
-        {/* Subtitle */}
         <Text style={styles.subtitle}>
           {isRemediation
             ? 'Great practice on tricky skills!'
             : 'Session Complete!'}
         </Text>
 
-        {/* Stats Card */}
         <View style={styles.statsCard}>
-          {/* Score Row */}
           <View style={styles.statRow}>
             <Text style={styles.statLabel}>Score</Text>
             <Text style={styles.scoreText}>
@@ -179,15 +168,57 @@ export default function ResultsScreen() {
 
           <View style={styles.divider} />
 
-          {/* XP Earned Row */}
           <View style={styles.statRow}>
             <Text style={styles.statLabel}>XP Earned</Text>
             <Text style={styles.xpText}>+{xpEarned} XP</Text>
           </View>
 
+          {isChallenge && (
+            <>
+              <View style={styles.divider} />
+              <View style={styles.challengeSection} testID="challenge-bonus-section">
+                <Text style={styles.challengeTitle}>Daily Challenge</Text>
+                <Text style={styles.challengeBonusText}>
+                  +{challengeBonusXp} Bonus XP
+                </Text>
+                <View style={styles.challengeGoals}>
+                  <View style={styles.challengeGoalRow}>
+                    <Text style={styles.challengeGoalIcon}>
+                      {accuracyGoalMet ? '\u2705' : '\u2B1C'}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.challengeGoalText,
+                        accuracyGoalMet && styles.challengeGoalMet,
+                      ]}
+                    >
+                      {accuracyGoalMet
+                        ? 'Accuracy goal met!'
+                        : `Accuracy: ${score}/${total}`}
+                    </Text>
+                  </View>
+                  <View style={styles.challengeGoalRow}>
+                    <Text style={styles.challengeGoalIcon}>
+                      {streakGoalMet ? '\u2705' : '\u2B1C'}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.challengeGoalText,
+                        streakGoalMet && styles.challengeGoalMet,
+                      ]}
+                    >
+                      {streakGoalMet
+                        ? 'Streak goal met!'
+                        : `Streak: ${streakCount}`}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </>
+          )}
+
           <View style={styles.divider} />
 
-          {/* XP Progress Bar Row */}
           <View style={styles.xpBarContainer}>
             <Text style={styles.xpBarLabel}>
               {xpIntoCurrentLevel} / {xpNeededForNextLevel} XP to Level{' '}
@@ -210,7 +241,6 @@ export default function ResultsScreen() {
 
           <View style={styles.divider} />
 
-          {/* Streak Row */}
           <View style={styles.streakRow} testID="streak-row">
             <Flame
               size={20}
@@ -223,7 +253,6 @@ export default function ResultsScreen() {
             <Check size={18} color={colors.correct} strokeWidth={3} />
           </View>
 
-          {/* CPA Advance Callout (conditional) */}
           {cpaAdvances.length > 0 && (
             <>
               <View style={styles.divider} />
@@ -237,7 +266,6 @@ export default function ResultsScreen() {
             </>
           )}
 
-          {/* Level Up Callout (conditional) */}
           {leveledUp && (
             <>
               <View style={styles.divider} />
@@ -251,7 +279,6 @@ export default function ResultsScreen() {
             </>
           )}
 
-          {/* Badges Earned (conditional) */}
           <BadgesSummary
             badgeIds={newBadges}
             onViewAll={() =>
@@ -266,14 +293,12 @@ export default function ResultsScreen() {
 
           <View style={styles.divider} />
 
-          {/* Time Row */}
           <View style={styles.statRow}>
             <Text style={styles.statLabel}>Time</Text>
             <Text style={styles.timeText}>{formatDuration(durationMs)}</Text>
           </View>
         </View>
 
-        {/* Done Button */}
         <Pressable
           onPress={handleDone}
           style={({ pressed }) => [
@@ -411,6 +436,39 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.bold,
     fontSize: typography.fontSize.lg,
     color: colors.primaryLight,
+  },
+  challengeSection: {
+    paddingVertical: spacing.md,
+    gap: spacing.sm,
+  },
+  challengeTitle: {
+    fontFamily: typography.fontFamily.bold,
+    fontSize: typography.fontSize.md,
+    color: colors.primaryLight,
+  },
+  challengeBonusText: {
+    fontFamily: typography.fontFamily.bold,
+    fontSize: typography.fontSize.lg,
+    color: colors.correct,
+  },
+  challengeGoals: {
+    gap: spacing.xs,
+  },
+  challengeGoalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  challengeGoalIcon: {
+    fontSize: 16,
+  },
+  challengeGoalText: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: typography.fontSize.sm,
+    color: colors.textSecondary,
+  },
+  challengeGoalMet: {
+    color: colors.correct,
   },
   timeText: {
     fontFamily: typography.fontFamily.semiBold,

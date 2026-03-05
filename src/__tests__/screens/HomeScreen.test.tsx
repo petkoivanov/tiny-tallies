@@ -35,6 +35,7 @@ jest.mock('@/components/home', () => {
   const { View } = require('react-native');
   return {
     ExploreGrid: () => <View testID="explore-grid" />,
+    DailyChallengeCard: () => <View testID="daily-challenge-card" />,
   };
 });
 

@@ -10,7 +10,7 @@ import { calculateLevelFromXp } from '@/services/gamification/levelProgression';
 import { isSameISOWeek } from '@/services/gamification/weeklyStreak';
 import { BADGES } from '@/services/achievement';
 import { getConfirmedMisconceptions } from '@/store/slices/misconceptionSlice';
-import { ExploreGrid } from '@/components/home';
+import { ExploreGrid, DailyChallengeCard } from '@/components/home';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -154,6 +154,11 @@ export default function HomeScreen() {
       {/* Explore Section */}
       <View style={styles.exploreSection}>
         <ExploreGrid />
+      </View>
+
+      {/* Daily Challenge */}
+      <View style={styles.challengeSection}>
+        <DailyChallengeCard />
       </View>
 
       {/* Start Practice Button */}
@@ -324,6 +329,10 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.md,
     color: colors.textPrimary,
+  },
+  challengeSection: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
   },
   buttonSection: {
     paddingHorizontal: spacing.lg,
