@@ -6,6 +6,7 @@ import SessionScreen from '@/screens/SessionScreen';
 import ResultsScreen from '@/screens/ResultsScreen';
 import SandboxScreen from '@/screens/SandboxScreen';
 import ConsentScreen from '@/screens/ConsentScreen';
+import BadgeCollectionScreen from '@/screens/BadgeCollectionScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -26,6 +27,7 @@ export default function AppNavigator() {
       />
       <Stack.Screen name="Results" component={ResultsScreen} />
       <Stack.Screen name="Sandbox" component={SandboxScreen} />
+      <Stack.Screen name="BadgeCollection" component={BadgeCollectionScreen} />
       <Stack.Screen
         name="Consent"
         component={ConsentScreen}
