@@ -1220,11 +1220,15 @@ describe('sessionOrchestrator', () => {
   });
 
   describe('remediation-only mode', () => {
+    const remSkill1 = 'addition.single-digit.no-carry';
+    const remSkill2 = 'subtraction.single-digit.no-borrow';
+    const remSkill3 = 'addition.two-digit.no-carry';
+
     it('produces exactly 5 problems with REMEDIATION_SESSION_CONFIG and remediationOnly=true', () => {
       const skillStates: Record<string, SkillState> = {
-        'add-2digit': { eloRating: 1000, attempts: 10, correct: 7, lastPracticed: null, ...bkt },
-        'sub-2digit': { eloRating: 900, attempts: 8, correct: 4, lastPracticed: null, ...bkt },
-        'mul-single': { eloRating: 800, attempts: 6, correct: 3, lastPracticed: null, ...bkt },
+        [remSkill1]: { eloRating: 1000, attempts: 10, correct: 7, ...bkt },
+        [remSkill2]: { eloRating: 900, attempts: 8, correct: 4, ...bkt },
+        [remSkill3]: { eloRating: 800, attempts: 6, correct: 3, ...bkt },
       };
 
       const queue = generateSessionQueue(
@@ -1232,7 +1236,7 @@ describe('sessionOrchestrator', () => {
         REMEDIATION_SESSION_CONFIG,
         42,
         null,
-        ['add-2digit', 'sub-2digit', 'mul-single'],
+        [remSkill1, remSkill2, remSkill3],
         true,
       );
 
@@ -1241,8 +1245,8 @@ describe('sessionOrchestrator', () => {
 
     it('all 5 problems are in practice phase (no warmup/cooldown)', () => {
       const skillStates: Record<string, SkillState> = {
-        'add-2digit': { eloRating: 1000, attempts: 10, correct: 7, lastPracticed: null, ...bkt },
-        'sub-2digit': { eloRating: 900, attempts: 8, correct: 4, lastPracticed: null, ...bkt },
+        [remSkill1]: { eloRating: 1000, attempts: 10, correct: 7, ...bkt },
+        [remSkill2]: { eloRating: 900, attempts: 8, correct: 4, ...bkt },
       };
 
       const queue = generateSessionQueue(
@@ -1250,7 +1254,7 @@ describe('sessionOrchestrator', () => {
         REMEDIATION_SESSION_CONFIG,
         42,
         null,
-        ['add-2digit', 'sub-2digit'],
+        [remSkill1, remSkill2],
         true,
       );
 
@@ -1262,13 +1266,12 @@ describe('sessionOrchestrator', () => {
 
     it('all practice problems come from confirmedMisconceptionSkillIds', () => {
       const skillStates: Record<string, SkillState> = {
-        'add-2digit': { eloRating: 1000, attempts: 10, correct: 7, lastPracticed: null, ...bkt },
-        'sub-2digit': { eloRating: 900, attempts: 8, correct: 4, lastPracticed: null, ...bkt },
-        'mul-single': { eloRating: 800, attempts: 6, correct: 3, lastPracticed: null, ...bkt },
-        'div-single': { eloRating: 1100, attempts: 12, correct: 9, lastPracticed: null, ...bkt },
+        [remSkill1]: { eloRating: 1000, attempts: 10, correct: 7, ...bkt },
+        [remSkill2]: { eloRating: 900, attempts: 8, correct: 4, ...bkt },
+        [remSkill3]: { eloRating: 800, attempts: 6, correct: 3, ...bkt },
       };
 
-      const remediationSkillIds = ['add-2digit', 'sub-2digit'];
+      const remediationSkillIds = [remSkill1, remSkill2];
 
       const queue = generateSessionQueue(
         skillStates,
@@ -1287,12 +1290,12 @@ describe('sessionOrchestrator', () => {
 
     it('each confirmed skill gets at least 1 problem when <= 5 skills', () => {
       const skillStates: Record<string, SkillState> = {
-        'add-2digit': { eloRating: 1000, attempts: 10, correct: 7, lastPracticed: null, ...bkt },
-        'sub-2digit': { eloRating: 900, attempts: 8, correct: 4, lastPracticed: null, ...bkt },
-        'mul-single': { eloRating: 800, attempts: 6, correct: 3, lastPracticed: null, ...bkt },
+        [remSkill1]: { eloRating: 1000, attempts: 10, correct: 7, ...bkt },
+        [remSkill2]: { eloRating: 900, attempts: 8, correct: 4, ...bkt },
+        [remSkill3]: { eloRating: 800, attempts: 6, correct: 3, ...bkt },
       };
 
-      const remediationSkillIds = ['add-2digit', 'sub-2digit', 'mul-single'];
+      const remediationSkillIds = [remSkill1, remSkill2, remSkill3];
 
       const queue = generateSessionQueue(
         skillStates,

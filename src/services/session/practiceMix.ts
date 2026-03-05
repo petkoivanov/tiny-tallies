@@ -283,7 +283,7 @@ function weightedSelect<T extends PoolItem>(
  * @param maxSlots - Maximum number of remediation slots to fill
  * @returns Array of selected skill IDs (length <= maxSlots)
  */
-function selectRemediationSkillIds(
+export function selectRemediationSkillIds(
   confirmedSkillIds: readonly string[],
   skillStates: Record<string, SkillState>,
   rng: SeededRng,

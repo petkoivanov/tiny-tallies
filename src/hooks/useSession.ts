@@ -19,9 +19,11 @@ import {
   getSessionPhase,
   commitSessionResults,
   DEFAULT_SESSION_CONFIG,
+  REMEDIATION_SESSION_CONFIG,
 } from '../services/session';
 import type {
   SessionPhase,
+  SessionMode,
   SessionProblem,
   SessionResult,
   SessionFeedback,
@@ -45,6 +47,7 @@ export interface UseSessionReturn {
   currentIndex: number;
   totalProblems: number;
   sessionPhase: SessionPhase;
+  sessionMode: SessionMode;
   feedbackState: FeedbackState | null;
   selectedAnswer: number | null;
   correctAnswer: number | null;
@@ -64,14 +67,23 @@ function initializeSession(
   skillStates: Record<string, SkillState>,
   startSession: () => void,
   misconceptions: Record<string, MisconceptionRecord>,
+  mode: SessionMode = 'standard',
+  remediationSkillIds?: readonly string[],
 ): { queue: SessionProblem[]; startTime: number } {
   startSession();
   const seed = Date.now();
   const startTime = Date.now();
-  const confirmed = getConfirmedMisconceptions(misconceptions);
-  const uniqueSkillIds = [...new Set(confirmed.map((r) => r.skillId))];
+
+  const isRemediation = mode === 'remediation';
+  const sessionConfig = isRemediation ? REMEDIATION_SESSION_CONFIG : DEFAULT_SESSION_CONFIG;
+
+  // For remediation mode, use provided skill IDs; for standard, read from store
+  const confirmedSkillIds = isRemediation && remediationSkillIds
+    ? [...remediationSkillIds]
+    : [...new Set(getConfirmedMisconceptions(misconceptions).map((r) => r.skillId))];
+
   const queue = generateSessionQueue(
-    skillStates, DEFAULT_SESSION_CONFIG, seed, null, uniqueSkillIds,
+    skillStates, sessionConfig, seed, null, confirmedSkillIds, isRemediation,
   );
   return { queue, startTime };
 }
@@ -88,7 +100,14 @@ function initializeSession(
  * - FrustrationState tracked in ref (session-scoped, not used for queue in v0.1)
  * - Feedback timer cleaned up on unmount (defense-in-depth)
  */
-export function useSession(): UseSessionReturn {
+export function useSession(options?: {
+  mode?: SessionMode;
+  remediationSkillIds?: string[];
+}): UseSessionReturn {
+  const mode = options?.mode ?? 'standard';
+  const remediationSkillIds = options?.remediationSkillIds;
+  const sessionConfig = mode === 'remediation' ? REMEDIATION_SESSION_CONFIG : DEFAULT_SESSION_CONFIG;
+
   // Store selectors and actions
   const skillStates = useAppStore((s) => s.skillStates);
   const startSession = useAppStore((s) => s.startSession);
@@ -105,6 +124,7 @@ export function useSession(): UseSessionReturn {
   const setWeeklyStreak = useAppStore((s) => s.setWeeklyStreak);
   const childAge = useAppStore((s) => s.childAge);
   const recordMisconception = useAppStore((s) => s.recordMisconception);
+  const recordRemediationCorrect = useAppStore((s) => s.recordRemediationCorrect);
   const resetSessionDedup = useAppStore((s) => s.resetSessionDedup);
   const misconceptions = useAppStore((s) => s.misconceptions);
 
@@ -121,7 +141,9 @@ export function useSession(): UseSessionReturn {
   if (!initializedRef.current) {
     initializedRef.current = true;
     resetSessionDedup();
-    const { queue, startTime } = initializeSession(skillStates, startSession, misconceptions);
+    const { queue, startTime } = initializeSession(
+      skillStates, startSession, misconceptions, mode, remediationSkillIds,
+    );
     sessionQueueRef.current = queue;
     sessionStartTimeRef.current = startTime;
   }
@@ -135,9 +157,9 @@ export function useSession(): UseSessionReturn {
   const [sessionResult, setSessionResult] = useState<SessionResult | null>(null);
 
   const totalProblems =
-    DEFAULT_SESSION_CONFIG.warmupCount +
-    DEFAULT_SESSION_CONFIG.practiceCount +
-    DEFAULT_SESSION_CONFIG.cooldownCount;
+    sessionConfig.warmupCount +
+    sessionConfig.practiceCount +
+    sessionConfig.cooldownCount;
 
   // Cleanup feedback timer on unmount (defense-in-depth)
   useEffect(() => {
@@ -151,7 +173,7 @@ export function useSession(): UseSessionReturn {
 
   // Derived values
   const currentProblem = isComplete ? null : (sessionQueueRef.current[currentIndex] ?? null);
-  const sessionPhase = getSessionPhase(currentIndex, DEFAULT_SESSION_CONFIG);
+  const sessionPhase = getSessionPhase(currentIndex, sessionConfig);
   const correctAnswer = currentProblem?.problem.correctAnswer ?? null;
 
   const handleAnswer = useCallback(
@@ -188,6 +210,11 @@ export function useSession(): UseSessionReturn {
       // Record misconception if wrong answer matched a Bug Library pattern
       if (!isCorrect && bugId) {
         recordMisconception(bugId, problem.skillId);
+      }
+
+      // Track remediation progress on correct answers during remediation sessions
+      if (isCorrect && mode === 'remediation') {
+        recordRemediationCorrect(problem.skillId);
       }
 
       // Update Elo in pending updates
@@ -350,6 +377,8 @@ export function useSession(): UseSessionReturn {
       endSession,
       childAge,
       recordMisconception,
+      recordRemediationCorrect,
+      mode,
     ],
   );
 
@@ -380,6 +409,7 @@ export function useSession(): UseSessionReturn {
     currentIndex,
     totalProblems,
     sessionPhase,
+    sessionMode: mode,
     feedbackState,
     selectedAnswer,
     correctAnswer,

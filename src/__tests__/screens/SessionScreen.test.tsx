@@ -72,6 +72,7 @@ const defaultUseSessionReturn: UseSessionReturn = {
   currentIndex: 0,
   totalProblems: 15,
   sessionPhase: 'warmup',
+  sessionMode: 'standard',
   feedbackState: null,
   selectedAnswer: null,
   correctAnswer: 68,

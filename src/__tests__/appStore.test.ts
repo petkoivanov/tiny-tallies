@@ -82,8 +82,8 @@ describe('appStore composition', () => {
     expect(useAppStore.getState().xp).toBe(35);
   });
 
-  it('STORE_VERSION equals 7', () => {
-    expect(STORE_VERSION).toBe(7);
+  it('STORE_VERSION equals 8', () => {
+    expect(STORE_VERSION).toBe(8);
   });
 });
 

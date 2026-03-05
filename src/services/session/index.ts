@@ -3,6 +3,7 @@ export type {
   SessionPhase,
   SessionConfig,
   SessionProblem,
+  SessionMode,
   PendingSkillUpdate,
   SessionResult,
   SessionFeedback,
@@ -10,7 +11,7 @@ export type {
   PracticeSlotCounts,
 } from './sessionTypes';
 
-export { DEFAULT_SESSION_CONFIG } from './sessionTypes';
+export { DEFAULT_SESSION_CONFIG, REMEDIATION_SESSION_CONFIG } from './sessionTypes';
 
 // Orchestrator
 export {
@@ -29,6 +30,7 @@ export {
   buildNewSkillPool,
   buildChallengePool,
   selectFromPool,
+  selectRemediationSkillIds,
   generatePracticeMix,
   constrainedShuffle,
 } from './practiceMix';

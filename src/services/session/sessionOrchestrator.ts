@@ -6,7 +6,8 @@ import { selectTemplateForSkill, weightBySuccessProbability, weightedRandomSelec
 import { getUnlockedSkills } from '../adaptive/prerequisiteGating';
 import { getOrCreateSkillState } from '../../store/helpers/skillStateHelpers';
 import { generateProblem, formatAsMultipleChoice, createRng, getTemplatesBySkill } from '../mathEngine';
-import { generatePracticeMix, constrainedShuffle } from './practiceMix';
+import { generatePracticeMix, constrainedShuffle, selectRemediationSkillIds } from './practiceMix';
+import type { PracticeMixItem } from './practiceMix';
 import { detectLevelUp, computeStreakUpdate } from '../gamification';
 
 /**
@@ -150,6 +151,7 @@ export function generateSessionQueue(
   seed: number = Date.now(),
   childAge: number | null = null,
   confirmedMisconceptionSkillIds: readonly string[] = [],
+  remediationOnly: boolean = false,
 ): SessionProblem[] {
   const rng = createRng(seed);
   const unlockedSkillIds = getUnlockedSkills(skillStates);
@@ -157,11 +159,34 @@ export function generateSessionQueue(
   const total = warmupCount + practiceCount + cooldownCount;
   const queue: SessionProblem[] = [];
 
-  // Generate the practice mix using the 60/30/10 algorithm with remediation injection
-  const practiceMix = generatePracticeMix(
-    skillStates, childAge, rng, practiceCount, undefined, confirmedMisconceptionSkillIds,
-  );
-  const orderedMix = constrainedShuffle(practiceMix, rng);
+  // Generate the practice mix
+  let orderedMix: PracticeMixItem[];
+
+  if (remediationOnly && confirmedMisconceptionSkillIds.length > 0) {
+    // Pure remediation: all practice slots target misconception skills
+    const selectedIds = selectRemediationSkillIds(
+      confirmedMisconceptionSkillIds, skillStates, rng, practiceCount,
+    );
+    // Each selected skill gets at least 1 slot; fill remaining with weakest
+    const mixItems: PracticeMixItem[] = selectedIds.map((skillId) => ({
+      skillId,
+      category: 'remediation' as const,
+    }));
+    // Fill remaining slots with inverse-BKT weighted selection from the confirmed set
+    while (mixItems.length < practiceCount) {
+      const extra = selectRemediationSkillIds(
+        confirmedMisconceptionSkillIds, skillStates, rng, 1,
+      );
+      mixItems.push({ skillId: extra[0], category: 'remediation' as const });
+    }
+    orderedMix = constrainedShuffle(mixItems, rng);
+  } else {
+    // Standard 60/30/10 mix with optional remediation injection
+    const practiceMix = generatePracticeMix(
+      skillStates, childAge, rng, practiceCount, undefined, confirmedMisconceptionSkillIds,
+    );
+    orderedMix = constrainedShuffle(practiceMix, rng);
+  }
 
   let practiceIdx = 0;
 
