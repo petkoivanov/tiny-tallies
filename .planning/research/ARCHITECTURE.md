@@ -1,899 +1,799 @@
-# Architecture Patterns: AI Tutor Integration
+# Architecture Research: Gamification Features Integration
 
-**Domain:** AI-powered math tutoring with LLM (Gemini) integration into existing React Native adaptive learning app
-**Researched:** 2026-03-03
-**Confidence:** HIGH (verified against existing codebase structure, @google/genai SDK docs, prior research docs)
+**Domain:** Gamification layer for children's math learning app (ages 6-9)
+**Researched:** 2026-03-04
+**Confidence:** HIGH
 
----
-
-## Recommended Architecture
-
-### System Overview
-
-The v0.5 AI Tutor grafts an LLM-powered conversational tutor onto the existing v0.4 session infrastructure. The integration is **additive** -- existing session, store, and manipulative code remains unchanged. New code creates a parallel conversation layer that reads from (but never writes to) existing session/skill state.
+## System Overview
 
 ```
-+----------------------------------------------------------------------+
-|                        NAVIGATION LAYER                              |
-|                                                                      |
-|  +--------+  +-------------------+  +---------+  +---------+        |
-|  | Home   |  | Session Screen    |  | Results |  | Sandbox |        |
-|  | Screen |  |                   |  | Screen  |  | Screen  |        |
-|  +--------+  |  +-------------+  |  +---------+  +---------+        |
-|              |  |CpaSession   |  |                                   |
-|              |  |Content      |  |                                   |
-|              |  +------+------+  |                                   |
-|              |         |         |                                   |
-|              |  +------v------+  |                                   |
-|              |  | NEW: Tutor  |  |                                   |
-|              |  | ChatPanel   |  |                                   |
-|              |  +------+------+  |                                   |
-|              |         |         |                                   |
-|              |  +------v------+  |                                   |
-|              |  | Manipulative|  |                                   |
-|              |  | Panel       |  |                                   |
-|              |  +-------------+  |                                   |
-|              +-------------------+                                   |
-+----------------------------------------------------------------------+
+EXISTING (unmodified)                    NEW (v0.7 additions)
+========================                 ========================
 
-+----------------------------------------------------------------------+
-|                         HOOKS LAYER                                  |
-|                                                                      |
-|  useSession (existing)    useTutor (NEW)     useCpaMode (existing)   |
-|  - session queue          - chat messages     - CPA stage            |
-|  - answer handling        - LLM streaming     - manipulative type    |
-|  - Elo/BKT updates        - mode escalation                         |
-|  - feedback timing        - abort cleanup                            |
-+----------------------------------------------------------------------+
+Navigation Layer
+  Home ---- Session ---- Results         SkillMap   AvatarPicker   DailyChallenge
+    |           |            |              |           |               |
+    v           v            v              v           v               v
 
-+----------------------------------------------------------------------+
-|                       SERVICES LAYER                                 |
-|                                                                      |
-|  src/services/tutor/ (NEW)         src/services/ (existing)          |
-|  +---------------------------+     +----------------------------+    |
-|  | geminiClient.ts           |     | mathEngine/                |    |
-|  | - GoogleGenAI singleton   |     | - problem generation       |    |
-|  | - chat session factory    |     | - bug library              |    |
-|  |                           |     |                            |    |
-|  | promptTemplates.ts        |     | adaptive/                  |    |
-|  | - system instructions     |     | - BKT, Elo, Leitner       |    |
-|  | - HINT/TEACH/BOOST prompts|     |                            |    |
-|  |                           |     | session/                   |    |
-|  | tutorOrchestrator.ts      |     | - queue generation         |    |
-|  | - mode selection logic    |     | - session orchestrator     |    |
-|  | - escalation rules        |     |                            |    |
-|  | - context assembly        |     | cpa/                       |    |
-|  |                           |     | - CPA mapping              |    |
-|  | tutorTypes.ts             |     | - guided steps             |    |
-|  | - TutorMode, ChatMessage  |     | - skill-manipulative map   |    |
-|  | - TutorContext, etc.      |     +----------------------------+    |
-|  +---------------------------+                                       |
-+----------------------------------------------------------------------+
+Screen Layer
+  HomeScreen (modify: badges,         SkillMapScreen    AvatarScreen
+   daily challenge card, avatar)      (new screen)      (new screen)
+  SessionScreen (modify: theme
+   wrapper, challenge banner)
+  ResultsScreen (modify: badges
+   earned, challenge results)
 
-+----------------------------------------------------------------------+
-|                        STORE LAYER                                   |
-|                                                                      |
-|  appStore.ts (existing)         tutorSlice.ts (NEW)                  |
-|  - childProfileSlice            - chat messages per problem          |
-|  - skillStatesSlice             - current tutor mode                 |
-|  - sessionStateSlice            - hint level counter                 |
-|  - gamificationSlice            - tutor active flag                  |
-|  - sandboxSlice                 - loading/error state                |
-|                                                                      |
-|  NOTE: tutorSlice is EPHEMERAL -- not persisted to AsyncStorage.     |
-|  Chat resets per-problem. No migration needed.                       |
-+----------------------------------------------------------------------+
+Component Layer
+  home/        session/     animations/   badges/       skillmap/     avatar/
+  ExploreGrid  CpaSession   Confetti      BadgeCard     SkillNode     AvatarGrid
+  (existing)   (existing)   (existing)    BadgePopup    SkillEdge     FrameSelector
+                                          BadgeGrid     MapCanvas     ThemePicker
+
+Service Layer
+  gamification/             adaptive/       NEW services
+  levelProgression.ts       prerequisite    gamification/
+  weeklyStreak.ts           Gating.ts         achievementEngine.ts
+  (existing)                (existing)        achievementDefinitions.ts
+                                              dailyChallengeScheduler.ts
+                                              themeRegistry.ts
+
+Store Layer (Zustand slices)
+  gamificationSlice    skillStatesSlice    NEW slices
+  (MODIFY: add         (READ-ONLY)        achievementSlice.ts
+   theme, avatar                          dailyChallengeSlice.ts
+   frame fields)
 ```
 
-### Key Architectural Decisions
+## Integration Strategy: New vs Modified
 
-| Decision | Rationale |
-|----------|-----------|
-| Tutor state is ephemeral (not persisted) | Chat resets per-problem; no value in persisting partial conversations across app restarts |
-| TutorSlice in Zustand (not just local state) | Multiple components need chat state: ChatPanel reads messages, CpaSessionContent reads mode for panel control, SessionScreen reads loading state |
-| Gemini client as singleton service | One API key, one client instance. Avoids re-initialization overhead. Matches existing service pattern (pure functions in services, not hooks) |
-| `ai.models.generateContentStream` over `ai.chats` | Manual history management gives explicit control over context window, prompt injection, and per-problem reset. The `ai.chats` convenience API adds opacity we do not want |
-| Streaming responses | Children see text appearing word-by-word, reducing perceived latency. Critical for 6-9 age group attention spans |
-| AbortController per request | CLAUDE.md mandates defense-in-depth cleanup. Every LLM call must be cancellable on unmount/problem-advance/quit |
-| Prompt templates as pure functions | Deterministic, testable, no side effects. Bug Library context and CPA stage are function parameters, not runtime lookups |
-| Tutor never writes to skillStatesSlice | Tutor is read-only against adaptive state. Only useSession's handleAnswer writes Elo/BKT/Leitner updates. Clean separation of concerns |
+### Files to CREATE (new)
 
----
+| File | Purpose | Size Est. |
+|------|---------|-----------|
+| `src/store/slices/achievementSlice.ts` | Achievement records, unlock timestamps | ~120 lines |
+| `src/store/slices/dailyChallengeSlice.ts` | Daily challenge state, completion tracking | ~100 lines |
+| `src/services/gamification/achievementEngine.ts` | Evaluate unlock conditions against store state | ~200 lines |
+| `src/services/gamification/achievementDefinitions.ts` | Badge definitions as typed constants | ~250 lines |
+| `src/services/gamification/dailyChallengeScheduler.ts` | Rotating challenge generation, themed sets | ~180 lines |
+| `src/services/gamification/themeRegistry.ts` | Theme definitions and unlock conditions | ~120 lines |
+| `src/screens/SkillMapScreen.tsx` | Interactive DAG visualization | ~200 lines |
+| `src/screens/AvatarScreen.tsx` | Avatar/frame/theme selection screen | ~180 lines |
+| `src/components/badges/BadgeCard.tsx` | Single badge display (locked/unlocked) | ~80 lines |
+| `src/components/badges/BadgePopup.tsx` | Full-screen badge unlock animation | ~100 lines |
+| `src/components/badges/BadgeGrid.tsx` | Scrollable grid of all badges | ~90 lines |
+| `src/components/badges/index.ts` | Barrel exports | ~10 lines |
+| `src/components/skillmap/SkillNode.tsx` | Single node in skill DAG visualization | ~120 lines |
+| `src/components/skillmap/SkillEdge.tsx` | Edge/arrow between nodes (SVG path) | ~80 lines |
+| `src/components/skillmap/MapCanvas.tsx` | Scrollable/zoomable map container | ~150 lines |
+| `src/components/skillmap/index.ts` | Barrel exports | ~10 lines |
+| `src/components/avatar/AvatarGrid.tsx` | Avatar emoji selection grid | ~90 lines |
+| `src/components/avatar/FrameSelector.tsx` | Unlockable frame ring selector | ~80 lines |
+| `src/components/avatar/ThemePicker.tsx` | Theme skin selection with previews | ~100 lines |
+| `src/components/avatar/index.ts` | Barrel exports | ~10 lines |
+| `src/components/home/DailyChallengeCard.tsx` | Challenge prompt + countdown on home | ~120 lines |
+| `src/components/session/ChallengeBanner.tsx` | In-session banner for daily challenge mode | ~60 lines |
+| `src/store/constants/badges.ts` | Badge ID union type, category constants | ~30 lines |
+| `src/store/constants/themes.ts` | Theme ID type, color palette definitions | ~60 lines |
+| `src/store/constants/frames.ts` | Avatar frame definitions (unlockable) | ~30 lines |
 
-## Component Boundaries
+### Files to MODIFY (existing)
 
-### New Components
+| File | Change | Risk |
+|------|--------|------|
+| `src/store/appStore.ts` | Add achievementSlice + dailyChallengeSlice to AppState, STORE_VERSION 8->10, partialize additions | LOW -- pattern well-established |
+| `src/store/migrations.ts` | Add v8->v9 (achievements map, equipped theme/frame) and v9->v10 (daily challenge state) | LOW -- follows existing migration chain |
+| `src/store/slices/gamificationSlice.ts` | Add `equippedThemeId` and `equippedFrameId` fields + setters | LOW -- additive only |
+| `src/navigation/AppNavigator.tsx` | Add SkillMap and Avatar screens | LOW -- additive |
+| `src/navigation/types.ts` | Add SkillMap and Avatar to RootStackParamList | LOW -- additive |
+| `src/screens/HomeScreen.tsx` | Add DailyChallengeCard, badge count display, avatar frame ring, skill map entry | MEDIUM -- largest UI change |
+| `src/screens/ResultsScreen.tsx` | Add newly-earned badges section, daily challenge bonus display | LOW -- additive section |
+| `src/screens/SessionScreen.tsx` | Pass challenge mode flag, apply theme wrapper | LOW -- conditional wrapper |
+| `src/services/session/sessionOrchestrator.ts` | Call achievementEngine.evaluate() in commitSessionResults | LOW -- single function call at end |
+| `src/services/session/sessionTypes.ts` | Add `isDailyChallenge` to SessionFeedback, `newBadges` | LOW -- additive fields |
+| `src/theme/index.ts` | Export theme variants alongside current defaults | LOW -- additive |
 
-| Component | Location | Responsibility | Communicates With |
-|-----------|----------|---------------|-------------------|
-| `TutorChatPanel` | `src/components/session/TutorChatPanel.tsx` | Chat bubble UI overlay, message list, streaming text display | useTutor hook, tutorSlice |
-| `TutorHelpButton` | `src/components/session/TutorHelpButton.tsx` | "Need help?" FAB that initiates tutor conversation | useTutor hook |
-| `ChatBubble` | `src/components/session/chat/ChatBubble.tsx` | Individual message bubble (child vs tutor styling) | TutorChatPanel |
-| `StreamingText` | `src/components/session/chat/StreamingText.tsx` | Renders text as it streams from LLM, character by character | ChatBubble |
+### Files that are READ-ONLY (no changes needed)
 
-### New Services
+| File | Why Untouched |
+|------|---------------|
+| `src/store/slices/skillStatesSlice.ts` | Achievement engine reads `skillStates` but never modifies it |
+| `src/store/slices/misconceptionSlice.ts` | Badge definitions reference misconception counts via selectors |
+| `src/services/adaptive/*` | Prerequisite graph, BKT, Leitner -- all read-only for skill map |
+| `src/services/mathEngine/*` | SKILLS array used by skill map, badge definitions -- read-only |
+| `src/store/slices/sessionStateSlice.ts` | Session flow unchanged |
+| `src/store/slices/tutorSlice.ts` | Tutor system unaffected |
 
-| Service | Location | Responsibility | Communicates With |
-|---------|----------|---------------|-------------------|
-| `geminiClient` | `src/services/tutor/geminiClient.ts` | GoogleGenAI singleton, `sendMessage()` with streaming + abort | promptTemplates, tutorOrchestrator |
-| `promptTemplates` | `src/services/tutor/promptTemplates.ts` | Pure functions that build system instructions + user prompts per mode | geminiClient |
-| `tutorOrchestrator` | `src/services/tutor/tutorOrchestrator.ts` | Mode selection (HINT/TEACH/BOOST), escalation logic, context assembly | geminiClient, promptTemplates, Bug Library |
-| `tutorTypes` | `src/services/tutor/tutorTypes.ts` | All tutor-related TypeScript types | Everything in tutor/ |
+## Component Responsibilities
 
-### New Hook
+| Component | Responsibility | Communicates With |
+|-----------|---------------|-------------------|
+| `achievementSlice` | Persists earned badges, timestamps, viewed status | Read by HomeScreen, ResultsScreen, BadgeGrid |
+| `dailyChallengeSlice` | Today's challenge config, completion status, bonus XP | Read by HomeScreen, SessionScreen, ResultsScreen |
+| `achievementEngine` | Pure function: takes full store state, returns newly-earned badge IDs | Called by sessionOrchestrator at commit time |
+| `achievementDefinitions` | Typed constant array of badge definitions with unlock predicates | Imported by achievementEngine, BadgeGrid |
+| `dailyChallengeScheduler` | Deterministic daily challenge generation from date seed | Called by HomeScreen on mount, SessionScreen on start |
+| `themeRegistry` | Maps themeId to color overrides, unlock conditions | Read by theme provider, AvatarScreen |
+| `SkillMapScreen` | Renders SKILLS DAG with mastery overlays | Reads skillStates, prerequisiteGating |
+| `AvatarScreen` | Avatar/frame/theme selection and equip | Reads/writes gamificationSlice |
 
-| Hook | Location | Responsibility | Communicates With |
-|------|----------|---------------|-------------------|
-| `useTutor` | `src/hooks/useTutor.ts` | Chat lifecycle, LLM calls, abort cleanup, mode state | tutorOrchestrator, geminiClient, tutorSlice, useSession data |
+## Architectural Patterns
 
-### New Store Slice
+### Pattern 1: Achievement Engine as Pure Function Evaluator
 
-| Slice | Location | Responsibility |
-|-------|----------|---------------|
-| `tutorSlice` | `src/store/slices/tutorSlice.ts` | Chat messages, tutor mode, hint level, loading/error, active flag |
+**What:** The achievement engine is a stateless pure function that accepts a snapshot of the full store state (skillStates, gamification, misconceptions, sessionAnswers) and returns an array of badge IDs that should be newly unlocked. It does NOT mutate state -- the caller (commitSessionResults) writes the results to achievementSlice.
 
-### Modified Components (minimal changes)
+**When to use:** Always. This is the core pattern for badge evaluation.
 
-| Component | What Changes | Why |
-|-----------|-------------|-----|
-| `CpaSessionContent` | Add `TutorHelpButton` + `TutorChatPanel` to render tree | Tutor UI lives inside session content |
-| `SessionScreen` | Pass problem/skill context to useTutor | Tutor needs current problem data |
-| `appStore.ts` | Add tutorSlice to composition, bump STORE_VERSION only if persisting (likely not needed) | New slice registration |
+**Why this pattern:** Testable without store mocking. Deterministic. Can be called speculatively (e.g., "show progress toward next badge") without side effects. Follows the existing pattern where commitSessionResults accumulates pure results then writes atomically.
 
----
+**Example:**
+```typescript
+// src/services/gamification/achievementEngine.ts
+
+export interface AchievementEvalContext {
+  readonly skillStates: Record<string, SkillState>;
+  readonly xp: number;
+  readonly level: number;
+  readonly weeklyStreak: number;
+  readonly totalSessions: number;
+  readonly totalCorrect: number;
+  readonly totalAttempts: number;
+  readonly misconceptions: Record<string, MisconceptionRecord>;
+  readonly exploredManipulatives: ManipulativeType[];
+  readonly earnedBadgeIds: ReadonlySet<string>;
+  // Session-specific context for session-scoped badges
+  readonly sessionScore?: number;
+  readonly sessionTotal?: number;
+  readonly isDailyChallenge?: boolean;
+}
+
+export function evaluateAchievements(
+  ctx: AchievementEvalContext,
+): string[] {
+  return ACHIEVEMENT_DEFINITIONS
+    .filter((def) => !ctx.earnedBadgeIds.has(def.id))
+    .filter((def) => def.condition(ctx))
+    .map((def) => def.id);
+}
+```
+
+### Pattern 2: Badge Definitions as Typed Constants with Predicate Functions
+
+**What:** Each badge is a constant object with an `id`, metadata (name, icon, category, description), and a `condition` function that takes `AchievementEvalContext` and returns `boolean`. Definitions are a readonly array, not a class hierarchy.
+
+**When to use:** For all badge types (skill mastery, effort, exploration, daily challenge).
+
+**Why this pattern:** Adding a new badge is a single object addition to an array -- no new files, no registration boilerplate. The predicate pattern supports arbitrary complexity (compound conditions, range checks) while staying type-safe. Matches the existing SKILLS constant array pattern.
+
+**Example:**
+```typescript
+// src/services/gamification/achievementDefinitions.ts
+
+export interface AchievementDefinition {
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  readonly icon: string; // emoji for MVP, Lottie key later
+  readonly category: 'skill' | 'effort' | 'exploration' | 'challenge';
+  readonly condition: (ctx: AchievementEvalContext) => boolean;
+  readonly progressFn?: (ctx: AchievementEvalContext) => {
+    current: number;
+    target: number;
+  };
+}
+
+export const ACHIEVEMENT_DEFINITIONS: readonly AchievementDefinition[] = [
+  // Skill mastery badges
+  {
+    id: 'addition-ace',
+    name: 'Addition Ace',
+    description: 'Master all addition skills',
+    icon: '\u2795',
+    category: 'skill',
+    condition: (ctx) =>
+      SKILLS.filter((s) => s.operation === 'addition')
+        .every((s) => ctx.skillStates[s.id]?.masteryLocked === true),
+    progressFn: (ctx) => {
+      const addSkills = SKILLS.filter((s) => s.operation === 'addition');
+      return {
+        current: addSkills.filter(
+          (s) => ctx.skillStates[s.id]?.masteryLocked
+        ).length,
+        target: addSkills.length,
+      };
+    },
+  },
+  // Effort badges
+  {
+    id: 'practice-500',
+    name: 'Practice Makes Perfect',
+    description: 'Answer 500 problems',
+    icon: '\uD83C\uDFAF',
+    category: 'effort',
+    condition: (ctx) => ctx.totalAttempts >= 500,
+    progressFn: (ctx) => ({ current: ctx.totalAttempts, target: 500 }),
+  },
+  // ...more definitions
+];
+```
+
+### Pattern 3: Daily Challenge as Deterministic Date-Seeded Generation
+
+**What:** Daily challenges are generated deterministically from the current date as a seed. No server needed. The same date always produces the same challenge. Challenge types rotate on a fixed schedule (e.g., Monday=accuracy goal, Tuesday=speed, Wednesday=specific skill, etc.).
+
+**When to use:** For all daily challenge generation.
+
+**Why this pattern:** Fully offline. Deterministic = testable. No backend coordination needed. Matches the existing Mulberry32 seeded PRNG pattern used by the math engine. If the app is opened multiple times in a day, the same challenge is shown.
+
+**Example:**
+```typescript
+// src/services/gamification/dailyChallengeScheduler.ts
+
+export type ChallengeType = 'accuracy' | 'streak' | 'skill-focus' | 'speed' | 'explorer';
+
+export interface DailyChallenge {
+  readonly id: string;           // date-based: "2026-03-04"
+  readonly type: ChallengeType;
+  readonly title: string;        // "Accuracy Star"
+  readonly description: string;  // "Get 12 out of 15 correct"
+  readonly goal: number;         // target value (e.g., 12 correct)
+  readonly bonusXp: number;      // extra XP for completing
+  readonly badgeId?: string;     // optional special badge for challenge completion
+}
+
+const CHALLENGE_ROTATION: readonly ChallengeType[] = [
+  'accuracy', 'streak', 'skill-focus', 'speed',
+  'explorer', 'accuracy', 'skill-focus',
+]; // 7-day cycle, indexed by dayOfWeek (0=Sunday)
+
+export function generateDailyChallenge(
+  date: Date,
+  skillStates: Record<string, SkillState>,
+): DailyChallenge {
+  const dayOfWeek = date.getDay();
+  const type = CHALLENGE_ROTATION[dayOfWeek];
+  const dateStr = date.toISOString().slice(0, 10);
+  const seed = dateStringToSeed(dateStr);
+  // ...generate challenge params based on type + seed
+}
+```
+
+### Pattern 4: Skill Map as Declarative Layout from Existing DAG
+
+**What:** The skill map screen reads the existing `SKILLS` array (which already defines prerequisites as a DAG) and `skillStates` from the store, then renders nodes and edges. Layout is computed from the DAG structure using a simple left-to-right layered algorithm (topological sort by depth). No new data structures needed -- the existing `skills.ts` IS the graph definition.
+
+**When to use:** For the SkillMapScreen.
+
+**Why this pattern:** Zero data duplication. The SKILLS array is already the single source of truth for the prerequisite graph. The visual map is a pure derivation. Any future skill additions automatically appear on the map.
+
+**Example:**
+```typescript
+// src/services/gamification/skillMapLayout.ts
+
+export interface SkillNodeLayout {
+  readonly skillId: string;
+  readonly x: number;
+  readonly y: number;
+  readonly depth: number; // topological depth from roots
+  readonly mastery: 'locked' | 'unlocked' | 'practicing' | 'mastered';
+}
+
+export function computeSkillMapLayout(
+  skills: readonly SkillDefinition[],
+  skillStates: Record<string, SkillState>,
+): SkillNodeLayout[] {
+  // 1. Compute depth via BFS from root skills
+  // 2. Assign x = depth, y = index within depth layer
+  // 3. Derive mastery status from skillStates + prerequisiteGating
+}
+```
+
+### Pattern 5: Theme System via React Context Provider with Store-Driven Selection
+
+**What:** A `ThemeProvider` wraps the app and reads `equippedThemeId` from gamificationSlice. It provides the active color palette via React context. Components consume `useTheme()` instead of importing `colors` directly from `@/theme`. The default theme is the current dark navy palette. Additional themes are unlockable cosmetic skins.
+
+**When to use:** For all theme-aware components. Non-theme-aware components (deep utilities, services) continue importing constants directly.
+
+**Why this pattern:** Minimal migration cost. The current `colors` import still works as the default. New components and gradually migrated existing components use `useTheme()`. Theme switching is instant (context re-render, no store write latency). Follows React idiom.
+
+**Trade-offs:** Requires gradual migration of existing `colors` imports to `useTheme()` in theme-affected components (screens, not services). However, this can be done incrementally -- only session-wrapper and home screen need immediate migration.
+
+**Example:**
+```typescript
+// src/theme/ThemeProvider.tsx
+
+const ThemeContext = React.createContext(DEFAULT_THEME);
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const equippedThemeId = useAppStore((s) => s.equippedThemeId);
+  const theme = THEMES[equippedThemeId ?? 'default'] ?? DEFAULT_THEME;
+  return (
+    <ThemeContext.Provider value={theme}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export function useTheme() {
+  return React.useContext(ThemeContext);
+}
+```
+
+### Pattern 6: Avatar Frame as Layered View Composition
+
+**What:** The avatar display becomes a composable `AvatarDisplay` component that layers: (1) frame ring (SVG/View border with theme color), (2) avatar emoji, (3) optional level badge overlay. Frame rings are unlockable cosmetics tied to achievements.
+
+**When to use:** HomeScreen avatar, ResultsScreen, AvatarScreen preview.
+
+**Why this pattern:** The current avatar is a simple emoji in a circle. Frames are purely visual overlays that don't change the underlying data. The `AvatarId` type and `AVATARS` constant remain unchanged. Only `equippedFrameId` is added to gamificationSlice.
 
 ## Data Flow
 
-### Flow 1: Child Taps "Help" Button
+### Achievement Evaluation Flow
 
 ```
-1. Child taps TutorHelpButton
-   |
-2. useTutor.startTutor() called
-   |
-3. tutorOrchestrator.determineMode() reads:
-   |-- current problem (from useSession)
-   |-- hint level (from tutorSlice: 0 = first help)
-   |-- child's wrong answer (from sessionStateSlice.sessionAnswers)
-   |-- bug ID of wrong answer (from SessionAnswer.bugId)
-   |-- CPA stage (from useCpaMode)
-   |-- child age (from childProfileSlice)
-   |
-4. Returns TutorMode: HINT (level 1) for first help request
-   |
-5. promptTemplates.buildHintPrompt() assembles:
-   |-- System instruction (safety rules, age-appropriate language)
-   |-- Problem context (operands, operation, correct answer)
-   |-- Child's wrong answer + matched bug description
-   |-- Hint level instructions (Socratic, never reveal)
-   |-- Previous hints in conversation (for continuity)
-   |
-6. geminiClient.sendMessage() called with:
-   |-- assembled prompt
-   |-- conversation history
-   |-- AbortSignal from controller
-   |
-7. Streaming response chunks update tutorSlice.messages[]
-   |-- Each chunk: dispatch addStreamChunk(text)
-   |-- UI re-renders incrementally via ChatBubble + StreamingText
-   |
-8. On stream complete: tutorSlice.setLoading(false)
+Session completes
+    |
+    v
+commitSessionResults()
+    |  (existing: write Elo, XP, level, streak)
+    |
+    v
+evaluateAchievements(ctx)    <-- NEW: pure function call
+    |  reads: skillStates, xp, level, streak, misconceptions,
+    |         exploredManipulatives, earnedBadges, sessionScore
+    |
+    v
+returns: newBadgeIds[]
+    |
+    v
+achievementSlice.unlockBadges(newBadgeIds)    <-- NEW: store write
+    |
+    v
+ResultsScreen route params include newBadgeIds    <-- NEW: display
+    |
+    v
+BadgePopup animation on Results screen
 ```
 
-### Flow 2: Auto-Escalation (HINT -> TEACH -> BOOST)
+### Daily Challenge Flow
 
 ```
-Wrong answer #1 + tap Help -> HINT level 1 (Socratic nudge)
-  |
-Wrong answer #2 + tap Help -> HINT level 2 (suggest manipulatives)
-  |-- tutorOrchestrator detects hintLevel >= 2
-  |-- prompt includes "Suggest using [manipulative type]"
-  |-- TutorChatPanel emits onSuggestManipulative event
-  |-- CpaSessionContent expands ManipulativePanel
-  |
-Wrong answer #3 + tap Help -> BOOST (deep scaffolding)
-  |-- tutorOrchestrator detects hintLevel >= 3
-  |-- Mode switches to BOOST
-  |-- Prompt: "Walk through from first principles"
-  |-- May reveal answer WITH full explanation
-  |-- Includes follow-up practice suggestion
+HomeScreen mounts
+    |
+    v
+generateDailyChallenge(today, skillStates)    <-- pure function
+    |
+    v
+DailyChallengeCard displays challenge
+    |
+    v
+User taps "Accept Challenge"
+    |
+    v
+navigation.navigate('Session', {
+  sessionId: ...,
+  isDailyChallenge: true,
+  challengeId: challenge.id,
+})
+    |
+    v
+SessionScreen renders ChallengeBanner (goal overlay)
+    |
+    v
+Session completes normally (same session flow)
+    |
+    v
+commitSessionResults() evaluates challenge goal
+    |
+    v
+dailyChallengeSlice.markCompleted(challengeId, passed)
+    |
+    v
+ResultsScreen shows challenge result + bonus XP if passed
 ```
 
-### Flow 3: TEACH Mode (Proactive on New Skill)
+### Theme Application Flow
 
 ```
-1. Session enters a problem for a NEW skill (category === 'new' from practiceMix)
-   |
-2. CPA stage is 'concrete' (BKT mastery < 0.40)
-   |
-3. CpaSessionContent renders ManipulativePanel auto-expanded (existing behavior)
-   |
-4. TutorHelpButton shows with enhanced prompt: "Want me to explain?"
-   |
-5. On tap: tutorOrchestrator.determineMode() returns TEACH
-   |-- because: first encounter with this skill + concrete CPA
-   |
-6. promptTemplates.buildTeachPrompt() assembles CPA walkthrough
-   |-- References the specific manipulative visible on screen
-   |-- Walks through concept step by step
+App starts
+    |
+    v
+ThemeProvider reads equippedThemeId from gamificationSlice
+    |
+    v
+Provides theme colors via React Context
+    |
+    v
+Components call useTheme() for color values
+    |
+    v
+User selects new theme in AvatarScreen
+    |
+    v
+gamificationSlice.setEquippedThemeId(id)
+    |
+    v
+ThemeProvider re-renders, all consumers update
 ```
 
-### Flow 4: Problem Advance (Chat Reset)
+### Skill Map Data Flow
 
 ```
-1. useSession advances to next problem (currentIndex++)
-   |
-2. useTutor detects problem change via useEffect dependency
-   |
-3. Abort in-flight LLM request:
-   |-- abortControllerRef.current.abort()
-   |-- Create new AbortController for next problem
-   |
-4. Reset tutorSlice:
-   |-- clearMessages()
-   |-- resetHintLevel()
-   |-- setMode(null)
-   |-- setActive(false)
+SkillMapScreen mounts
+    |
+    v
+Read SKILLS array (static import)    +    Read skillStates (store selector)
+    |                                       |
+    v                                       v
+computeSkillMapLayout(SKILLS, skillStates)
+    |
+    v
+SkillNodeLayout[] with positions + mastery status
+    |
+    v
+MapCanvas renders ScrollView with:
+  - SkillEdge components (SVG lines for prerequisites)
+  - SkillNode components (circles with mastery coloring)
+    |
+    v
+Tap SkillNode -> show detail popover (mastery %, BKT, Leitner box)
 ```
 
-### Flow 5: Session Quit/Complete
+## Store Schema Changes
 
-```
-1. useSession.handleQuit() or session completes
-   |
-2. useTutor cleanup runs (useEffect return):
-   |-- abortControllerRef.current.abort()
-   |
-3. tutorSlice resets (ephemeral, no persistence needed)
-```
-
----
-
-## Detailed Component Designs
-
-### TutorSlice (New Zustand Slice)
+### New Slice: achievementSlice
 
 ```typescript
-// src/store/slices/tutorSlice.ts
-
-export type TutorMode = 'hint' | 'teach' | 'boost';
-
-export interface ChatMessage {
-  id: string;
-  role: 'child' | 'tutor';
-  text: string;
-  /** True while streaming is in progress for this message */
-  isStreaming: boolean;
-  timestamp: number;
+export interface AchievementRecord {
+  readonly badgeId: string;
+  readonly earnedAt: string;  // ISO string
+  viewed: boolean;            // false until user sees the badge popup
 }
 
-export interface TutorSlice {
-  // State
-  tutorActive: boolean;
-  tutorMode: TutorMode | null;
-  hintLevel: number;  // 0 = no hints yet, 1-3 = escalation
-  chatMessages: ChatMessage[];
-  isLoading: boolean;
-  error: string | null;
-
-  // Actions
-  activateTutor: (mode: TutorMode) => void;
-  deactivateTutor: () => void;
-  addChildMessage: (text: string) => void;
-  addTutorMessage: (id: string) => void;
-  appendToTutorMessage: (id: string, chunk: string) => void;
-  finalizeTutorMessage: (id: string) => void;
-  incrementHintLevel: () => void;
-  resetForNewProblem: () => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
+export interface AchievementSlice {
+  achievements: Record<string, AchievementRecord>;  // keyed by badgeId
+  totalSessions: number;      // lifetime session count (for effort badges)
+  totalCorrect: number;       // lifetime correct answers (for effort badges)
+  totalAttempts: number;      // lifetime total attempts (for effort badges)
+  unlockBadges: (badgeIds: string[]) => void;
+  markBadgeViewed: (badgeId: string) => void;
+  incrementSessionStats: (correct: number, total: number) => void;
 }
 ```
 
-**Critical design choice:** `chatMessages` is an array, not a Map. React re-renders on array reference change (spread). Map mutations do not trigger re-renders in Zustand without extra work.
+**Rationale for `totalSessions/totalCorrect/totalAttempts` here vs. computing from skillStates:**
+The skillStates track per-skill attempts/correct, but summing across all skills on every evaluation is O(n). Keeping lifetime counters in the achievement slice avoids repeated computation and enables simple threshold checks in badge predicates. The counters are incremented once per session in commitSessionResults, which already iterates pendingUpdates.
 
-**Not persisted:** The `partialize` function in `appStore.ts` already controls what gets persisted. TutorSlice fields simply will not be listed in `partialize`, so they reset on app restart. No STORE_VERSION bump needed.
-
-### Gemini Client Service
+### New Slice: dailyChallengeSlice
 
 ```typescript
-// src/services/tutor/geminiClient.ts
-
-import { GoogleGenAI } from '@google/genai';
-import { z } from 'zod';
-
-// Zod validation at system boundary (per CLAUDE.md)
-const GeminiResponseSchema = z.object({
-  text: z.string().min(1),
-});
-
-let client: GoogleGenAI | null = null;
-
-function getClient(): GoogleGenAI {
-  if (!client) {
-    // API key from expo-secure-store (per CLAUDE.md: don't bypass secure store)
-    const apiKey = getApiKeyFromSecureStore();
-    client = new GoogleGenAI({ apiKey });
-  }
-  return client;
+export interface DailyChallengeState {
+  currentChallengeId: string | null;  // date string, e.g., "2026-03-04"
+  challengeCompleted: boolean;
+  challengePassed: boolean;
+  bonusXpAwarded: number;
 }
 
-export interface SendMessageOptions {
-  systemInstruction: string;
-  conversationHistory: Array<{ role: 'user' | 'model'; text: string }>;
-  userMessage: string;
-  abortSignal: AbortSignal;
-  onChunk: (text: string) => void;
-}
-
-export async function sendTutorMessage(options: SendMessageOptions): Promise<string> {
-  const ai = getClient();
-
-  const contents = [
-    ...options.conversationHistory.map((msg) => ({
-      role: msg.role,
-      parts: [{ text: msg.text }],
-    })),
-    { role: 'user' as const, parts: [{ text: options.userMessage }] },
-  ];
-
-  const stream = await ai.models.generateContentStream({
-    model: 'gemini-2.5-flash',
-    contents,
-    config: {
-      systemInstruction: options.systemInstruction,
-      temperature: 0.7,
-      maxOutputTokens: 200, // Short responses for children
-      abortSignal: options.abortSignal,
-    },
-  });
-
-  let fullText = '';
-  for await (const chunk of stream) {
-    if (options.abortSignal.aborted) break;
-    const text = chunk.text ?? '';
-    fullText += text;
-    options.onChunk(text);
-  }
-
-  // Validate at boundary
-  GeminiResponseSchema.parse({ text: fullText });
-  return fullText;
+export interface DailyChallengeSlice {
+  dailyChallenge: DailyChallengeState;
+  setDailyChallenge: (challengeId: string) => void;
+  markChallengeCompleted: (passed: boolean, bonusXp: number) => void;
+  resetDailyChallenge: () => void;
 }
 ```
 
-**Model choice: `gemini-2.5-flash`** because:
-- 232 tokens/sec output speed, 0.51s time-to-first-token
-- Lowest cost at $0.30/M input, $2.50/M output (children's app = cost-sensitive)
-- Thinking can be disabled for maximum speed (children's hints do not need reasoning traces)
-- Sufficient quality for age-appropriate language generation
-- Already in the Google GenAI ecosystem matching `@google/genai` package
+**Rationale:** Ephemeral-ish -- only today's challenge matters. On new day, `resetDailyChallenge()` is called. Persisted to survive app restarts within the same day.
 
-**Max 200 output tokens** because:
-- Research doc specifies max 2-3 sentences for hints
-- Children ages 6-9 cannot process long text blocks
-- Limits cost per interaction
-- Forces LLM to be concise
+### Modified Slice: gamificationSlice
 
-### Prompt Template Architecture
+Add three fields:
 
 ```typescript
-// src/services/tutor/promptTemplates.ts
-
-import type { Problem } from '../mathEngine/types';
-import type { CpaStage, ManipulativeType } from '../cpa/cpaTypes';
-import type { BugPattern } from '../mathEngine/bugLibrary/types';
-import type { TutorMode } from './tutorTypes';
-
-interface PromptContext {
-  problem: Problem;
-  childAge: number;
-  cpaStage: CpaStage;
-  manipulativeType: ManipulativeType | null;
+export interface GamificationSlice {
+  // ... existing fields (xp, level, weeklyStreak, lastSessionDate)
+  equippedThemeId: string | null;   // NEW: currently active theme
+  equippedFrameId: string | null;   // NEW: avatar frame ring
+  setEquippedThemeId: (id: string | null) => void;  // NEW
+  setEquippedFrameId: (id: string | null) => void;  // NEW
 }
-
-interface HintContext extends PromptContext {
-  childAnswer: number;
-  bugId: string | undefined;
-  bugDescription: string | undefined;
-  hintLevel: 1 | 2 | 3;
-  previousHints: string[];
-}
-
-interface TeachContext extends PromptContext {
-  conceptDescription: string;
-}
-
-interface BoostContext extends PromptContext {
-  childAnswer: number;
-  bugId: string | undefined;
-  bugDescription: string | undefined;
-  previousHints: string[];
-}
-
-// System instruction is CONSTANT across all modes.
-// This is the safety guardrail layer.
-export function buildSystemInstruction(childAge: number): string {
-  return `You are a friendly, encouraging math tutor helping a ${childAge}-year-old child.
-
-CRITICAL RULES:
-1. NEVER compute math yourself. Use ONLY the provided correct_answer.
-2. NEVER reveal the answer in a hint. Guide through questions ONLY.
-3. NEVER say "wrong", "incorrect", or "no." Say "let's try again" or "hmm, not quite."
-4. NEVER use negative language about the child's ability.
-5. ALWAYS praise effort ("Great thinking!" not "You're so smart!").
-6. Use sentences of ${childAge <= 7 ? 8 : childAge <= 8 ? 10 : 12} words or fewer.
-7. Use only words a ${childAge}-year-old knows.
-8. Maximum 3 sentences per response.
-9. Use gender-neutral examples. No allergen food. No scary contexts.
-10. If you suggest a manipulative, name it specifically (blocks, number line, etc.).`;
-}
-
-export function buildHintPrompt(ctx: HintContext): string { /* ... */ }
-export function buildTeachPrompt(ctx: TeachContext): string { /* ... */ }
-export function buildBoostPrompt(ctx: BoostContext): string { /* ... */ }
 ```
 
-**Pure functions, fully testable.** Each takes a typed context object, returns a string. No side effects, no async, no store dependency. The Bug Library description is passed in as a string parameter -- the prompt template does not import from bugLibrary directly, keeping the dependency direction clean.
-
-### Tutor Orchestrator
+### Migration Plan: STORE_VERSION 8 -> 10
 
 ```typescript
-// src/services/tutor/tutorOrchestrator.ts
+// migrations.ts additions
 
-import type { TutorMode } from './tutorTypes';
-import type { SessionAnswer } from '../../store/slices/sessionStateSlice';
-import type { CpaStage } from '../cpa/cpaTypes';
-import type { PracticeProblemCategory } from '../session/sessionTypes';
-
-interface EscalationContext {
-  currentHintLevel: number;
-  wrongAnswerCount: number;  // for current problem
-  cpaStage: CpaStage;
-  problemCategory: PracticeProblemCategory;
-  isFirstEncounter: boolean;  // first time seeing this skill
+if (version < 9) {
+  // v8 -> v9: Add achievement tracking + cosmetic equips
+  state.achievements ??= {};
+  state.totalSessions ??= 0;
+  state.totalCorrect ??= 0;
+  state.totalAttempts ??= 0;
+  state.equippedThemeId ??= null;
+  state.equippedFrameId ??= null;
 }
 
-/**
- * Determines tutor mode based on escalation context.
- * Pure function -- no side effects.
- */
-export function determineMode(ctx: EscalationContext): TutorMode {
-  // TEACH: new skill at concrete level, child hasn't answered yet
-  if (ctx.isFirstEncounter && ctx.cpaStage === 'concrete') {
-    return 'teach';
-  }
-
-  // BOOST: 3+ wrong answers on same problem
-  if (ctx.wrongAnswerCount >= 3 || ctx.currentHintLevel >= 3) {
-    return 'boost';
-  }
-
-  // HINT: default for wrong answers
-  return 'hint';
-}
-
-/**
- * Resolves bug description from bug ID for prompt context.
- */
-export function resolveBugDescription(bugId: string | undefined): string | undefined {
-  // Looks up from ADDITION_BUGS + SUBTRACTION_BUGS
-  // Returns human-readable description
+if (version < 10) {
+  // v9 -> v10: Add daily challenge state
+  state.dailyChallenge ??= {
+    currentChallengeId: null,
+    challengeCompleted: false,
+    challengePassed: false,
+    bonusXpAwarded: 0,
+  };
 }
 ```
 
-### useTutor Hook
+**Rationale for two versions, not one:** Achievements and daily challenges are independent features. If one ships before the other (phased rollout), each has its own migration boundary. This matches the v6->v7->v8 pattern used for misconception tracking.
+
+### Updated partialize (appStore.ts)
 
 ```typescript
-// src/hooks/useTutor.ts
-
-export interface UseTutorReturn {
-  // State
-  isActive: boolean;
-  isLoading: boolean;
-  messages: ChatMessage[];
-  currentMode: TutorMode | null;
-  error: string | null;
-
-  // Actions
-  requestHelp: () => Promise<void>;
-  dismissTutor: () => void;
-
-  // Signals for parent components
-  shouldExpandManipulative: boolean;
-  suggestedManipulativeType: ManipulativeType | null;
-}
-```
-
-**AbortController pattern (defense-in-depth per CLAUDE.md):**
-
-```typescript
-export function useTutor(
-  currentProblem: SessionProblem | null,
-  currentIndex: number,
-  sessionAnswers: SessionAnswer[],
-): UseTutorReturn {
-  const abortControllerRef = useRef<AbortController>(new AbortController());
-
-  // Reset on problem change (explicit handler)
-  useEffect(() => {
-    // Abort any in-flight request from previous problem
-    abortControllerRef.current.abort();
-    abortControllerRef.current = new AbortController();
-
-    // Reset tutor state
-    resetForNewProblem();
-  }, [currentIndex]);
-
-  // Defense-in-depth: abort on unmount
-  useEffect(() => {
-    return () => {
-      abortControllerRef.current.abort();
-    };
-  }, []);
-
-  const requestHelp = useCallback(async () => {
-    const controller = abortControllerRef.current;
-    if (controller.signal.aborted) return;
-
-    setLoading(true);
-    const messageId = generateId();
-    addTutorMessage(messageId);
-
-    try {
-      await sendTutorMessage({
-        systemInstruction: buildSystemInstruction(childAge),
-        conversationHistory: buildHistory(messages),
-        userMessage: buildPrompt(context),
-        abortSignal: controller.signal,
-        onChunk: (text) => {
-          if (!controller.signal.aborted) {
-            appendToTutorMessage(messageId, text);
-          }
-        },
-      });
-      finalizeTutorMessage(messageId);
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        // Expected on problem advance or unmount -- not an error
-        return;
-      }
-      setError('Something went wrong. Try again!');
-    } finally {
-      if (!controller.signal.aborted) {
-        setLoading(false);
-      }
-    }
-  }, [/* deps */]);
-
-  // Signal to CpaSessionContent: expand manipulative panel
-  const shouldExpandManipulative =
-    currentMode === 'teach' ||
-    (currentMode === 'hint' && hintLevel >= 2) ||
-    currentMode === 'boost';
-
-  return { /* ... */ };
-}
-```
-
-### TutorChatPanel (UI Component)
-
-```
-+------------------------------------------+
-| [x]  Math Helper                         |  <- header with dismiss
-|------------------------------------------|
-|  +------------------------------------+  |
-|  |  [tutor bubble]                    |  |
-|  |  "Let's think about 7 + 8.        |  |
-|  |   How many more do we need         |  |
-|  |   to make 10?"                     |  |
-|  +------------------------------------+  |
-|                                          |
-|  +------------------------------------+  |
-|  |            [child bubble]          |  |
-|  |            "I need help"           |  |
-|  +------------------------------------+  |
-|                                          |
-|  +------------------------------------+  |
-|  |  [tutor bubble, streaming...]      |  |
-|  |  "Great thinking! We know 7 + 3    |  |
-|  |   makes 10. So we take 3 fro..."  |  |
-|  +------------------------------------+  |
-|                                          |
-|  [More help]                             |  <- escalation button
-+------------------------------------------+
-```
-
-**UI placement:** The TutorChatPanel renders as an overlay **between** the problem text and the ManipulativePanel (or answer buttons). It does NOT use a Modal (same rationale as ManipulativePanel -- gesture conflicts). It uses `Animated.View` with spring slide-in, matching ManipulativePanel's animation style.
-
-**Height:** Takes up to 40% of screen height when active, pushing answer buttons into CompactAnswerRow mode (same pattern used by ManipulativePanel in concrete mode).
-
-**FlatList for messages:** Uses standard `FlatList` (not FlashList -- chat messages are typically <10 items, no virtualization benefit, and avoids FlashList v1.x complexity for trivial list).
-
-### Integration with CpaSessionContent
-
-The existing `CpaSessionContent` component is the natural integration point. Changes are minimal:
-
-```
-Current CpaSessionContent layout:
-  [Problem Text]
-  [Pictorial Diagram?]     (pictorial mode)
-  [Need Help Button?]      (pictorial mode)  <-- REPURPOSE for tutor
-  [Answer Buttons]
-  [Guided Hint Text?]      (concrete mode)
-  [Manipulative Panel?]    (concrete/pictorial)
-
-New CpaSessionContent layout:
-  [Problem Text]
-  [Pictorial Diagram?]     (pictorial mode)
-  [TutorHelpButton]        (ALL modes -- replaces "Need help?")
-  [TutorChatPanel?]        (when tutor active)
-  [Answer Buttons]         (CompactAnswerRow when panel/chat active)
-  [Guided Hint Text?]      (concrete mode)
-  [Manipulative Panel?]    (concrete/pictorial + tutor-triggered)
-```
-
-**Key change:** The existing "Need help?" button (`needHelpButton` in pictorial mode) becomes `TutorHelpButton` that works in ALL CPA modes. In pictorial/abstract modes, it was previously a manipulative scaffold. Now it launches the AI tutor instead, which may ALSO trigger the manipulative panel (when tutor suggests it).
-
-### Integration with ManipulativePanel
-
-The tutor does NOT directly control the ManipulativePanel. Instead:
-
-1. `useTutor` exposes `shouldExpandManipulative: boolean` and `suggestedManipulativeType: ManipulativeType | null`
-2. `CpaSessionContent` reads these values and sets `panelExpanded` accordingly
-3. This preserves the existing panel toggle logic -- tutor suggests, CpaSessionContent decides
-
-```typescript
-// In CpaSessionContent (modified):
-const { shouldExpandManipulative, suggestedManipulativeType } = useTutor(/*...*/);
-
-useEffect(() => {
-  if (shouldExpandManipulative && !panelExpanded) {
-    setPanelExpanded(true);
-  }
-}, [shouldExpandManipulative]);
-```
-
-This means TEACH mode at hint level 2+ opens the manipulative panel with a chat message like "Let's use our blocks! Put 7 blocks here..." while the actual blocks are visible below.
-
----
-
-## Patterns to Follow
-
-### Pattern 1: Service Singleton with Lazy Init
-
-**What:** GoogleGenAI client created once, lazily, cached in module scope.
-**When:** Any service that wraps an external SDK with expensive initialization.
-**Why:** Matches existing codebase pattern (services are pure modules, not classes/hooks).
-
-```typescript
-// src/services/tutor/geminiClient.ts
-let client: GoogleGenAI | null = null;
-
-function getClient(): GoogleGenAI {
-  if (!client) {
-    client = new GoogleGenAI({ apiKey: getApiKey() });
-  }
-  return client;
-}
-```
-
-### Pattern 2: Ephemeral Zustand Slice (No Persistence)
-
-**What:** Store slice that is excluded from `partialize`, resetting on app restart.
-**When:** UI state that has no value across sessions (chat messages, loading flags).
-**Why:** The existing `partialize` in `appStore.ts` already controls persistence. Simply not listing tutorSlice fields means they auto-reset. No migration needed.
-
-```typescript
-// In appStore.ts partialize -- tutorSlice fields NOT listed:
 partialize: (state) => ({
+  // ...existing fields
   childName: state.childName,
   childAge: state.childAge,
-  // ... existing fields only
-  // tutorActive, chatMessages, etc. intentionally OMITTED
+  childGrade: state.childGrade,
+  avatarId: state.avatarId,
+  tutorConsentGranted: state.tutorConsentGranted,
+  skillStates: state.skillStates,
+  xp: state.xp,
+  level: state.level,
+  weeklyStreak: state.weeklyStreak,
+  lastSessionDate: state.lastSessionDate,
+  exploredManipulatives: state.exploredManipulatives,
+  misconceptions: state.misconceptions,
+  // NEW: v0.7 additions
+  achievements: state.achievements,
+  totalSessions: state.totalSessions,
+  totalCorrect: state.totalCorrect,
+  totalAttempts: state.totalAttempts,
+  equippedThemeId: state.equippedThemeId,
+  equippedFrameId: state.equippedFrameId,
+  dailyChallenge: state.dailyChallenge,
 }),
 ```
 
-### Pattern 3: Streaming Chunk Accumulation
+## Navigation Changes
 
-**What:** Stream LLM chunks into a Zustand message object, updating text incrementally.
-**When:** Any streaming text UI that needs React re-renders per chunk.
-
-```typescript
-// In tutorSlice:
-appendToTutorMessage: (id, chunk) =>
-  set((state) => ({
-    chatMessages: state.chatMessages.map((msg) =>
-      msg.id === id
-        ? { ...msg, text: msg.text + chunk }
-        : msg
-    ),
-  })),
-```
-
-**Performance note:** This creates a new array on every chunk (~5-20 per response). Acceptable because chat has <10 messages and chunks arrive at ~50ms intervals. No optimization needed.
-
-### Pattern 4: AbortController Per-Request with Defense-in-Depth
-
-**What:** Create a new AbortController for each LLM request. Abort on problem advance AND on unmount.
-**When:** Any async operation that must be cancellable.
-**Why:** CLAUDE.md mandates this pattern. The existing codebase does not yet use AbortController (no async external calls until now), so this establishes the precedent.
+### New Routes
 
 ```typescript
-// Two-layer cleanup:
+// navigation/types.ts additions
 
-// Layer 1: Explicit abort on problem change
-useEffect(() => {
-  abortControllerRef.current.abort();
-  abortControllerRef.current = new AbortController();
-  resetForNewProblem();
-}, [currentIndex]);
-
-// Layer 2: Abort on unmount (defense-in-depth)
-useEffect(() => {
-  return () => {
-    abortControllerRef.current.abort();
-  };
-}, []);
+export type RootStackParamList = {
+  // ...existing routes
+  SkillMap: undefined;
+  Avatar: undefined;
+};
 ```
 
-### Pattern 5: Pure Prompt Templates with Typed Contexts
+Both new screens take no params. SkillMap reads SKILLS + skillStates from store. Avatar reads avatarId, equippedThemeId, equippedFrameId from store.
 
-**What:** Prompt construction as pure functions taking typed context objects.
-**When:** Any LLM prompt that needs to be testable and deterministic.
+### Navigation Entry Points
 
-```typescript
-// testable:
-expect(buildHintPrompt({
-  problem: mockProblem,
-  childAge: 7,
-  childAnswer: 14,
-  hintLevel: 2,
-  // ...
-})).toContain('Suggest using');
-```
+| Entry Point | Target Screen | Trigger |
+|-------------|--------------|---------|
+| HomeScreen avatar circle tap | Avatar | Tap profile avatar |
+| HomeScreen "Skill Map" button (new) | SkillMap | Tap button in explore section |
+| HomeScreen badge count (new) | Overlay/modal with BadgeGrid | Tap badge count |
+| ResultsScreen badge earned | BadgePopup overlay | Auto-shown when newBadges.length > 0 |
+| AvatarScreen theme/frame selection | Stay on Avatar | In-screen selection |
 
----
-
-## Anti-Patterns to Avoid
-
-### Anti-Pattern 1: LLM Computes Math
-
-**What:** Asking Gemini to compute answers, verify answers, or generate problems.
-**Why bad:** LLMs are unreliable at arithmetic (especially carry/borrow). The entire hybrid architecture exists to prevent this. CLAUDE.md explicitly forbids it.
-**Instead:** Always pass `correctAnswer` from the programmatic math engine into the prompt. The LLM references it but never computes it.
-
-### Anti-Pattern 2: Tutor Writes to Skill State
-
-**What:** Having the tutor update Elo, BKT, or Leitner state based on hint interactions.
-**Why bad:** Breaks the commit-on-complete pattern. Session results are accumulated in refs and committed atomically. If tutor modified skill state mid-session, quit-discard semantics break.
-**Instead:** Tutor reads from store (via selectors), never writes. Hint usage could be tracked in analytics later, but not in adaptive state.
-
-### Anti-Pattern 3: Modal for Chat UI
-
-**What:** Rendering TutorChatPanel inside a `<Modal>`.
-**Why bad:** Same reason ManipulativePanel avoids Modal -- gesture conflicts with react-native-gesture-handler. The ManipulativePanel may be open simultaneously with the chat panel. Nested modals break on Android.
-**Instead:** Use an `Animated.View` overlay within the component tree, exactly like ManipulativePanel.
-
-### Anti-Pattern 4: Full Conversation History to LLM
-
-**What:** Sending all messages from every hint level as conversation history.
-**Why bad:** Context window waste. Children's tutoring conversations are at most 3-6 messages. But including ALL system prompts repeated per-message inflates token count.
-**Instead:** Send system instruction once (via `config.systemInstruction`). Send only the actual conversation turns as `contents`. Cap at last 6 messages.
-
-### Anti-Pattern 5: Persisting Chat Messages
-
-**What:** Adding chatMessages to the `partialize` function.
-**Why bad:** Chat resets per-problem by design. Persisting creates stale state on app restart (the session is gone but old chat messages remain). Also requires migration when schema changes.
-**Instead:** Ephemeral slice. Let it reset naturally.
-
-### Anti-Pattern 6: Creating AbortController in Render
-
-**What:** `const controller = new AbortController()` inside the component body.
-**Why bad:** Creates a new controller on every render, losing the reference to abort in-flight requests.
-**Instead:** Store in `useRef` and manage explicitly.
-
----
-
-## File Structure
+## Recommended Project Structure (new files only)
 
 ```
 src/
-  services/
-    tutor/
-      index.ts                    # Barrel exports
-      tutorTypes.ts               # TutorMode, ChatMessage, prompt context types
-      geminiClient.ts             # GoogleGenAI singleton, sendTutorMessage()
-      promptTemplates.ts          # System instruction + per-mode prompt builders
-      tutorOrchestrator.ts        # Mode determination, escalation logic
   store/
     slices/
-      tutorSlice.ts               # Ephemeral chat state slice
-  hooks/
-    useTutor.ts                   # Chat lifecycle, abort cleanup
+      achievementSlice.ts       # Badge records, lifetime stats
+      dailyChallengeSlice.ts    # Today's challenge state
+    constants/
+      badges.ts                 # Badge ID type, categories
+      themes.ts                 # Theme palettes + unlock conditions
+      frames.ts                 # Frame ring definitions
+  services/
+    gamification/
+      achievementEngine.ts      # Pure evaluator function
+      achievementDefinitions.ts # Badge array with predicates
+      dailyChallengeScheduler.ts # Date-seeded challenge gen
+      themeRegistry.ts          # Theme color mappings
+      skillMapLayout.ts         # DAG layout computation
+  screens/
+    SkillMapScreen.tsx          # Interactive prerequisite DAG
+    AvatarScreen.tsx            # Avatar + frame + theme picker
   components/
-    session/
-      TutorHelpButton.tsx         # FAB to initiate tutor
-      TutorChatPanel.tsx          # Chat overlay with message list
-      chat/
-        ChatBubble.tsx            # Individual message bubble
-        StreamingText.tsx         # Animated streaming text display
-        index.ts                  # Barrel exports
+    badges/
+      BadgeCard.tsx             # Single badge (locked/unlocked)
+      BadgePopup.tsx            # Unlock celebration overlay
+      BadgeGrid.tsx             # All badges scrollable grid
+      index.ts
+    skillmap/
+      SkillNode.tsx             # DAG node circle
+      SkillEdge.tsx             # DAG edge SVG path
+      MapCanvas.tsx             # Scrollable container
+      index.ts
+    avatar/
+      AvatarGrid.tsx            # Emoji avatar selection
+      FrameSelector.tsx         # Frame ring options
+      ThemePicker.tsx           # Theme skin options
+      AvatarDisplay.tsx         # Composable avatar view (frame + emoji + badge)
+      index.ts
+    home/
+      DailyChallengeCard.tsx    # Challenge card on home screen
+  theme/
+    ThemeProvider.tsx            # React Context for active theme
+    themes.ts                   # Theme variant color palettes
 ```
 
-Estimated file count: 10 new files, 2-3 modified files.
-All new files target <500 lines (per CLAUDE.md).
+### Structure Rationale
 
----
+- **`store/slices/`:** Two new slices follow the established domain-slice pattern. achievementSlice is persisted (lifetime data). dailyChallengeSlice is persisted (survives app restart within day).
+- **`services/gamification/`:** Extends the existing gamification service folder. Achievement engine and definitions are separate files to keep definitions (data) apart from evaluation logic. Matches the mathEngine pattern of separating `skills.ts` (definitions) from calculation code.
+- **`components/badges/`, `skillmap/`, `avatar/`:** Each feature gets its own component folder with barrel export, matching the existing `manipulatives/`, `chat/`, `session/` pattern.
+- **`theme/ThemeProvider.tsx`:** Lives alongside existing `theme/index.ts`. The provider wraps the app in `App.tsx`.
 
-## Connectivity Handling
+## Scaling Considerations
 
-The AI tutor requires network connectivity. The app already has `@react-native-community/netinfo` in dependencies.
+| Scale | Architecture Adjustments |
+|-------|--------------------------|
+| 14 skills (current) | DAG layout is trivial. Linear scan of badge conditions is fine. |
+| 50 skills (future) | DAG layout needs proper layered algorithm (Sugiyama). Badge evaluation still O(badges * skills) which is fine up to hundreds. |
+| 100+ badges (future) | Consider indexing badges by trigger event (skill mastery, session complete, etc.) to avoid evaluating all predicates on every session. |
+
+### Scaling Priorities
+
+1. **First bottleneck (unlikely):** Badge evaluation on session commit. With 30-50 badges and 14 skills, this is microseconds. No concern until hundreds of badges.
+2. **Second bottleneck (possible):** Skill map rendering with 50+ nodes. React Native's layout engine handles this fine with `ScrollView`. Only becomes an issue with 200+ nodes, which would need virtualization.
+
+## Anti-Patterns
+
+### Anti-Pattern 1: Coupling Badge Logic to UI Components
+
+**What people do:** Check badge conditions inside screen components or useEffect hooks.
+**Why it's wrong:** Scatters achievement logic across the codebase. Makes testing require full component rendering. Creates race conditions when multiple components evaluate simultaneously.
+**Do this instead:** All badge evaluation happens in `achievementEngine.evaluate()`, called exactly once per session commit in `commitSessionResults`. UI only reads the resulting achievementSlice state.
+
+### Anti-Pattern 2: Mutable Badge Definitions
+
+**What people do:** Store badge definitions in the Zustand store or make them editable.
+**Why it's wrong:** Badge definitions are application constants, not user data. Putting them in the store means persisting them, migrating them, and syncing them. Bloats store size.
+**Do this instead:** Badge definitions are `readonly` TypeScript constants imported from `achievementDefinitions.ts`. The store only tracks which badges are earned (IDs + timestamps).
+
+### Anti-Pattern 3: Server-Dependent Daily Challenges
+
+**What people do:** Fetch daily challenges from an API endpoint.
+**Why it's wrong:** Requires a backend (this app has none). Fails offline. Adds latency. Over-engineered for a single-player children's app.
+**Do this instead:** Generate challenges deterministically from the date using the existing seeded PRNG (Mulberry32). Same date = same challenge. Fully offline.
+
+### Anti-Pattern 4: Persisting Theme Colors in the Store
+
+**What people do:** Store the entire color palette object in Zustand.
+**Why it's wrong:** Duplicates static data. Requires migration when theme palettes change. Bloats persisted state.
+**Do this instead:** Store only `equippedThemeId: string | null` in the store. Resolve the actual colors at runtime from the static `themeRegistry`. Theme palette changes in code updates propagate automatically.
+
+### Anti-Pattern 5: Re-computing Skill Map Layout on Every Render
+
+**What people do:** Call `computeSkillMapLayout()` inside the render function of SkillMapScreen.
+**Why it's wrong:** Layout computation involves topological sort and position calculation. While fast for 14 nodes, it's unnecessary work on every re-render.
+**Do this instead:** Use `useMemo` with `[skillStates]` dependency. Layout only recomputes when skill states change (mastery transitions), which happens at most once per session.
+
+### Anti-Pattern 6: Punitive Unlock Loss
+
+**What people do:** Lock previously earned badges/themes/frames if the underlying condition is no longer met (e.g., streak resets, mastery lost).
+**Why it's wrong:** The existing codebase has an explicit no-re-locking policy for skills. Taking away earned cosmetics from a 6-year-old causes distress and violates the "no punitive mechanics" design principle.
+**Do this instead:** Once earned, always earned. Badges, themes, and frames are permanent. The `AchievementRecord.earnedAt` timestamp is immutable. The `equippedThemeId` might reference a theme earned during a streak that later reset -- that is fine.
+
+## Integration Points
+
+### Session Orchestrator Integration
+
+The primary integration point is `commitSessionResults()` in `sessionOrchestrator.ts`. This function already handles the atomic commit pattern (Elo + XP + level + streak). The achievement evaluation call is added after existing commits:
 
 ```typescript
-// In useTutor, before making LLM call:
-import NetInfo from '@react-native-community/netinfo';
+// In commitSessionResults(), after existing logic:
 
-const requestHelp = useCallback(async () => {
-  const netState = await NetInfo.fetch();
-  if (!netState.isConnected) {
-    setError('Connect to the internet to use the helper!');
-    return;
-  }
-  // ... proceed with LLM call
-}, []);
+// NEW: Evaluate achievements
+const achievementCtx: AchievementEvalContext = {
+  skillStates: /* read from store after updates */,
+  xp: newTotalXp,
+  level: levelResult.newLevel,
+  weeklyStreak: streakResult.newStreak,
+  totalSessions: currentTotalSessions + 1,
+  totalCorrect: currentTotalCorrect + sessionCorrect,
+  totalAttempts: currentTotalAttempts + sessionTotal,
+  misconceptions: /* read from store */,
+  exploredManipulatives: /* read from store */,
+  earnedBadgeIds: new Set(Object.keys(currentAchievements)),
+  sessionScore: score,
+  sessionTotal: total,
+  isDailyChallenge: isDailyChallenge,
+};
+
+const newBadgeIds = evaluateAchievements(achievementCtx);
+if (newBadgeIds.length > 0) {
+  unlockBadges(newBadgeIds);
+}
+incrementSessionStats(sessionCorrect, sessionTotal);
+
+// Return newBadgeIds in SessionFeedback for ResultsScreen
 ```
 
-The tutor button remains visible but shows a friendly offline message. Core practice (problem generation, answer checking, Elo/BKT updates) continues working offline as designed.
+**Important:** The `commitSessionResults` function signature will need additional parameters (achievementSlice actions, current achievement state). This is consistent with how it grew to include streak parameters in earlier versions. Consider refactoring to accept a single `StoreActions` object to prevent parameter sprawl.
 
----
+### Internal Boundaries
 
-## Scalability Considerations
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| achievementEngine <-> store | Pure function reads snapshot, caller writes results | No direct store access in engine |
+| dailyChallengeScheduler <-> store | Pure function generates challenge, screen reads/writes | Scheduler has no store dependency |
+| SkillMapScreen <-> SKILLS array | Static import, read-only | No coupling to session flow |
+| ThemeProvider <-> gamificationSlice | React context reads one field from store | One-way data flow |
+| HomeScreen <-> achievementSlice | Selector reads badge count + unviewed count | Display-only |
+| ResultsScreen <-> route params | newBadgeIds passed via navigation params | Follows existing pattern (score, xp, etc.) |
+| SessionScreen <-> dailyChallengeSlice | Reads isDailyChallenge from route params | Challenge state managed externally |
 
-| Concern | Current (v0.5) | At Scale |
-|---------|----------------|----------|
-| Token cost | ~200 tokens/response, ~3 responses/session = 600 tokens/session | Rate limiting per child per day; cost caps in API config |
-| Latency | Streaming masks TTFT (0.51s for 2.5 Flash) | Acceptable; pre-fetch not needed for child-initiated |
-| Conversation length | Max 6 messages per problem, resets | No context window concern |
-| Concurrent requests | 1 at a time (abort previous) | No concurrency issues |
-| API key management | expo-secure-store, single key | Future: per-user auth tokens via backend proxy |
+## Build Order (Suggested Phase Sequence)
 
----
-
-## Build Order (Dependency-Aware)
+The features have the following dependency graph:
 
 ```
-Phase 1: Types + Service Layer (no UI dependencies)
-  1. tutorTypes.ts           -- all types, no imports from new code
-  2. promptTemplates.ts      -- pure functions, imports only types + mathEngine types
-  3. tutorOrchestrator.ts    -- pure functions, imports tutorTypes + bugLibrary types
-  4. geminiClient.ts         -- imports @google/genai + tutorTypes + Zod
-
-Phase 2: Store Layer (depends on types)
-  5. tutorSlice.ts           -- imports tutorTypes, follows existing slice pattern
-  6. appStore.ts             -- minimal change: add tutorSlice to composition
-
-Phase 3: Hook Layer (depends on services + store)
-  7. useTutor.ts             -- composes services + store + AbortController
-
-Phase 4: UI Layer (depends on hook)
-  8. ChatBubble.tsx          -- pure presentational
-  9. StreamingText.tsx        -- animated text display
-  10. TutorChatPanel.tsx      -- composes ChatBubble + StreamingText
-  11. TutorHelpButton.tsx     -- simple Pressable
-  12. CpaSessionContent.tsx   -- integrate TutorHelpButton + TutorChatPanel
+achievementSlice + achievementEngine (foundation)
+    |
+    +--- BadgeCard + BadgeGrid + BadgePopup (display layer)
+    |       |
+    |       +--- HomeScreen badge count (integration)
+    |       +--- ResultsScreen badge earned (integration)
+    |
+dailyChallengeSlice + dailyChallengeScheduler (independent of badges)
+    |
+    +--- DailyChallengeCard (display)
+    |       |
+    |       +--- HomeScreen integration
+    |       +--- SessionScreen challenge banner
+    |       +--- ResultsScreen challenge result
+    |
+SkillMapScreen + layout service (independent, read-only data)
+    |
+    +--- HomeScreen entry point
+    |
+ThemeProvider + themeRegistry (independent)
+    |
+    +--- AvatarScreen (depends on theme + frame)
+    |       |
+    |       +--- HomeScreen avatar tap navigation
+    |
+Avatar frames + AvatarDisplay (depends on gamificationSlice frame field)
 ```
 
-This order ensures each layer is testable independently before integration. Services can be unit-tested with mock data. The hook can be tested with mock services. UI components can be tested with mock hook returns.
+**Recommended build order:**
 
----
+1. **Achievement system** (store + engine + definitions) -- foundation that other features reference for unlock conditions
+2. **Badge UI components** (BadgeCard, BadgePopup, BadgeGrid) -- visual layer for achievements
+3. **Badge integration** (HomeScreen, ResultsScreen, commitSessionResults) -- wire up the system
+4. **Skill map** (layout service + SkillMapScreen + components) -- independent, can parallel with badges
+5. **Daily challenges** (scheduler + slice + DailyChallengeCard + session integration) -- independent
+6. **Theme system** (ThemeProvider + themeRegistry + AvatarScreen themes tab) -- needs achievement system for unlock conditions
+7. **Avatar frames** (frame definitions + FrameSelector + AvatarDisplay) -- needs achievement system for unlock conditions
+8. **AvatarScreen** (combines avatar + frame + theme selection) -- depends on theme + frame systems
+
+Items 4 and 5 can be built in parallel with 2-3. Items 6-8 depend on 1 being complete.
 
 ## Sources
 
-- [Existing codebase analysis] -- all file references verified against actual source
-- [@google/genai npm package](https://www.npmjs.com/package/@google/genai) -- v1.30.0+ (installed), v1.43.0 latest
-- [@google/genai SDK docs](https://googleapis.github.io/js-genai/release_docs/index.html) -- API reference
-- [GenerateContentConfig interface](https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerateContentConfig.html) -- abortSignal support confirmed
-- [Gemini 2.5 Flash performance](https://artificialanalysis.ai/models/gemini-2-5-flash) -- 232 tok/s, 0.51s TTFT
-- [Project research: 03-ai-tutoring-engine.md] -- three-mode tutor design, prompt templates, safety guardrails
-- [Project research: 05-misconception-detection.md] -- Bug Library integration with tutor
+- Existing codebase analysis: `src/store/`, `src/services/`, `src/screens/`, `src/navigation/`
+- Existing gamification research: `.planning/07-gamification.md`
+- Zustand v5 slice pattern: established in codebase across 7 slices
+- React Navigation 7 native-stack: established in `AppNavigator.tsx`
+- SKILLS DAG definition: `src/services/mathEngine/skills.ts` (14 skills, 2 root nodes)
+- BKT mastery system: `src/services/adaptive/bktCalculator.ts`
+- Prerequisite gating: `src/services/adaptive/prerequisiteGating.ts`
+- Session orchestrator commit pattern: `src/services/session/sessionOrchestrator.ts`
+- Migration chain: `src/store/migrations.ts` (versions 1-8)
+- Avatar constants: `src/store/constants/avatars.ts`
+- Theme constants: `src/theme/index.ts`
+
+---
+*Architecture research for: Gamification features integration into Tiny Tallies v0.7*
+*Researched: 2026-03-04*

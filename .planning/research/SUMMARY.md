@@ -1,202 +1,228 @@
 # Project Research Summary
 
-**Project:** Tiny Tallies v0.5 — AI Tutor Milestone
-**Domain:** LLM-powered conversational tutoring in a children's math learning app (React Native / Expo)
-**Researched:** 2026-03-03
+**Project:** Tiny Tallies — v0.7 Gamification Features
+**Domain:** Children's math learning app gamification (ages 6-9) — achievement badges, skill map, daily challenges, avatar customization, UI themes
+**Researched:** 2026-03-04
 **Confidence:** HIGH
 
 ## Executive Summary
 
-The v0.5 AI Tutor milestone adds an on-demand Gemini-powered tutoring layer to the existing session infrastructure. Research confirms this is an **additive integration** — the existing session, adaptive engine (Elo/BKT/Leitner), and virtual manipulatives remain entirely unchanged. The tutor grafts a parallel conversation layer that reads from session state but never writes to it. The recommended approach is to build the service layer first (types, prompts, orchestrator, Gemini client), then the store slice, then the composing hook, then the UI — a strict bottom-up dependency order that keeps each layer independently testable. Zero new npm dependencies are required; every capability needed (Gemini SDK, Zod, NetInfo, Reanimated, Secure Store) is already installed.
+Tiny Tallies v0.7 adds a gamification layer on top of a mature, adaptive math learning engine. The foundational approach is badge-first: an achievement system (badge registry, evaluation engine, store slice) must be built before anything else, because unlockable avatars, frames, and themes all depend on badges as their unlock mechanism. This is ethically differentiated from competitors — no coins, no shop, no paywall — all cosmetics are earned through achievement. The existing codebase already contains every library needed (react-native-svg, react-native-reanimated, lottie-react-native, expo-notifications); v0.7 is entirely an architectural and UI expansion, zero new npm dependencies.
 
-The most important design decisions are non-negotiable guardrails: the LLM must never compute math (always receive the correct answer from the programmatic engine), HINT mode must never reveal the answer (enforced by a deterministic post-generation output filter, not just a system prompt instruction), and COPPA 2025 amendments require a Verifiable Parental Consent gate before any LLM call transmits data to Google. The PNAS 2024 study is the anchor finding here — guardrailed AI produced +127% learning improvement while unguardrailed AI caused -17% decline. Every safety check exists to stay on the right side of that gap.
+The recommended build order flows from dependency to dependent: (1) achievement system foundation, (2) visual skill map (can parallel with badges since it reads existing data independently), (3) daily challenges, (4) avatar/frame unlockables, (5) UI themes last. Themes are deliberately deferred to last because the existing static `StyleSheet.create` pattern is hostile to dynamic theming — attempting themes early will destabilize all prior work. The visual skill map is the highest-complexity single feature (custom SVG/React Native DAG rendering of 14 nodes) and requires a performance validation spike before full build.
 
-The feature scope is intentionally narrow for v0.5: child-initiated help only (never auto-trigger), text-only interface with pre-defined response buttons (no free-text input for ages 6-9), HINT/TEACH/BOOST three-mode escalation, and manipulative panel integration via a signal-not-direct-control pattern. Voice I/O, tutor analytics, and sandbox-mode tutoring are explicitly deferred. The architecture mirrors the existing ManipulativePanel pattern — an `Animated.View` overlay inside the component tree (not a Modal) with `CpaSessionContent` as the integration point.
-
----
+The critical risk is the overjustification effect: if badge pop-ups are too prominent or too frequent, research shows they shift children from "I enjoy math" to "I want the next badge," which reduces learning outcomes (Hanus & Fox 2015). The second critical risk is store migration: the Zustand store is at v8 and needs at least two new version bumps for gamification state; a botched migration silently drops persisted data. Both risks have clear prevention strategies documented in research and must be addressed in Phase 1 design decisions, not deferred to later phases.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The v0.5 milestone requires **no new npm dependencies**. The Gemini SDK (`@google/genai` v1.30.0, upgrade to v1.43.0 recommended) is already in `package.json`. All supporting libraries — Zod for output validation, NetInfo for offline detection, Secure Store for API key, Reanimated for panel animation, Lucide for icons — are already installed and Expo SDK 54 compatible.
+The v0.7 gamification features require no new dependencies — every library is already in `package.json`. `react-native-svg` (v15.12.1) handles skill map node/edge rendering with animated mastery arcs via `useAnimatedProps`. `react-native-reanimated` (~4.1.1) drives 60fps node animations. `lottie-react-native` (~7.3.1) provides rich badge unlock celebration animations from free LottieFiles assets (10-30KB per animation). `expo-notifications` (~0.32.15) enables daily challenge reminders via `DailyTriggerInput` with no backend required. The theme system is implemented using React Context + Zustand — the project's existing `StyleSheet.create` pattern means NativeWind or styled-components would require rewriting 40+ component files.
+
+See full details: `.planning/research/STACK.md`
 
 **Core technologies:**
-- `@google/genai` + Gemini 2.5 Flash: LLM engine — 232 tok/s output, 0.51s TTFT, $0.30/M input; fastest/cheapest model adequate for children's 2-3 sentence hints; upgrade `@google/genai` to v1.43.0 for latest fixes
-- Zustand ephemeral slice (`tutorSlice`): chat state — excluded from `partialize` so it resets on app restart without requiring a store migration; no STORE_VERSION bump needed
-- `ai.models.generateContentStream` (manual history): LLM call pattern — chosen over `ai.chats` convenience API to retain explicit control over context window, prompt injection guards, and per-problem reset; non-streaming (`generateContent`) is recommended as the stable primary path for v0.5 with streaming as a Phase 4 polish enhancement
-- FlatList (not FlashList): chat message list — chat has fewer than 10 messages per problem; FlashList v1.x adds complexity with no virtualization benefit at this scale
+- `react-native-svg` v15.12.1: Skill map DAG rendering (nodes, edges, animated mastery arcs) — already installed, proven in 8 pictorial diagram components
+- `react-native-reanimated` ~4.1.1: Skill map node animations (pulse, glow, unlock transitions) — already drives confetti and manipulative drag
+- `lottie-react-native` ~7.3.1: Badge unlock celebration animations — already in package.json, not yet imported
+- `expo-notifications` ~0.32.15: Daily challenge reminders — already in package.json, not yet imported
+- `zustand` ^5.0.8: 2 new domain slices (achievementSlice, dailyChallengeSlice) — follows established slice pattern
+- React Context: ThemeProvider for dynamic color palette — minimal migration cost for a theme-per-context approach
+
+**No-install constraint:** FlashList must stay at v1.x (v2.x crashes on RN 0.81). No Skia, no d3, no graph visualization libraries needed for 14-node DAG.
 
 ### Expected Features
 
-**Must have (table stakes):**
-- Child-initiated help button — always visible, never pulsing or auto-triggering; autonomy is critical for math anxiety prevention
-- Socratic hints that never reveal the answer — enforced by deterministic output filter post-generation (not just system prompt instructions alone)
-- Age-appropriate language — prompt templates parameterized by child age bracket (6-7, 8-9) with sentence length and vocabulary constraints baked in
-- Chat bubble UI with pre-defined response buttons — no free-text input; ages 6-7 cannot type reliably and pre-defined buttons eliminate the prompt injection attack surface entirely
-- Per-problem chat reset — tutor state clears on every `currentIndex` change, preventing stale context contamination
-- Offline graceful degradation — NetInfo check before every LLM call; canned fallback response shown; core practice continues uninterrupted
-- Safety guardrails — all 4 Gemini configurable safety filter categories set to `BLOCK_LOW_AND_ABOVE` (default is OFF for Gemini 2.5+ models — an active misconfiguration risk)
-- Error handling — API failures show child-friendly message, never crash the session
+See full details: `.planning/research/FEATURES.md`
+
+**Must have (table stakes) — these make the app feel gamified:**
+- Achievement badges for mastery milestones — every major competitor has these; children need visible proof of learning
+- Achievement badges for effort/behavior — rewards persistence over speed, aligns with growth mindset research
+- Progress visualization (skill map) — highest-complexity v0.7 feature; children need concrete representation of abstract progress
+- Avatar selection from presets — already partially implemented (8 emoji animals); needs expansion to 12-15 with unlock states
+- Session-end summary with rewards — extend existing Results screen to show badge unlocks and challenge progress
 
 **Should have (differentiators):**
-- Three-mode auto-escalation (HINT -> TEACH -> BOOST) — pure function in `tutorOrchestrator`; most tutors are single-mode
-- Bug Library-informed hints — child's wrong answer matched to `bugId`; tutor explains the specific misconception, not generic "try again"
-- TEACH mode triggers manipulative panel — tutor signals `shouldExpandManipulative`; `CpaSessionContent` responds; tutor never directly controls UI
-- CPA-aware language — prompt adapts to concrete/pictorial/abstract stage visible on screen
-- Effort praise only — system prompt enforces growth mindset language (Dweck 2006); ability praise explicitly forbidden
+- Visual skill map with prerequisite DAG — no competitor shows actual skill relationships as an interactive tree; this is the standout feature
+- Daily challenges with rotating themes — bonus XP, no penalty for skipping, date-seeded rotation (fully offline, no backend)
+- Unlockable avatars/frames via achievements — all cosmetics achievement-unlockable, zero paywall (ethically superior to Prodigy's FTC-complaint model)
+- Unlockable UI color themes — 3-5 palette variants earned through badges
+- Remediation achievement badges — no competitor rewards overcoming misconceptions; leverages existing misconceptionSlice
 
-**Defer (v0.8+ or later):**
-- Tutor analytics/metrics — parent dashboard milestone (v0.8)
-- Voice input/output — TTS/STT dependencies, COPPA audio implications
-- Free-text chat input
-- Tutor in sandbox/exploration mode
+**Defer to v0.8+:**
+- Social badges (requires family groups)
+- Animated mascot integration (higher asset cost)
+- Badge showcase/trophy wall screen (nice-to-have, not structural)
+- Sound effects for badge unlocks (incremental polish)
+
+**Anti-features to avoid explicitly:**
+- Coins/virtual currency — creates loss aversion and is an FTC complaint target (Prodigy precedent)
+- Collectible items/gacha — compulsive behavior in children; explicitly excluded from milestone scope
+- Competitive leaderboards — COPPA implications; harms self-esteem in ages 6-9
+- Daily login streak separate from weekly — causes anxiety documented in parent complaints; weekly streak is the correct granularity
+- Pay-to-unlock cosmetics — violates project values; all cosmetics must be earned through gameplay
+- Complex avatar builder — implementation cost disproportionate to value for emoji-based system
 
 ### Architecture Approach
 
-The integration is strictly additive: approximately 10 new files, 2-3 modified files, no changes to existing session/adaptive/manipulative code. The architecture has four distinct layers built bottom-up: (1) Service layer — `tutorTypes.ts`, `promptTemplates.ts`, `tutorOrchestrator.ts`, `geminiClient.ts` — all pure functions, fully unit-testable with no UI dependency; (2) Store layer — `tutorSlice.ts` added to `appStore.ts` composition, not persisted; (3) Hook layer — `useTutor.ts` composing services and store with AbortController lifecycle management; (4) UI layer — `ChatBubble`, `StreamingText`, `TutorChatPanel`, `TutorHelpButton`, and minimal changes to `CpaSessionContent`.
+The gamification layer integrates with the existing codebase via two new Zustand slices (achievementSlice, dailyChallengeSlice), minimal modifications to gamificationSlice (two new fields), and a single integration point at `commitSessionResults()` in sessionOrchestrator.ts. The achievement engine is a pure function evaluator — stateless, takes a snapshot of store state, returns newly-earned badge IDs — making it fully testable without store mocking. The skill map is a pure derivation of the existing `SKILLS` array (already defines the prerequisite DAG). Daily challenges are generated deterministically from a UTC date seed using the existing Mulberry32 PRNG — no backend required. Theme switching uses React Context over Zustand-persisted `equippedThemeId`, avoiding storage of full color palettes.
+
+See full details: `.planning/research/ARCHITECTURE.md`
 
 **Major components:**
-1. `geminiClient.ts` — GoogleGenAI singleton (lazy init, module-scoped), `sendTutorMessage()` with abort support; Zod validation at the system boundary; max 200 output tokens per response
-2. `promptTemplates.ts` — pure functions `buildSystemInstruction()`, `buildHintPrompt()`, `buildTeachPrompt()`, `buildBoostPrompt()`; typed context objects; bug descriptions passed in as resolved strings (not direct bugLibrary imports, keeping dependency direction clean)
-3. `tutorOrchestrator.ts` — pure function `determineMode()` implementing HINT/TEACH/BOOST escalation as a typed discriminated union state machine; reads but never writes session/adaptive state
-4. `tutorSlice.ts` — ephemeral Zustand slice; `chatMessages` as array (not Map) for React re-render compatibility; `hintLevel` counter tracking escalation; not listed in `partialize`
-5. `useTutor.ts` — two-layer AbortController cleanup (explicit on `currentIndex` change + defense-in-depth on unmount); exposes `shouldExpandManipulative` signal to `CpaSessionContent`
-6. `TutorChatPanel.tsx` — `Animated.View` overlay (not Modal, to avoid gesture conflicts with react-native-gesture-handler); max 40% screen height; FlatList for messages
-7. `CpaSessionContent.tsx` (modified) — adds `TutorHelpButton` + `TutorChatPanel` to render tree; reads `shouldExpandManipulative` to trigger existing `ManipulativePanel`; `ManipulativePanel` itself is unmodified
+1. `achievementSlice` + `achievementEngine` — foundation; pure function evaluator called once at session commit; stores earned badge IDs + timestamps
+2. `dailyChallengeSlice` + `dailyChallengeScheduler` — date-seeded rotation; ephemeral state (today's challenge only); extends existing session modes
+3. `SkillMapScreen` + `skillMapLayout` service — reads existing SKILLS DAG + skillStates; custom SVG rendering; no new data structures
+4. `ThemeProvider` — React Context wrapping app root; reads `equippedThemeId` from store; components migrate from direct `colors` import to `useTheme()` hook
+5. `AvatarScreen` — combines avatar + frame + theme selection; depends on badge system for unlock conditions
+
+**Store migration plan:** STORE_VERSION 8 → 9 (achievements, lifetime stats, equipped theme/frame) → 10 (daily challenge state). Two separate migration hops to allow phased rollout.
+
+**Build order from architecture research:** achievements (1) → badge UI (2) → badge integration (3) → skill map parallel track → daily challenges (4) → theme system (5) → avatar frames + AvatarScreen (6).
 
 ### Critical Pitfalls
 
-1. **LLM answer leaking in HINT mode** — Post-generation deterministic output filter is required (regex scan for correct answer as a standalone number, spelled out, or in indirect phrasing like "one more than 14"). In HINT mode, do NOT pass the correct answer in the prompt — the LLM cannot leak what it does not know. For BOOST mode (where the answer is eventually revealed), generate the reveal text programmatically, not via LLM. This is a hard requirement — the PNAS study's -17% learning outcome from unguardrailed AI is the consequence of skipping it.
+See full details: `.planning/research/PITFALLS.md`
 
-2. **COPPA 2025 violation via Gemini API data transmission** — COPPA 2025 amendments (compliance deadline April 22, 2026) require SEPARATE Verifiable Parental Consent for third-party data sharing. The Gemini API is third-party. Use the paid API tier (not Google AI Studio free tier, which may use data for training). Data minimization is mandatory: never send child's name, specific age, or profile data — only math problem, numeric answer, and misconception tag. PII scrubbing layer on all outbound prompts. Written data retention policy must exist before launch.
+1. **Store migration cascade corruption** — Adding 5+ new features means multiple new persisted fields; a botched migration drops user data silently. Prevention: bump STORE_VERSION once per phase; write a roundtrip migration test (v8 fixture → v9/v10 → verify all fields intact); always update `partialize` in the same commit as the migration.
 
-3. **Gemini 2.5+ safety filters disabled by default** — All four configurable safety categories (harassment, hate speech, sexually explicit, dangerous content) default to OFF for Gemini 2.5+ models. Must explicitly set all to `BLOCK_LOW_AND_ABOVE`. Post-generation content validator also required: sentence length check (max 8 words/sentence for ages 6-7; 12 for ages 8-9), vocabulary check, negative language scan. Fallback to curated canned response library if validation fails — child must never see a raw LLM failure.
+2. **Overjustification effect** — Prominent badges shift children from "I enjoy math" to "I want the next badge," reducing learning outcomes (Hanus & Fox 2015). Prevention: informational framing ("You earned this!"), cap 1 badge pop-up per session, never show grayed-out locked badge checklists, focus badge categories on effort/persistence not performance speed/accuracy.
 
-4. **Streaming failures on React Native mobile** — `generateContentStream` has known issues on React Native (GitHub #50015): streams hang on background/foreground transitions, network switches, and low-power mode. Use `generateContent` (non-streaming) as the stable primary path for v0.5. Add 8-second hard timeout. Buffer and validate the complete response before any UI display — never stream chunks to the UI before safety validation has run.
+3. **Skill map SVG rendering tanks on low-end Android** — 50-100+ SVG elements with animations cause multi-second render times on low-end devices. Prevention: technology spike before full build; limit animations to 2-3 active/next-unlockable nodes; use `useMemo` for layout computation; consider Skia or View-based layout as alternative.
 
-5. **Auto-escalation state not resetting between problems** — Tutor state must be scoped to `problemId` via TypeScript discriminated unions (`{ mode: 'idle' } | { mode: 'hint'; level: 1|2|3; problemId: string } | ...`). When `currentProblemIndex` advances, any tutor state with a non-matching `problemId` is automatically invalidated. The tutor escalation system and the existing session frustration guard must coordinate — two independent "child is struggling" detectors giving contradictory responses undermines both systems.
+4. **Theme system breaks existing accessibility guarantees** — `StyleSheet.create` captures static values at module load time, not render time; a "just wrap it in a context provider" approach without careful refactoring silently breaks color values. Prevention: use `useTheme()` hook + `createThemedStyles(theme)` factory pattern; preserve Lexend font across all themes; require WCAG AA contrast ratios for all palette variants; update `AppNavigator.tsx` contentStyle to avoid "White Flash of Death."
 
----
+5. **Daily challenges create hidden punitive mechanics** — Even "optional" challenges become obligatory when they are the primary source of bonus XP and special badges. Prevention: no exclusive daily-challenge-only badges; cap XP bonus at 10-20% of standard session; multi-day availability windows; never show "missed challenge" messaging.
+
+6. **HomeScreen and SessionScreen file size bloat** — SessionScreen is already at 552 lines (over the 500-line limit); adding gamification elements to HomeScreen, SessionScreen, and ResultsScreen will push all three well past the guardrail. Prevention: refactor SessionScreen below 500 lines BEFORE gamification work begins; extract every gamification element as its own component before integrating into screens.
 
 ## Implications for Roadmap
 
-Based on combined research, a four-phase structure is strongly recommended. The dependency order is dictated by the bottom-up architecture: services must exist before the store, store before the hook, hook before the UI. All critical safety requirements live in Phase 1 — this is a deliberate design choice, not an arbitrary ordering.
+Based on combined research, the dependency graph dictates a clear phase structure. The badge system must come first because unlockable avatars, frames, and themes all use badges as their unlock mechanism. The skill map can be built in parallel (it reads only existing data). Themes must come last to avoid destabilizing earlier work.
 
-### Phase 1: Core LLM Service Layer
+### Phase 0: Pre-work — Screen Refactoring
+**Rationale:** SessionScreen is already at 552 lines, violating the 500-line guardrail. Adding gamification to it without first refactoring guarantees an unmaintainable file. This must happen before any feature work.
+**Delivers:** SessionScreen refactored below 500 lines; extraction of candidate components for gamification hook points
+**Avoids:** Pitfall 6 (HomeScreen/SessionScreen file size bloat)
+**Research flag:** SKIP — this is a refactor of existing code, no new patterns needed
 
-**Rationale:** All safety requirements (answer leak prevention, COPPA data minimization, safety filters, output validation) live in the service layer. Building this first means every subsequent phase inherits safe behavior automatically. This is also the most testable layer — pure functions with no UI dependencies. PITFALLS research is unambiguous: safety is a Phase 1 responsibility, not a "we'll add it later" concern.
+### Phase 1: Achievement System Foundation
+**Rationale:** Everything else — daily challenges, unlockable avatars, frames, themes — depends on the badge system existing. Store migration pattern for v8→v9 must be established correctly here; mistakes here corrupt all subsequent phases.
+**Delivers:** achievementSlice, achievementEngine (pure function evaluator), achievementDefinitions (~30 badges covering skill mastery + effort + exploration + remediation), STORE_VERSION 8→9 migration, badge state persistence
+**Addresses:** Achievement badges for mastery (table stakes), achievement badges for effort/behavior (table stakes)
+**Avoids:** Store migration cascade (Pitfall 1), overjustification effect (Pitfall 2 — badge definition framing must be correct from day 1)
+**Research flag:** SKIP — architecture is fully specified; patterns are established in codebase
 
-**Delivers:** `tutorTypes.ts`, `promptTemplates.ts`, `tutorOrchestrator.ts`, `geminiClient.ts`, `tutorSlice.ts`, `appStore.ts` update (add tutorSlice composition), `useTutor.ts` (core lifecycle without UI integration), rate limiting (max 3 calls/problem, 20/session), output validation middleware (answer leak + content safety + sentence length), COPPA data minimization layer, AbortController pattern, offline detection via NetInfo
+### Phase 2: Badge UI + Results Integration
+**Rationale:** Once the data layer exists, the display layer can be built and wired to the session flow. Keeping this separate from Phase 1 enforces the boundary between data (engine, store) and presentation (components, screens).
+**Delivers:** BadgeCard, BadgePopup, BadgeGrid components; ResultsScreen extended with badge unlock display; HomeScreen badge count indicator; session commit wired to achievement evaluation
+**Uses:** lottie-react-native (badge unlock celebration), react-native-reanimated (entrance animations)
+**Implements:** Badge display layer from architecture
+**Avoids:** Badge-during-session interruption (queue all unlocks for ResultsScreen, never mid-session)
+**Research flag:** SKIP — well-documented Lottie + Reanimated patterns; component structure fully specified
 
-**Features addressed:** Socratic hints, per-problem reset, offline degradation, safety guardrails, error handling
+### Phase 3: Visual Skill Map
+**Rationale:** The skill map reads only existing data (SKILLS array + skillStates) so it has no dependencies on the badge system. It is the highest-complexity single feature and benefits from its own phase. A performance validation spike must happen before committing to full SVG rendering.
+**Delivers:** SkillMapScreen, skillMapLayout service, SkillNode + SkillEdge + MapCanvas components; HomeScreen entry point
+**Uses:** react-native-svg + react-native-reanimated for node/edge rendering and animations
+**Avoids:** SVG performance on low-end devices (Pitfall 4 — spike first, measure time-to-interactive < 500ms on low-end Android before full build)
+**Research flag:** NEEDS RESEARCH — validate rendering approach (SVG vs. View-based absolute positioning vs. Skia) with a performance spike before building full feature
 
-**Pitfalls addressed:** Answer leaking (Pitfall 1), prompt injection (Pitfall 2), COPPA (Pitfall 3), inappropriate content (Pitfall 4), streaming failures (Pitfall 6 — non-streaming path with timeout), API key security, auto-escalation state machine definition (Pitfall 7)
+### Phase 4: Daily Challenges
+**Rationale:** Daily challenges depend on the badge system (challenge completion triggers badge awards and bonus XP). By this phase, the session orchestrator integration pattern is understood from Phase 2's badge integration work.
+**Delivers:** dailyChallengeScheduler (date-seeded, offline), dailyChallengeSlice, DailyChallengeCard component, SessionScreen challenge mode integration (banner, shortened session config), ResultsScreen challenge result display, STORE_VERSION 9→10 migration
+**Addresses:** Daily challenges with rotating themes (differentiator)
+**Avoids:** Hidden punitive mechanics (Pitfall 5 — no exclusive badges, XP cap, multi-day windows, no "missed" messaging); session orchestrator god-function (Pitfall 7 — strategy pattern for Standard/Remediation/Challenge)
+**Research flag:** SKIP — deterministic date-seeded pattern established; strategy extraction is architectural refactoring
 
-**Research flag:** Standard patterns — Zustand slice and AbortController patterns are well-established in this codebase. Gemini `generateContent` (non-streaming) is the simpler and more stable path. No additional research needed.
+### Phase 5: Unlockable Avatars and Frames
+**Rationale:** Depends on the badge system (badges are the unlock mechanism). The avatar type migration (from the constrained `AvatarId` union to a broader unlockable system) requires care to preserve existing users' avatar selections.
+**Delivers:** Expanded avatar pool (12-15 vs. current 8), avatar frame ring system (5-7 frames), AvatarDisplay composable component (frame + emoji + badge overlay), AvatarScreen with avatar/frame selection, HomeScreen avatar with frame rendering
+**Addresses:** Unlockable avatars/frames via achievements (differentiator)
+**Avoids:** Avatar type migration breaking existing selection (use separate `equippedAvatarId: string` field, keep `AvatarId` for presets); dead-end progression (extensible `UnlockCondition` union type supporting `achievement`, `level`, `time` variants)
+**Research flag:** SKIP — avatar extension is straightforward; migration pattern follows established chain
 
-### Phase 2: Chat UI and HINT Mode Integration
-
-**Rationale:** With the service layer and safety guarantees in place, build the minimum viable tutor UI delivering HINT mode only. End-to-end user value (child taps Help and gets a hint) is achieved while keeping escalation scope controlled. Allows UX validation before committing to the full escalation design. The COPPA VPC gate and interstitial disclosure also ship here — required before any public testing.
-
-**Delivers:** `ChatBubble.tsx`, `TutorChatPanel.tsx`, `TutorHelpButton.tsx`, `CpaSessionContent.tsx` integration, VPC parental consent gate and interstitial disclosure, pre-defined response buttons (no free-text input), character limit enforcement on bubble display
-
-**Features addressed:** Help button (child-initiated), chat bubble UI, age-appropriate language display, pre-defined response buttons
-
-**Pitfalls addressed:** Chat UI overwhelming young readers (Pitfall 5 — character limits, no free-text, pre-built response buttons), prompt injection (Pitfall 2 — pre-defined buttons eliminate the injection surface entirely), COPPA VPC gate (Pitfall 3)
-
-**Research flag:** TTS for emergent readers is flagged as a "looks done but isn't" risk in PITFALLS. If text-to-speech is targeted for this phase, `expo-speech` needs an Expo SDK 54 compatibility check before committing — not currently in dependencies. Deferring TTS to Phase 4 is the lower-risk option.
-
-### Phase 3: TEACH/BOOST Modes and Manipulative Integration
-
-**Rationale:** Auto-escalation and manipulative integration are the primary differentiators of this tutor. They depend on Phase 1 (orchestrator state machine) and Phase 2 (UI components) being stable. The TEACH mode trigger for the ManipulativePanel — LLM says "try the blocks" and the blocks actually appear — is the feature that makes this tutor unique and distinct from generic chatbots.
-
-**Delivers:** Full `tutorOrchestrator.ts` HINT->TEACH->BOOST escalation, Bug Library `bugId`-to-prompt mapping (`misconceptionPromptMap`), `shouldExpandManipulative` signal integration with `ManipulativePanel`, TEACH mode CPA-stage-aware prompts, BOOST mode programmatic answer reveal, frustration guard coordination, canned response fallback library (minimum 5 variants per hint level per age bracket)
-
-**Features addressed:** Three-mode auto-escalation, Bug Library-informed hints, TEACH mode with manipulative trigger, CPA-aware tutoring, effort praise enforcement
-
-**Pitfalls addressed:** Auto-escalation state bugs (Pitfall 7 — typed state machine with problemId scoping, frustration guard coordination), manipulative integration ("tutor SAYS try the blocks but panel doesn't open" — the most common integration failure mode)
-
-**Research flag:** The orchestrator is a pure function state machine and the manipulative signal pattern mirrors existing code. No additional research needed. Integration testing is essential — explicitly verify that TEACH mode suggestions actually expand the ManipulativePanel with the correct type pre-selected.
-
-### Phase 4: Polish and Streaming Enhancement
-
-**Rationale:** After Phase 3 the tutor is feature-complete and safe. Phase 4 improves perceived quality. Streaming is deliberately deferred here because PITFALLS research explicitly recommends proving the non-streaming path stable first on both iOS and Android. Response caching reduces API costs at scale. TTS narration (if deferred from Phase 2) ships here.
-
-**Delivers:** Streaming response display (conditional on non-streaming stability on both platforms), response caching layer (keyed by templateId + hintLevel + ageGroup + misconceptionTag), canned response library expansion, TTS audio playback for tutor messages, animated loading state (mascot thinking animation vs. static text)
-
-**Features addressed:** Streaming text display, TTS narration, visual mode differentiation (HINT vs TEACH vs BOOST look distinct)
-
-**Pitfalls addressed:** Streaming failures (Pitfall 6 — only enabled after non-streaming validated), Chat UI overwhelming (Pitfall 5 — TTS ensures 6-year-olds can access content)
-
-**Research flag:** Streaming on React Native with `@google/genai` v1.43.0 on RN 0.81 may benefit from a targeted spike before implementation. GitHub issue #50015 indicates this area has been unstable — behavior may have changed in newer SDK versions. Investigate before committing to streaming in this phase.
+### Phase 6: UI Themes
+**Rationale:** Themes must come last because the existing `StyleSheet.create` pattern requires careful refactoring to work with dynamic theming. Building themes last means the refactoring scope is controlled and existing screens are stable before being theme-aware. The "White Flash of Death" and contrast-ratio concerns require dedicated QA.
+**Delivers:** ThemeProvider (React Context), THEMES registry (3-5 color palettes), `useTheme()` hook, theme-aware screens (HomeScreen, ResultsScreen, AvatarScreen), ThemePicker in AvatarScreen, AppNavigator.tsx contentStyle updated
+**Addresses:** Unlockable UI color themes (differentiator)
+**Avoids:** Theme breaking accessibility (Pitfall 3 — WCAG AA validation, Lexend font preserved, White Flash prevention, manipulative colors exempted from theming)
+**Research flag:** NEEDS RESEARCH — validate `createThemedStyles(theme)` factory approach vs. hook-per-component approach; determine which screens require full migration vs. cosmetic overlay only
 
 ### Phase Ordering Rationale
 
-- **Safety first:** Every pitfall rated Critical belongs to Phase 1 or has Phase 1 prerequisites. The PNAS study's -17% learning outcome makes safety a launch blocker, not a post-launch concern.
-- **Services before UI:** Prompt templates and output validation must exist before any response reaches a chat bubble. Testing the service layer in isolation validates the most complex logic before UI complexity is introduced.
-- **HINT before full escalation:** Delivering HINT-only first reduces v0.5 launch scope. TEACH and BOOST are differentiators, not table stakes — the tutor is useful at HINT-only.
-- **Non-streaming before streaming:** React Native streaming is a known failure mode. The 1-3 second latency for non-streaming `generateContent` is acceptable for children's hints, especially with a well-designed animated loading state.
-- **COPPA compliance is a hard external deadline:** The VPC gate and data minimization layer must ship with Phase 1-2. The April 22, 2026 COPPA 2025 compliance deadline is the highest-risk external constraint on the milestone.
+- **Dependency order is mandatory:** Badges → (Daily Challenges, Avatar Frames, Themes) because all three unlock mechanisms depend on the achievement system. Skill map is independent and can be Phase 3 or inserted anywhere after Phase 2.
+- **Performance-risk isolation:** Skill map (highest technical risk) and themes (highest integration risk) are given their own phases rather than bundled with other features. This ensures failures in these areas don't block other deliverables.
+- **Migration sequencing:** Two store version bumps (v9 for achievements, v10 for daily challenges) match two natural phase boundaries. Never bundle all migrations into one hop.
+- **COPPA compliance is a cross-cutting concern:** No free-text input anywhere in gamification; all timestamps in UTC; gamification state never sent to external services. Verify in every phase.
 
 ### Research Flags
 
-Phases likely needing deeper research during planning:
-- **Phase 2 (TTS integration):** If text-to-speech is targeted for this phase rather than deferred, `expo-speech` compatibility with Expo SDK 54 on both iOS and Android needs verification. Not in current dependencies.
-- **Phase 4 (Streaming on React Native):** React Native streaming behavior with `@google/genai` v1.43.0 on RN 0.81 needs targeted investigation before committing to implementation. GitHub issue #50015 is open and the streaming path has known failure modes on mobile.
+Phases needing deeper research during planning:
+- **Phase 3 (Skill Map):** Rendering approach must be validated with a performance spike before committing. Options: (a) react-native-svg + useAnimatedProps, (b) View-based absolute positioning with Reanimated, (c) react-native-skia. Measure time-to-interactive on a low-end Android device. Target < 500ms.
+- **Phase 6 (Themes):** Need to validate `createThemedStyles(theme)` factory approach works with `StyleSheet.create` caching. Need to confirm which components require full `useTheme()` migration vs. which can use cosmetic overlays without touching the `StyleSheet` layer.
 
 Phases with standard patterns (skip research-phase):
-- **Phase 1 (Service layer):** Zustand slices, Zod validation, AbortController, Gemini `generateContent` non-streaming — all established in this codebase or official SDK docs.
-- **Phase 3 (State machine + manipulative signal):** Orchestrator is a pure function; signal pattern mirrors existing ManipulativePanel logic in CpaSessionContent.
-
----
+- **Phase 0:** Established refactoring — no new patterns
+- **Phase 1:** Architecture fully specified; pure function evaluator pattern is standard; Zustand slice pattern established across 7 existing slices
+- **Phase 2:** Lottie integration is well-documented; component structure fully specified in ARCHITECTURE.md
+- **Phase 4:** Date-seeded PRNG pattern already used by math engine; strategy pattern extraction is standard refactoring
+- **Phase 5:** Avatar extension is additive; migration pattern follows established chain
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All dependencies verified in `package.json`. Gemini 2.5 Flash specs from official benchmarks. Zero new dependencies means zero compatibility risk. Upgrade to `@google/genai` v1.43.0 is optional but low-risk. |
-| Features | HIGH | Grounded in PNAS 2024 study, existing project research docs (03-ai-tutoring-engine.md, 09-child-ux-design.md), and codebase analysis of existing integration points. Anti-features clearly defined from child UX research. |
-| Architecture | HIGH | Verified against actual codebase structure. Component boundaries mirror established patterns (ManipulativePanel, existing hooks, Zustand slice composition). Build order is dependency-graph-derived. 10 new files, 2-3 modified — scope is well-bounded. |
-| Pitfalls | HIGH (safety/COPPA/child UX) / MEDIUM (streaming) | Safety, COPPA, and child UX pitfalls sourced from OWASP, FTC rules, PNAS study, and existing research docs. Streaming pitfalls from community-reported GitHub issues — behavior may differ by SDK version and RN release. |
+| Stack | HIGH | All libraries already in package.json and verified against Expo SDK 54 compatibility; no new dependencies required; alternatives documented and rejected with rationale |
+| Features | HIGH | Competitor analysis is current and documented (Khan Academy, Prodigy, SplashLearn, Duolingo); psychology research on overjustification and punitive mechanics is well-sourced; feature dependencies mapped explicitly |
+| Architecture | HIGH | Based on direct codebase analysis of existing slices, services, and patterns; build order derived from actual dependency graph, not assumptions; all integration points identified |
+| Pitfalls | HIGH | Primary pitfalls documented with academic sources (Hanus & Fox 2015, Petrovych et al. 2022); technical pitfalls based on known react-native-svg performance benchmarks and confirmed RN/Expo behavior |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **TTS for emergent readers (ages 6-7):** PITFALLS research flags TTS as essential ("looks done but isn't") for the 6-7 age bracket, but no TTS library is in current dependencies. Decision needed in Phase 2 planning: include TTS in Phase 2 (adds `expo-speech` dependency, needs compatibility check) or defer to Phase 4. Deferring is lower-risk; including it is higher pedagogical value.
-
-- **Gemini API tier for production:** Development must use the paid API tier from day one to match production data policies. COPPA 2025 compliance requires paid tier data protection controls — Google AI Studio free tier may use data for model training, which constitutes a COPPA violation. Coordinate with budget/monetization planning before Phase 1 begins.
-
-- **COPPA VPC gate UX design:** Research establishes that VPC is required before first AI tutor use but does not specify the exact UX flow. Options: (a) integrate into existing parental PIN setup screen, (b) a separate first-use consent interstitial. This design decision affects Phase 2 scope and must be resolved during Phase 2 planning.
-
-- **Canned response fallback library scope:** Research specifies minimum 5 variants per hint level per age bracket as content work, not just engineering. The library must be authored before Phase 3 can ship a reliable fallback path. Schedule this as a parallel content task during Phase 2, not a Phase 3 code task.
-
-- **Rate limiting thresholds:** Research recommends max 3 LLM calls per problem, 20 per session, 50 per day per device. These are conservative estimates for legitimate use. Implement the rate limiter with configurable thresholds (not hardcoded constants) so they can be adjusted based on early usage data without requiring a code deploy.
-
----
+- **Skill map rendering performance on low-end Android:** Research identifies the risk and recommends a spike, but exact element count + animation configuration that stays under 500ms is not pre-validated. Resolve with a focused performance spike at the start of Phase 3.
+- **Theme migration scope:** The research specifies the approach (createThemedStyles factory + useTheme hook) but does not enumerate which of the ~40 existing component files require migration vs. which can remain static. Resolve during Phase 6 planning with a file audit.
+- **Badge count and categories:** Research defines the structure (skill mastery, effort, exploration, challenge, remediation) and examples, but the full badge catalog (targeting 30-50 definitions) needs to be authored during Phase 1. Badge design should be reviewed against the overjustification criteria before shipping.
+- **Lottie asset sourcing:** Research recommends LottieFiles as the source for badge unlock animations. Specific animation selections and their file size validation need to happen during Phase 2 execution, not planning.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- `.planning/research/STACK.md` — dependency verification, Gemini 2.5 Flash specs, rationale for no-new-dependencies conclusion
-- `.planning/research/FEATURES.md` — feature prioritization, dependency graph, MVP definition, anti-features
-- `.planning/research/ARCHITECTURE.md` — component boundaries, data flows, code patterns, build order
-- `.planning/research/PITFALLS.md` — safety, COPPA, content safety, streaming, escalation pitfalls with phase mapping
-- [PNAS GPT-4 Tutoring Study 2024](https://doi.org/10.1073/pnas.2405945121) — guardrailed AI +127% vs. unguardrailed -17%
-- [OWASP LLM01:2025 Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/) — injection prevention
-- [FTC COPPA Rule 2025 Amendments](https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa) — compliance requirements including VPC for third-party data sharing
-- [Gemini API Safety Settings](https://ai.google.dev/gemini-api/docs/safety-settings) — filter configuration; default OFF confirmed for 2.5+ models
-- [@google/genai npm](https://www.npmjs.com/package/@google/genai) — v1.43.0 latest, already installed at v1.30.0
-- Existing project research: `.planning/03-ai-tutoring-engine.md`, `.planning/09-child-ux-design.md`, `.planning/12-coppa-privacy.md`
+
+**Stack:**
+- Expo SDK 54 Notifications docs: https://docs.expo.dev/versions/latest/sdk/notifications/ — DailyTriggerInput API verified
+- react-native-reanimated docs: https://docs.swmansion.com/react-native-reanimated/docs/core/useAnimatedProps/ — SVG animated props pattern
+- react-native-svg GitHub v15.x: https://github.com/software-mansion/react-native-svg — RN 0.81 compatibility confirmed
+- Expo color themes guide: https://docs.expo.dev/develop/user-interface/color-themes/ — React Context theming pattern
+- Existing codebase: `src/theme/index.ts`, `src/store/constants/avatars.ts`, `src/services/mathEngine/skills.ts`, `src/store/migrations.ts`
+
+**Features:**
+- Prodigy FTC Complaint: https://www.nbcnews.com/tech/tech-news/child-protection-nonprofit-alleges-manipulative-upselling-math-game-prodigy-n1258294
+- Gamification dark patterns (children): https://www.researchgate.net/publication/378448656_Dark_Patterns_of_Cuteness_Popular_Learning_App_Design_as_a_Risk_to_Children's_Autonomy
+- Existing project research: `.planning/07-gamification.md`, `.planning/09-child-ux-design.md`
+
+**Architecture:**
+- Codebase analysis: `src/store/`, `src/services/`, `src/screens/`, `src/navigation/`
+- SKILLS DAG: `src/services/mathEngine/skills.ts` (14 skills, 2 root nodes, prerequisites array)
+- Session orchestrator: `src/services/session/sessionOrchestrator.ts`
+- Migration chain: `src/store/migrations.ts` (versions 1-8)
+
+**Pitfalls:**
+- Overjustification effect: https://www.psychologyofgames.com/2016/10/the-overjustification-effect-and-game-achievements/
+- Daily Quests or Daily Pests (ACM 2022): https://dl.acm.org/doi/10.1145/3549489
+- White Flash of Death (React Native themes): https://medium.com/@ripenapps-technologies/the-white-flash-of-death-solving-theme-flickering-in-react-native-production-apps-d732af3b4cae
+- react-native-svg performance: https://github.com/software-mansion/react-native-svg/issues/2660
+- FTC COPPA 2025 amendments: https://securiti.ai/ftc-coppa-final-rule-amendments/
 
 ### Secondary (MEDIUM confidence)
-- [LLMs and Childhood Safety arxiv 2502.11242](https://arxiv.org/abs/2502.11242) — developmental sensitivity gaps in current LLM safety frameworks
-- [SocraticLM NeurIPS 2024](https://openreview.net/forum?id=qkoZgJhxsA) — Socratic tutoring with LLMs
-- [React Native AbortController issues GitHub #50015](https://github.com/facebook/react-native/issues/50015) — streaming stability on React Native
-- [Gemini 2.5 Flash benchmarks](https://artificialanalysis.ai/models/gemini-2-5-flash) — 232 tok/s, 0.51s TTFT independently benchmarked
-- [EPIC/Fairplay letter to FTC re: Google Gemini and children](https://fairplayforkids.org/wp-content/uploads/2025/05/Letter-to-FTC-re-Google-Gemini_EPIC-and-Fairplay_5.21.25.pdf) — regulatory advocacy context for COPPA exposure
+
+- SplashLearn gamification: https://brighterly.com/blog/splashlearn-reviews/
+- Duolingo achievement system: https://duolingoguides.com/all-duolingo-achievements/
+- Gamification in children's education meta-analysis: https://slejournal.springeropen.com/articles/10.1186/s40561-019-0085-2
+- Zustand migration best practices: https://github.com/pmndrs/zustand/discussions/1717
 
 ---
-*Research completed: 2026-03-03*
+*Research completed: 2026-03-04*
 *Ready for roadmap: yes*
