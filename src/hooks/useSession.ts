@@ -341,6 +341,7 @@ export function useSession(options?: {
             weeklyStreak: useAppStore.getState().weeklyStreak,
             sessionsCompleted: useAppStore.getState().sessionsCompleted,
             misconceptions: useAppStore.getState().misconceptions,
+            challengesCompleted: useAppStore.getState().challengesCompleted,
           };
           const newBadges = evaluateBadges(badgeSnapshot, useAppStore.getState().earnedBadges);
           if (newBadges.length > 0) {

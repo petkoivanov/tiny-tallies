@@ -10,7 +10,9 @@ export type UnlockCondition =
   | { type: 'grade-mastery'; grade: Grade }
   | { type: 'streak-milestone'; weeklyStreakRequired: number }
   | { type: 'sessions-milestone'; sessionsRequired: number }
-  | { type: 'remediation-victory'; resolvedCountRequired: number };
+  | { type: 'remediation-victory'; resolvedCountRequired: number }
+  | { type: 'challenges-completed'; challengesRequired: number }
+  | { type: 'perfect-challenge' };
 
 export interface BadgeDefinition {
   readonly id: string;
@@ -26,4 +28,6 @@ export interface BadgeEvaluationSnapshot {
   weeklyStreak: number;
   sessionsCompleted: number;
   misconceptions: Record<string, { status: string }>;
+  challengesCompleted: number;
+  lastChallengeScore?: { score: number; total: number };
 }

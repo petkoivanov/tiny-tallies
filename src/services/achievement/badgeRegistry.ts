@@ -1,17 +1,18 @@
 import type { BadgeCategory, BadgeDefinition } from './badgeTypes';
 
 /**
- * Static badge registry: 27 badge definitions organized by category.
+ * Static badge registry: 31 badge definitions organized by category.
  *
  * Mastery badges (19):
  *   - 14 skill-mastery (one per skill)
  *   - 2 category-mastery (addition, subtraction)
  *   - 3 grade-mastery (grades 1-3)
  *
- * Behavior badges (8):
+ * Behavior badges (12):
  *   - 3 streak-milestone (bronze/silver/gold)
  *   - 3 sessions-milestone (bronze/silver/gold)
  *   - 2 remediation-victory (bronze/silver)
+ *   - 4 challenge (bronze/silver/gold + perfect)
  */
 export const BADGES: readonly BadgeDefinition[] = [
   // ── Skill-Mastery Badges (14) ──────────────────────────────────────────
@@ -240,6 +241,40 @@ export const BADGES: readonly BadgeDefinition[] = [
     category: 'behavior',
     tier: 'silver',
     condition: { type: 'remediation-victory', resolvedCountRequired: 3 },
+  },
+
+  // ── Challenge Badges (4) ──────────────────────────────────────────────
+  {
+    id: 'behavior.challenge.first',
+    name: 'First Challenge',
+    description: 'Complete your first daily challenge',
+    category: 'behavior',
+    tier: 'bronze',
+    condition: { type: 'challenges-completed', challengesRequired: 1 },
+  },
+  {
+    id: 'behavior.challenge.streak',
+    name: 'Challenge Streak',
+    description: 'Complete 5 daily challenges',
+    category: 'behavior',
+    tier: 'silver',
+    condition: { type: 'challenges-completed', challengesRequired: 5 },
+  },
+  {
+    id: 'behavior.challenge.master',
+    name: 'Challenge Master',
+    description: 'Complete 20 daily challenges',
+    category: 'behavior',
+    tier: 'gold',
+    condition: { type: 'challenges-completed', challengesRequired: 20 },
+  },
+  {
+    id: 'behavior.challenge.perfect',
+    name: 'Perfect Challenge',
+    description: 'Score a perfect 10/10 on a daily challenge',
+    category: 'behavior',
+    tier: 'gold',
+    condition: { type: 'perfect-challenge' },
   },
 ];
 

@@ -100,8 +100,14 @@ export function migrateStore(
     state.sessionsCompleted ??= 0;
   }
 
+  if (version < 10) {
+    // v9 -> v10: Add daily challenge tracking fields
+    state.challengeCompletions ??= {};
+    state.challengesCompleted ??= 0;
+  }
+
   // Future migrations chain here:
-  // if (version < 10) { ... }
+  // if (version < 11) { ... }
 
   return state;
 }

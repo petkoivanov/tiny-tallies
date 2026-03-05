@@ -43,6 +43,15 @@ function checkCondition(
       return resolvedCount >= condition.resolvedCountRequired;
     }
 
+    case 'challenges-completed':
+      return snapshot.challengesCompleted >= condition.challengesRequired;
+
+    case 'perfect-challenge':
+      return (
+        snapshot.lastChallengeScore !== undefined &&
+        snapshot.lastChallengeScore.score === snapshot.lastChallengeScore.total
+      );
+
     default:
       return false;
   }

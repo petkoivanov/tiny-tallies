@@ -8,6 +8,7 @@ function createEmptySnapshot(): BadgeEvaluationSnapshot {
     weeklyStreak: 0,
     sessionsCompleted: 0,
     misconceptions: {},
+    challengesCompleted: 0,
   };
 }
 
