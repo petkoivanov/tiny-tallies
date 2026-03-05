@@ -44,7 +44,7 @@ Requirements for gamification milestone. Each maps to roadmap phases.
 - [x] **AVTR-01**: Avatar preset pool expanded from 8 to 12-15 options
 - [x] **AVTR-02**: 4-7 special avatars unlockable through achievement badges
 - [x] **AVTR-03**: 5-7 frame decorations around avatar earned via badges
-- [ ] **AVTR-04**: Updated avatar picker shows all presets + locked unlockables with requirements
+- [x] **AVTR-04**: Updated avatar picker shows all presets + locked unlockables with requirements
 
 ### Themes
 
@@ -108,7 +108,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AVTR-01 | Phase 36 | Complete |
 | AVTR-02 | Phase 36 | Complete |
 | AVTR-03 | Phase 36 | Complete |
-| AVTR-04 | Phase 36 | Pending |
+| AVTR-04 | Phase 36 | Complete |
 | THME-01 | Phase 37 | Pending |
 | THME-02 | Phase 37 | Pending |
 | THME-03 | Phase 37 | Pending |

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.7
 milestone_name: Gamification
-status: in-progress
-stopped_at: Completed 36-01 avatar data layer and AvatarCircle
-last_updated: "2026-03-05T19:12:46Z"
+status: executing
+stopped_at: Completed 36-02-PLAN.md (Avatar picker screen)
+last_updated: "2026-03-05T19:20:34.894Z"
 last_activity: 2026-03-05 -- Completed Phase 36 Plan 01 (Avatar data layer and AvatarCircle)
 progress:
   total_phases: 7
-  completed_phases: 5
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
+  completed_phases: 6
+  total_plans: 13
+  completed_plans: 13
+  percent: 50
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 36 of 37 (Avatars & Frames)
-Plan: 1 of 2 complete
-Status: In Progress
-Last activity: 2026-03-05 -- Completed Phase 36 Plan 01 (Avatar data layer and AvatarCircle)
+Plan: 2 of 2 complete
+Status: Complete
+Last activity: 2026-03-05 -- Completed Phase 36 Plan 02 (Avatar picker screen)
 
-Progress: [#####-----] 50% of Phase 36 (1/2 plans)
+Progress: [##########] 100% of Phase 36 (2/2 plans)
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [#####-----] 50% of Phase 36 (1/2 plans)
 | 35 | P01 | 11m52s | 2 | 15 |
 | Phase 35 PP02 | 11m10s | 2 tasks | 12 files |
 | 36 | P01 | 5m2s | 2 | 11 |
+| Phase 36 P02 | 4m16s | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -117,6 +118,9 @@ Key context for v0.7:
 - [Phase 36 P01]: 14 regular + 5 special avatars + 6 frames, all with typed IDs and badge-unlock mapping
 - [Phase 36 P01]: AvatarCircle component: sparkle animation (4s rotation + 1s opacity pulse), optional frame border, conditional Pressable
 - [Phase 36 P01]: resolveAvatar returns widened { id, label, emoji } type for simpler consumer usage
+- [Phase 36]: BADGE_EMOJIS lookup for overlay badge display (BadgeDefinition has no emoji field)
+- [Phase 36]: Frame unequip via re-tap toggle for intuitive UX
+- [Phase 36]: 1380 tests passing, TypeScript clean (2 pre-existing TS2366 errors in badge UI)
 
 ### Pending Todos
 
@@ -129,7 +133,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05T19:12:46Z
-Stopped at: Completed 36-01 avatar data layer and AvatarCircle
-Resume file: .planning/phases/36-avatars-frames/36-01-SUMMARY.md
+Last session: 2026-03-05T19:20:34.892Z
+Stopped at: Completed 36-02-PLAN.md (Avatar picker screen)
+Resume file: None
 Resume command: /gsd:execute-phase 36

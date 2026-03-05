@@ -87,7 +87,7 @@
 - [x] **Phase 33: Badge UI & Session Integration** - Badge display components, popup animations, and Results/Home screen wiring (completed 2026-03-05)
 - [x] **Phase 34: Visual Skill Map** - Interactive DAG visualization of prerequisite skills with mastery states (completed 2026-03-05)
 - [x] **Phase 35: Daily Challenges** - Date-seeded themed challenge sessions with bonus XP and non-punitive design (completed 2026-03-05)
-- [ ] **Phase 36: Avatars & Frames** - Expanded avatar pool with achievement-unlockable special avatars and frame decorations
+- [x] **Phase 36: Avatars & Frames** - Expanded avatar pool with achievement-unlockable special avatars and frame decorations (completed 2026-03-05)
 - [ ] **Phase 37: UI Themes** - Dynamic color theming with ThemeProvider, theme picker, and session cosmetic wrappers
 
 ## Phase Details
@@ -175,7 +175,7 @@ Plans:
   2. User sees 4-7 special avatars and 5-7 decorative frames that are locked until specific badges are earned
   3. Updated avatar picker screen shows all presets alongside locked unlockable items with their badge requirements
   4. Equipped avatar and frame render correctly on the home screen and throughout the app
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 36-01-PLAN.md -- Expand avatar constants (14 regular + 5 special + 6 frames), store migration v10->v11, AvatarCircle component, HomeScreen integration
@@ -239,5 +239,5 @@ Phases execute in numeric order: 31 -> 32 -> 33 -> 34 -> 35 -> 36 -> 37
 | 33. Badge UI & Session Integration | 3/3 | Complete    | 2026-03-05 | - |
 | 34. Visual Skill Map | 3/3 | Complete    | 2026-03-05 | - |
 | 35. Daily Challenges | 2/2 | Complete    | 2026-03-05 | - |
-| 36. Avatars & Frames | 1/2 | In Progress|  | - |
+| 36. Avatars & Frames | 2/2 | Complete   | 2026-03-05 | - |
 | 37. UI Themes | v0.7 | 0/0 | Not started | - |
