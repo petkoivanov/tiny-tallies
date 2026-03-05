@@ -83,13 +83,13 @@ describe('appStore composition', () => {
   });
 
   it('STORE_VERSION equals 10', () => {
-    expect(STORE_VERSION).toBe(10);
+    expect(STORE_VERSION).toBe(11);
   });
 });
 
 describe('avatar constants', () => {
-  it('AVATARS has exactly 8 entries with required fields', () => {
-    expect(AVATARS).toHaveLength(8);
+  it('AVATARS has exactly 14 entries with required fields', () => {
+    expect(AVATARS).toHaveLength(14);
     for (const avatar of AVATARS) {
       expect(avatar).toHaveProperty('id');
       expect(avatar).toHaveProperty('label');

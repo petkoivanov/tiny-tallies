@@ -11,6 +11,7 @@ import Animated, {
 import { colors, spacing, typography, layout } from '@/theme';
 import { getBadgeById } from '@/services/achievement';
 import { BadgeIcon, BADGE_EMOJIS } from '@/components/badges';
+import { getCosmeticUnlockText } from '@/store/constants/avatars';
 
 interface BadgeUnlockPopupProps {
   badgeIds: string[];
@@ -79,6 +80,7 @@ export function BadgeUnlockPopup({ badgeIds, onComplete }: BadgeUnlockPopupProps
   const currentBadgeId = badgeIds[currentIndex];
   const badge = getBadgeById(currentBadgeId);
   const emoji = BADGE_EMOJIS[currentBadgeId] ?? '?';
+  const cosmeticText = getCosmeticUnlockText(currentBadgeId);
 
   const handleTap = () => {
     if (currentIndex >= badgeIds.length - 1) {
@@ -114,6 +116,11 @@ export function BadgeUnlockPopup({ badgeIds, onComplete }: BadgeUnlockPopupProps
           <Text style={styles.badgeDescription}>
             {badge?.description ?? ''}
           </Text>
+          {cosmeticText && (
+            <Text testID="cosmetic-unlock-text" style={styles.cosmeticText}>
+              {cosmeticText}
+            </Text>
+          )}
         </Animated.View>
         <Text style={styles.hintText}>Tap to continue</Text>
       </Pressable>
@@ -155,6 +162,13 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.medium,
     fontSize: typography.fontSize.md,
     color: colors.textSecondary,
+    textAlign: 'center',
+    maxWidth: 260,
+  },
+  cosmeticText: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: typography.fontSize.sm,
+    color: '#ffd700',
     textAlign: 'center',
     maxWidth: 260,
   },

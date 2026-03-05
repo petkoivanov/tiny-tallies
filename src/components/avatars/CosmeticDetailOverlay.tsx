@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, spacing, typography, layout } from '@/theme';
 import { getBadgeById } from '@/services/achievement';
+import { BADGE_EMOJIS } from '@/components/badges';
 
 export interface CosmeticDetailOverlayProps {
   visible: boolean;
@@ -61,7 +62,7 @@ export function CosmeticDetailOverlay({
           <Text style={styles.unlockHeader}>Unlock by earning:</Text>
           {badge && (
             <Text style={styles.badgeInfo}>
-              {badge.emoji ?? ''} {badge.name}
+              {BADGE_EMOJIS[badgeId] ?? ''} {badge.name}
             </Text>
           )}
           <Text style={styles.progressHint}>

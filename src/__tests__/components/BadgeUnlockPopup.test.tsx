@@ -39,6 +39,12 @@ jest.mock('@/services/achievement', () => ({
         description: 'Master adding within 20',
         tier: 'silver',
       },
+      'behavior.sessions.bronze': {
+        id: 'behavior.sessions.bronze',
+        name: 'Getting Started',
+        description: 'Complete 5 sessions',
+        tier: 'bronze',
+      },
     };
     return badges[id] ?? null;
   },
@@ -52,6 +58,7 @@ jest.mock('@/components/badges', () => {
     BADGE_EMOJIS: {
       'badge-1': '\u2B50',
       'badge-2': '\uD83D\uDC8E',
+      'behavior.sessions.bronze': '\uD83C\uDFC5',
     },
   };
 });
@@ -112,5 +119,23 @@ describe('BadgeUnlockPopup', () => {
     const badgeIcon = getByTestId('badge-icon');
     expect(badgeIcon.props.emoji).toBe('\u2B50');
     expect(badgeIcon.props.earned).toBe(true);
+  });
+
+  it('shows cosmetic unlock text when badge unlocks a cosmetic item', () => {
+    const { getByTestId } = render(
+      <BadgeUnlockPopup
+        badgeIds={['behavior.sessions.bronze']}
+        onComplete={mockOnComplete}
+      />,
+    );
+    const unlockText = getByTestId('cosmetic-unlock-text');
+    expect(unlockText.props.children).toContain('Unicorn');
+  });
+
+  it('does not show cosmetic unlock text when badge has no cosmetic unlock', () => {
+    const { queryByTestId } = render(
+      <BadgeUnlockPopup badgeIds={['badge-1']} onComplete={mockOnComplete} />,
+    );
+    expect(queryByTestId('cosmetic-unlock-text')).toBeNull();
   });
 });
