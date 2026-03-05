@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.7
 milestone_name: Gamification
-status: completed
-stopped_at: Phase 35 context gathered
-last_updated: "2026-03-05T14:20:04.875Z"
-last_activity: 2026-03-05 -- Completed Phase 34 Plan 03 (Skill detail overlay)
+status: in-progress
+stopped_at: Completed 35-01-PLAN.md
+last_updated: "2026-03-05T16:34:13.000Z"
+last_activity: 2026-03-05 -- Completed Phase 35 Plan 01 (Challenge service layer)
 progress:
   total_phases: 7
   completed_phases: 4
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 11
+  completed_plans: 10
   percent: 100
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.7 Gamification -- Phase 34 (Visual Skill Map)
+**Current focus:** v0.7 Gamification -- Phase 35 (Daily Challenges)
 
 ## Current Position
 
-Phase: 34 of 37 (Visual Skill Map)
-Plan: 3 of 3 complete
-Status: Phase Complete
-Last activity: 2026-03-05 -- Completed Phase 34 Plan 03 (Skill detail overlay)
+Phase: 35 of 37 (Daily Challenges)
+Plan: 1 of 2 complete
+Status: In Progress
+Last activity: 2026-03-05 -- Completed Phase 35 Plan 01 (Challenge service layer)
 
-Progress: [##########] 100% of Phase 34 (3/3 plans)
+Progress: [#####-----] 50% of Phase 35 (1/2 plans)
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [##########] 100% of Phase 34 (3/3 plans)
 | 34 | P01 | 4m10s | 2 | 10 |
 | 34 | P02 | 6m32s | 2 | 7 |
 | 34 | P03 | 3m50s | 2 | 5 |
+| 35 | P01 | 11m52s | 2 | 15 |
 
 ## Accumulated Context
 
@@ -100,6 +101,11 @@ Key context for v0.7:
 - [Phase 34 P03]: Sub-components per NodeState keep SkillDetailOverlay under 500 lines
 - [Phase 34 P03]: SkillDetailOverlay rendered at SkillMapScreen level using React Native Modal
 - [Phase 34 P03]: 1,283 tests passing, TypeScript clean
+- [Phase 35 P01]: Challenge themes use date-seeded PRNG (createRng) for deterministic daily rotation
+- [Phase 35 P01]: Skill filtering falls back to all unlocked skills when theme filter produces empty set
+- [Phase 35 P01]: STORE_VERSION = 10 with challengeCompletions and challengesCompleted persisted via partialize
+- [Phase 35 P01]: 4 challenge badges (challenges-completed and perfect-challenge condition types), 31 badges total
+- [Phase 35 P01]: 1,314 tests passing, TypeScript clean (2 pre-existing TS2366 errors in badge UI)
 
 ### Pending Todos
 
@@ -112,7 +118,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05T14:20:04.873Z
-Stopped at: Phase 35 context gathered
-Resume file: .planning/phases/35-daily-challenges/35-CONTEXT.md
-Resume command: /gsd:plan-phase 35
+Last session: 2026-03-05T16:34:13.000Z
+Stopped at: Completed 35-01-PLAN.md
+Resume file: .planning/phases/35-daily-challenges/35-02-PLAN.md
+Resume command: /gsd:execute-phase 35
