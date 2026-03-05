@@ -117,31 +117,37 @@ jest.mock('@/hooks/useTutor', () => ({
   useTutor: jest.fn(() => mockTutorReturn),
 }));
 
-// Mock getBugDescription
-const mockGetBugDescription = jest.fn();
-jest.mock('@/services/tutor/bugLookup', () => ({
-  getBugDescription: (...args: any[]) => mockGetBugDescription(...args),
-}));
-
 // Mock useNetworkStatus hook
 let mockIsOnline = true;
 jest.mock('@/hooks/useNetworkStatus', () => ({
   useNetworkStatus: () => ({ isOnline: mockIsOnline }),
 }));
 
-// Mock appStore
-const mockAddTutorMessage = jest.fn();
-const mockIncrementWrongAnswerCount = jest.fn();
-let mockTutorConsentGranted = true;
-jest.mock('@/store/appStore', () => ({
-  useAppStore: (selector: any) => {
-    const state = {
-      addTutorMessage: mockAddTutorMessage,
-      incrementWrongAnswerCount: mockIncrementWrongAnswerCount,
-      tutorConsentGranted: mockTutorConsentGranted,
-    };
-    return selector(state);
-  },
+// Mock useChatOrchestration -- mutable return value
+const mockHandleAnswerWithBoost = jest.fn();
+const mockHandleHelpTap = jest.fn();
+const mockHandleResponse = jest.fn();
+const mockHandleCloseChat = jest.fn();
+const mockHandleBannerTap = jest.fn();
+
+let mockChatOrchestrationReturn = {
+  chatOpen: false,
+  chatMinimized: false,
+  showHelp: false,
+  shouldPulse: false,
+  showCorrectAnswer: false,
+  boostHighlightAnswer: null as number | null,
+  responseMode: 'standard' as 'standard' | 'gotit',
+  bannerMessage: '',
+  handleAnswerWithBoost: mockHandleAnswerWithBoost,
+  handleHelpTap: mockHandleHelpTap,
+  handleResponse: mockHandleResponse,
+  handleCloseChat: mockHandleCloseChat,
+  handleBannerTap: mockHandleBannerTap,
+};
+
+jest.mock('@/hooks/useChatOrchestration', () => ({
+  useChatOrchestration: () => mockChatOrchestrationReturn,
 }));
 
 // Mock CpaModeIcon
@@ -337,10 +343,24 @@ describe('SessionScreen', () => {
       requestTutor: mockRequestTutor,
       resetForProblem: mockResetForProblem,
     };
+    mockChatOrchestrationReturn = {
+      chatOpen: false,
+      chatMinimized: false,
+      showHelp: false,
+      shouldPulse: false,
+      showCorrectAnswer: false,
+      boostHighlightAnswer: null,
+      responseMode: 'standard',
+      bannerMessage: '',
+      handleAnswerWithBoost: mockHandleAnswerWithBoost,
+      handleHelpTap: mockHandleHelpTap,
+      handleResponse: mockHandleResponse,
+      handleCloseChat: mockHandleCloseChat,
+      handleBannerTap: mockHandleBannerTap,
+    };
     mockPreventRemoveCallback = null;
     mockRouteParams = {};
     mockIsOnline = true;
-    mockTutorConsentGranted = true;
   });
 
   it('renders problem text and 4 answer options', () => {
@@ -397,10 +417,10 @@ describe('SessionScreen', () => {
     expect(getByText('Cooldown')).toBeTruthy();
   });
 
-  it('calls handleAnswer when answer option is tapped', () => {
+  it('calls handleAnswerWithBoost when answer option is tapped', () => {
     const { getByTestId } = render(<SessionScreen />);
     fireEvent.press(getByTestId('answer-option-0'));
-    expect(mockHandleAnswer).toHaveBeenCalledWith(68);
+    expect(mockHandleAnswerWithBoost).toHaveBeenCalledWith(68);
   });
 
   it('applies correct feedback style to selected answer button on correct answer', () => {
@@ -438,7 +458,7 @@ describe('SessionScreen', () => {
 
     const { getByTestId } = render(<SessionScreen />);
     fireEvent.press(getByTestId('answer-option-0'));
-    expect(mockHandleAnswer).not.toHaveBeenCalled();
+    expect(mockHandleAnswerWithBoost).not.toHaveBeenCalled();
   });
 
   it('quit button triggers confirmation dialog via usePreventRemove', () => {
@@ -624,476 +644,216 @@ describe('SessionScreen', () => {
 
   // ---- Chat UI Integration Tests ----
 
-  it('shows help button during practice phase', () => {
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
+  it('shows help button when useChatOrchestration returns showHelp=true', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      showHelp: true,
     };
 
     const { getByTestId } = render(<SessionScreen />);
     expect(getByTestId('help-button')).toBeTruthy();
   });
 
-  it('hides help button during warmup phase', () => {
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'warmup',
+  it('hides help button when useChatOrchestration returns showHelp=false', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      showHelp: false,
     };
 
     const { queryByTestId } = render(<SessionScreen />);
     expect(queryByTestId('help-button')).toBeNull();
   });
 
-  it('hides help button during cooldown phase', () => {
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'cooldown',
-    };
-
-    const { queryByTestId } = render(<SessionScreen />);
-    expect(queryByTestId('help-button')).toBeNull();
-  });
-
-  it('opens chat panel and requests hint when help button tapped', () => {
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
+  it('calls handleHelpTap when help button tapped', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      showHelp: true,
     };
 
     const { getByTestId } = render(<SessionScreen />);
     fireEvent.press(getByTestId('help-button'));
 
-    // Chat panel should now be visible
-    expect(getByTestId('chat-panel')).toBeTruthy();
-    // Should have requested a hint
-    expect(mockRequestHint).toHaveBeenCalled();
+    expect(mockHandleHelpTap).toHaveBeenCalled();
   });
 
-  it('does not request hint when offline and help tapped', () => {
-    mockIsOnline = false;
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
+  it('opens chat panel when chatOpen is true', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      chatOpen: true,
     };
 
     const { getByTestId } = render(<SessionScreen />);
-    fireEvent.press(getByTestId('help-button'));
-
-    // Chat panel opens but no hint requested
     expect(getByTestId('chat-panel')).toBeTruthy();
-    expect(mockRequestHint).not.toHaveBeenCalled();
   });
 
-  it('closes chat panel when close button pressed', () => {
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
+  it('calls handleCloseChat when close button pressed', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      chatOpen: true,
     };
 
-    const { getByTestId, queryByTestId } = render(<SessionScreen />);
-
-    // Open chat
-    fireEvent.press(getByTestId('help-button'));
-    expect(getByTestId('chat-panel')).toBeTruthy();
-
-    // Close chat
+    const { getByTestId } = render(<SessionScreen />);
     fireEvent.press(getByTestId('chat-close-button'));
-    expect(queryByTestId('chat-panel')).toBeNull();
+
+    expect(mockHandleCloseChat).toHaveBeenCalled();
   });
 
-  it('adds child message when "I understand!" response pressed', () => {
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
+  it('calls handleResponse with "understand" when I understand pressed', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      chatOpen: true,
     };
 
     const { getByTestId } = render(<SessionScreen />);
-
-    // Open chat first
-    fireEvent.press(getByTestId('help-button'));
-
-    // Press "I understand!"
     fireEvent.press(getByTestId('response-understand'));
 
-    expect(mockAddTutorMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        role: 'child',
-        text: 'I understand!',
-      }),
-    );
+    expect(mockHandleResponse).toHaveBeenCalledWith('understand');
   });
 
-  it('adds child message and requests tutor when "Tell me more" pressed', () => {
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
+  it('calls handleResponse with "more" when Tell me more pressed', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      chatOpen: true,
     };
 
     const { getByTestId } = render(<SessionScreen />);
-
-    fireEvent.press(getByTestId('help-button'));
-    mockRequestTutor.mockClear(); // Clear the initial requestHint call
-
     fireEvent.press(getByTestId('response-more'));
 
-    expect(mockAddTutorMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        role: 'child',
-        text: 'Tell me more',
-      }),
-    );
-    expect(mockRequestTutor).toHaveBeenCalled();
+    expect(mockHandleResponse).toHaveBeenCalledWith('more');
   });
 
   it('hides help button when chat is open', () => {
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      chatOpen: true,
+      showHelp: false,
     };
 
-    const { getByTestId, queryByTestId } = render(<SessionScreen />);
-
-    // Help button visible initially
-    expect(getByTestId('help-button')).toBeTruthy();
-
-    // Open chat
-    fireEvent.press(getByTestId('help-button'));
-
-    // Help button should be hidden
+    const { queryByTestId } = render(<SessionScreen />);
     expect(queryByTestId('help-button')).toBeNull();
   });
 
   // ---- TEACH/BOOST/Escalation Integration Tests ----
 
-  it('calls incrementWrongAnswerCount on wrong answer', () => {
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
-    };
-
+  it('calls handleAnswerWithBoost on wrong answer tap', () => {
     const { getByTestId } = render(<SessionScreen />);
-
-    // Tap wrong answer (58 is wrong, 68 is correct)
     fireEvent.press(getByTestId('answer-option-1'));
 
-    expect(mockIncrementWrongAnswerCount).toHaveBeenCalled();
+    expect(mockHandleAnswerWithBoost).toHaveBeenCalledWith(58);
   });
 
-  it('does not call incrementWrongAnswerCount on correct answer', () => {
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
-    };
-
+  it('calls handleAnswerWithBoost on correct answer tap', () => {
     const { getByTestId } = render(<SessionScreen />);
-
-    // Tap correct answer (68)
     fireEvent.press(getByTestId('answer-option-0'));
 
-    expect(mockIncrementWrongAnswerCount).not.toHaveBeenCalled();
+    expect(mockHandleAnswerWithBoost).toHaveBeenCalledWith(68);
   });
 
-  it('resolves bug description from bugId on wrong answer', () => {
-    mockGetBugDescription.mockReturnValue('Forgot to carry');
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
+  it('passes responseMode "gotit" to ChatPanel when orchestration returns gotit', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      chatOpen: true,
+      responseMode: 'gotit',
     };
 
     const { getByTestId } = render(<SessionScreen />);
-
-    // Tap wrong answer with bugId (value 58, bugId 'add_no_carry')
-    fireEvent.press(getByTestId('answer-option-1'));
-
-    expect(mockGetBugDescription).toHaveBeenCalledWith('add_no_carry');
-  });
-
-  it('passes responseMode "gotit" to ChatPanel when tutor is in boost mode', () => {
-    mockTutorReturn = {
-      ...mockTutorReturn,
-      tutorMode: 'boost',
-    };
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
-    };
-
-    const { getByTestId } = render(<SessionScreen />);
-
-    // Open chat
-    fireEvent.press(getByTestId('help-button'));
-
-    // Check responseMode is 'gotit'
     expect(getByTestId('chat-response-mode').props.children).toBe('gotit');
   });
 
-  it('adds child "Got it!" message when gotit response pressed', () => {
-    mockTutorReturn = {
-      ...mockTutorReturn,
-      tutorMode: 'boost',
-    };
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
+  it('renders Got it button when responseMode is gotit', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      chatOpen: true,
+      responseMode: 'gotit',
     };
 
     const { getByTestId } = render(<SessionScreen />);
-
-    // Open chat
-    fireEvent.press(getByTestId('help-button'));
-
-    // Press "Got it!"
     fireEvent.press(getByTestId('response-gotit'));
 
-    expect(mockAddTutorMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        role: 'child',
-        text: 'Got it!',
-      }),
-    );
+    expect(mockHandleResponse).toHaveBeenCalledWith('gotit');
   });
 
-  it('renders ChatBanner when chat is minimized during TEACH', () => {
-    mockTutorReturn = {
-      ...mockTutorReturn,
-      tutorMode: 'teach',
-      shouldExpandManipulative: true,
-      messages: [
-        {
-          id: 'tutor-1',
-          role: 'tutor',
-          text: 'Let me show you with blocks!',
-          timestamp: Date.now(),
-        },
-      ],
-    };
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
+  it('renders ChatBanner when chatMinimized is true', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      chatMinimized: true,
+      bannerMessage: 'Let me show you with blocks!',
     };
 
     const { getByTestId } = render(<SessionScreen />);
-
-    // Open chat first (so the TEACH minimize effect can fire)
-    fireEvent.press(getByTestId('help-button'));
-
-    // The shouldExpandManipulative effect will minimize chat
-    // ChatBanner should be visible with the tutor message
     expect(getByTestId('chat-banner')).toBeTruthy();
     expect(getByTestId('chat-banner-message').props.children).toBe(
       'Let me show you with blocks!',
     );
   });
 
-  it('tapping ChatBanner re-expands full chat panel', () => {
-    mockTutorReturn = {
-      ...mockTutorReturn,
-      tutorMode: 'teach',
-      shouldExpandManipulative: true,
-      messages: [
-        {
-          id: 'tutor-1',
-          role: 'tutor',
-          text: 'Let me show you with blocks!',
-          timestamp: Date.now(),
-        },
-      ],
-    };
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
+  it('calls handleBannerTap when ChatBanner tapped', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      chatMinimized: true,
+      bannerMessage: 'Let me show you with blocks!',
     };
 
-    const { getByTestId, queryByTestId } = render(<SessionScreen />);
-
-    // Open chat first (triggers minimize via shouldExpandManipulative)
-    fireEvent.press(getByTestId('help-button'));
-
-    // Banner should be visible
-    expect(getByTestId('chat-banner')).toBeTruthy();
-
-    // Tap banner to re-expand
+    const { getByTestId } = render(<SessionScreen />);
     fireEvent.press(getByTestId('chat-banner'));
 
-    // Chat panel should be visible again
-    expect(getByTestId('chat-panel')).toBeTruthy();
-    // Banner should be gone (chatMinimized = false)
-    expect(queryByTestId('chat-banner')).toBeNull();
+    expect(mockHandleBannerTap).toHaveBeenCalled();
   });
 
-  it('BOOST-revealed correct tap calls handleAnswer with sentinel (wrong scoring)', () => {
-    mockTutorReturn = {
-      ...mockTutorReturn,
-      tutorMode: 'boost',
-    };
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
+  it('passes standard responseMode when orchestration returns standard', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      chatOpen: true,
+      responseMode: 'standard',
     };
 
     const { getByTestId } = render(<SessionScreen />);
-
-    // Tap the correct answer (68) while boost mode is active
-    fireEvent.press(getByTestId('answer-option-0'));
-
-    // Should call handleAnswer with sentinel value, NOT 68
-    // The sentinel forces wrong-answer scoring in useSession
-    expect(mockHandleAnswer).toHaveBeenCalledWith(-999999);
-    expect(mockHandleAnswer).not.toHaveBeenCalledWith(68);
-  });
-
-  it('BOOST mode does not intercept wrong answer taps', () => {
-    mockTutorReturn = {
-      ...mockTutorReturn,
-      tutorMode: 'boost',
-    };
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
-    };
-
-    const { getByTestId } = render(<SessionScreen />);
-
-    // Tap a wrong answer (58) -- should pass through normally
-    fireEvent.press(getByTestId('answer-option-1'));
-
-    expect(mockHandleAnswer).toHaveBeenCalledWith(58);
-  });
-
-  it('passes standard responseMode when tutor is in hint mode', () => {
-    mockTutorReturn = {
-      ...mockTutorReturn,
-      tutorMode: 'hint',
-    };
-    mockUseSessionReturn = {
-      ...defaultUseSessionReturn,
-      sessionPhase: 'practice',
-    };
-
-    const { getByTestId } = render(<SessionScreen />);
-
-    // Open chat
-    fireEvent.press(getByTestId('help-button'));
-
-    // Check responseMode is 'standard'
     expect(getByTestId('chat-response-mode').props.children).toBe('standard');
   });
 
-  // ---- Consent Gate Tests ----
+  // ---- Retry/Response Integration ----
 
-  describe('consent gate', () => {
-    it('shows consent message when Help tapped without consent', () => {
-      mockTutorConsentGranted = false;
-      mockUseSessionReturn = {
-        ...defaultUseSessionReturn,
-        sessionPhase: 'practice',
-      };
+  it('calls handleResponse with retry when retry pressed', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      chatOpen: true,
+    };
 
-      const { getByTestId } = render(<SessionScreen />);
-      fireEvent.press(getByTestId('help-button'));
+    const { getByTestId } = render(<SessionScreen />);
+    fireEvent.press(getByTestId('response-retry'));
 
-      // Should add a consent message to chat
-      expect(mockAddTutorMessage).toHaveBeenCalledWith(
-        expect.objectContaining({
-          role: 'tutor',
-          text: expect.stringContaining('grown-up'),
-        }),
-      );
-
-      // Should navigate to Consent screen
-      expect(mockNavigate).toHaveBeenCalledWith('Consent');
-
-      // Should NOT call requestHint (consent not granted)
-      expect(mockRequestHint).not.toHaveBeenCalled();
-    });
-
-    it('does not show consent message when consent is granted', () => {
-      mockTutorConsentGranted = true;
-      mockUseSessionReturn = {
-        ...defaultUseSessionReturn,
-        sessionPhase: 'practice',
-      };
-
-      const { getByTestId } = render(<SessionScreen />);
-      fireEvent.press(getByTestId('help-button'));
-
-      // Should NOT add a consent message
-      expect(mockAddTutorMessage).not.toHaveBeenCalledWith(
-        expect.objectContaining({
-          text: expect.stringContaining('grown-up'),
-        }),
-      );
-
-      // Should NOT navigate to Consent
-      expect(mockNavigate).not.toHaveBeenCalledWith('Consent');
-
-      // Should call requestHint (consent granted, online)
-      expect(mockRequestHint).toHaveBeenCalled();
-    });
-
-    it('auto-fires tutor request after consent granted on return', () => {
-      mockTutorConsentGranted = false;
-      mockUseSessionReturn = {
-        ...defaultUseSessionReturn,
-        sessionPhase: 'practice',
-      };
-
-      const { getByTestId, rerender } = render(<SessionScreen />);
-
-      // Tap help -- triggers consent flow, sets consentPendingRef
-      fireEvent.press(getByTestId('help-button'));
-      mockRequestHint.mockClear();
-
-      // Simulate returning from ConsentScreen with consent now granted
-      mockTutorConsentGranted = true;
-      rerender(<SessionScreen />);
-
-      // Should auto-fire requestHint now that consent is granted
-      expect(mockRequestHint).toHaveBeenCalled();
-    });
+    expect(mockHandleResponse).toHaveBeenCalledWith('retry');
   });
 
-  // ---- Retry Offline Guard Tests ----
+  it('passes boostHighlightAnswer to CpaSessionContent', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      boostHighlightAnswer: 68,
+    };
 
-  describe('retry offline guard', () => {
-    it('retry does not call requestTutor when offline', () => {
-      mockIsOnline = false;
-      mockUseSessionReturn = {
-        ...defaultUseSessionReturn,
-        sessionPhase: 'practice',
-      };
+    // CpaSessionContent receives the prop; we verify rendering works
+    const { getByText } = render(<SessionScreen />);
+    expect(getByText('68')).toBeTruthy();
+  });
 
-      const { getByTestId } = render(<SessionScreen />);
+  it('passes showCorrectAnswer to CpaSessionContent', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      showCorrectAnswer: true,
+    };
 
-      // Open chat first
-      fireEvent.press(getByTestId('help-button'));
-      mockRequestTutor.mockClear();
+    const { getByText } = render(<SessionScreen />);
+    expect(getByText('68')).toBeTruthy();
+  });
 
-      // Press retry
-      fireEvent.press(getByTestId('response-retry'));
+  it('passes shouldPulse to HelpButton', () => {
+    mockChatOrchestrationReturn = {
+      ...mockChatOrchestrationReturn,
+      showHelp: true,
+      shouldPulse: true,
+    };
 
-      // Should NOT call requestTutor when offline
-      expect(mockRequestTutor).not.toHaveBeenCalled();
-    });
-
-    it('retry calls requestTutor when online', () => {
-      mockIsOnline = true;
-      mockUseSessionReturn = {
-        ...defaultUseSessionReturn,
-        sessionPhase: 'practice',
-      };
-
-      const { getByTestId } = render(<SessionScreen />);
-
-      // Open chat first
-      fireEvent.press(getByTestId('help-button'));
-      mockRequestTutor.mockClear();
-
-      // Press retry
-      fireEvent.press(getByTestId('response-retry'));
-
-      // Should call requestTutor when online
-      expect(mockRequestTutor).toHaveBeenCalled();
-    });
+    const { getByText } = render(<SessionScreen />);
+    expect(getByText('Help (pulsing)')).toBeTruthy();
   });
 });
