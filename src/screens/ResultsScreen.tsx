@@ -75,6 +75,7 @@ export default function ResultsScreen() {
     newLevel,
     streakCount,
     cpaAdvances = [],
+    isRemediation = false,
   } = route.params;
 
   const xp = useAppStore((state) => state.xp);
@@ -83,8 +84,12 @@ export default function ResultsScreen() {
     calculateLevelFromXp(xp);
 
   const scorePercent = total > 0 ? (score / total) * 100 : 0;
-  const motivationalMessage = getMotivationalMessage(scorePercent);
-  const motivationalColor = getMotivationalColor(scorePercent);
+  const motivationalMessage = isRemediation
+    ? 'Great focus!'
+    : getMotivationalMessage(scorePercent);
+  const motivationalColor = isRemediation
+    ? colors.primaryLight
+    : getMotivationalColor(scorePercent);
 
   const progressFraction =
     xpNeededForNextLevel > 0
@@ -149,7 +154,11 @@ export default function ResultsScreen() {
         </Text>
 
         {/* Subtitle */}
-        <Text style={styles.subtitle}>Session Complete!</Text>
+        <Text style={styles.subtitle}>
+          {isRemediation
+            ? 'Great practice on tricky skills!'
+            : 'Session Complete!'}
+        </Text>
 
         {/* Stats Card */}
         <View style={styles.statsCard}>

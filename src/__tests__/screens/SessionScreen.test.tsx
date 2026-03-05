@@ -274,12 +274,16 @@ const mockGoBack = jest.fn();
 const mockDispatch = jest.fn();
 let mockPreventRemoveCallback: ((e: { data: { action: any } }) => void) | null =
   null;
+let mockRouteParams: Record<string, unknown> = {};
 
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({
     navigate: mockNavigate,
     goBack: mockGoBack,
     dispatch: mockDispatch,
+  }),
+  useRoute: () => ({
+    params: mockRouteParams,
   }),
   usePreventRemove: (
     enabled: boolean,
@@ -334,6 +338,7 @@ describe('SessionScreen', () => {
       resetForProblem: mockResetForProblem,
     };
     mockPreventRemoveCallback = null;
+    mockRouteParams = {};
     mockIsOnline = true;
     mockTutorConsentGranted = true;
   });
@@ -506,6 +511,45 @@ describe('SessionScreen', () => {
         newLevel: 3,
         streakCount: 2,
         cpaAdvances: [],
+        isRemediation: false,
+      }),
+    );
+  });
+
+  it('passes isRemediation=true to Results when in remediation mode', () => {
+    mockUseSessionReturn = {
+      ...defaultUseSessionReturn,
+      isComplete: true,
+      currentProblem: null,
+      sessionMode: 'remediation',
+      sessionResult: {
+        score: 3,
+        total: 5,
+        xpEarned: 50,
+        durationMs: 60000,
+        pendingUpdates: new Map(),
+        feedback: {
+          xpEarned: 50,
+          newLevel: 2,
+          previousLevel: 2,
+          leveledUp: false,
+          levelsGained: 0,
+          streakCount: 1,
+          practicedThisWeek: true,
+        },
+      },
+    };
+    mockRouteParams = {
+      mode: 'remediation',
+      remediationSkillIds: ['addition.single'],
+    };
+
+    render(<SessionScreen />);
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      'Results',
+      expect.objectContaining({
+        isRemediation: true,
       }),
     );
   });

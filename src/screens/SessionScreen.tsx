@@ -1,8 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation, usePreventRemove } from '@react-navigation/native';
+import {
+  useNavigation,
+  useRoute,
+  usePreventRemove,
+} from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RouteProp } from '@react-navigation/native';
 import { X } from 'lucide-react-native';
 import { colors, spacing, typography, layout } from '@/theme';
 import { useSession } from '@/hooks/useSession';
@@ -17,6 +22,7 @@ import type { RootStackParamList } from '@/navigation/types';
 import type { SessionPhase } from '@/services/session';
 
 type SessionNavProp = NativeStackNavigationProp<RootStackParamList, 'Session'>;
+type SessionRouteProp = RouteProp<RootStackParamList, 'Session'>;
 
 /** Sentinel value used to force wrong-answer scoring for BOOST-revealed taps */
 const BOOST_SENTINEL = -999999;
@@ -52,12 +58,15 @@ function getPhaseColor(phase: SessionPhase): string {
 export default function SessionScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<SessionNavProp>();
+  const route = useRoute<SessionRouteProp>();
+  const { mode, remediationSkillIds } = route.params ?? {};
 
   const {
     currentProblem,
     currentIndex,
     totalProblems,
     sessionPhase,
+    sessionMode,
     feedbackState,
     selectedAnswer,
     correctAnswer,
@@ -66,7 +75,7 @@ export default function SessionScreen() {
     handleAnswer,
     handleQuit,
     sessionResult,
-  } = useSession();
+  } = useSession({ mode, remediationSkillIds });
 
   const cpaInfo = useCpaMode(currentProblem?.skillId ?? null);
   const { stage } = cpaInfo;
@@ -202,9 +211,10 @@ export default function SessionScreen() {
         newLevel: sessionResult.feedback?.newLevel ?? 1,
         streakCount: sessionResult.feedback?.streakCount ?? 0,
         cpaAdvances: sessionResult.feedback?.cpaAdvances ?? [],
+        isRemediation: sessionMode === 'remediation',
       });
     }
-  }, [isComplete, sessionResult, navigation]);
+  }, [isComplete, sessionResult, navigation, sessionMode]);
 
   const isFeedbackActive = feedbackState !== null;
 

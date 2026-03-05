@@ -297,4 +297,43 @@ describe('ResultsScreen', () => {
       getByText('Amazing! You can solve with just numbers now!'),
     ).toBeTruthy();
   });
+
+  // Remediation messaging tests
+  it('renders remediation subtitle when isRemediation is true', () => {
+    mockRouteParams = { ...mockRouteParams, isRemediation: true };
+
+    const { getByText, queryByText } = render(<ResultsScreen />);
+    expect(getByText('Great practice on tricky skills!')).toBeTruthy();
+    expect(queryByText('Session Complete!')).toBeNull();
+  });
+
+  it('renders standard subtitle when isRemediation is false', () => {
+    mockRouteParams = { ...mockRouteParams, isRemediation: false };
+
+    const { getByText } = render(<ResultsScreen />);
+    expect(getByText('Session Complete!')).toBeTruthy();
+  });
+
+  it('renders "Great focus!" motivational message for remediation sessions', () => {
+    mockRouteParams = { ...mockRouteParams, isRemediation: true };
+
+    const { getByTestId } = render(<ResultsScreen />);
+    expect(getByTestId('motivational-message').props.children).toBe(
+      'Great focus!',
+    );
+  });
+
+  it('uses score-based motivational message for non-remediation sessions', () => {
+    mockRouteParams = {
+      ...mockRouteParams,
+      isRemediation: false,
+      score: 15,
+      total: 15,
+    };
+
+    const { getByTestId } = render(<ResultsScreen />);
+    expect(getByTestId('motivational-message').props.children).toBe(
+      'Amazing!',
+    );
+  });
 });
