@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.7
 milestone_name: Gamification
 status: active
-stopped_at: Completed 32-01-PLAN.md
-last_updated: "2026-03-05T04:14:00.000Z"
-last_activity: 2026-03-05 -- Completed Phase 32 Plan 01 (badge registry + evaluation engine)
+stopped_at: Completed 32-02-PLAN.md
+last_updated: "2026-03-05T04:20:21.000Z"
+last_activity: 2026-03-05 -- Completed Phase 32 Plan 02 (achievement store slice + migration)
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 32 of 37 (Achievement System Foundation)
-Plan: 1 of 2 complete
-Status: Executing
-Last activity: 2026-03-05 -- Completed Phase 32 Plan 01 (badge registry + evaluation engine)
+Plan: 2 of 2 complete
+Status: Phase Complete
+Last activity: 2026-03-05 -- Completed Phase 32 Plan 02 (achievement store slice + migration)
 
-Progress: [######░░░░] 67% of Phase 32 (1/2 plans)
+Progress: [##########] 100% of Phase 32 (2/2 plans)
 
 ## Performance Metrics
 
@@ -45,6 +45,7 @@ Progress: [######░░░░] 67% of Phase 32 (1/2 plans)
 |-------|------|----------|-------|-------|
 | 31 | P01 | 6m24s | 2 | 7 |
 | 32 | P01 | 3m24s | 2 | 6 |
+| 32 | P02 | 4m | 2 | 7 |
 
 ## Accumulated Context
 
@@ -67,6 +68,10 @@ Key context for v0.7:
 - [Phase 32 P01]: Badge IDs follow mastery.{skillId} / mastery.category.{op} / mastery.grade.{n} / behavior.{metric}.{tier} convention
 - [Phase 32 P01]: 27 badges total: 14 skill-mastery (gold), 2 category-mastery, 3 grade-mastery, 3 streak, 3 sessions, 2 remediation
 - [Phase 32 P01]: BadgeCategory = 'mastery' | 'behavior' (exploration/remediation realized as behavior badges)
+- [Phase 32 P02]: STORE_VERSION = 9 with earnedBadges and sessionsCompleted persisted via partialize
+- [Phase 32 P02]: EarnedBadge stores only earnedAt timestamp; badge metadata resolved from registry at read time
+- [Phase 32 P02]: sessionsCompleted in gamificationSlice (not achievementSlice) since it is a general session counter
+- [Phase 32 P02]: 1,215 tests passing, TypeScript clean
 
 ### Pending Todos
 
@@ -79,7 +84,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05T04:14:00.000Z
-Stopped at: Completed 32-01-PLAN.md
-Resume file: .planning/phases/32-achievement-system-foundation/32-02-PLAN.md
-Resume command: /gsd:execute-phase 32
+Last session: 2026-03-05T04:20:21Z
+Stopped at: Completed 32-02-PLAN.md (Phase 32 complete)
+Resume file: Next phase
+Resume command: /gsd:plan-phase 33

@@ -83,7 +83,7 @@
 **Milestone Goal:** Deep gamification layer -- achievement badges, visual skill map, daily challenges, avatar customization, and unlockable themes -- building intrinsic motivation through progression and personalization.
 
 - [x] **Phase 31: Pre-work -- Screen Refactoring** - Refactor SessionScreen below 500-line guardrail before adding gamification code (completed 2026-03-05)
-- [ ] **Phase 32: Achievement System Foundation** - Badge registry, evaluation engine, and store persistence (data layer)
+- [x] **Phase 32: Achievement System Foundation** - Badge registry, evaluation engine, and store persistence (data layer) (completed 2026-03-05)
 - [ ] **Phase 33: Badge UI & Session Integration** - Badge display components, popup animations, and Results/Home screen wiring
 - [ ] **Phase 34: Visual Skill Map** - Interactive DAG visualization of prerequisite skills with mastery states
 - [ ] **Phase 35: Daily Challenges** - Date-seeded themed challenge sessions with bonus XP and non-punitive design
@@ -112,7 +112,7 @@ Plans:
   1. Badge definitions catalog exists with categories (mastery, behavior, exploration, remediation) and typed unlock conditions
   2. Achievement evaluation engine takes a store state snapshot and returns newly-earned badge IDs without side effects
   3. Earned badges and badge progress persist across app restarts via store migration (STORE_VERSION bump)
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 32-01-PLAN.md -- Badge types, static registry catalog (27 badges), and pure-function evaluation engine
@@ -213,7 +213,7 @@ Phases execute in numeric order: 31 -> 32 -> 33 -> 34 -> 35 -> 36 -> 37
 | 29. AI Tutor Misconception Context | v0.6 | 1/1 | Complete | 2026-03-04 |
 | 30. Remediation Mini-Sessions | v0.6 | 2/2 | Complete | 2026-03-05 |
 | 31. Pre-work -- Screen Refactoring | v0.7 | 1/1 | Complete | 2026-03-05 |
-| 32. Achievement System Foundation | 1/2 | In Progress|  | - |
+| 32. Achievement System Foundation | 2/2 | Complete   | 2026-03-05 | - |
 | 33. Badge UI & Session Integration | v0.7 | 0/0 | Not started | - |
 | 34. Visual Skill Map | v0.7 | 0/0 | Not started | - |
 | 35. Daily Challenges | v0.7 | 0/0 | Not started | - |
