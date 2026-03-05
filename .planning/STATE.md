@@ -3,29 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.7
 milestone_name: Gamification
 status: active
-stopped_at: Phase 33 context gathered
-last_updated: "2026-03-05T04:33:45.144Z"
-last_activity: 2026-03-05 -- Completed Phase 32 Plan 02 (achievement store slice + migration)
+stopped_at: Completed 33-01-PLAN.md
+last_updated: "2026-03-05T12:50:09.000Z"
+last_activity: 2026-03-05 -- Completed Phase 33 Plan 01 (badge UI & session integration)
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 3
-  completed_plans: 3
----
-
----
-gsd_state_version: 1.0
-milestone: v0.7
-milestone_name: Gamification
-status: active
-stopped_at: Completed 32-02-PLAN.md
-last_updated: "2026-03-05T04:20:21.000Z"
-last_activity: 2026-03-05 -- Completed Phase 32 Plan 02 (achievement store slice + migration)
-progress:
-  total_phases: 7
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  completed_plans: 1
 ---
 
 # Project State
@@ -35,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.7 Gamification -- Phase 32 (Achievement System Foundation)
+**Current focus:** v0.7 Gamification -- Phase 33 (Badge UI & Session Integration)
 
 ## Current Position
 
-Phase: 32 of 37 (Achievement System Foundation)
-Plan: 2 of 2 complete
-Status: Phase Complete
-Last activity: 2026-03-05 -- Completed Phase 32 Plan 02 (achievement store slice + migration)
+Phase: 33 of 37 (Badge UI & Session Integration)
+Plan: 1 of 3 complete
+Status: In Progress
+Last activity: 2026-03-05 -- Completed Phase 33 Plan 01 (badge UI & session integration)
 
-Progress: [##########] 100% of Phase 32 (2/2 plans)
+Progress: [###-------] 33% of Phase 33 (1/3 plans)
 
 ## Performance Metrics
 
@@ -61,6 +46,7 @@ Progress: [##########] 100% of Phase 32 (2/2 plans)
 | 31 | P01 | 6m24s | 2 | 7 |
 | 32 | P01 | 3m24s | 2 | 6 |
 | 32 | P02 | 4m | 2 | 7 |
+| 33 | P01 | 6m7s | 2 | 10 |
 
 ## Accumulated Context
 
@@ -87,6 +73,10 @@ Key context for v0.7:
 - [Phase 32 P02]: EarnedBadge stores only earnedAt timestamp; badge metadata resolved from registry at read time
 - [Phase 32 P02]: sessionsCompleted in gamificationSlice (not achievementSlice) since it is a general session counter
 - [Phase 32 P02]: 1,215 tests passing, TypeScript clean
+- [Phase 33 P01]: evaluateBadges receives earnedBadges Record directly (not Object.keys) matching actual function signature
+- [Phase 33 P01]: useAppStore.getState() used for badge snapshot (synchronous post-commit reads)
+- [Phase 33 P01]: incrementSessionsCompleted called before evaluateBadges for session-count badge detection
+- [Phase 33 P01]: BadgeIcon pattern: emoji in View circle with tier-colored border (bronze=#cd7f32, silver=#c0c0c0, gold=#ffd700)
 
 ### Pending Todos
 
@@ -99,7 +89,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05T04:33:45.141Z
-Stopped at: Phase 33 context gathered
-Resume file: .planning/phases/33-badge-ui-session-integration/33-CONTEXT.md
-Resume command: /gsd:plan-phase 33
+Last session: 2026-03-05T12:50:09.000Z
+Stopped at: Completed 33-01-PLAN.md
+Resume file: .planning/phases/33-badge-ui-session-integration/33-02-PLAN.md
+Resume command: /gsd:execute-phase 33

@@ -16,8 +16,8 @@ Requirements for gamification milestone. Each maps to roadmap phases.
 - [x] **ACHV-01**: Badge registry with static catalog (ID, category, unlock conditions, reward associations)
 - [x] **ACHV-02**: Badge evaluation engine checks unlock conditions post-session
 - [x] **ACHV-03**: Badge state persisted in store (earnedBadges, badgeProgress) with migration
-- [ ] **ACHV-04**: User earns mastery badges (skill mastered, category complete, grade complete)
-- [ ] **ACHV-05**: User earns behavior badges (streak milestones, session count, remediation victories)
+- [x] **ACHV-04**: User earns mastery badges (skill mastered, category complete, grade complete)
+- [x] **ACHV-05**: User earns behavior badges (streak milestones, session count, remediation victories)
 - [ ] **ACHV-06**: Badge popup animation on unlock with Results screen integration
 - [ ] **ACHV-07**: User can view badge grid showing earned and locked badges with requirements
 - [ ] **ACHV-08**: Results screen displays newly earned badges after session
@@ -89,8 +89,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ACHV-01 | Phase 32 | Complete |
 | ACHV-02 | Phase 32 | Complete |
 | ACHV-03 | Phase 32 | Complete |
-| ACHV-04 | Phase 33 | Pending |
-| ACHV-05 | Phase 33 | Pending |
+| ACHV-04 | Phase 33 | Complete |
+| ACHV-05 | Phase 33 | Complete |
 | ACHV-06 | Phase 33 | Pending |
 | ACHV-07 | Phase 33 | Pending |
 | ACHV-08 | Phase 33 | Pending |
