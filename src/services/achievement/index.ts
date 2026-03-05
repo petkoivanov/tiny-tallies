@@ -7,3 +7,5 @@ export type {
 } from './badgeTypes';
 
 export { BADGES, getBadgeById, getBadgesByCategory } from './badgeRegistry';
+
+export { evaluateBadges } from './badgeEvaluation';
