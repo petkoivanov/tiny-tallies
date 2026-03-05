@@ -19,7 +19,7 @@ Requirements for gamification milestone. Each maps to roadmap phases.
 - [x] **ACHV-04**: User earns mastery badges (skill mastered, category complete, grade complete)
 - [x] **ACHV-05**: User earns behavior badges (streak milestones, session count, remediation victories)
 - [x] **ACHV-06**: Badge popup animation on unlock with Results screen integration
-- [ ] **ACHV-07**: User can view badge grid showing earned and locked badges with requirements
+- [x] **ACHV-07**: User can view badge grid showing earned and locked badges with requirements
 - [x] **ACHV-08**: Results screen displays newly earned badges after session
 
 ### Skill Map
@@ -92,7 +92,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ACHV-04 | Phase 33 | Complete |
 | ACHV-05 | Phase 33 | Complete |
 | ACHV-06 | Phase 33 | Complete |
-| ACHV-07 | Phase 33 | Pending |
+| ACHV-07 | Phase 33 | Complete |
 | ACHV-08 | Phase 33 | Complete |
 | SMAP-01 | Phase 34 | Pending |
 | SMAP-02 | Phase 34 | Pending |
