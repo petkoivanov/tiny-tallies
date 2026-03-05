@@ -1,7 +1,7 @@
 import { BADGES } from '@/services/achievement/badgeRegistry';
 
 /**
- * Emoji lookup map for all 27 badge definitions.
+ * Emoji lookup map for all 31 badge definitions.
  *
  * Tier differentiation is handled by BadgeIcon border color, not by
  * different emojis per tier. Emojis are themed by condition type.
@@ -47,6 +47,12 @@ export const BADGE_EMOJIS: Record<string, string> = {
   // ── Remediation-Victory (2) ──────────────────────────────────────────
   'behavior.remediation.bronze': '\uD83D\uDC1B', // Bug
   'behavior.remediation.silver': '\uD83D\uDC1B', // Bug
+
+  // ── Challenge (4) ───────────────────────────────────────────────────
+  'behavior.challenge.first': '\uD83C\uDFC6',   // Trophy
+  'behavior.challenge.streak': '\uD83C\uDFC6',  // Trophy
+  'behavior.challenge.master': '\uD83C\uDFC6',  // Trophy
+  'behavior.challenge.perfect': '\uD83D\uDCAF', // Hundred points
 };
 
 // Compile-time coverage check: ensure every registry badge has an emoji

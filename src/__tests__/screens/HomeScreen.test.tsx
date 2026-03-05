@@ -27,7 +27,7 @@ jest.mock('lucide-react-native', () => {
 
 // Mock achievement service
 jest.mock('@/services/achievement', () => ({
-  BADGES: Array.from({ length: 27 }, (_, i) => ({ id: `badge-${i}` })),
+  BADGES: Array.from({ length: 31 }, (_, i) => ({ id: `badge-${i}` })),
 }));
 
 // Mock ExploreGrid as a simple View with testID
@@ -261,7 +261,7 @@ describe('HomeScreen', () => {
     });
 
     const { getByText } = render(<HomeScreen />);
-    expect(getByText('3 / 27 Badges')).toBeTruthy();
+    expect(getByText('3 / 31 Badges')).toBeTruthy();
   });
 
   it('badge count button navigates to BadgeCollection', () => {

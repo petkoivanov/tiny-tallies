@@ -116,8 +116,8 @@ describe('badgeRegistry', () => {
       }
     });
 
-    it('has exactly 27 total badges', () => {
-      expect(BADGES).toHaveLength(27);
+    it('has exactly 31 total badges', () => {
+      expect(BADGES).toHaveLength(31);
     });
   });
 
