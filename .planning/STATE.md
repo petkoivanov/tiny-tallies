@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 37 of 37 (UI Themes)
-Plan: 2 of 4 complete
-Status: In Progress
-Last activity: 2026-03-05 -- Completed Phase 37 Plan 02 (Screen & component color migration)
+Plan: 4 of 4 complete
+Status: Complete
+Last activity: 2026-03-06 -- Completed Phase 37 Plan 04 (Session wrapper & theme picker)
 
-Progress: [#####.....] 50% of Phase 37 (2/4 plans)
+Progress: [##########] 100% of Phase 37 (4/4 plans)
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Progress: [#####.....] 50% of Phase 37 (2/4 plans)
 | 37 | P01 | 3m5s | 2 | 9 |
 | 37 | P02 | 8m | 2 | 21 |
 | Phase 37 P03 | 45min | 2 tasks | 29 files |
+| 37 | P04 | 5m34s | 2 | 10 |
 
 ## Accumulated Context
 
@@ -137,6 +138,10 @@ Key context for v0.7:
 - [Phase 37 P02]: 21 files migrated (8 screens + AppNavigator + App.tsx + Header + 5 session + 5 chat components), 84 screen tests passing
 - [Phase 37]: Used createStyles factory for complex multi-subcomponent files (DailyChallengeCard, SkillDetailOverlay)
 - [Phase 37]: ConfettiCelebration uses colorIndex in particle config, resolving theme colors at render time
+- [Phase 37 P04]: SessionWrapper ambient decorations at screen edges only, pointerEvents=none, slow cycles (4-8s), low opacity (0.1-0.3)
+- [Phase 37 P04]: ThemePickerScreen reuses CosmeticDetailOverlay for locked theme items
+- [Phase 37 P04]: BadgeUnlockPopup already handled theme cosmetic text via getCosmeticUnlockText -- no changes needed
+- [Phase 37 P04]: 1411 tests (12 new), TypeScript clean, 1 pre-existing appStore version test failure
 
 ### Pending Todos
 
@@ -149,7 +154,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T04:23:56.198Z
-Stopped at: Completed 37-03-PLAN.md
+Last session: 2026-03-06T04:30:34Z
+Stopped at: Completed 37-04-PLAN.md (Phase 37 complete)
 Resume file: None
-Resume command: /gsd:execute-phase 37
+Resume command: Phase 37 complete

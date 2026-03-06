@@ -88,7 +88,7 @@
 - [x] **Phase 34: Visual Skill Map** - Interactive DAG visualization of prerequisite skills with mastery states (completed 2026-03-05)
 - [x] **Phase 35: Daily Challenges** - Date-seeded themed challenge sessions with bonus XP and non-punitive design (completed 2026-03-05)
 - [x] **Phase 36: Avatars & Frames** - Expanded avatar pool with achievement-unlockable special avatars and frame decorations (completed 2026-03-05)
-- [ ] **Phase 37: UI Themes** - Dynamic color theming with ThemeProvider, theme picker, and session cosmetic wrappers
+- [x] **Phase 37: UI Themes** - Dynamic color theming with ThemeProvider, theme picker, and session cosmetic wrappers (completed 2026-03-06)
 
 ## Phase Details
 
@@ -191,7 +191,7 @@ Plans:
   3. Session cosmetic wrappers add themed context and art around math problems during play
   4. Theme picker screen allows preview, equip, and shows locked theme badge requirements
   5. Non-default themes are locked until the user earns the corresponding achievement badges
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [ ] 37-01-PLAN.md -- Theme types, palettes, ThemeProvider, useTheme hook, theme cosmetics, store migration v12
@@ -242,4 +242,4 @@ Phases execute in numeric order: 31 -> 32 -> 33 -> 34 -> 35 -> 36 -> 37
 | 34. Visual Skill Map | 3/3 | Complete    | 2026-03-05 | - |
 | 35. Daily Challenges | 2/2 | Complete    | 2026-03-05 | - |
 | 36. Avatars & Frames | 2/2 | Complete    | 2026-03-05 | - |
-| 37. UI Themes | 3/4 | In Progress|  | - |
+| 37. UI Themes | 4/4 | Complete   | 2026-03-06 | - |
