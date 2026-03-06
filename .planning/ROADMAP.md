@@ -94,7 +94,7 @@
 
 ### v0.8 Social & Subscription (Phases 38-43)
 
-- [ ] **Phase 38: Multi-Child Store Foundation** - Restructure Zustand store from single-child to multi-child keyed architecture
+- [x] **Phase 38: Multi-Child Store Foundation** - Restructure Zustand store from single-child to multi-child keyed architecture (completed 2026-03-06)
 - [ ] **Phase 39: Profile Management UI** - Profile switcher, add/edit/delete children from home screen
 - [ ] **Phase 40: Session History & Analytics Engine** - Session history collection and pure-computation analytics services
 - [ ] **Phase 41: Parent Dashboard** - PIN-gated parent navigator with progress, misconception, and trend views
@@ -217,7 +217,7 @@ Plans:
 | 35. Daily Challenges | v0.7 | 2/2 | Complete | 2026-03-05 |
 | 36. Avatars & Frames | v0.7 | 2/2 | Complete | 2026-03-05 |
 | 37. UI Themes | v0.7 | 4/4 | Complete | 2026-03-06 |
-| 38. Multi-Child Store Foundation | 2/3 | In Progress|  | - |
+| 38. Multi-Child Store Foundation | 3/3 | Complete   | 2026-03-06 | - |
 | 39. Profile Management UI | v0.8 | 0/? | Not started | - |
 | 40. Session History & Analytics Engine | v0.8 | 0/? | Not started | - |
 | 41. Parent Dashboard | v0.8 | 0/? | Not started | - |
