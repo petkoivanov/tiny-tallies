@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Flame, Check, Focus, GitBranch } from 'lucide-react-native';
+import { Flame, Check, Focus, GitBranch, Palette } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { AVATARS, DEFAULT_AVATAR_ID, SPECIAL_AVATARS, FRAMES, resolveAvatar } from '@/store/constants/avatars';
@@ -175,6 +175,20 @@ export default function HomeScreen() {
       fontSize: typography.fontSize.md,
       color: colors.textPrimary,
     },
+    themeButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      backgroundColor: colors.surface,
+      borderRadius: layout.borderRadius.lg,
+    },
+    themeButtonText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.md,
+      color: colors.textPrimary,
+    },
     challengeSection: {
       paddingHorizontal: spacing.lg,
       paddingTop: spacing.lg,
@@ -323,6 +337,18 @@ export default function HomeScreen() {
         >
           <GitBranch size={20} color={colors.primaryLight} strokeWidth={2} />
           <Text style={styles.skillMapButtonText}>Skill Map</Text>
+        </Pressable>
+
+        {/* Theme Picker */}
+        <Pressable
+          onPress={() => navigation.navigate('ThemePicker')}
+          style={styles.themeButton}
+          accessibilityRole="button"
+          accessibilityLabel="Choose theme"
+          testID="theme-picker-button"
+        >
+          <Palette size={20} color={colors.primaryLight} strokeWidth={2} />
+          <Text style={styles.themeButtonText}>Themes</Text>
         </Pressable>
       </View>
 

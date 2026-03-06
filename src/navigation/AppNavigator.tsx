@@ -9,6 +9,7 @@ import ConsentScreen from '@/screens/ConsentScreen';
 import BadgeCollectionScreen from '@/screens/BadgeCollectionScreen';
 import SkillMapScreen from '@/screens/SkillMapScreen';
 import AvatarPickerScreen from '@/screens/AvatarPickerScreen';
+import ThemePickerScreen from '@/screens/ThemePickerScreen';
 import { useTheme } from '@/theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -35,6 +36,7 @@ export default function AppNavigator() {
       <Stack.Screen name="BadgeCollection" component={BadgeCollectionScreen} />
       <Stack.Screen name="SkillMap" component={SkillMapScreen} />
       <Stack.Screen name="AvatarPicker" component={AvatarPickerScreen} options={{ title: 'Choose Avatar' }} />
+      <Stack.Screen name="ThemePicker" component={ThemePickerScreen} options={{ title: 'Choose Theme' }} />
       <Stack.Screen
         name="Consent"
         component={ConsentScreen}

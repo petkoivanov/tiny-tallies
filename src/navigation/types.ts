@@ -37,6 +37,7 @@ export type RootStackParamList = {
   BadgeCollection: undefined;
   SkillMap: undefined;
   AvatarPicker: undefined;
+  ThemePicker: undefined;
   Consent: { returnTo?: 'Session' } | undefined;
 };
 
