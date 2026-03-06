@@ -19,7 +19,7 @@ import { ManipulativeShell } from '../ManipulativeShell';
 import { triggerSnapHaptic } from '../shared/haptics';
 import { useActionHistory } from '../shared/useActionHistory';
 import { GuidedHighlight } from '../shared/GuidedHighlight';
-import { colors, spacing, typography } from '../../../theme';
+import { useTheme, spacing, typography } from '../../../theme';
 import { NumberPicker } from './NumberPicker';
 import { PresetButton, DividerHandle, SectionView } from './BarModelParts';
 import {
@@ -58,6 +58,20 @@ function snapFraction(fraction: number): number {
 }
 
 export function BarModel({ testID, guidedTargetId }: BarModelProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(() => StyleSheet.create({
+    presetTitle: {
+      fontSize: typography.fontSize.lg,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      marginBottom: spacing.lg,
+    },
+    labelIndex: {
+      fontSize: typography.fontSize.xs,
+      color: colors.textMuted,
+    },
+  }), [colors]);
+
   const [partitionCount, setPartitionCount] = useState<PartitionCount | null>(
     null,
   );
@@ -203,7 +217,7 @@ export function BarModel({ testID, guidedTargetId }: BarModelProps) {
         testID={testID}
       >
         <View style={styles.presetContainer}>
-          <Text style={styles.presetTitle}>Choose partitions</Text>
+          <Text style={dynamicStyles.presetTitle}>Choose partitions</Text>
           <View style={styles.presetRow}>
             {([2, 3, 4] as PartitionCount[]).map((count) => (
               <PresetButton
@@ -287,7 +301,7 @@ export function BarModel({ testID, guidedTargetId }: BarModelProps) {
                   key={`label-${section.id}`}
                   style={[styles.labelContainer, { width }]}
                 >
-                  <Text style={styles.labelIndex}>{index + 1}</Text>
+                  <Text style={dynamicStyles.labelIndex}>{index + 1}</Text>
                 </View>
               );
             })}
@@ -304,12 +318,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
-  },
-  presetTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    marginBottom: spacing.lg,
   },
   presetRow: {
     flexDirection: 'row',
@@ -341,9 +349,5 @@ const styles = StyleSheet.create({
   },
   labelContainer: {
     alignItems: 'center',
-  },
-  labelIndex: {
-    fontSize: typography.fontSize.xs,
-    color: colors.textMuted,
   },
 });

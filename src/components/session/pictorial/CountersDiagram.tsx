@@ -9,14 +9,13 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Line } from 'react-native-svg';
 
-import { colors } from '@/theme';
+import { useTheme } from '@/theme';
 import type { Problem } from '@/services/mathEngine/types';
 
 const DOT_RADIUS = 10;
 const DOT_SPACING = 28;
 const DOTS_PER_ROW = 5;
 const PADDING = 12;
-const COLOR_A = colors.primary;
 const COLOR_B = '#FACC15';
 
 interface CountersDiagramProps {
@@ -24,6 +23,7 @@ interface CountersDiagramProps {
 }
 
 export function CountersDiagram({ problem }: CountersDiagramProps) {
+  const { colors } = useTheme();
   const [a, b] = problem.operands;
   const isSubtraction = problem.operation === 'subtraction';
   const totalDots = isSubtraction ? a : a + b;
@@ -41,9 +41,9 @@ export function CountersDiagram({ problem }: CountersDiagramProps) {
 
     let fill: string;
     if (isSubtraction) {
-      fill = COLOR_A;
+      fill = colors.primary;
     } else {
-      fill = i < a ? COLOR_A : COLOR_B;
+      fill = i < a ? colors.primary : COLOR_B;
     }
 
     dots.push(

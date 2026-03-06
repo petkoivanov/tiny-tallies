@@ -9,7 +9,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Rect, Line } from 'react-native-svg';
 
-import { colors } from '@/theme';
+import { useTheme } from '@/theme';
 import type { Problem } from '@/services/mathEngine/types';
 
 const CELL_SIZE = 20;
@@ -17,7 +17,6 @@ const GAP = 4;
 const COLS = 5;
 const ROWS = 2;
 const PADDING = 8;
-const COLOR_A = colors.primary;
 const COLOR_B = '#FACC15';
 
 interface TenFrameDiagramProps {
@@ -25,11 +24,13 @@ interface TenFrameDiagramProps {
 }
 
 export function TenFrameDiagram({ problem }: TenFrameDiagramProps) {
+  const { colors } = useTheme();
   const [a, b] = problem.operands;
   const isSubtraction = problem.operation === 'subtraction';
   const totalCells = 10;
   const filledCount = isSubtraction ? a : Math.min(a + b, totalCells);
 
+  const colorA = colors.primary;
   const svgWidth = COLS * (CELL_SIZE + GAP) - GAP + PADDING * 2;
   const svgHeight = ROWS * (CELL_SIZE + GAP) - GAP + PADDING * 2;
 
@@ -43,9 +44,9 @@ export function TenFrameDiagram({ problem }: TenFrameDiagramProps) {
     let fill: string = colors.surface;
     if (i < filledCount) {
       if (isSubtraction) {
-        fill = COLOR_A;
+        fill = colorA;
       } else {
-        fill = i < a ? COLOR_A : COLOR_B;
+        fill = i < a ? colorA : COLOR_B;
       }
     }
 

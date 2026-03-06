@@ -5,7 +5,7 @@
  * practice level stars (1-6 Leitner box), and prerequisite checklist for locked
  * skills. Follows the centered modal pattern from BadgeDetailOverlay.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Star } from 'lucide-react-native';
 
@@ -14,7 +14,8 @@ import { getOrCreateSkillState } from '@/store/helpers/skillStateHelpers';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
 import { getNodeState } from './skillMapLayout';
 import { skillMapColors } from './skillMapColors';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
+import type { ThemeColors } from '@/theme';
 
 export interface SkillDetailOverlayProps {
   skillId: string | null;
@@ -35,11 +36,147 @@ const STAR_EMPTY_COLOR = '#475569';
 /** Total practice level stars. */
 const TOTAL_STARS = 6;
 
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: layout.borderRadius.lg,
+      padding: spacing.lg,
+      alignItems: 'center',
+      width: '80%',
+      maxWidth: 320,
+    },
+    closeBtn: {
+      position: 'absolute',
+      top: spacing.sm,
+      right: spacing.sm,
+      width: 32,
+      height: 32,
+      borderRadius: layout.borderRadius.round,
+      backgroundColor: colors.surfaceLight,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    closeBtnText: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.sm,
+    },
+    emojiCircle: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
+    emojiText: {
+      fontSize: typography.fontSize.xxl,
+      color: colors.textPrimary,
+      fontFamily: typography.fontFamily.bold,
+    },
+    skillName: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.xl,
+      textAlign: 'center',
+    },
+    gradeLabel: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.sm,
+      marginTop: spacing.xs,
+      marginBottom: spacing.md,
+    },
+    divider: {
+      width: '100%',
+      height: 1,
+      backgroundColor: colors.surfaceLight,
+      marginVertical: spacing.md,
+    },
+    sectionLabel: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.sm,
+      marginBottom: spacing.sm,
+      textAlign: 'center',
+    },
+    prereqRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: spacing.xs,
+      width: '100%',
+      paddingHorizontal: spacing.sm,
+    },
+    prereqIcon: {
+      fontSize: typography.fontSize.md,
+      marginRight: spacing.sm,
+    },
+    prereqName: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.sm,
+      flex: 1,
+    },
+    readyText: {
+      color: colors.primaryLight,
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.md,
+      marginBottom: spacing.md,
+    },
+    progressBarOuter: {
+      width: '100%',
+      height: 12,
+      borderRadius: layout.borderRadius.round,
+      backgroundColor: colors.surfaceLight,
+      marginBottom: spacing.md,
+      overflow: 'hidden',
+    },
+    progressBarInner: {
+      height: 12,
+      borderRadius: layout.borderRadius.round,
+    },
+    starsRow: {
+      flexDirection: 'row',
+      gap: spacing.xs,
+      marginBottom: spacing.sm,
+    },
+    trophyEmoji: {
+      fontSize: 48,
+      marginBottom: spacing.sm,
+    },
+    masteredText: {
+      color: STAR_FILLED_COLOR,
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.xl,
+      marginBottom: spacing.md,
+    },
+    encourageText: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.md,
+      marginTop: spacing.sm,
+      textAlign: 'center',
+    },
+  });
+}
+
+type Styles = ReturnType<typeof createStyles>;
+
 export function SkillDetailOverlay({
   skillId,
   skillStates,
   onClose,
 }: SkillDetailOverlayProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   if (!skillId) return null;
 
   const skill = getSkillById(skillId);
@@ -85,11 +222,12 @@ export function SkillDetailOverlay({
             <LockedContent
               skillId={skillId}
               skillStates={skillStates}
+              styles={styles}
             />
           )}
 
           {nodeState === 'unlocked' && (
-            <UnlockedContent />
+            <UnlockedContent styles={styles} />
           )}
 
           {nodeState === 'in-progress' && (
@@ -97,11 +235,12 @@ export function SkillDetailOverlay({
               masteryProbability={skillState.masteryProbability}
               leitnerBox={skillState.leitnerBox}
               opTintLight={opColors.light}
+              styles={styles}
             />
           )}
 
           {nodeState === 'mastered' && (
-            <MasteredContent />
+            <MasteredContent styles={styles} />
           )}
         </Pressable>
       </Pressable>
@@ -113,9 +252,11 @@ export function SkillDetailOverlay({
 function LockedContent({
   skillId,
   skillStates,
+  styles,
 }: {
   skillId: string;
   skillStates: Record<string, SkillState>;
+  styles: Styles;
 }) {
   const skill = getSkillById(skillId);
   if (!skill) return null;
@@ -145,13 +286,13 @@ function LockedContent({
 }
 
 /** Content for unlocked skills with no attempts. */
-function UnlockedContent() {
+function UnlockedContent({ styles }: { styles: Styles }) {
   return (
     <>
       <Text style={styles.readyText}>Ready to learn!</Text>
-      <ProgressBar fill={0} color={STAR_FILLED_COLOR} />
+      <ProgressBar fill={0} color={STAR_FILLED_COLOR} styles={styles} />
       <Text style={styles.sectionLabel}>Practice level</Text>
-      <StarsRow filledCount={1} />
+      <StarsRow filledCount={1} styles={styles} />
     </>
   );
 }
@@ -161,36 +302,38 @@ function InProgressContent({
   masteryProbability,
   leitnerBox,
   opTintLight,
+  styles,
 }: {
   masteryProbability: number;
   leitnerBox: number;
   opTintLight: string;
+  styles: Styles;
 }) {
   return (
     <>
       <Text style={styles.sectionLabel}>How well you know this!</Text>
-      <ProgressBar fill={masteryProbability} color={opTintLight} />
+      <ProgressBar fill={masteryProbability} color={opTintLight} styles={styles} />
       <Text style={styles.sectionLabel}>Practice level</Text>
-      <StarsRow filledCount={leitnerBox} />
+      <StarsRow filledCount={leitnerBox} styles={styles} />
     </>
   );
 }
 
 /** Content for mastered skills: celebration display. */
-function MasteredContent() {
+function MasteredContent({ styles }: { styles: Styles }) {
   return (
     <>
       <Text style={styles.trophyEmoji}>{'\u{1F3C6}'}</Text>
       <Text style={styles.masteredText}>Mastered!</Text>
-      <ProgressBar fill={1} color={STAR_FILLED_COLOR} />
-      <StarsRow filledCount={TOTAL_STARS} />
+      <ProgressBar fill={1} color={STAR_FILLED_COLOR} styles={styles} />
+      <StarsRow filledCount={TOTAL_STARS} styles={styles} />
       <Text style={styles.encourageText}>You're a pro at this!</Text>
     </>
   );
 }
 
 /** Progress bar driven by fill (0-1). No raw numbers shown. */
-function ProgressBar({ fill, color }: { fill: number; color: string }) {
+function ProgressBar({ fill, color, styles }: { fill: number; color: string; styles: Styles }) {
   const widthPercent = Math.max(fill > 0 ? 2 : 0, fill * 100);
 
   return (
@@ -209,7 +352,7 @@ function ProgressBar({ fill, color }: { fill: number; color: string }) {
 }
 
 /** Row of 6 star icons (filled vs empty). */
-function StarsRow({ filledCount }: { filledCount: number }) {
+function StarsRow({ filledCount, styles }: { filledCount: number; styles: Styles }) {
   return (
     <View style={styles.starsRow}>
       {Array.from({ length: TOTAL_STARS }, (_, i) => (
@@ -223,132 +366,3 @@ function StarsRow({ filledCount }: { filledCount: number }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: layout.borderRadius.lg,
-    padding: spacing.lg,
-    alignItems: 'center',
-    width: '80%',
-    maxWidth: 320,
-  },
-  closeBtn: {
-    position: 'absolute',
-    top: spacing.sm,
-    right: spacing.sm,
-    width: 32,
-    height: 32,
-    borderRadius: layout.borderRadius.round,
-    backgroundColor: colors.surfaceLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  closeBtnText: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.sm,
-  },
-  emojiCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  emojiText: {
-    fontSize: typography.fontSize.xxl,
-    color: colors.textPrimary,
-    fontFamily: typography.fontFamily.bold,
-  },
-  skillName: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.xl,
-    textAlign: 'center',
-  },
-  gradeLabel: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.sm,
-    marginTop: spacing.xs,
-    marginBottom: spacing.md,
-  },
-  divider: {
-    width: '100%',
-    height: 1,
-    backgroundColor: colors.surfaceLight,
-    marginVertical: spacing.md,
-  },
-  sectionLabel: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.sm,
-    marginBottom: spacing.sm,
-    textAlign: 'center',
-  },
-  prereqRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-    width: '100%',
-    paddingHorizontal: spacing.sm,
-  },
-  prereqIcon: {
-    fontSize: typography.fontSize.md,
-    marginRight: spacing.sm,
-  },
-  prereqName: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.sm,
-    flex: 1,
-  },
-  readyText: {
-    color: colors.primaryLight,
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.md,
-    marginBottom: spacing.md,
-  },
-  progressBarOuter: {
-    width: '100%',
-    height: 12,
-    borderRadius: layout.borderRadius.round,
-    backgroundColor: colors.surfaceLight,
-    marginBottom: spacing.md,
-    overflow: 'hidden',
-  },
-  progressBarInner: {
-    height: 12,
-    borderRadius: layout.borderRadius.round,
-  },
-  starsRow: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    marginBottom: spacing.sm,
-  },
-  trophyEmoji: {
-    fontSize: 48,
-    marginBottom: spacing.sm,
-  },
-  masteredText: {
-    color: STAR_FILLED_COLOR,
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.xl,
-    marginBottom: spacing.md,
-  },
-  encourageText: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.md,
-    marginTop: spacing.sm,
-    textAlign: 'center',
-  },
-});

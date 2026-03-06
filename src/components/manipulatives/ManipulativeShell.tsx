@@ -3,7 +3,7 @@ import { View, Pressable, StyleSheet } from 'react-native';
 import { RotateCcw, Undo2, Grid3X3, Move } from 'lucide-react-native';
 
 import { AnimatedCounter } from './shared';
-import { colors, spacing } from '@/theme';
+import { useTheme, spacing } from '@/theme';
 
 /**
  * Props for the ManipulativeShell wrapper.
@@ -60,6 +60,8 @@ export function ManipulativeShell({
   children,
   testID,
 }: ManipulativeShellProps) {
+  const { colors } = useTheme();
+
   return (
     <View style={styles.container} testID={testID}>
       <View style={styles.header}>

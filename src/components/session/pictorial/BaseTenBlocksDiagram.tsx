@@ -8,7 +8,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 
-import { colors } from '@/theme';
+import { useTheme } from '@/theme';
 import type { Problem } from '@/services/mathEngine/types';
 
 const HUNDRED_SIZE = 30;
@@ -18,7 +18,6 @@ const ONE_SIZE = 8;
 const BLOCK_GAP = 3;
 const GROUP_GAP = 16;
 const PADDING = 8;
-const COLOR_A = colors.primary;
 const COLOR_B = '#FACC15';
 
 interface BaseTenBlocksDiagramProps {
@@ -39,6 +38,7 @@ function renderOperandBlocks(
   startX: number,
   baseY: number,
   fill: string,
+  strokeColor: string,
 ): { elements: React.ReactNode[]; width: number } {
   const [hundreds, tens, ones] = decompose(value);
   const elements: React.ReactNode[] = [];
@@ -56,7 +56,7 @@ function renderOperandBlocks(
         height={HUNDRED_SIZE}
         rx={2}
         fill={fill}
-        stroke={colors.textSecondary}
+        stroke={strokeColor}
         strokeWidth={0.5}
       />,
     );
@@ -74,7 +74,7 @@ function renderOperandBlocks(
         height={TEN_HEIGHT}
         rx={1}
         fill={fill}
-        stroke={colors.textSecondary}
+        stroke={strokeColor}
         strokeWidth={0.5}
       />,
     );
@@ -92,7 +92,7 @@ function renderOperandBlocks(
         height={ONE_SIZE}
         rx={1}
         fill={fill}
-        stroke={colors.textSecondary}
+        stroke={strokeColor}
         strokeWidth={0.5}
       />,
     );
@@ -103,14 +103,15 @@ function renderOperandBlocks(
 }
 
 export function BaseTenBlocksDiagram({ problem }: BaseTenBlocksDiagramProps) {
+  const { colors } = useTheme();
   const [a, b] = problem.operands;
   const symbol = problem.operation === 'addition' ? '+' : '\u2212';
   const baseY = PADDING + TEN_HEIGHT;
 
-  const groupA = renderOperandBlocks(a, PADDING, baseY, COLOR_A);
+  const groupA = renderOperandBlocks(a, PADDING, baseY, colors.primary, colors.textSecondary);
   const symbolX = PADDING + groupA.width + GROUP_GAP / 2;
   const groupBStartX = symbolX + GROUP_GAP / 2 + 8;
-  const groupB = renderOperandBlocks(b, groupBStartX, baseY, COLOR_B);
+  const groupB = renderOperandBlocks(b, groupBStartX, baseY, COLOR_B, colors.textSecondary);
 
   const svgWidth = groupBStartX + groupB.width + PADDING;
   const svgHeight = baseY + PADDING + 14;

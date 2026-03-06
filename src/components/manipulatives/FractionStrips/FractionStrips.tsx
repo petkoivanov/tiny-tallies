@@ -20,7 +20,7 @@ import { ManipulativeShell } from '../ManipulativeShell';
 import { triggerSnapHaptic } from '../shared/haptics';
 import { useActionHistory } from '../shared/useActionHistory';
 import { GuidedHighlight } from '../shared/GuidedHighlight';
-import { colors, spacing, layout } from '@/theme';
+import { useTheme, spacing, layout } from '@/theme';
 import {
   DENOMINATORS,
   MAX_STRIPS,
@@ -68,6 +68,7 @@ interface StripRowProps {
   onRemove: (stripIdx: number) => void;
   canRemove: boolean;
   guidedTargetId?: string | null;
+  fractionLabelStyle: object;
 }
 
 function StripRow({
@@ -78,6 +79,7 @@ function StripRow({
   onRemove,
   canRemove,
   guidedTargetId,
+  fractionLabelStyle,
 }: StripRowProps) {
   const sectionWidth = stripWidth / strip.denominator;
   const needsScroll = sectionWidth < MIN_SECTION_WIDTH;
@@ -133,7 +135,7 @@ function StripRow({
       )}
 
       <View style={styles.labelContainer}>
-        <Text style={styles.fractionLabel}>{fractionLabel(strip)}</Text>
+        <Text style={fractionLabelStyle}>{fractionLabel(strip)}</Text>
         {canRemove && (
           <Pressable
             onPress={() => onRemove(stripIndex)}
@@ -181,6 +183,20 @@ export function FractionStrips({
   guidedTargetId,
   testID,
 }: FractionStripsProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = React.useMemo(() => StyleSheet.create({
+    fractionLabel: {
+      color: colors.textPrimary,
+      fontSize: 18,
+      fontWeight: '700',
+    },
+    addButtonText: {
+      color: colors.textSecondary,
+      fontSize: 15,
+      fontWeight: '600',
+    },
+  }), [colors]);
+
   const initialState = initialStrips ?? [createStrip(2)];
   const { state: strips, canUndo, pushState, undo, reset } = useActionHistory<StripState[]>(initialState);
   const [stripWidth, setStripWidth] = useState(0);
@@ -264,6 +280,7 @@ export function FractionStrips({
               onRemove={removeStrip}
               canRemove={strips.length > 1}
               guidedTargetId={guidedTargetId}
+              fractionLabelStyle={dynamicStyles.fractionLabel}
             />
           ))}
 
@@ -279,7 +296,7 @@ export function FractionStrips({
                 accessibilityLabel="Add fraction strip"
                 accessibilityRole="button"
               >
-                <Text style={styles.addButtonText}>+ Add Strip</Text>
+                <Text style={dynamicStyles.addButtonText}>+ Add Strip</Text>
               </Pressable>
             )}
           </View>
@@ -318,11 +335,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingLeft: spacing.sm,
   },
-  fractionLabel: {
-    color: colors.textPrimary,
-    fontSize: 18,
-    fontWeight: '700',
-  },
   removeButton: {
     marginTop: spacing.xs,
     width: 28,
@@ -348,11 +360,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: FRACTION_BORDER,
     borderStyle: 'dashed',
-  },
-  addButtonText: {
-    color: colors.textSecondary,
-    fontSize: 15,
-    fontWeight: '600',
   },
   denominatorRow: {
     flexDirection: 'row',

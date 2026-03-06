@@ -8,14 +8,13 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg';
 
-import { colors } from '@/theme';
+import { useTheme } from '@/theme';
 import type { Problem } from '@/services/mathEngine/types';
 
 const MAX_BAR_WIDTH = 220;
 const BAR_HEIGHT = 22;
 const ROW_GAP = 6;
 const PADDING = 16;
-const COLOR_A = colors.primary;
 const COLOR_B = '#FACC15';
 
 interface BarModelDiagramProps {
@@ -23,6 +22,7 @@ interface BarModelDiagramProps {
 }
 
 export function BarModelDiagram({ problem }: BarModelDiagramProps) {
+  const { colors } = useTheme();
   const [a, b] = problem.operands;
   const isAddition = problem.operation === 'addition';
   const total = isAddition ? a + b : a;
@@ -73,7 +73,7 @@ export function BarModelDiagram({ problem }: BarModelDiagramProps) {
             width={widthA}
             height={BAR_HEIGHT}
             rx={4}
-            fill={COLOR_A}
+            fill={colors.primary}
           />
           <SvgText
             x={PADDING + widthA / 2}
@@ -135,7 +135,7 @@ export function BarModelDiagram({ problem }: BarModelDiagramProps) {
           width={widthA}
           height={BAR_HEIGHT}
           rx={4}
-          fill={COLOR_A}
+          fill={colors.primary}
         />
         <SvgText
           x={PADDING + widthA / 2}

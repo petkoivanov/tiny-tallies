@@ -9,7 +9,7 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 
-import { colors, spacing } from '@/theme';
+import { useTheme, spacing } from '@/theme';
 import {
   COUNTER_COLORS,
   COUNTER_BORDER_COLORS,
@@ -80,6 +80,21 @@ export function CountersGrid({
   cols,
   onFlip,
 }: CountersGridProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = React.useMemo(() => StyleSheet.create({
+    labelText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textMuted,
+    },
+    totalText: {
+      marginTop: spacing.sm,
+      fontSize: 16,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+  }), [colors]);
+
   const cellSize = COUNTER_SIZE + 8; // counter + gap
 
   return (
@@ -89,7 +104,7 @@ export function CountersGrid({
         <View style={styles.labelCorner} />
         {Array.from({ length: cols }, (_, c) => (
           <View key={`col-label-${c}`} style={[styles.colLabel, { width: cellSize }]}>
-            <Text style={styles.labelText}>{c + 1}</Text>
+            <Text style={dynamicStyles.labelText}>{c + 1}</Text>
           </View>
         ))}
       </View>
@@ -99,7 +114,7 @@ export function CountersGrid({
         <View key={`grid-row-${r}`} style={styles.gridRow}>
           {/* Row label */}
           <View style={styles.rowLabel}>
-            <Text style={styles.labelText}>{r + 1}</Text>
+            <Text style={dynamicStyles.labelText}>{r + 1}</Text>
           </View>
 
           {/* Grid cells for this row */}
@@ -136,7 +151,7 @@ export function CountersGrid({
       ))}
 
       {/* Total label */}
-      <Text style={styles.totalText}>
+      <Text style={dynamicStyles.totalText}>
         {rows} x {cols} = {rows * cols}
       </Text>
     </View>
@@ -161,11 +176,6 @@ const styles = StyleSheet.create({
   colLabel: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  labelText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.textMuted,
   },
   gridRow: {
     flexDirection: 'row',
@@ -195,11 +205,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.15)',
     borderStyle: 'dashed',
-  },
-  totalText: {
-    marginTop: spacing.sm,
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.textPrimary,
   },
 });

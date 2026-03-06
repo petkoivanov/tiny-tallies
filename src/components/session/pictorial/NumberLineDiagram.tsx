@@ -8,7 +8,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Line, Text as SvgText, Path } from 'react-native-svg';
 
-import { colors } from '@/theme';
+import { useTheme } from '@/theme';
 import type { Problem } from '@/services/mathEngine/types';
 
 const SVG_WIDTH = 260;
@@ -17,7 +17,6 @@ const LINE_Y = 45;
 const PAD = 20;
 const TICK_H = 8;
 const LABEL_SIZE = 10;
-const ARC_COLOR = colors.correct;
 
 interface NumberLineDiagramProps {
   problem: Problem;
@@ -30,6 +29,9 @@ function valueToX(value: number, rangeMax: number): number {
 }
 
 export function NumberLineDiagram({ problem }: NumberLineDiagramProps) {
+  const { colors } = useTheme();
+  const arcColor = colors.correct;
+
   const [a, b] = problem.operands;
   const answer = problem.correctAnswer;
   const rangeMax = Math.ceil(Math.max(a, b, answer) / 10) * 10 || 10;
@@ -118,12 +120,12 @@ export function NumberLineDiagram({ problem }: NumberLineDiagramProps) {
         })}
 
         {/* Hop arc */}
-        <Path d={arcPath} stroke={ARC_COLOR} strokeWidth={2} fill="none" />
-        <Path d={arrowPath} stroke={ARC_COLOR} strokeWidth={2} fill="none" />
+        <Path d={arcPath} stroke={arcColor} strokeWidth={2} fill="none" />
+        <Path d={arrowPath} stroke={arcColor} strokeWidth={2} fill="none" />
         <SvgText
           x={midX}
           y={peakY - 3}
-          fill={ARC_COLOR}
+          fill={arcColor}
           fontSize={10}
           fontWeight="bold"
           textAnchor="middle"

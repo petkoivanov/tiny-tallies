@@ -6,7 +6,7 @@
  * SectionView: Individual bar section with tap-to-label behavior.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -18,7 +18,7 @@ import Animated, {
 
 import { triggerSnapHaptic } from '../shared/haptics';
 import { SNAP_SPRING_CONFIG } from '../shared/animationConfig';
-import { colors, spacing, layout, typography } from '../../../theme';
+import { useTheme, spacing, layout, typography } from '../../../theme';
 import {
   type SectionState,
   type PartitionCount,
@@ -38,13 +38,32 @@ interface PresetButtonProps {
 }
 
 export function PresetButton({ count, onSelect }: PresetButtonProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(() => StyleSheet.create({
+    presetButton: {
+      alignItems: 'center',
+      padding: spacing.md,
+      borderRadius: layout.borderRadius.md,
+      backgroundColor: colors.surface,
+      borderWidth: 2,
+      borderColor: BAR_BORDER,
+      minWidth: 90,
+      minHeight: layout.minTouchTarget,
+    },
+    presetLabel: {
+      fontSize: typography.fontSize.sm,
+      fontWeight: '600',
+      color: colors.textPrimary,
+    },
+  }), [colors]);
+
   const handlePress = useCallback(() => {
     onSelect(count);
   }, [count, onSelect]);
 
   return (
     <Pressable
-      style={styles.presetButton}
+      style={dynamicStyles.presetButton}
       onPress={handlePress}
       accessibilityLabel={`${count} equal parts`}
       accessibilityRole="button"
@@ -60,7 +79,7 @@ export function PresetButton({ count, onSelect }: PresetButtonProps) {
           />
         ))}
       </View>
-      <Text style={styles.presetLabel}>{count} parts</Text>
+      <Text style={dynamicStyles.presetLabel}>{count} parts</Text>
     </Pressable>
   );
 }
@@ -142,6 +161,15 @@ export function SectionView({
   barWidth,
   onTap,
 }: SectionViewProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(() => StyleSheet.create({
+    sectionLabel: {
+      fontSize: typography.fontSize.xl,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+  }), [colors]);
+
   const width = section.widthFraction * barWidth;
 
   const handlePress = useCallback(() => {
@@ -179,7 +207,7 @@ export function SectionView({
     >
       <Text
         style={[
-          styles.sectionLabel,
+          dynamicStyles.sectionLabel,
           section.isUnknown && styles.sectionLabelUnknown,
         ]}
       >
@@ -191,16 +219,6 @@ export function SectionView({
 
 const styles = StyleSheet.create({
   // --- Preset Button ---
-  presetButton: {
-    alignItems: 'center',
-    padding: spacing.md,
-    borderRadius: layout.borderRadius.md,
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: BAR_BORDER,
-    minWidth: 90,
-    minHeight: layout.minTouchTarget,
-  },
   presetPreview: {
     flexDirection: 'row',
     width: 60,
@@ -219,12 +237,6 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderRightColor: BAR_PRIMARY,
   },
-  presetLabel: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: '600',
-    color: colors.textPrimary,
-  },
-
   // --- Divider ---
   dividerTouchArea: {
     position: 'absolute',
@@ -254,11 +266,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     height: '100%',
-  },
-  sectionLabel: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: '700',
-    color: colors.textPrimary,
   },
   sectionLabelUnknown: {
     color: BAR_UNKNOWN,

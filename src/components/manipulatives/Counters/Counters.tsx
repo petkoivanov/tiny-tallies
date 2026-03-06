@@ -10,7 +10,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 import { ManipulativeShell } from '../ManipulativeShell';
 import { triggerSnapHaptic, MAX_OBJECTS, DRAG_SCALE, useActionHistory, GuidedHighlight } from '../shared';
-import { colors, spacing } from '@/theme';
+import { useTheme, spacing } from '@/theme';
 
 import {
   COUNTER_COLORS,
@@ -160,6 +160,38 @@ export function Counters({
   gridCols,
   testID,
 }: CountersProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = React.useMemo(() => StyleSheet.create({
+    tray: {
+      height: 72,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderTopWidth: 1,
+      borderTopColor: colors.surfaceLight,
+      paddingHorizontal: spacing.md,
+    },
+    addLabel: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    nudgeText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: colors.textMuted,
+      fontStyle: 'italic',
+    },
+    dimensionPickers: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: spacing.lg,
+      paddingVertical: spacing.sm,
+      borderTopWidth: 1,
+      borderTopColor: colors.surfaceLight,
+    },
+  }), [colors]);
+
   const { state: counters, canUndo, pushState, undo, reset } = useActionHistory<CounterState[]>([]);
   const nextId = useRef(0);
 
@@ -294,7 +326,7 @@ export function Counters({
             onFlip={handleFlip}
           />
           {showDimensionPickers && (
-            <View style={styles.dimensionPickers} testID="grid-dimension-pickers">
+            <View style={dynamicStyles.dimensionPickers} testID="grid-dimension-pickers">
               <DimensionStepper
                 label="Rows"
                 value={gridState.rows}
@@ -329,9 +361,9 @@ export function Counters({
           </View>
 
           {/* Tray -- counter source at bottom */}
-          <View style={styles.tray}>
+          <View style={dynamicStyles.tray}>
             {atCap ? (
-              <Text style={styles.nudgeText} testID="cap-nudge">
+              <Text style={dynamicStyles.nudgeText} testID="cap-nudge">
                 Try grouping your counters!
               </Text>
             ) : (
@@ -353,7 +385,7 @@ export function Counters({
                       },
                     ]}
                   />
-                  <Text style={styles.addLabel}>+ Add</Text>
+                  <Text style={dynamicStyles.addLabel}>+ Add</Text>
                 </Pressable>
               </GuidedHighlight>
             )}
@@ -381,15 +413,6 @@ const styles = StyleSheet.create({
     // Pad touch target to meet 48dp minimum
     padding: (48 - COUNTER_SIZE) / 2,
   },
-  tray: {
-    height: 72,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderTopWidth: 1,
-    borderTopColor: colors.surfaceLight,
-    paddingHorizontal: spacing.md,
-  },
   trayCounter: {
     position: 'relative',
   },
@@ -400,24 +423,5 @@ const styles = StyleSheet.create({
     minWidth: 48,
     minHeight: 48,
     paddingHorizontal: spacing.md,
-  },
-  addLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  nudgeText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.textMuted,
-    fontStyle: 'italic',
-  },
-  dimensionPickers: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.surfaceLight,
   },
 });

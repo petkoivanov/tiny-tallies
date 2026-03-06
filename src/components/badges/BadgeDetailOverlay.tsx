@@ -30,6 +30,8 @@ function getRequirementText(condition: UnlockCondition): string {
       return `Complete ${condition.sessionsRequired} sessions`;
     case 'remediation-victory':
       return `Resolve ${condition.resolvedCountRequired} misconception${condition.resolvedCountRequired === 1 ? '' : 's'}`;
+    default:
+      return 'Unknown requirement';
   }
 }
 

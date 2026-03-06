@@ -9,13 +9,12 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg';
 
-import { colors } from '@/theme';
+import { useTheme } from '@/theme';
 import type { Problem } from '@/services/mathEngine/types';
 
 const STRIP_WIDTH = 220;
 const STRIP_HEIGHT = 24;
 const PADDING = 16;
-const COLOR_A = colors.primary;
 const COLOR_B = '#FACC15';
 
 interface FractionStripsDiagramProps {
@@ -23,6 +22,7 @@ interface FractionStripsDiagramProps {
 }
 
 export function FractionStripsDiagram({ problem }: FractionStripsDiagramProps) {
+  const { colors } = useTheme();
   const [a, b] = problem.operands;
   const total = a + b;
   const scale = total > 0 ? STRIP_WIDTH / total : 1;
@@ -54,7 +54,7 @@ export function FractionStripsDiagram({ problem }: FractionStripsDiagramProps) {
           width={widthA}
           height={STRIP_HEIGHT}
           rx={4}
-          fill={COLOR_A}
+          fill={colors.primary}
         />
         <SvgText
           x={PADDING + widthA / 2}

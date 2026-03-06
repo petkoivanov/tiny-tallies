@@ -52,6 +52,8 @@ function getShortRequirement(badge: BadgeDefinition): string {
       return `${c.sessionsRequired} sessions`;
     case 'remediation-victory':
       return `${c.resolvedCountRequired} fixed`;
+    default:
+      return badge.description;
   }
 }
 

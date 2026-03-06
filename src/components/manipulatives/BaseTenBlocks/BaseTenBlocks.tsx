@@ -18,7 +18,7 @@ import {
 } from '../shared';
 import type { SnapTarget } from '../shared';
 import { ManipulativeShell } from '../ManipulativeShell';
-import { colors, spacing } from '@/theme';
+import { useTheme, spacing } from '@/theme';
 
 import type { BaseTenBlocksProps, BlockState, BlockType, PlaceValueColumn } from './BaseTenBlocksTypes';
 import { COLUMN_COLORS, COLUMN_LABELS, GROUP_THRESHOLD } from './BaseTenBlocksTypes';
@@ -48,6 +48,30 @@ function renderBlock(type: BlockType) {
 }
 
 export function BaseTenBlocks({ testID, guidedTargetId }: BaseTenBlocksProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(() => StyleSheet.create({
+    columnLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: spacing.xs,
+    },
+    capMessageText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: colors.textSecondary,
+      fontStyle: 'italic',
+    },
+    trayLabel: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: colors.textMuted,
+      marginTop: 2,
+      textAlign: 'center',
+    },
+  }), [colors]);
+
   const { state: blocks, canUndo, pushState, undo, reset } = useActionHistory<BlockState[]>([]);
   const [containerWidth, setContainerWidth] = useState(0);
   const [isGrouping, setIsGrouping] = useState(false);
@@ -231,7 +255,7 @@ export function BaseTenBlocks({ testID, guidedTargetId }: BaseTenBlocksProps) {
               accessibilityLabel={`${COLUMN_LABELS[col]} column`}
               style={[styles.column, { width: colWidth, backgroundColor: COLUMN_COLORS[col] }]}
             >
-              <Text style={styles.columnLabel}>{COLUMN_LABELS[col]}</Text>
+              <Text style={dynamicStyles.columnLabel}>{COLUMN_LABELS[col]}</Text>
               <View style={styles.blockArea}>
                 {blocksByColumn[col].map((block, idx) => {
                   const pos = getBlockPosition(col, idx, containerWidth);
@@ -259,19 +283,19 @@ export function BaseTenBlocks({ testID, guidedTargetId }: BaseTenBlocksProps) {
 
         {capMessage ? (
           <View style={styles.capMessageContainer}>
-            <Text style={styles.capMessageText}>{capMessage}</Text>
+            <Text style={dynamicStyles.capMessageText}>{capMessage}</Text>
           </View>
         ) : null}
 
         <View style={styles.tray}>
           <GuidedHighlight active={guidedTargetId === 'hundreds-column'}>
-            <TraySource type="flat" label="100" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} />
+            <TraySource type="flat" label="100" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} labelStyle={dynamicStyles.trayLabel} />
           </GuidedHighlight>
           <GuidedHighlight active={guidedTargetId === 'tens-column'}>
-            <TraySource type="rod" label="10" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} />
+            <TraySource type="rod" label="10" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} labelStyle={dynamicStyles.trayLabel} />
           </GuidedHighlight>
           <GuidedHighlight active={guidedTargetId === 'ones-column'}>
-            <TraySource type="cube" label="1" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} />
+            <TraySource type="cube" label="1" onPress={addBlock} disabled={isGrouping || blocks.length >= MAX_OBJECTS} labelStyle={dynamicStyles.trayLabel} />
           </GuidedHighlight>
         </View>
       </View>
@@ -280,9 +304,10 @@ export function BaseTenBlocks({ testID, guidedTargetId }: BaseTenBlocksProps) {
 }
 
 // Tray source button extracted for DRY
-function TraySource({ type, label, onPress, disabled }: {
+function TraySource({ type, label, onPress, disabled, labelStyle }: {
   type: BlockType; label: string;
   onPress: (t: BlockType) => void; disabled: boolean;
+  labelStyle: object;
 }) {
   return (
     <Pressable
@@ -293,7 +318,7 @@ function TraySource({ type, label, onPress, disabled }: {
       disabled={disabled}
     >
       {renderBlock(type)}
-      <Text style={styles.trayLabel}>{label}</Text>
+      <Text style={labelStyle}>{label}</Text>
     </Pressable>
   );
 }
@@ -314,22 +339,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 200,
   },
-  columnLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: spacing.xs,
-  },
   blockArea: { flex: 1, width: '100%', position: 'relative' },
   blockItem: { position: 'absolute' },
   capMessageContainer: { paddingVertical: spacing.xs, alignItems: 'center' },
-  capMessageText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.textSecondary,
-    fontStyle: 'italic',
-  },
   tray: {
     height: TRAY_HEIGHT,
     flexDirection: 'row',
@@ -344,12 +356,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minWidth: 48,
     minHeight: 48,
-  },
-  trayLabel: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.textMuted,
-    marginTop: 2,
-    textAlign: 'center',
   },
 });

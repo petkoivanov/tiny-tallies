@@ -16,7 +16,7 @@ import {
   type NativeSyntheticEvent,
   type NativeScrollEvent,
 } from 'react-native';
-import { colors, layout, spacing } from '../../../theme';
+import { useTheme, layout, spacing } from '../../../theme';
 import {
   BAR_BORDER,
   BAR_UNKNOWN,
@@ -50,6 +50,33 @@ export function NumberPicker({
   onClose,
   onMarkUnknown,
 }: NumberPickerProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(() => StyleSheet.create({
+    container: {
+      width: 120,
+      backgroundColor: colors.surface,
+      borderRadius: layout.borderRadius.md,
+      borderWidth: 2,
+      borderColor: BAR_BORDER,
+      overflow: 'hidden',
+      zIndex: 11,
+    },
+    itemText: {
+      fontSize: 18,
+      fontWeight: '500',
+      color: colors.textSecondary,
+    },
+    itemTextSelected: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+    doneButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.textPrimary,
+    },
+  }), [colors]);
   const flatListRef = useRef<FlatList<number>>(null);
 
   // Build data array with padding items for centering
@@ -110,8 +137,8 @@ export function NumberPicker({
         <View style={styles.item} accessibilityLabel={`${item}`}>
           <Text
             style={[
-              styles.itemText,
-              isSelected && styles.itemTextSelected,
+              dynamicStyles.itemText,
+              isSelected && dynamicStyles.itemTextSelected,
               { opacity },
             ]}
           >
@@ -120,7 +147,7 @@ export function NumberPicker({
         </View>
       );
     },
-    [value, min],
+    [value, min, dynamicStyles],
   );
 
   if (!visible) {
@@ -135,7 +162,7 @@ export function NumberPicker({
         accessibilityLabel="Close number picker"
       />
       <View
-        style={styles.container}
+        style={dynamicStyles.container}
         accessibilityLabel="Number picker"
         accessibilityRole="adjustable"
       >
@@ -169,7 +196,7 @@ export function NumberPicker({
           onPress={onClose}
           accessibilityLabel="Done"
         >
-          <Text style={styles.doneButtonText}>Done</Text>
+          <Text style={dynamicStyles.doneButtonText}>Done</Text>
         </Pressable>
       </View>
     </View>
@@ -186,15 +213,6 @@ const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  container: {
-    width: 120,
-    backgroundColor: colors.surface,
-    borderRadius: layout.borderRadius.md,
-    borderWidth: 2,
-    borderColor: BAR_BORDER,
-    overflow: 'hidden',
-    zIndex: 11,
   },
   unknownButton: {
     alignItems: 'center',
@@ -233,16 +251,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  itemText: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: colors.textSecondary,
-  },
-  itemTextSelected: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
   doneButton: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -250,10 +258,5 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: BAR_BORDER,
     backgroundColor: 'rgba(45, 212, 191, 0.1)',
-  },
-  doneButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.textPrimary,
   },
 });

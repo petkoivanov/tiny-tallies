@@ -11,7 +11,7 @@ import {
   GuidedHighlight,
   type SnapTarget,
 } from '../shared';
-import { colors, spacing } from '@/theme';
+import { useTheme, spacing } from '@/theme';
 
 import {
   GRID_COLS,
@@ -148,6 +148,25 @@ function TrayCounter({ snapTargets, onSnap }: TrayCounterProps) {
  * a second frame auto-spawns below. Running count shows total occupied cells.
  */
 export function TenFrame({ testID, initialFrames = 1, guidedTargetId }: TenFrameProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(() => StyleSheet.create({
+    tray: {
+      height: 72,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderTopWidth: 1,
+      borderTopColor: colors.surfaceLight,
+      paddingHorizontal: spacing.md,
+      gap: spacing.md,
+    },
+    trayLabel: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: colors.textMuted,
+    },
+  }), [colors]);
+
   const initialCells = useMemo(
     () => new Array(CELLS_PER_FRAME * initialFrames).fill(false) as boolean[],
     [initialFrames],
@@ -275,9 +294,9 @@ export function TenFrame({ testID, initialFrames = 1, guidedTargetId }: TenFrame
       </View>
 
       {/* Tray -- counter source at bottom */}
-      <View style={styles.tray}>
+      <View style={dynamicStyles.tray}>
         <TrayCounter snapTargets={snapTargets} onSnap={handleSnap} />
-        <Text style={styles.trayLabel}>Drag to place</Text>
+        <Text style={dynamicStyles.trayLabel}>Drag to place</Text>
       </View>
     </ManipulativeShell>
   );
@@ -328,16 +347,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COUNTER_BORDER,
   },
-  tray: {
-    height: 72,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderTopWidth: 1,
-    borderTopColor: colors.surfaceLight,
-    paddingHorizontal: spacing.md,
-    gap: spacing.md,
-  },
   trayItemWrapper: {
     minWidth: 48,
     minHeight: 48,
@@ -351,10 +360,5 @@ const styles = StyleSheet.create({
     backgroundColor: COUNTER_COLOR,
     borderWidth: 2,
     borderColor: COUNTER_BORDER,
-  },
-  trayLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.textMuted,
   },
 });
