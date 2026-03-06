@@ -40,6 +40,7 @@ export type RootStackParamList = {
   ThemePicker: undefined;
   Consent: { returnTo?: 'Session' } | undefined;
   ProfileSetup: undefined;
+  ProfileManagement: undefined;
 };
 
 declare global {

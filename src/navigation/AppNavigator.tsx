@@ -1,5 +1,4 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './types';
 import HomeScreen from '@/screens/HomeScreen';
@@ -11,23 +10,12 @@ import BadgeCollectionScreen from '@/screens/BadgeCollectionScreen';
 import SkillMapScreen from '@/screens/SkillMapScreen';
 import AvatarPickerScreen from '@/screens/AvatarPickerScreen';
 import ThemePickerScreen from '@/screens/ThemePickerScreen';
+import ProfileSetupScreen from '@/screens/ProfileSetupScreen';
+import ProfileManagementScreen from '@/screens/ProfileManagementScreen';
 import { useTheme } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
-/** Minimal placeholder -- Phase 39 replaces with full ProfileCreationWizard */
-function ProfileSetupPlaceholder() {
-  return (
-    <View style={styles.placeholder}>
-      <Text>Profile Setup (Phase 39)</Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  placeholder: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-});
 
 export default function AppNavigator() {
   const { colors } = useTheme();
@@ -60,9 +48,10 @@ export default function AppNavigator() {
       />
       <Stack.Screen
         name="ProfileSetup"
-        component={ProfileSetupPlaceholder}
+        component={ProfileSetupScreen}
         options={{ gestureEnabled: false }}
       />
+      <Stack.Screen name="ProfileManagement" component={ProfileManagementScreen} />
     </Stack.Navigator>
   );
 }

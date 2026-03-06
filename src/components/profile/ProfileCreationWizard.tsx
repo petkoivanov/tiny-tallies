@@ -109,7 +109,7 @@ export function ProfileCreationWizard({
 
       {step === 'name' && (
         <View style={styles.stepContainer}>
-          <Text style={[styles.heading, { color: colors.text }]}>
+          <Text style={[styles.heading, { color: colors.textPrimary }]}>
             {"What's your learner's name?"}
           </Text>
 
@@ -117,8 +117,8 @@ export function ProfileCreationWizard({
             style={[
               styles.nameInput,
               {
-                color: colors.text,
-                borderColor: colors.border,
+                color: colors.textPrimary,
+                borderColor: colors.surfaceLight,
                 backgroundColor: colors.surface,
               },
             ]}
@@ -136,7 +136,7 @@ export function ProfileCreationWizard({
               {
                 color:
                   name.length > NAME_MAX_LENGTH
-                    ? colors.error
+                    ? colors.incorrect
                     : colors.textSecondary,
               },
             ]}
@@ -179,7 +179,7 @@ export function ProfileCreationWizard({
 
       {step === 'age-grade' && (
         <View style={styles.stepContainer}>
-          <Text style={[styles.heading, { color: colors.text }]}>
+          <Text style={[styles.heading, { color: colors.textPrimary }]}>
             How old is {trimmedName}?
           </Text>
 
@@ -197,7 +197,7 @@ export function ProfileCreationWizard({
                     backgroundColor:
                       age === a ? colors.primary : colors.surface,
                     borderColor:
-                      age === a ? colors.primary : colors.border,
+                      age === a ? colors.primary : colors.surfaceLight,
                   },
                 ]}
                 onPress={() => handleAgeSelect(a)}
@@ -205,7 +205,7 @@ export function ProfileCreationWizard({
                 <Text
                   style={[
                     styles.selectorChipText,
-                    { color: age === a ? '#fff' : colors.text },
+                    { color: age === a ? '#fff' : colors.textPrimary },
                   ]}
                 >
                   {String(a)}
@@ -215,7 +215,7 @@ export function ProfileCreationWizard({
           </ScrollView>
 
           <Text
-            style={[styles.subHeading, { color: colors.text, marginTop: 24 }]}
+            style={[styles.subHeading, { color: colors.textPrimary, marginTop: 24 }]}
           >
             What grade?
           </Text>
@@ -234,7 +234,7 @@ export function ProfileCreationWizard({
                     backgroundColor:
                       grade === g.value ? colors.primary : colors.surface,
                     borderColor:
-                      grade === g.value ? colors.primary : colors.border,
+                      grade === g.value ? colors.primary : colors.surfaceLight,
                   },
                 ]}
                 onPress={() => handleGradeSelect(g.value)}
@@ -243,7 +243,7 @@ export function ProfileCreationWizard({
                   style={[
                     styles.selectorChipText,
                     {
-                      color: grade === g.value ? '#fff' : colors.text,
+                      color: grade === g.value ? '#fff' : colors.textPrimary,
                     },
                   ]}
                 >
@@ -258,8 +258,8 @@ export function ProfileCreationWizard({
               style={[styles.navButton, { backgroundColor: colors.surface }]}
               onPress={handleBack}
             >
-              <ChevronLeft size={18} color={colors.text} />
-              <Text style={[styles.navButtonText, { color: colors.text }]}>
+              <ChevronLeft size={18} color={colors.textPrimary} />
+              <Text style={[styles.navButtonText, { color: colors.textPrimary }]}>
                 Back
               </Text>
             </Pressable>
@@ -299,7 +299,7 @@ export function ProfileCreationWizard({
 
       {step === 'avatar' && (
         <View style={styles.stepContainer}>
-          <Text style={[styles.heading, { color: colors.text }]}>
+          <Text style={[styles.heading, { color: colors.textPrimary }]}>
             Choose an avatar for {trimmedName}!
           </Text>
 
@@ -330,8 +330,8 @@ export function ProfileCreationWizard({
               style={[styles.navButton, { backgroundColor: colors.surface }]}
               onPress={handleBack}
             >
-              <ChevronLeft size={18} color={colors.text} />
-              <Text style={[styles.navButtonText, { color: colors.text }]}>
+              <ChevronLeft size={18} color={colors.textPrimary} />
+              <Text style={[styles.navButtonText, { color: colors.textPrimary }]}>
                 Back
               </Text>
             </Pressable>
