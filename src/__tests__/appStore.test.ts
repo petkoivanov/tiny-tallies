@@ -82,8 +82,8 @@ describe('appStore composition', () => {
     expect(useAppStore.getState().xp).toBe(35);
   });
 
-  it('STORE_VERSION equals 10', () => {
-    expect(STORE_VERSION).toBe(11);
+  it('STORE_VERSION equals 13', () => {
+    expect(STORE_VERSION).toBe(13);
   });
 });
 
@@ -272,9 +272,16 @@ describe('enriched slice behaviors', () => {
 });
 
 describe('appStore persistence', () => {
+  const TEST_CHILD_ID = 'test-child-001';
+
   beforeEach(async () => {
     await AsyncStorage.clear();
     useAppStore.setState(useAppStore.getInitialState(), true);
+    // Set up an active child directly so partialize has a target for dehydration
+    useAppStore.setState({
+      activeChildId: TEST_CHILD_ID,
+      children: {},
+    });
   });
 
   it('persists child profile to AsyncStorage', async () => {
@@ -291,10 +298,13 @@ describe('appStore persistence', () => {
     const stored = await AsyncStorage.getItem('tiny-tallies-store');
     expect(stored).not.toBeNull();
     const parsed = JSON.parse(stored!);
-    expect(parsed.state.childName).toBe('Luna');
-    expect(parsed.state.childAge).toBe(7);
-    expect(parsed.state.childGrade).toBe(2);
-    expect(parsed.state.avatarId).toBe('owl');
+    // After Plan 02 restructure, child data persists inside children map
+    const child = parsed.state.children[TEST_CHILD_ID];
+    expect(child).toBeDefined();
+    expect(child.childName).toBe('Luna');
+    expect(child.childAge).toBe(7);
+    expect(child.childGrade).toBe(2);
+    expect(child.avatarId).toBe('owl');
   });
 
   it('persists skill states to AsyncStorage', async () => {
@@ -311,8 +321,11 @@ describe('appStore persistence', () => {
     const stored = await AsyncStorage.getItem('tiny-tallies-store');
     expect(stored).not.toBeNull();
     const parsed = JSON.parse(stored!);
+    // After Plan 02 restructure, skill states persist inside children map
+    const child = parsed.state.children[TEST_CHILD_ID];
+    expect(child).toBeDefined();
     const skill =
-      parsed.state.skillStates['addition.single-digit.no-carry'];
+      child.skillStates['addition.single-digit.no-carry'];
     expect(skill).toBeDefined();
     expect(skill.eloRating).toBe(1050);
     expect(skill.attempts).toBe(5);
@@ -329,9 +342,12 @@ describe('appStore persistence', () => {
     const stored = await AsyncStorage.getItem('tiny-tallies-store');
     expect(stored).not.toBeNull();
     const parsed = JSON.parse(stored!);
-    expect(parsed.state.xp).toBe(50);
-    expect(parsed.state.level).toBe(3);
-    expect(parsed.state.weeklyStreak).toBe(1);
+    // After Plan 02 restructure, gamification data persists inside children map
+    const child = parsed.state.children[TEST_CHILD_ID];
+    expect(child).toBeDefined();
+    expect(child.xp).toBe(50);
+    expect(child.level).toBe(3);
+    expect(child.weeklyStreak).toBe(1);
   });
 
   it('does NOT persist session state', async () => {
