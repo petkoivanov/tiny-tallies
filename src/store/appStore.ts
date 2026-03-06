@@ -38,7 +38,12 @@ import {
   type ChallengeSlice,
   createChallengeSlice,
 } from './slices/challengeSlice';
+import {
+  type ProfilesSlice,
+  createProfilesSlice,
+} from './slices/profilesSlice';
 import { migrateStore } from './migrations';
+import { dehydrateChild, hydrateChild } from './helpers/childDataHelpers';
 
 export type AppState = ChildProfileSlice &
   SkillStatesSlice &
@@ -48,13 +53,14 @@ export type AppState = ChildProfileSlice &
   TutorSlice &
   MisconceptionSlice &
   AchievementSlice &
-  ChallengeSlice;
+  ChallengeSlice &
+  ProfilesSlice;
 
 /**
  * Increment + add migration function when changing schema shape.
  * See CLAUDE.md guardrail: never bump version without a corresponding migration.
  */
-export const STORE_VERSION = 12;
+export const STORE_VERSION = 13;
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -68,6 +74,7 @@ export const useAppStore = create<AppState>()(
       ...createMisconceptionSlice(...a),
       ...createAchievementSlice(...a),
       ...createChallengeSlice(...a),
+      ...createProfilesSlice(...a),
     }),
     {
       name: 'tiny-tallies-store',
@@ -75,25 +82,21 @@ export const useAppStore = create<AppState>()(
       version: STORE_VERSION,
       migrate: migrateStore,
       partialize: (state) => ({
-        childName: state.childName,
-        childAge: state.childAge,
-        childGrade: state.childGrade,
-        avatarId: state.avatarId,
-        frameId: state.frameId,
-        themeId: state.themeId,
-        tutorConsentGranted: state.tutorConsentGranted,
-        skillStates: state.skillStates,
-        xp: state.xp,
-        level: state.level,
-        weeklyStreak: state.weeklyStreak,
-        lastSessionDate: state.lastSessionDate,
-        exploredManipulatives: state.exploredManipulatives,
-        misconceptions: state.misconceptions,
-        earnedBadges: state.earnedBadges,
-        sessionsCompleted: state.sessionsCompleted,
-        challengeCompletions: state.challengeCompletions,
-        challengesCompleted: state.challengesCompleted,
+        children: state.activeChildId
+          ? {
+              ...state.children,
+              [state.activeChildId]: dehydrateChild(state),
+            }
+          : state.children,
+        activeChildId: state.activeChildId,
+        _needsMigrationPrompt: state._needsMigrationPrompt,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state?.activeChildId && state.children[state.activeChildId]) {
+          const childData = state.children[state.activeChildId];
+          useAppStore.setState(hydrateChild(childData));
+        }
+      },
     },
   ),
 );

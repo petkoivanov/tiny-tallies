@@ -1,5 +1,8 @@
+import * as Crypto from 'expo-crypto';
+
 import { mapPLToInitialBox } from '../services/adaptive/leitnerCalculator';
 import { deriveCpaStage } from '../services/cpa/cpaMappingService';
+import { CHILD_DATA_KEYS } from './helpers/childDataHelpers';
 
 /**
  * Store migration functions for Zustand persist middleware.
@@ -116,8 +119,21 @@ export function migrateStore(
     state.themeId ??= 'dark';
   }
 
+  if (version < 13) {
+    // v12 -> v13: Restructure flat state into multi-child map
+    const childData: Record<string, unknown> = {};
+    for (const key of CHILD_DATA_KEYS) {
+      childData[key] = state[key];
+    }
+    const childId = Crypto.randomUUID();
+    state.children = { [childId]: childData };
+    state.activeChildId = childId;
+    state._needsMigrationPrompt = true;
+    // Flat fields remain for immediate hydration after migration
+  }
+
   // Future migrations chain here:
-  // if (version < 13) { ... }
+  // if (version < 14) { ... }
 
   return state;
 }
