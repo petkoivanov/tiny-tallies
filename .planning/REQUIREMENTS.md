@@ -9,7 +9,7 @@ Requirements for Social & Subscription milestone. Each maps to roadmap phases.
 
 ### Multi-Child Profiles
 
-- [ ] **PROF-01**: User can switch between child profiles from the home screen
+- [x] **PROF-01**: User can switch between child profiles from the home screen
 - [ ] **PROF-02**: Parent can add a new child profile with name, age, and grade level (PIN-gated)
 - [ ] **PROF-03**: Parent can edit an existing child profile's name, age, and grade level
 - [ ] **PROF-04**: Parent can delete a child profile with confirmation
@@ -79,7 +79,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROF-01 | Phase 39 | Pending |
+| PROF-01 | Phase 39 | Complete |
 | PROF-02 | Phase 39 | Pending |
 | PROF-03 | Phase 39 | Pending |
 | PROF-04 | Phase 39 | Pending |

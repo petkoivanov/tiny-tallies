@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: executing
-stopped_at: Completed 38-03-PLAN.md
-last_updated: "2026-03-06T13:29:59.553Z"
-last_activity: 2026-03-06 -- Completed 38-03 (Auto-save and conditional navigation)
+stopped_at: Completed 39-01-PLAN.md
+last_updated: "2026-03-06T13:55:00.000Z"
+last_activity: 2026-03-06 -- Completed 39-01 (Profile switcher and PIN gate)
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 5
 ---
 
 # Project State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-03-05)
 
 ## Current Position
 
-Phase: 38 (Multi-Child Store Foundation) -- in progress
-Plan: 03 of 4 complete
-Status: Executing phase 38
-Last activity: 2026-03-06 -- Completed 38-03 (Auto-save and conditional navigation)
+Phase: 39 (Profile Management UI) -- in progress
+Plan: 01 of 3 complete
+Status: Executing phase 39
+Last activity: 2026-03-06 -- Completed 39-01 (Profile switcher and PIN gate)
 
 ```
 [==........] 17% (1/6 phases in progress)
@@ -65,6 +65,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 38]: onRehydrateStorage hydrates active child flat fields after store load
 - [Phase 38]: useAutoSave at App root triggers saveActiveChild on app background
 - [Phase 38]: AppNavigator conditionally routes to ProfileSetup when no children exist
+- [Phase 39]: PinGate uses refs to avoid stale closure bugs in async digit handler
+- [Phase 39]: ProfileSwitcherSheet reads active child from flat state (not stale map)
+- [Phase 39]: HomeScreen avatar tap changed from AvatarPicker to profile switcher
 
 ### Pending Todos
 
@@ -81,7 +84,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-06T13:01:19.780Z
-Stopped at: Completed 38-03-PLAN.md
+Last session: 2026-03-06T13:55:00.000Z
+Stopped at: Completed 39-01-PLAN.md
 Resume file: None
-Resume command: /gsd:execute-phase 38 (continues with plan 02)
+Resume command: /gsd:execute-phase 39 (continues with plan 02)
