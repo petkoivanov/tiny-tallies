@@ -1,33 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.7
-milestone_name: Gamification
-status: completed
-stopped_at: Milestone v0.7 archived
-last_updated: "2026-03-06"
-last_activity: 2026-03-06 -- Milestone v0.7 Gamification archived and completed
+milestone: v0.8
+milestone_name: Social & Subscription
+status: active
+stopped_at: Defining requirements
+last_updated: "2026-03-05"
+last_activity: 2026-03-05 -- Milestone v0.8 started
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 17
-  completed_plans: 17
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-06)
+See: .planning/PROJECT.md (updated 2026-03-05)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** Planning next milestone
+**Current focus:** Defining requirements for v0.8 Social & Subscription
 
 ## Current Position
 
-Milestone v0.7 Gamification: COMPLETE
-All 7 phases (31-37), 17 plans shipped.
-Next: /gsd:new-milestone to start v0.8
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-05 — Milestone v0.8 started
 
 ## Performance Metrics
 
@@ -56,7 +57,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06
-Stopped at: Milestone v0.7 archived
+Last session: 2026-03-05
+Stopped at: Defining requirements
 Resume file: None
 Resume command: /gsd:new-milestone

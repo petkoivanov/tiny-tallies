@@ -55,7 +55,16 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ### Active
 
-(Next milestone requirements to be defined via /gsd:new-milestone)
+## Current Milestone: v0.8 Social & Subscription
+
+**Goal:** Add multi-child profiles, parent dashboard with analytics and time controls, and freemium subscription with IAP.
+
+**Target features:**
+- Multi-child profile switcher (add/edit/delete children, independent progress per child)
+- Parent dashboard (progress overview, skill analytics, misconception breakdown, trend graphs)
+- Parental controls (daily session time cap, bedtime lockout, break reminders)
+- Freemium subscription (free: 3 sessions/day no AI tutor; premium: unlimited + AI tutor + all themes)
+- IAP integration (subscription management, restore purchases, subscription state)
 
 ### Out of Scope
 
@@ -132,7 +141,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tutoring engine design, virtual manipulatives specs, misconception detection patterns, spaced repetition algorithms, gamification design, onboarding/placement testing, child UX design, sound/audio design, math anxiety mitigation, COPPA privacy compliance, problem generation engine.
 
 **Future milestones:**
-- v0.8: Social & subscription (family groups, parent dashboard, IAP)
+- v0.9: TBD (onboarding/placement testing, sound/audio, expanded curriculum)
 
 ## Constraints
 
@@ -205,4 +214,4 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | STORE_VERSION 9-12 across v0.7 phases | One migration per gamification feature, clean chaining | ✓ Good — 4 sequential migrations |
 
 ---
-*Last updated: 2026-03-06 after v0.7 milestone*
+*Last updated: 2026-03-05 after v0.8 milestone started*
