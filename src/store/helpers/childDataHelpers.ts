@@ -95,9 +95,10 @@ export const DEFAULT_CHILD_DATA: ChildData = {
  * Extract all per-child fields from flat AppState into a ChildData snapshot.
  */
 export function dehydrateChild(state: AppState): ChildData {
-  const result = {} as Record<string, unknown>;
+  const result: Partial<ChildData> = {};
   for (const key of CHILD_DATA_KEYS) {
-    result[key] = state[key];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (result as any)[key] = state[key];
   }
   return result as ChildData;
 }
@@ -106,11 +107,12 @@ export function dehydrateChild(state: AppState): ChildData {
  * Create a partial state update from ChildData that can be spread onto AppState.
  */
 export function hydrateChild(data: ChildData): Partial<AppState> {
-  const result = {} as Record<string, unknown>;
+  const result: Partial<AppState> = {};
   for (const key of CHILD_DATA_KEYS) {
-    result[key] = data[key];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (result as any)[key] = data[key];
   }
-  return result as Partial<AppState>;
+  return result;
 }
 
 /**
