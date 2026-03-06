@@ -7,6 +7,7 @@
  */
 import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
+import type { ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -105,18 +106,21 @@ function DecorationDot({ item }: { item: DecorationItem }) {
 
   const isSunsetBar = item.size > 30;
 
-  const positionStyle = useMemo(() => ({
-    position: 'absolute' as const,
-    ...(item.top != null ? { top: item.top } : {}),
-    ...(item.bottom != null ? { bottom: item.bottom } : {}),
-    ...(item.left != null ? { left: item.left } : {}),
-    ...(item.right != null ? { right: item.right } : {}),
-    width: isSunsetBar ? '90%' : item.size,
-    height: isSunsetBar ? 3 : item.size,
-    borderRadius: item.borderRadius ?? item.size / 2,
-    backgroundColor: item.color,
-    ...(item.rotate ? { transform: [{ rotate: item.rotate }] } : {}),
-  }), [item, isSunsetBar]);
+  const positionStyle = useMemo((): ViewStyle => {
+    const base: ViewStyle = {
+      position: 'absolute',
+      width: isSunsetBar ? '90%' : item.size,
+      height: isSunsetBar ? 3 : item.size,
+      borderRadius: item.borderRadius ?? item.size / 2,
+      backgroundColor: item.color,
+    };
+    if (item.top != null) base.top = item.top as ViewStyle['top'];
+    if (item.bottom != null) base.bottom = item.bottom as ViewStyle['bottom'];
+    if (item.left != null) base.left = item.left as ViewStyle['left'];
+    if (item.right != null) base.right = item.right as ViewStyle['right'];
+    if (item.rotate) base.transform = [{ rotate: item.rotate }];
+    return base;
+  }, [item, isSunsetBar]);
 
   return <Animated.View style={[positionStyle, animatedStyle]} />;
 }
