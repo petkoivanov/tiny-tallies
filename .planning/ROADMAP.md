@@ -128,7 +128,11 @@ Plans:
   2. Parent can add a new child profile with name, age, and grade level after entering the parental PIN
   3. Parent can edit an existing child profile's name, age, and grade level
   4. Parent can delete a child profile with a confirmation prompt
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 39-01-PLAN.md — updateChild store action, PinGate component, ProfileSwitcherSheet, HomeScreen integration
+- [ ] 39-02-PLAN.md — ProfileCreationWizard, ProfileSetupScreen, navigation wiring
+- [ ] 39-03-PLAN.md — ProfileManagementScreen with edit/delete, end-to-end verification
 
 ### Phase 40: Session History & Analytics Engine
 **Goal**: The app collects session-level data and computes analytics that power the parent dashboard
@@ -218,7 +222,7 @@ Plans:
 | 36. Avatars & Frames | v0.7 | 2/2 | Complete | 2026-03-05 |
 | 37. UI Themes | v0.7 | 4/4 | Complete | 2026-03-06 |
 | 38. Multi-Child Store Foundation | 3/3 | Complete    | 2026-03-06 | - |
-| 39. Profile Management UI | v0.8 | 0/? | Not started | - |
+| 39. Profile Management UI | v0.8 | 0/3 | Not started | - |
 | 40. Session History & Analytics Engine | v0.8 | 0/? | Not started | - |
 | 41. Parent Dashboard | v0.8 | 0/? | Not started | - |
 | 42. Parental Time Controls | v0.8 | 0/? | Not started | - |
