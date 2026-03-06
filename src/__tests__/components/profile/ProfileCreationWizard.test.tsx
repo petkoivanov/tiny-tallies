@@ -165,14 +165,15 @@ describe('ProfileCreationWizard', () => {
     });
 
     it('shows ages 5-12', () => {
-      const { getByPlaceholderText, getByText } = render(
+      const { getByPlaceholderText, getByText, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
       goToAgeGrade(getByPlaceholderText, getByText);
 
       for (let age = 5; age <= 12; age++) {
-        expect(getByText(String(age))).toBeTruthy();
+        // Some numbers may appear in multiple places (e.g. "5" in char count)
+        expect(getAllByText(String(age)).length).toBeGreaterThanOrEqual(1);
       }
     });
 
