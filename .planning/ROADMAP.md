@@ -191,7 +191,7 @@ Plans:
   3. Session cosmetic wrappers add themed context and art around math problems during play
   4. Theme picker screen allows preview, equip, and shows locked theme badge requirements
   5. Non-default themes are locked until the user earns the corresponding achievement badges
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 - [ ] 37-01-PLAN.md -- Theme types, palettes, ThemeProvider, useTheme hook, theme cosmetics, store migration v12
@@ -242,4 +242,4 @@ Phases execute in numeric order: 31 -> 32 -> 33 -> 34 -> 35 -> 36 -> 37
 | 34. Visual Skill Map | 3/3 | Complete    | 2026-03-05 | - |
 | 35. Daily Challenges | 2/2 | Complete    | 2026-03-05 | - |
 | 36. Avatars & Frames | 2/2 | Complete    | 2026-03-05 | - |
-| 37. UI Themes | 2/4 | In Progress|  | - |
+| 37. UI Themes | 3/4 | In Progress|  | - |
