@@ -20,6 +20,12 @@ export interface ProfilesSlice {
   switchChild: (childId: string) => void;
   addChild: (profile: NewChildProfile) => string | null;
   removeChild: (childId: string) => void;
+  updateChild: (
+    childId: string,
+    updates: Partial<
+      Pick<ChildData, 'childName' | 'childAge' | 'childGrade' | 'avatarId'>
+    >
+  ) => void;
   saveActiveChild: () => void;
   setMigrationComplete: () => void;
 }
@@ -118,6 +124,34 @@ export const createProfilesSlice: StateCreator<
 
     // Non-active child deleted — just update map
     set({ children: remainingChildren });
+  },
+
+  updateChild: (
+    childId: string,
+    updates: Partial<
+      Pick<ChildData, 'childName' | 'childAge' | 'childGrade' | 'avatarId'>
+    >
+  ): void => {
+    const state = get();
+
+    // Active child — update flat state directly
+    if (childId === state.activeChildId) {
+      set(updates);
+      return;
+    }
+
+    // Non-active child — update children map entry
+    if (state.children[childId]) {
+      set({
+        children: {
+          ...state.children,
+          [childId]: { ...state.children[childId], ...updates },
+        },
+      });
+      return;
+    }
+
+    // Non-existent child — no-op
   },
 
   saveActiveChild: (): void => {
