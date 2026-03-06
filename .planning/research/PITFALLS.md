@@ -1,306 +1,424 @@
-# Pitfalls Research
+# Domain Pitfalls
 
-**Domain:** Gamification features (achievements, skill map, daily challenges, avatars, themes) added to an existing children's math learning app
-**Researched:** 2026-03-04
-**Confidence:** HIGH (codebase analysis + domain research + established psychology literature)
+**Domain:** Multi-child profiles, parent dashboard, parental controls, and freemium IAP subscription added to an existing children's math learning app
+**Researched:** 2026-03-05
+**Confidence:** HIGH (codebase analysis + platform documentation + COPPA regulations + IAP ecosystem research)
 
 ## Critical Pitfalls
 
-### Pitfall 1: Store Migration Cascade Corruption
+Mistakes that cause rewrites, app store rejections, data loss, or legal exposure.
+
+### Pitfall 1: Single-Child Assumption Baked into Store Architecture
 
 **What goes wrong:**
-Adding 5+ new features (badges, daily challenges, avatars, themes, skill map state) to the Zustand store requires multiple new persisted fields. The store is already at STORE_VERSION=8 with a linear migration chain. If badge definitions, avatar unlockables, theme selections, daily challenge state, and achievement progress are all added in a single version bump (v8 -> v9), any mid-development schema change forces re-doing the migration. Worse: if the migration function has a bug and ships, existing users' persisted data gets silently corrupted or dropped because `migrateStore` returns partial state.
+The entire Zustand store (STORE_VERSION=12) treats child data as a singleton. Fields like `childName`, `childAge`, `childGrade`, `skillStates`, `xp`, `level`, `weeklyStreak`, `misconceptions`, `earnedBadges`, `challengeCompletions`, `avatarId`, `frameId`, `themeId`, and `tutorConsentGranted` all live at the top level of the store with no child ID scoping. The `partialize` function in `appStore.ts` explicitly lists every one of these as top-level keys. Every screen, hook, and service reads these flat -- `useAppStore(state => state.xp)` appears across 36+ files. Adding multi-child support requires either (a) nesting all child data under a `children: Record<childId, ChildData>` structure, which is a massive schema change breaking every selector in the app, or (b) swapping the entire persisted store when switching children, which creates complex data lifecycle issues.
 
 **Why it happens:**
-The existing migration chain (`migrations.ts`) handles each version bump sequentially. With gamification, the temptation is to add all new state in one shot to avoid multiple version bumps. But gamification state is inherently iterative -- badge definitions evolve, theme unlocks get rebalanced, avatar systems change. The `partialize` function in `appStore.ts` must also be updated for every new persisted field, and missing a field means it silently disappears on app restart.
+The app was designed for a single child from v0.1. Twelve store versions of migrations have cemented this assumption. The `partialize` function, migration chain, all slice interfaces, and every `useAppStore` selector assume flat top-level access. This is not a bug -- it was the correct architecture for a single-child app. But it means multi-child is a fundamental schema restructuring, not an additive feature.
 
-**How to avoid:**
-- Bump STORE_VERSION once per phase, not once per feature. Each phase adds a bounded set of fields.
-- Keep a "migration test" that roundtrips v8 state through all new migrations and asserts every field survives.
-- Add new persisted fields to `partialize` in the same commit as the migration -- never separately.
-- Use Zod schemas to validate migrated state in development, catching silent drops early.
-- Consider which gamification state actually needs persistence: badge unlock timestamps YES, daily challenge rotation state NO (derive from date), theme selection YES, cached badge render state NO.
+**Consequences:**
+- Attempting a flat migration (v12 -> v13) that restructures all child data into a nested map will be the most complex migration in the app's history
+- If the migration has a bug, ALL existing user data (skill states, Elo ratings, BKT mastery, Leitner boxes, misconception records, badge progress, XP, streaks) is at risk of corruption or loss
+- Every `useAppStore` selector across 36+ files must be updated to scope to the active child
+- The `commitSessionResults` flow in `useSession.ts` (28 `useAppStore` references) must be rewired entirely
 
-**Warning signs:**
-- `partialize` in `appStore.ts` lists fewer fields than what the slices define as state.
-- A store test passes with fresh state but fails when migrating from v8 fixture data.
-- Users report losing progress after an app update (badges disappeared, theme reset).
+**Prevention:**
+- Use the "active child pointer" pattern: keep `activeChildId` at the store root, nest all per-child data under `children: Record<string, ChildData>`, and create a `useActiveChild()` hook that resolves `children[activeChildId]` so selectors remain simple
+- Create a `ChildData` type that is the union of all per-child state (profile + skills + gamification + misconceptions + achievements + challenges) -- extract this from existing slice types
+- Write the v12 -> v13 migration as a "wrap existing data" operation: take all current top-level fields and nest them under `children: { [generatedId]: { ...existingFields } }` with `activeChildId: generatedId`
+- Build a comprehensive migration test fixture that captures a real v12 store snapshot and verifies every field survives the restructuring
+- Create the `useActiveChild()` hook FIRST, then migrate all 36+ files to use it, BEFORE enabling multi-child UI -- this way the refactor can be validated with a single child before the switching logic exists
+- Keep `partialize` in sync: it must now include `children`, `activeChildId`, and the subscription/parental-control fields, but NOT the old flat fields
+
+**Detection:**
+- XP resets to 0 after switching children and switching back
+- "Child A" sees "Child B"'s badges or skill progress
+- App crashes on first launch after update (migration failure)
+- Store migration test fails when starting from v12 fixture data
 
 **Phase to address:**
-Phase 1 (Achievement/Badge system) -- must establish the migration pattern before subsequent phases add more state.
+Phase 1 (Multi-child profiles) -- this is THE foundational change. Everything else depends on it.
 
 ---
 
-### Pitfall 2: Overjustification Effect -- Badges Crowding Out Learning Motivation
+### Pitfall 2: Store Migration v12->v13 Is a Structural Reshape, Not an Additive Migration
 
 **What goes wrong:**
-Adding visible achievement badges for every action (complete a session, get 5 correct, use a manipulative) shifts children's motivation from "I enjoy math" to "I want the next badge." Research consistently shows that when extrinsic rewards are prominent and expected, intrinsic motivation drops. Hanus & Fox (2015) found that gamification with badges decreased intrinsic motivation, classroom satisfaction, AND final exam scores. The overjustification effect is especially pronounced in children ages 6-9 who are still forming their relationship with learning.
+All previous 12 migrations have been additive: "add field X with default Y." The multi-child migration is fundamentally different -- it must MOVE existing data from the root into a nested structure. The existing `migrateStore` function in `migrations.ts` treats `state` as a flat `Record<string, unknown>` and uses `state.fieldName ??= default`. A structural reshape requires creating a new `children` map, copying every child-related field into it, and DELETING the old top-level fields. If old fields are left at the root alongside the nested structure, `partialize` will persist duplicates, the store will grow, and stale root-level data will shadow the nested data.
 
 **Why it happens:**
-Developers design badges to feel rewarding and assume more badges = more engagement. The research doc (`07-gamification.md`) already identifies this risk but the concrete implementation is where it goes wrong: too many badge categories, too-frequent pop-ups, badge counts shown prominently on every screen, or "you haven't earned X yet" messaging that creates a controlling frame instead of an informational one.
+The migration pattern established in v1-v12 is "null-coalesce defaults." Developers follow the pattern and write `state.children ??= {}` without moving the existing data into it. The result: existing users get an empty `children` map alongside their existing flat data, and the app shows "no children" despite having a full history.
 
-**How to avoid:**
-- Use INFORMATIONAL framing: "You've been practicing and earned this!" (not "Complete 5 sessions to unlock this badge").
-- Cap visible badge pop-ups to 1 per session maximum. Queue others for the results screen.
-- Avoid showing unearned badges as locked/grayed-out checklists -- this creates controlling "to-do" pressure.
-- Focus badges on EFFORT and PERSISTENCE (already in the research doc), not performance outcomes.
-- Never tie badges to speed or accuracy thresholds that would make children rush or feel inadequate.
-- Include "surprise" badges that children discover naturally rather than chase intentionally.
-- Test with children: if a child asks "how do I get more badges?" instead of "can I do more math?", the system is failing.
+**Consequences:**
+- Existing user's learning history appears lost (it is still there, just not in the expected location)
+- If both flat and nested data exist, which does the app read? Race condition between old and new code paths
+- Rollback is extremely difficult once the migration ships
 
-**Warning signs:**
-- Badge unlock screen gets more animation/polish time than the actual problem-solving experience.
-- Badge definitions include "get X correct in a row" or "complete session in under Y minutes" -- these are performance-controlling.
-- Children who have earned all easy badges stop using the app (novelty wore off).
-- The badge gallery becomes the first screen children navigate to.
+**Prevention:**
+- Write the migration as a two-step operation: (1) construct the `ChildData` object from existing flat fields, (2) delete the flat fields from root state
+- The migration MUST be idempotent: if run twice (which Zustand can do in edge cases), it should not create duplicate children
+- Add a guard: `if (state.children && Object.keys(state.children).length > 0) return` at the top of the v13 migration to prevent re-migration
+- Test with three fixture scenarios: fresh install (no state), v12 state with full history, v12 state with minimal data (no badges, no misconceptions)
+- Consider a "migration validation" step that runs after migration and logs warnings if unexpected root-level child fields still exist
+
+**Detection:**
+- After update, app shows onboarding screen instead of home screen (no active child found)
+- Store size doubles (duplicate data at root and nested levels)
+- `partialize` includes both old flat fields AND new nested structure
 
 **Phase to address:**
-Phase 1 (Achievement/Badge system) -- badge definition design is the foundation. Getting the framing wrong here poisons everything built on top.
+Phase 1 (Multi-child profiles) -- the migration IS the phase. Get it wrong and nothing else works.
 
 ---
 
-### Pitfall 3: Theme System Breaks Existing Dark-Mode + Accessibility Guarantees
+### Pitfall 3: IAP Requires Development Build -- Expo Go Cannot Test Purchases
 
 **What goes wrong:**
-The existing theme (`src/theme/index.ts`) is a set of `as const` exported objects: `colors`, `spacing`, `typography`, `layout`. Every screen and component imports these directly. A theme system that allows multiple color schemes must either (a) replace these static exports with dynamic values, causing a massive refactor touching every file that uses `colors.background`, or (b) create a parallel dynamic system that coexists awkwardly with the static one. Either way, the existing high-contrast dark theme (designed for accessibility with specific contrast ratios and the Lexend dyslexia-friendly font) can be silently broken by a theme that introduces lighter backgrounds, lower-contrast text, or different font families.
+The team has been developing with Expo Go (implied by managed workflow + no mention of dev builds). IAP libraries (RevenueCat `react-native-purchases` or `expo-iap`) require native modules not included in Expo Go. Attempting to test IAP in Expo Go either crashes or silently uses mock/preview mode that does not exercise real purchase flows. The first time the team discovers this, they must set up EAS Build and a development build, which introduces a new build pipeline, provisioning profiles, and significantly longer iteration cycles.
 
 **Why it happens:**
-The static `as const` theme pattern was the right choice for a single-theme app -- it's fast (no runtime lookup), type-safe, and zero-overhead. But it is architecturally hostile to multiple themes. Developers will try to "just wrap it in a context provider" without realizing that every `StyleSheet.create` call captures the static values at module load time, not at render time. StyleSheet.create does NOT react to theme changes.
+IAP is one of the few features in Expo managed workflow that CANNOT work in Expo Go at all. Unlike most Expo modules that have JS fallbacks, IAP requires StoreKit 2 (iOS) and Google Play Billing (Android) native bindings. RevenueCat's docs explicitly state: "purchases won't work [in Expo Go] because Expo Go doesn't include all the native APIs required."
 
-**How to avoid:**
-- Do NOT try to make `StyleSheet.create` dynamic. Instead, use a hook-based pattern where components consume theme via `useTheme()` and create styles inline or via a `createThemedStyles(theme)` factory.
-- OR keep the existing theme as the base and implement "themes" as cosmetic overlays (session backgrounds, card borders, button accent colors) that do NOT touch the core UI chrome. This is far less disruptive.
-- Preserve the Lexend font family across ALL themes -- it is not decorative, it is an accessibility feature.
-- Every theme must pass WCAG AA contrast ratio checks (4.5:1 for normal text, 3:1 for large text) against its background.
-- The `contentStyle: { backgroundColor: '#1a1a2e' }` hardcoded in `AppNavigator.tsx` must also be made theme-aware, or it causes a flash of wrong color on navigation.
-- The "White Flash of Death" (documented in React Native theme implementations) occurs when JS theme state and native UI are out of sync on cold start.
+**Consequences:**
+- Development velocity drops significantly during IAP phase (minutes per build instead of seconds per reload)
+- IAP bugs cannot be caught until deployed to TestFlight/internal testing tracks
+- Sandbox purchase accounts (Apple) and test accounts (Google) must be configured separately
+- Android: if Activity `launchMode` is not `standard` or `singleTop`, purchases cancel when user backgrounds to verify in banking app
 
-**Warning signs:**
-- New theme looks fine in Storybook/isolated component but text becomes unreadable in context.
-- Hardcoded color values appear in components that were supposed to be theme-aware (grep for hex codes like `#1a1a2e`).
-- SessionScreen's ManipulativePanel drawer or ChatPanel bottom sheet doesn't pick up new theme colors.
-- Children with dyslexia report difficulty reading in a new theme (font changed or contrast dropped).
+**Prevention:**
+- Set up EAS Build and development builds BEFORE starting IAP work -- treat this as Phase 0 infrastructure
+- Use RevenueCat over raw `expo-iap` or `react-native-iap` because RevenueCat handles receipt validation server-side, subscription status tracking, cross-platform entitlement management, and provides a dashboard -- this eliminates an entire class of receipt-validation bugs
+- RevenueCat is confirmed compatible with Expo SDK 54 / React Native 0.81
+- Add `react-native-purchases` to app.json plugins array for config plugin support
+- Create Apple sandbox test accounts and Google Play internal test tracks early
+- Gate IAP testing behind a feature flag so the rest of the app remains testable in Expo Go during development
+
+**Detection:**
+- `E_IAP_NOT_AVAILABLE` error in development
+- Purchases "succeed" in development but never grant entitlements
+- App crashes on import of IAP module in Expo Go
 
 **Phase to address:**
-Phase 5 (Themes) -- must be the LAST gamification feature to avoid destabilizing earlier work. Requires an architecture decision early (Phase 1 design) about whether themes are "full UI reskin" or "cosmetic overlays."
+IAP/Subscription phase -- but development build setup should happen as pre-work before the phase begins.
 
 ---
 
-### Pitfall 4: Skill Map SVG Rendering Tanks Performance on Low-End Devices
+### Pitfall 4: Apple Kids Category + Subscription Creates Heightened Review Scrutiny
 
 **What goes wrong:**
-The prerequisite DAG has 14 skills with cross-operation dependencies (subtraction nodes require addition prereqs). Rendering this as an interactive SVG graph with nodes, edges, mastery indicators, pulsing animations, and tap targets creates 50-100+ SVG elements. On low-end Android devices, react-native-svg rendering 100+ elements causes multi-second render times (benchmarked at 9-10 seconds for 500 elements). Even with 14 nodes, each node with a circle, text label, mastery ring, glow animation, and connecting edges, the SVG element count balloons. Pinch-to-zoom, pan, and tap interactions on SVG elements compound the issue.
+Apps in Apple's Kids Category face stricter review guidelines (Guideline 1.3). Kids Category apps with subscriptions must: (a) have a parental gate before ANY purchase UI, (b) not use manipulative subscription patterns (free trial that auto-converts without clear disclosure), (c) not show ads (the app doesn't, but analytics SDKs could trigger this), (d) clearly communicate subscription terms before the purchase button, and (e) provide a restore purchases button. Missing ANY of these causes rejection. Multiple rejections delay launch by weeks.
 
 **Why it happens:**
-The skill tree "looks simple" -- 14 nodes, some edges. But each node is a complex visual element (mastery ring with gradient, label, icon, pulsing animation for active skills, grayed overlay for locked). On react-native-svg, each SVG element creates its own native view, and clipping operations (for mastery progress rings) are particularly slow. The DAG also has a non-trivial layout: it is not a simple tree but a directed acyclic graph with cross-links (subtraction skills depend on both subtraction and addition prereqs).
+Developers implement IAP following standard RevenueCat/Apple patterns without accounting for Kids Category-specific requirements. Standard paywall templates show pricing and a "Subscribe" button -- in a Kids Category app, this button must be behind a parental gate. The existing parental PIN gate (expo-secure-store) handles tutor consent but was not designed to gate purchases.
 
-**How to avoid:**
-- Use react-native-skia (already compatible with Expo SDK 54) for the skill map rendering instead of react-native-svg. Skia renders on the GPU and handles complex drawings at 60fps.
-- Alternatively, render the skill map as a static pre-computed layout with React Native Views (not SVG at all) -- position nodes absolutely using a computed layout. This avoids SVG overhead entirely.
-- Pre-compute the DAG layout once (topological sort + layer assignment) and cache it. Do not re-layout on every render.
-- Limit animations to the "active" and "next unlockable" nodes (2-3 at most), not all 14.
-- Use `React.memo` aggressively on skill nodes -- mastery data changes rarely (only after session commit).
-- Consider a "flat" skill map (scrollable list grouped by grade/operation) as a simpler alternative to a graph view, with the graph as an optional "advanced" view.
+**Consequences:**
+- App store rejection with vague "Guideline 1.3" message
+- Multiple resubmission cycles (each takes 1-3 days for review)
+- Potential removal from Kids Category if violations are found post-launch
+- Google Play has similar "Designed for Families" program requirements
 
-**Warning signs:**
-- Skill map screen takes >500ms to appear (measure with `performance.now()` or React profiler).
-- Jank when scrolling/panning the skill map (dropped frames visible on low-end devices).
-- The skill map component file exceeds 500 lines because layout logic, rendering, and interaction are tangled.
-- Users never visit the skill map screen (too slow to load or too complex to understand).
+**Prevention:**
+- Require parental PIN verification before showing ANY subscription UI (paywall screen, manage subscription, cancel subscription)
+- Subscription terms must be visible BEFORE the purchase button (price, billing period, auto-renewal terms, cancellation instructions)
+- Include a prominent "Restore Purchases" button accessible without purchase -- Apple rejects if this is missing
+- Never use "free trial" language without clearly stating what happens after the trial ends and how much it costs
+- Do not include any third-party analytics SDK that could be classified as advertising (RevenueCat analytics are fine as they are first-party purchase tracking)
+- Test the full purchase flow on a real device via TestFlight before submission
+- Review Apple's "Helping Protect Kids Online" (February 2025) document for current guidelines
+- On Google Play: ensure the app is enrolled in the "Designed for Families" program and meets its requirements
+
+**Detection:**
+- App Review rejection citing Guideline 1.3
+- Subscription UI is accessible without parental authentication
+- "Restore Purchases" button missing or non-functional
+- Free trial terms not clearly displayed before purchase button
 
 **Phase to address:**
-Phase 2 (Skill Map) -- requires a technology spike to validate rendering approach before building the full feature.
+IAP/Subscription phase -- design the parental-gated paywall flow before implementing any RevenueCat integration.
 
 ---
 
-### Pitfall 5: Daily Challenge System Creates Hidden Punitive Mechanics
+### Pitfall 5: Freemium Gating Turns Existing Free Features Into Lost Functionality
 
 **What goes wrong:**
-Daily challenges ("Complete 3 addition problems with 100% accuracy" or "Finish today's challenge to keep your streak") are described as optional bonus content but functionally become mandatory because they are the primary source of bonus XP and special badges. Missing a day feels like losing progress, which violates the core design principle of "no punitive mechanics." The existing weekly streak system was specifically chosen over daily streaks to avoid this exact problem. Daily challenges reintroduce the same anxiety through the back door.
+The v0.8 spec says "free: 3 sessions/day, no AI tutor; premium: unlimited + AI tutor + all themes." But the AI tutor has been free and available since v0.5. Themes have been free since v0.7 (earned through achievements, "all cosmetics earned through badges, zero paywall" is an explicit design decision). Existing users who update to v0.8 will LOSE access to the AI tutor and theme unlocks they previously had. This violates user trust, creates negative reviews, and contradicts the "no paywall" philosophy that was a core design principle.
 
 **Why it happens:**
-Designers intend daily challenges as "fun extras" but the implementation naturally creates daily engagement obligations. If daily challenges offer exclusive badges or significant XP bonuses, children feel compelled to complete them every day. Research from ACM (Petrovych et al., 2022, "Daily Quests or Daily Pests?") documents that engagement rewards can harm player experience when they feel obligatory rather than optional.
+Feature gating is designed from the new-user perspective ("free users get X, premium users get X+Y"). But existing users have been using Y for free. The migration from "everything free" to "freemium" must handle grandfathering or users perceive it as taking away features they already had.
 
-**How to avoid:**
-- Make daily challenges TRULY optional: no exclusive badges, no XP multipliers, no streak mechanics tied to daily completion.
-- Use "rotating challenges" with multi-day windows (e.g., 3-day availability) instead of strict daily deadlines.
-- Cap bonus XP from challenges to be small relative to standard session XP (at most 10-20% bonus, not 50%+).
-- Never show "you missed today's challenge" messaging. Only positive: "Today's challenge is ready!"
-- Track challenge completion rate -- if >80% of children complete daily challenges, they may feel obligatory. Aim for 40-60% completion as a sign they are truly optional.
-- Do not stack daily challenges -- if a child misses Monday's, it is gone; Tuesday's is a fresh start with no sense of accumulation.
+**Consequences:**
+- 1-star reviews: "App used to have a tutor, now it wants me to pay"
+- Children who relied on AI tutor hints for challenging problems suddenly lose their support system
+- Parents who valued the "no paywall" positioning lose trust in the app
+- Violates the "all cosmetics earned through badges, zero paywall" design decision documented in PROJECT.md
 
-**Warning signs:**
-- Children have anxiety about opening the app because they "need to do their daily challenge."
-- Parents report children insisting on completing challenges even when they want to stop.
-- Challenge-related badges become the most-pursued badges (engagement is badge-driven, not math-driven).
-- The word "daily" appears prominently in the UI (creates urgency).
+**Prevention:**
+- Grandfather existing users: anyone who has used the app before the freemium update gets a permanent "legacy" entitlement for AI tutor access
+- OR: make the AI tutor always available but limit it (e.g., 3 tutor interactions/day free, unlimited premium) rather than fully gating it
+- Themes earned through achievements MUST remain free -- paywall only applies to additional premium-exclusive themes, not the 5 existing ones
+- Premium features should be NEW features, not restrictions on existing ones: premium could mean "unlimited sessions" + "parent dashboard analytics" + "premium-exclusive themes" + "priority AI tutor" (no daily limit)
+- Communicate the change clearly in update notes: "New premium features added! Everything you had before is still free."
+- Add a `legacyUser` flag in the v12->v13 migration that detects existing data and grants appropriate entitlements
+
+**Detection:**
+- Existing user updates and immediately hits paywall for AI tutor
+- Badge-unlocked themes show lock icons after update
+- User reviews mention "they took away features"
 
 **Phase to address:**
-Phase 3 (Daily Challenges) -- must integrate with the existing session orchestrator without creating a second parallel session flow.
+Freemium/Subscription design phase -- must be resolved BEFORE implementing any feature gating. This is a product decision, not a technical one.
 
 ---
 
-### Pitfall 6: HomeScreen and SessionScreen Exceed 500-Line Limit
+### Pitfall 6: COPPA 2025 Amendments Expand Scope for Subscription Data
 
 **What goes wrong:**
-HomeScreen is 317 lines and SessionScreen is 552 lines (already over the 500-line limit). Adding gamification features (badge showcase, daily challenge entry point, skill map navigation, avatar display, theme indicators) to HomeScreen will push it well past 500 lines. SessionScreen needs challenge-mode integration and theme-aware rendering. ResultsScreen (418 lines) needs badge unlock announcements, challenge completion, and XP bonus displays. All three screens bloat past the file size guardrail.
+The 2025 COPPA amendments (effective June 23, 2025, compliance deadline April 22, 2026) expand the definition of "personal information" and add stricter data retention requirements. Subscription management inherently involves collecting parent email (for receipt), payment processing (Apple/Google handle this, but the app may store subscription status), and linking a child's usage data to a paying account. If subscription status is stored alongside child learning data, the combined dataset may constitute "personal information" under the expanded COPPA definition, triggering additional consent and data retention obligations.
 
 **Why it happens:**
-Each gamification feature seems small in isolation ("just add a badge row to HomeScreen"). But 5 features x 30-50 lines each = 150-250 additional lines per screen. Without proactive extraction, the screens become monolithic files that are hard to test, review, and maintain.
+Developers treat subscription as a parent-only concern ("it's the parent's payment, not the child's data"). But in a children's app, the subscription unlocks child-facing features, and the subscription status is inherently linked to the child's profile. Under 2025 COPPA, "separate verifiable parental consent" may be required when personal information is disclosed to third parties -- and RevenueCat is a third party.
 
-**How to avoid:**
-- Extract each gamification feature into its own component BEFORE integrating into screens:
-  - `<BadgeShowcase />` (home screen badge display)
-  - `<DailyChallengeCard />` (home screen challenge entry)
-  - `<SkillMapButton />` (navigation to skill map)
-  - `<AvatarDisplay />` (avatar with frame/accessories)
-  - `<BadgeUnlockOverlay />` (results screen badge announcement)
-- Use a `src/components/gamification/` directory with barrel exports.
-- SessionScreen already needs refactoring (552 lines) -- this should happen BEFORE gamification work begins.
-- Each new screen (SkillMapScreen, BadgeGalleryScreen, AvatarScreen, ThemePickerScreen) must stay under 500 lines from the start.
+**Consequences:**
+- FTC enforcement action if COPPA requirements are not met (fines up to $50,000+ per violation)
+- Need to disclose RevenueCat as a data processor in privacy policy
+- Must limit data retention: cannot store subscription history indefinitely
+- May need enhanced parental consent mechanism beyond the current PIN gate
 
-**Warning signs:**
-- Any file exceeds 400 lines during development (act at 400, not 500).
-- A component accepts >5 props (sign it is doing too much).
-- StyleSheet definition in a file exceeds 100 lines (extract styles into a co-located styles file or shared components).
+**Prevention:**
+- Keep subscription state entirely separate from child learning data: `subscriptionSlice` should store only `{ isActive: boolean, expiresAt: string | null, tier: 'free' | 'premium' }` -- no child identifiers, no usage correlation
+- RevenueCat handles all payment data server-side; the app should only store the resulting entitlement status, not payment details
+- Update the privacy policy to disclose RevenueCat as a service provider and what data it processes
+- The existing parental PIN gate satisfies "verifiable parental consent" for basic COPPA, but subscription adds a new consent surface -- parents must explicitly consent to the purchase (Apple/Google handle this via their payment flows, which counts as VPC)
+- Set data retention policy: subscription state expires and is cleared when subscription lapses + grace period
+- Never send child learning data (skill states, misconceptions, BKT probabilities) to RevenueCat or any external service -- this is already the pattern but must be explicitly enforced in code review
+- Ensure the app complies by April 22, 2026 (the COPPA amendment compliance deadline)
+
+**Detection:**
+- Privacy policy does not mention RevenueCat or subscription data processing
+- Child identifiers (name, age, grade) are included in RevenueCat user attributes
+- Subscription history is stored alongside child profile data with no expiration
 
 **Phase to address:**
-Phase 1 (pre-work) -- refactor SessionScreen below 500 lines BEFORE starting gamification features.
+IAP/Subscription phase -- privacy policy update and data architecture must precede implementation.
 
 ---
 
-### Pitfall 7: Daily Challenge Session Conflicts with Session Orchestrator
+## Moderate Pitfalls
+
+### Pitfall 7: Parental Controls Time Limits Are Trivially Bypassable
 
 **What goes wrong:**
-Daily challenges need their own session flow (themed problem set, specific skill focus, bonus XP calculation) but the app has a single session orchestrator (`sessionOrchestrator.ts`) that generates the 15-problem queue with warmup/practice/cooldown phases. The existing code already supports two session modes (`standard` and `remediation` via `SessionMode` type and `REMEDIATION_SESSION_CONFIG`). Adding a third "challenge" mode seems straightforward but creates conflicts: challenges need different problem selection logic (specific skill, specific difficulty), different XP calculation (bonus multiplier), and different completion criteria (accuracy threshold, not just finishing).
+App-level time controls ("30 minutes per day," "no sessions after 8pm") are enforced in JavaScript. A child can bypass them by: (a) changing the device clock, (b) force-quitting and reopening the app, (c) clearing app data, or (d) having a second device. Parents set controls expecting enforcement, then discover their child played for 2 hours because they changed the clock forward.
 
-**Why it happens:**
-The session orchestrator is tightly coupled to the practice mix algorithm (`practiceMix.ts`), which uses Leitner review scheduling and BKT-weighted skill selection. Daily challenges need deterministic, themed content (e.g., "all addition problems at grade 2 level") which bypasses the adaptive algorithm entirely. Bolting challenge logic onto the existing orchestrator creates a god-function; creating a separate orchestrator means duplicating shared logic (Elo updates, BKT transitions, XP calculation, misconception tracking).
+**Prevention:**
+- Accept that app-level time controls are ADVISORY, not enforcement. Frame them as "reminders" not "limits" in the UI
+- Use `Date.now()` for elapsed-time tracking (harder to fake than wall-clock comparisons), but still validate against last known server time if available
+- Store cumulative session time per day with a monotonic counter (increments during sessions, never decrements), not wall-clock comparisons
+- Bedtime lockout: compare against device time but also check if time jumped (current time < last recorded time = clock manipulation)
+- Accept gracefully when bypassed: the app should never crash or corrupt data if the clock is wrong
+- Do NOT use iOS Screen Time API or Android Digital Wellbeing API -- these are OS-level and create platform dependency nightmares; keep controls app-internal
 
-**How to avoid:**
-- Extract the session lifecycle (start -> answer -> next -> commit) from the problem-selection strategy. Use a strategy pattern: `StandardStrategy`, `RemediationStrategy`, `ChallengeStrategy`.
-- Share `commitSessionResults` across all strategies -- Elo, BKT, XP, and streak logic are universal.
-- Challenge problems should still flow through the math engine (same `generateProblem` + `formatAsMultipleChoice`) -- only the skill/template selection differs.
-- Route param for session mode already exists (`mode: 'remediation'`); extend to `mode: 'challenge'` with a `challengeId` param.
-- Keep challenge session configs small (5-8 problems, no warmup/cooldown) to differentiate from standard sessions.
-
-**Warning signs:**
-- `sessionOrchestrator.ts` grows past 350 lines with challenge-specific branches.
-- `if (mode === 'challenge')` checks scattered across multiple files.
-- Challenge XP is calculated differently from standard XP, creating inconsistencies in total XP display.
-- Misconception tracking skips challenge sessions (not intentional, just not wired up).
+**Detection:**
+- Time controls work in testing but parents report they are ineffective
+- `sessionStartTime > currentTime` (clock was set backward)
 
 **Phase to address:**
-Phase 3 (Daily Challenges) -- but the strategy extraction should be planned in Phase 1 architecture.
+Parental controls phase -- set correct user expectations in UI copy.
 
 ---
 
-### Pitfall 8: Avatar/Theme Unlockables Without an Economy Create Dead-End Progression
+### Pitfall 8: Parent Dashboard Reads Same Store as Child, Causing Re-renders
 
 **What goes wrong:**
-The milestone context says "NO coins/economy, NO collectibles" but the app needs unlockable avatars and themes. Without a currency, unlockables must be tied directly to achievements. This creates a rigid system where unlocks are one-time events with no ongoing engagement -- once a player has earned all achievement-linked unlocks, there is nothing left to pursue. The research doc (`07-gamification.md`) includes a coins/shop system, but the v0.7 scope explicitly excludes it. The result is an unlock system that is engaging for the first few weeks then goes silent.
+The parent dashboard needs to read ALL children's data (skill states, misconception records, session history, XP progression) to render analytics. If the dashboard subscribes to the entire `children` map via `useAppStore`, any child state change (mid-session Elo update, BKT transition) triggers a re-render of the dashboard. Worse: if the parent is viewing the dashboard while a child session is in progress on the same device, every answer submission triggers a dashboard re-render.
 
-**Why it happens:**
-Achievement-gated unlocks feel clean in design ("earn Addition Ace badge to unlock Robot avatar") but create a ceiling. With 14 skills and a handful of badge categories, there are maybe 20-30 possible achievement-linked unlocks. A child who practices daily will exhaust these within 2-3 months. After that, the avatar/theme system has no remaining engagement value.
+**Prevention:**
+- Parent dashboard should read from persisted store data, not live reactive state. Use `useAppStore.getState()` for initial data load, not reactive selectors
+- OR use Zustand's `shallow` comparator with narrow selectors that only pick the specific analytics-relevant fields
+- Dashboard analytics (trend graphs, mastery breakdowns) should be computed once on screen mount and NOT reactively updated
+- Consider computing analytics in a service function (`computeChildAnalytics(childData)`) that returns a snapshot, not a live subscription
+- Parent dashboard and child session should never run simultaneously in practice (child uses the app, parent reviews later), but the architecture should not break if they do
 
-**How to avoid:**
-- Design the unlock system to be EXTENSIBLE for a future economy (v0.8+) without requiring schema changes. Use a generic `UnlockCondition` type that supports `{ type: 'achievement', achievementId: string }` now and can later support `{ type: 'purchase', cost: number }` or `{ type: 'level', level: number }`.
-- Include level-gated unlocks (every 5 levels unlocks a new avatar/theme) which provides ongoing progression.
-- Include time-based unlocks ("Use the app for 30 days" -- not 30 consecutive days) for long-term engagement.
-- Make the initial set of free presets generous (6-8 avatars, 3 themes) so unlockables feel like bonuses, not necessities.
-- Plan for content drops -- new avatars/themes added in app updates keep the system fresh.
-
-**Warning signs:**
-- All unlockable items are tied to specific achievements (no level-based or time-based unlocks).
-- A dedicated child runs out of things to unlock within 6 weeks.
-- The `UnlockCondition` type is hardcoded to `achievementId: string` with no union/extensibility.
+**Detection:**
+- Dashboard scrolling stutters or lags
+- Dashboard shows mid-session partial data (e.g., Elo rating that has not been committed yet)
+- React profiler shows excessive re-renders on dashboard components
 
 **Phase to address:**
-Phase 4 (Avatars) and Phase 5 (Themes) -- but the extensible unlock condition type should be designed in Phase 1.
+Parent dashboard phase -- use snapshot pattern from the start.
 
 ---
 
-## Technical Debt Patterns
+### Pitfall 9: Profile Switcher Without Authentication Lets Children Access Each Other's Profiles
 
-Shortcuts that seem reasonable but create long-term problems.
+**What goes wrong:**
+A profile switcher that shows all children's names/avatars with a tap-to-switch pattern means any child can switch to a sibling's profile and mess up their progress. Six-year-olds will absolutely do this, either intentionally ("I want to see what my sister unlocked") or accidentally.
 
-| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|-------------------|----------------|-----------------|
-| Hardcoding badge definitions in a TypeScript const array | Fast to implement, type-safe | Cannot add new badges without app update; no A/B testing | MVP only -- migrate to config-driven system in v0.8 |
-| Using emoji for badge icons instead of custom art | No asset pipeline needed | Emoji render differently across Android/iOS; cannot animate | Acceptable for v0.7 if badges use Lottie animations for unlock events |
-| Single theme file with all color values | Simple to read and maintain | Every new theme duplicates the full color set; easy to miss a value | Never -- use a base + override pattern from the start |
-| Computing daily challenge seed from `Date.now()` | Deterministic per-day | Timezone issues (UTC vs local), challenge changes mid-day for traveling users | Acceptable if seed uses UTC date string, not timestamp |
-| Storing full badge history in Zustand persist | Simple implementation | Store size grows unbounded as achievements accumulate | Acceptable -- badge records are tiny (id + timestamp), will not be a problem for years |
-| Inlining skill map layout coordinates | No layout algorithm needed | Must manually update when skills are added in future milestones | Never -- compute layout from DAG structure programmatically |
+**Prevention:**
+- Put the profile switcher behind the parental PIN gate -- only parents can switch active child profiles
+- The child-facing app shows only the active child's avatar and name with no visible "switch" option
+- Profile management (add/edit/delete children) also requires PIN
+- Deleting a child profile should require PIN + confirmation ("Type DELETE to confirm") to prevent accidental data loss
+- Profile data isolation: switching profiles must be a clean boundary -- no leaked state from previous child's session
 
-## Integration Gotchas
+**Detection:**
+- Child's misconception records show patterns inconsistent with their age/grade (sibling was using their profile)
+- Elo rating oscillates wildly (two children of different skill levels sharing a profile)
+- Children report seeing unfamiliar avatars or badges
 
-Common mistakes when connecting gamification to the existing systems.
+**Phase to address:**
+Phase 1 (Multi-child profiles) -- PIN-gating must be designed into the profile switcher from day one.
 
-| Integration | Common Mistake | Correct Approach |
-|-------------|----------------|------------------|
-| Badges + Session Commit | Checking badge conditions DURING the session (before Elo/BKT updates are committed) -- stale data | Check badge conditions AFTER `commitSessionResults` returns, using the updated store state |
-| Daily Challenges + Misconception Tracking | Excluding challenge sessions from misconception recording because they are "special" | Challenge sessions MUST flow through the same misconception detection pipeline -- a wrong answer in a challenge is still a misconception signal |
-| Theme Colors + ManipulativePanel | Manipulative colors (base-ten block units, rods) use hardcoded colors for pedagogical reasons (blue units, green rods) | Manipulative colors should be EXEMPT from theming -- they are teaching tools, not decorative elements |
-| Avatar + childProfileSlice | Expanding `avatarId: AvatarId` to include unlockable avatars without updating the `AvatarId` type | Use a separate `equippedAvatarId: string` field that accepts both preset and unlockable IDs; keep `AvatarId` for presets |
-| Skill Map + prerequisiteGating | Duplicating the prerequisite DAG structure for visual rendering instead of using the canonical `SKILLS` array | Always derive skill map edges from `SKILLS[].prerequisites` -- single source of truth |
-| Badge Unlock + Results Screen | Showing badge unlocks BEFORE the results summary, hijacking the flow | Badge unlocks should appear AFTER the session summary (XP, streaks, score) -- the learning feedback is primary |
-| Themes + AppNavigator | Forgetting to update `contentStyle: { backgroundColor: '#1a1a2e' }` in `AppNavigator.tsx` | Navigator background must be theme-aware, or screen transitions show the old background color |
+---
 
-## Performance Traps
+### Pitfall 10: Subscription State Desynchronizes Between RevenueCat and Local Store
 
-Patterns that work at small scale but fail as usage grows.
+**What goes wrong:**
+RevenueCat manages subscription state server-side. The app queries entitlements and stores `isPremium: boolean` locally. If the user's subscription expires, the RevenueCat server knows but the local store still says `isPremium: true` until the next entitlement check. The app must check entitlements on every app foreground, but if the check fails (no network), the app must decide: assume still premium (risk of unpaid access) or assume expired (punishes users with connectivity issues).
 
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| Re-rendering entire skill map on any store change | Skill map jitters or lags on answer submission during a session | Use `useAppStore` with a shallow selector that picks only `skillStates` -- not the full store | Immediately on lower-end devices |
-| Computing "all unlocked badges" on every render | HomeScreen becomes sluggish as badge definitions grow | Memoize badge computation with `useMemo`, keyed on the specific state fields badges depend on | At 20+ badge definitions |
-| SVG node animations running when skill map is not visible | Battery drain, background CPU usage | Stop animations when screen loses focus (React Navigation `useIsFocused` or `useFocusEffect`) | Any device, accumulates over time |
-| Full badge gallery in a ScrollView instead of FlashList | Gallery stutters with 30+ badges rendering at once | Use FlashList v1.x with `estimatedItemSize` for badge grid -- view recycling handles large lists | At 30+ badge items |
-| Storing theme colors as JS objects instead of using StyleSheet | Each render creates new style objects, triggering unnecessary native bridge calls | Use `StyleSheet.create` with theme-specific cached stylesheets, rebuilt only on theme change | Immediately, but worse on complex screens |
-| Daily challenge seed computation on every component mount | Unnecessary re-computation; potential timezone inconsistency if computed differently in different components | Compute challenge seed once per app launch, store in a non-persisted Zustand field | When multiple components need the seed |
+**Prevention:**
+- Check RevenueCat entitlements on every app foreground (`AppState` listener) and on subscription-gated actions
+- Cache the last successful entitlement check with a timestamp; treat cached status as valid for 24 hours (grace period)
+- If entitlement check fails (network error), use cached status -- do not punish the user
+- Never store subscription status in the main Zustand store alongside child data -- use a separate, non-persisted or separately-persisted slice with short TTL
+- RevenueCat's `CustomerInfo` listener handles real-time subscription changes; wire it up in the app root
+- Handle edge cases: subscription purchased on another device, family sharing, promotional offers, refunds
+- The "restore purchases" flow must be accessible and functional for users who reinstall or switch devices
 
-## Security Mistakes
+**Detection:**
+- User paid but app shows free tier (entitlement check not running)
+- User's subscription expired but app still shows premium features (cached status not refreshed)
+- "Restore Purchases" button does nothing or throws an error
 
-Domain-specific security issues for a children's education app.
+**Phase to address:**
+IAP/Subscription phase -- entitlement synchronization is the core technical challenge.
 
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Allowing avatar names or custom text in themes | Children enter personal information (name, school, address) via "custom avatar name" | NO free-text input anywhere in gamification. All avatars and themes are preset selections only. COPPA requirement. |
-| Exposing achievement data in analytics events | Badge names like "Addition Ace at Lincoln Elementary" leak location data | Achievement events must contain only badge ID and timestamp -- never child name, location, or school |
-| Storing achievement timestamps with timezone info | Timezone reveals approximate geographic location -- personal info under COPPA 2025 amendments | Use UTC-only ISO strings for all timestamps. Never persist local timezone offsets. |
-| Daily challenge seeded from user-identifiable data | If challenge seed incorporates device ID or user ID, challenges become fingerprinting vectors | Seed from UTC date string only: `"2026-03-04"`. All users get the same challenge (no personalization that could identify) |
-| Theme/avatar unlock state sent to any external service | Unlock progression could be correlated with usage patterns to profile children | Gamification state stays entirely on-device. Never sent to Gemini, analytics, or any external API. |
+---
 
-## UX Pitfalls
+### Pitfall 11: Parent Dashboard Analytics Require Session History That Does Not Exist
 
-Common user experience mistakes in gamification for children ages 6-9.
+**What goes wrong:**
+The parent dashboard needs trend graphs (progress over time), skill breakdowns, and misconception timelines. But the current store only tracks CURRENT state: current Elo rating, current BKT mastery, current streak count. There is no session history -- no record of "on March 1, child scored 80% on addition problems." The `sessionsCompleted` counter is just a number; `lastSessionDate` is a single date. To show trends, the app needs historical data that was never collected.
 
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| Too many gamification screens (badges, map, avatars, themes, challenges) cluttering navigation | Children get lost, can't find the "practice" button | Keep ONE primary action (Start Practice) prominent. Gamification screens are secondary -- accessed from a profile/settings area, not top-level tabs |
-| Badge unlock pop-ups interrupting problem-solving flow | Breaks concentration during a session, especially for children with ADHD | Queue all badge unlocks for the results screen. NEVER interrupt a session with a badge notification |
-| Skill map showing all 14 skills at once with technical labels | Overwhelming for 6-year-olds; "addition.two-digit.with-carry" means nothing to a child | Use friendly names ("Big Number Adding") and progressive disclosure (show current grade's skills, expand others on demand) |
-| Showing "locked" items prominently (grayed-out badges, locked avatars) | Creates frustration and "I can't do that" feelings in young children | Show earned items proudly. Hide or minimize locked items. Use "Coming soon!" framing, not lock icons |
-| Daily challenge timer/countdown visible on screen | Creates time pressure anxiety; contradicts "no punitive mechanics" principle | Show "Today's Challenge" without any timer. It is available all day. No urgency framing |
-| Theme changes applying to session screens | Changes the visual context children have learned to associate with math practice -- disorienting | Themes should primarily affect home/profile/results screens. Session screen maintains consistent visual language for learning stability |
+**Prevention:**
+- Add a `sessionHistory` array to the per-child data structure: `{ date: string, problemCount: number, correctCount: number, skillsWorked: string[], duration: number }`
+- Keep entries lightweight (no full problem replay, just summary stats) to avoid store bloat
+- Cap history at 90 days (rolling window) to bound storage growth
+- Start collecting session history in the multi-child migration (v13) even before the dashboard is built -- you cannot show historical trends without historical data
+- For existing users upgrading: accept that pre-v13 history is not available. Show "tracking started [date]" in the dashboard rather than empty charts
+- Consider computing derived analytics (weekly averages, skill trends) as materialized views updated at session commit, not computed on-the-fly from raw history
+
+**Detection:**
+- Dashboard shows "no data" for users who have been using the app for months (history not retroactively available)
+- Store size grows unboundedly (session history not capped)
+- Dashboard load time increases as history grows (computing trends from raw records on every render)
+
+**Phase to address:**
+Phase 1 (Multi-child profiles) -- begin collecting session summaries in the schema restructure, even if dashboard phase comes later.
+
+---
+
+## Minor Pitfalls
+
+### Pitfall 12: expo-secure-store Key Format Restrictions
+
+**What goes wrong:**
+expo-secure-store only supports keys matching `[A-Za-z0-9.-_]`. If child IDs use UUIDs with other characters, or if per-child secure store keys include special characters, the key gets silently mangled (characters replaced with `_`). Two different child IDs could map to the same secure store key.
+
+**Prevention:**
+- Use alphanumeric child IDs (nanoid with custom alphabet `[A-Za-z0-9]`) or UUID v4 (which only uses hex + hyphens, both valid characters)
+- The parental PIN should remain a single key (`parental-pin`), not per-child -- there is one parent, one PIN
+- Test secure store operations with the actual child ID format before committing to an ID scheme
+
+**Phase to address:** Phase 1 (Multi-child profiles).
+
+---
+
+### Pitfall 13: Adding Child Profiles Without Onboarding Creates Empty Shells
+
+**What goes wrong:**
+When a parent adds a second child, the new profile has no skill states, no Elo baseline, no BKT data. The first session defaults to the lowest difficulty with all skills locked. For a child who is already in grade 3, this means they get grade 1 addition problems. The experience feels broken compared to the first child's calibrated experience.
+
+**Prevention:**
+- When adding a new child, collect age and grade (as the original onboarding does)
+- Use age/grade to set initial BKT parameters (the existing age-adjusted BKT parameters system handles this)
+- Unlock prerequisite-appropriate skills based on grade level
+- Consider a brief "placement session" (5-10 problems) for new profiles to calibrate Elo faster
+- The existing Elo K-factor system (K=40 decaying to K=16) will handle rapid initial calibration if the starting point is grade-appropriate
+
+**Phase to address:** Phase 1 (Multi-child profiles).
+
+---
+
+### Pitfall 14: Subscription Paywall Screen Violates "No Punitive Mechanics" Principle
+
+**What goes wrong:**
+Standard paywall design uses scarcity/loss framing: "You've used your 3 free sessions today! Upgrade to continue." For children ages 6-9, this is functionally identical to a "game over" screen -- the app is telling them they cannot do math anymore today. This directly violates the core design principle and creates negative associations with learning.
+
+**Prevention:**
+- The session limit message should be shown to the PARENT (behind PIN gate), not the child
+- The child-facing message should be positive: "Great job today! Come back tomorrow for more practice!" -- no mention of payment or limits
+- The paywall/subscription screen is ONLY accessible to parents (behind PIN) and uses adult-appropriate language
+- Never show pricing, subscription terms, or "upgrade" messaging to children
+- If a child hits the session limit mid-discovery (exploring manipulative sandboxes, viewing skill map), those non-session features should remain accessible -- only sessions are limited
+
+**Phase to address:** IAP/Subscription phase -- paywall UX must be designed with the child/parent separation in mind.
+
+---
+
+### Pitfall 15: Parent Dashboard Navigation Conflicts with Child Navigation
+
+**What goes wrong:**
+The app currently uses a single native-stack navigator. Adding parent dashboard screens (overview, per-child detail, settings, subscription management) to the same stack means the parent can navigate to the dashboard, hand the device to the child, and the child is now in the parent section. Or worse: the child navigates back from a session and lands on a parent dashboard screen.
+
+**Prevention:**
+- Use separate navigation stacks: child stack (existing) and parent stack (new), switched via profile/role context
+- Parent dashboard entry requires PIN verification, and exiting the parent section returns to the child's last screen
+- Consider a bottom tab or drawer that is only visible in parent mode
+- Use `usePreventRemove` in parent screens to prevent children from swiping back into dashboard content
+- Parent stack should not share navigation history with child stack
+
+**Phase to address:** Parent dashboard phase -- navigation architecture must be designed before building screens.
+
+---
+
+## Phase-Specific Warnings
+
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| Multi-child profiles | Migration corrupts existing data | Comprehensive v12 fixture tests; idempotent migration; `useActiveChild()` hook before UI |
+| Multi-child profiles | Profile switcher accessible to children | PIN-gate all profile management; child sees only active profile |
+| Multi-child profiles | New child gets grade-1 problems regardless of age | Grade-aware initial state; age-adjusted BKT parameters |
+| Parent dashboard | No historical data to display | Begin collecting session summaries in v13 migration |
+| Parent dashboard | Re-renders from live session data | Snapshot pattern with `getState()`; compute analytics once |
+| Parent dashboard | Navigation bleeds into child experience | Separate navigation stacks; PIN-gated entry/exit |
+| Parental controls | Time limits trivially bypassed by clock change | Frame as advisory reminders; monotonic elapsed-time tracking |
+| Parental controls | Bedtime lockout uses wrong timezone | Use device local time (this IS the correct behavior for bedtime); but validate against monotonic time |
+| Freemium subscription | Existing users lose AI tutor access | Grandfather existing users or limit (not gate) free AI tutor |
+| Freemium subscription | Paywall shown to children | All subscription UI behind parental PIN; child sees positive "come back tomorrow" message |
+| IAP implementation | Cannot test in Expo Go | Set up EAS Build + development builds as pre-work |
+| IAP implementation | App Store rejection for Kids Category violations | Parental gate before purchase UI; restore button; clear terms |
+| IAP implementation | Subscription state desyncs | RevenueCat listener + 24h cache grace period |
+| COPPA compliance | Subscription data treated as non-personal | Keep subscription state separate from child data; disclose RevenueCat in privacy policy |
 
 ## "Looks Done But Isn't" Checklist
 
 Things that appear complete but are missing critical pieces.
 
-- [ ] **Badge System:** Often missing persistence migration -- verify badges survive app restart by testing with `STORE_VERSION` upgrade from v8 fixture
-- [ ] **Badge System:** Often missing "earn exactly once" guard -- verify the same badge cannot be awarded twice (deduplicate by badge ID in the awards array)
-- [ ] **Skill Map:** Often missing edge rendering for cross-operation dependencies -- verify subtraction nodes show edges to their addition prerequisites (not just same-operation chains)
-- [ ] **Skill Map:** Often missing accessibility -- verify all nodes have `accessibilityLabel` with skill name and mastery status for screen readers
-- [ ] **Daily Challenges:** Often missing timezone handling -- verify challenge rotation uses UTC, not device local time, by testing with a device set to UTC+12 and UTC-12
-- [ ] **Daily Challenges:** Often missing offline behavior -- verify challenges work without network (no Gemini dependency) since core practice works offline
-- [ ] **Avatar System:** Often missing the migration from old `avatarId: AvatarId` to new expanded avatar type -- verify existing users keep their selected avatar after update
-- [ ] **Theme System:** Often missing navigator `contentStyle` update -- verify no "flash of old background" during screen transitions
-- [ ] **Theme System:** Often missing manipulative color exemption -- verify base-ten blocks, fraction strips, etc. retain pedagogical colors regardless of theme
-- [ ] **All Features:** Often missing 500-line check -- verify every new and modified file stays under 500 lines after integration
-- [ ] **All Features:** Often missing `partialize` update -- verify every new persisted field is listed in `appStore.ts` `partialize` function
-- [ ] **All Features:** Often missing FlashList v1 compatibility -- verify any list-based screen (badge gallery, avatar picker) uses FlashList v1.x, NOT FlatList and NOT FlashList v2.x
+- [ ] **Multi-child migration:** Often missing deletion of old flat fields from root state -- verify v12 fields are moved, not copied, to nested structure
+- [ ] **Multi-child migration:** Often missing `partialize` update -- verify it now includes `children` and `activeChildId`, and REMOVES old flat fields
+- [ ] **Profile switcher:** Often missing session state cleanup on switch -- verify mid-session data (queue, tutor state, manipulative state) is cleared when changing active child
+- [ ] **Profile switcher:** Often missing PIN protection -- verify profile management requires parental PIN
+- [ ] **Parent dashboard:** Often missing empty-state handling -- verify dashboard shows meaningful content for a child who has completed 0 sessions
+- [ ] **Parent dashboard:** Often missing multi-child comparison -- verify dashboard can show data for all children, not just active child
+- [ ] **Time controls:** Often missing persistence -- verify time-used-today counter persists across app restart (child force-quits to reset timer)
+- [ ] **Subscription:** Often missing restore purchases -- Apple WILL reject without a working restore button
+- [ ] **Subscription:** Often missing subscription state on cold start -- verify app checks entitlements before showing gated features, not just on subscription change
+- [ ] **Subscription:** Often missing parental gate before paywall -- verify subscription UI is only accessible after PIN entry
+- [ ] **Freemium gating:** Often missing grandfathering logic -- verify existing users retain previously free features after update
+- [ ] **COPPA:** Often missing privacy policy update -- verify RevenueCat and subscription data processing are disclosed
+- [ ] **All features:** Often missing per-child data isolation -- verify one child's actions never affect another child's state
+- [ ] **All features:** Often missing store migration test with v12 fixture -- verify migration from actual v12 data to v13+ works end-to-end
 
 ## Recovery Strategies
 
@@ -308,51 +426,30 @@ When pitfalls occur despite prevention, how to recover.
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Store migration corrupts existing user data | HIGH | Cannot easily recover lost data. Must add a "reset gamification" option that wipes only gamification state. Add store migration tests ASAP to prevent recurrence. |
-| Overjustification effect (children only care about badges) | MEDIUM | Reduce badge visibility: move gallery deeper in navigation, reduce unlock animation duration, stop showing badge count on home screen. Re-emphasize learning feedback. |
-| Theme breaks accessibility | LOW | Revert to default dark theme as fallback. Add contrast-ratio validation to theme definitions (automated test). |
-| Skill map performance too slow | MEDIUM | Replace SVG rendering with Skia or static View-based layout. If urgent, ship a "list view" fallback and defer graph view. |
-| Daily challenges feel punitive | LOW | Remove daily terminology. Rename to "Bonus Practice" with no time limit. Remove any streak/completion tracking on challenges. |
-| HomeScreen exceeds 500 lines | LOW | Extract gamification components into `src/components/gamification/` with barrel exports. Pure refactor, no behavior change. |
-| Session orchestrator becomes a god function | MEDIUM | Extract strategy pattern (Standard/Remediation/Challenge). Each strategy in its own file <300 lines. Shared lifecycle logic in base module. |
-| Avatar type migration breaks existing selection | LOW | Add migration that maps old `AvatarId` values to new schema. Include fallback: if avatar ID is not found in new system, default to the user's original preset. |
-
-## Pitfall-to-Phase Mapping
-
-How roadmap phases should address these pitfalls.
-
-| Pitfall | Prevention Phase | Verification |
-|---------|------------------|--------------|
-| Store migration cascade | Phase 1 (Badges) | Roundtrip migration test: v8 fixture -> v9 -> verify all fields intact |
-| Overjustification effect | Phase 1 (Badges) | Badge definitions reviewed for informational (not controlling) framing; no speed/accuracy badges |
-| Theme breaks accessibility | Phase 5 (Themes) | Automated contrast-ratio test for every theme definition; Lexend font preserved |
-| Skill map performance | Phase 2 (Skill Map) | Technology spike: render 14-node DAG, measure time-to-interactive on low-end Android (<500ms target) |
-| Daily challenges feel punitive | Phase 3 (Daily Challenges) | No "missed" messaging in UI; challenge XP bonus capped at 20% of standard session XP |
-| HomeScreen bloat | Phase 1 pre-work | SessionScreen refactored below 500 lines before gamification begins; all new features as extracted components |
-| Session orchestrator conflicts | Phase 3 (Daily Challenges) | Strategy pattern extracted; each strategy in own file; shared `commitSessionResults` tested across all modes |
-| Dead-end avatar progression | Phase 4 (Avatars) | `UnlockCondition` union type supports `achievement`, `level`, and `time` variants; extensible for future `purchase` |
-| COPPA violations | All phases | No free-text input anywhere; all timestamps UTC; gamification state never sent externally; audit in each phase |
-| FlashList version conflict | Phase 1 (Badge gallery), Phase 4 (Avatar picker) | `package.json` pins `@shopify/flash-list` to `^1.x.x`; CI test fails if v2 installed |
-| Navigator background flash | Phase 5 (Themes) | Manual test: switch theme, navigate between screens, verify no white/wrong-color flash |
-| Badge awarded twice | Phase 1 (Badges) | Unit test: call badge-check twice with same conditions, verify single entry in awards array |
+| Store migration corrupts child data | CRITICAL | Cannot recover lost data. Must ship hotfix with corrected migration + "reset profile" option. Add migration roundtrip tests to prevent recurrence. Previous v12 data may still be recoverable from AsyncStorage if not overwritten. |
+| Existing users lose free features | HIGH | Ship immediate update removing the gate or adding grandfathering. Issue app store update notes apologizing. Reputation damage is hard to undo. |
+| App Store rejection (Kids Category) | MEDIUM | Fix cited issues (usually parental gate + restore purchases). Resubmit. Each cycle takes 1-3 days. Budget 2-3 rejection cycles into timeline. |
+| Subscription state desync | LOW | Force entitlement refresh on next app open. RevenueCat's `syncPurchases()` resolves most cases. Add retry logic. |
+| Time controls bypassed | LOW | Accept as inherent limitation. Update UI to frame as "reminders." No technical fix for clock manipulation. |
+| Dashboard re-renders cause jank | LOW | Switch from reactive selectors to snapshot pattern. Pure refactor, no data change. |
+| Profile data leaks between children | MEDIUM | Audit all `useAppStore` selectors for `activeChildId` scoping. Add integration test that switches profiles and verifies isolation. |
+| Navigation confusion (parent/child) | LOW | Add PIN check on parent screen mount. If PIN not verified, redirect to child home. |
 
 ## Sources
 
-- [The Overjustification Effect and Game Achievements](https://www.psychologyofgames.com/2016/10/the-overjustification-effect-and-game-achievements/) -- Game Developer / Psychology of Games
-- [Daily Quests or Daily Pests? Benefits and Pitfalls of Engagement Rewards](https://dl.acm.org/doi/10.1145/3549489) -- ACM SIGCHI 2022
-- [The White Flash of Death: Solving Theme Flickering in React Native](https://medium.com/@ripenapps-technologies/the-white-flash-of-death-solving-theme-flickering-in-react-native-production-apps-d732af3b4cae) -- Medium
-- [react-native-svg Performance Issues with Multiple SVG Elements](https://github.com/software-mansion/react-native-svg/issues/2660) -- GitHub Issue
-- [react-native-svg Rendering Many SVGs Lags Performance](https://github.com/software-mansion/react-native-svg/issues/2739) -- GitHub Issue
-- [FlashList v1 Documentation](https://shopify.github.io/flash-list/) -- Shopify
-- [FTC 2025 COPPA Rule Amendments](https://securiti.ai/ftc-coppa-final-rule-amendments/) -- Securiti.ai
-- [COPPA Compliance 2025 Practical Guide](https://blog.promise.legal/startup-central/coppa-compliance-in-2025-a-practical-guide-for-tech-edtech-and-kids-apps/) -- Promise Legal
-- [Zustand Persisted Store Re-hydration Merging Issue](https://dev.to/atsyot/solving-zustand-persisted-store-re-hydtration-merging-state-issue-1abk) -- DEV Community
-- [Zustand Migration Best Practices](https://github.com/pmndrs/zustand/discussions/1717) -- GitHub Discussion
-- [Gamification in Children's Education](https://slejournal.springeropen.com/articles/10.1186/s40561-019-0085-2) -- Smart Learning Environments
-- [Gamification Enhances Intrinsic Motivation Meta-Analysis](https://link.springer.com/article/10.1007/s11423-023-10337-7) -- Springer
-- [Revealing Weaknesses of Gamification in Education](https://www.temjournal.com/content/143/TEMJournalAugust2025_2462_2471.pdf) -- TEM Journal 2025
-- Codebase analysis: `appStore.ts`, `migrations.ts`, `gamificationSlice.ts`, `sessionOrchestrator.ts`, `prerequisiteGating.ts`, `skills.ts`, `theme/index.ts`, `AppNavigator.tsx`, `HomeScreen.tsx` (all at C:/projects/tiny-tallies/src/)
+- [Expo Documentation: In-App Purchases](https://docs.expo.dev/guides/in-app-purchases/) -- confirms development build requirement
+- [RevenueCat Expo Installation Guide](https://www.revenuecat.com/docs/getting-started/installation/expo) -- Expo managed workflow compatibility
+- [Expo + RevenueCat Tutorial](https://expo.dev/blog/expo-revenuecat-in-app-purchase-tutorial) -- official Expo blog, confirmed pattern
+- [COPPA 2025 Compliance Guide](https://blog.promise.legal/startup-central/coppa-compliance-in-2025-a-practical-guide-for-tech-edtech-and-kids-apps/) -- expanded personal information definition
+- [FTC COPPA Rule Amendments 2025](https://www.federalregister.gov/documents/2025/04/22/2025-05904/childrens-online-privacy-protection-rule) -- Federal Register, compliance deadline April 22, 2026
+- [Apple Kids Category Guidelines](https://developer.apple.com/kids/) -- parental gate requirements for purchases
+- [App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) -- Guideline 1.3 Kids Category
+- [Helping Protect Kids Online February 2025](https://developer.apple.com/support/downloads/Helping-Protect-Kids-Online-2025.pdf) -- Apple developer document
+- [App Store IAP Review Checklist](https://capgo.app/blog/how-to-pass-app-store-review-iap/) -- common rejection reasons
+- [expo-secure-store Documentation](https://docs.expo.dev/versions/latest/sdk/securestore/) -- key format restrictions
+- [Expo SDK 54 Changelog](https://expo.dev/changelog/sdk-54) -- confirms React Native 0.81 compatibility
+- Codebase analysis: `appStore.ts` (STORE_VERSION=12, flat partialize), `migrations.ts` (12 additive migrations), `childProfileSlice.ts` (singleton pattern), `skillStatesSlice.ts` (unscoped skillStates), `gamificationSlice.ts` (flat XP/level/streak), all at `C:/projects/tiny-tallies/src/store/`
 
 ---
-*Pitfalls research for: Gamification features in Tiny Tallies (children's math learning app, ages 6-9)*
-*Researched: 2026-03-04*
+*Pitfalls research for: Multi-child profiles, parent dashboard, parental controls, and freemium IAP subscription in Tiny Tallies (children's math learning app, ages 6-9)*
+*Researched: 2026-03-05*

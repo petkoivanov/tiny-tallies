@@ -1,228 +1,205 @@
 # Project Research Summary
 
-**Project:** Tiny Tallies — v0.7 Gamification Features
-**Domain:** Children's math learning app gamification (ages 6-9) — achievement badges, skill map, daily challenges, avatar customization, UI themes
-**Researched:** 2026-03-04
+**Project:** Tiny Tallies v0.8 — Multi-Child Profiles, Parent Dashboard, IAP Subscription
+**Domain:** Children's education app monetization and family profile management
+**Researched:** 2026-03-05
 **Confidence:** HIGH
 
 ## Executive Summary
 
-Tiny Tallies v0.7 adds a gamification layer on top of a mature, adaptive math learning engine. The foundational approach is badge-first: an achievement system (badge registry, evaluation engine, store slice) must be built before anything else, because unlockable avatars, frames, and themes all depend on badges as their unlock mechanism. This is ethically differentiated from competitors — no coins, no shop, no paywall — all cosmetics are earned through achievement. The existing codebase already contains every library needed (react-native-svg, react-native-reanimated, lottie-react-native, expo-notifications); v0.7 is entirely an architectural and UI expansion, zero new npm dependencies.
+Tiny Tallies v0.8 introduces four interconnected capabilities: multi-child profiles, a parent analytics dashboard, parental time controls, and a freemium subscription model via in-app purchases. The dominant technical challenge is restructuring the Zustand store from a flat single-child architecture (12 versions of additive migrations) to a multi-child keyed structure. This store migration is the riskiest change in the project's history -- every slice, selector, and persistence mechanism assumes a single child. The recommended approach is a "copy-on-switch" pattern: keep existing slice interfaces unchanged, wrap all per-child data under a `children: Record<childId, ChildData>` map, and hydrate/dehydrate flat state on profile switch. This preserves all existing tests and screen components without modification.
 
-The recommended build order flows from dependency to dependent: (1) achievement system foundation, (2) visual skill map (can parallel with badges since it reads existing data independently), (3) daily challenges, (4) avatar/frame unlockables, (5) UI themes last. Themes are deliberately deferred to last because the existing static `StyleSheet.create` pattern is hostile to dynamic theming — attempting themes early will destabilize all prior work. The visual skill map is the highest-complexity single feature (custom SVG/React Native DAG rendering of 14 nodes) and requires a performance validation spike before full build.
+The monetization layer uses RevenueCat (react-native-purchases) for IAP/subscription management -- the industry standard for mobile subscriptions with proven Expo compatibility. The only other new dependency is react-native-gifted-charts for parent dashboard visualizations, which uses already-installed react-native-svg with zero new native code. All other features (time controls, session history, analytics, feature gating) are pure TypeScript/Zustand architecture work on existing libraries.
 
-The critical risk is the overjustification effect: if badge pop-ups are too prominent or too frequent, research shows they shift children from "I enjoy math" to "I want the next badge," which reduces learning outcomes (Hanus & Fox 2015). The second critical risk is store migration: the Zustand store is at v8 and needs at least two new version bumps for gamification state; a botched migration silently drops persisted data. Both risks have clear prevention strategies documented in research and must be addressed in Phase 1 design decisions, not deferred to later phases.
+The three highest risks are: (1) the v12-to-v13 store migration corrupting existing user data during the structural reshape, (2) existing users losing previously-free features (AI tutor, themes) when freemium gating is introduced, and (3) Apple Kids Category rejection due to missing parental gates on subscription UI. Mitigation requires comprehensive migration fixture tests, grandfathering logic for existing users, and designing all payment-related UI behind the parental PIN gate from day one.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The v0.7 gamification features require no new dependencies — every library is already in `package.json`. `react-native-svg` (v15.12.1) handles skill map node/edge rendering with animated mastery arcs via `useAnimatedProps`. `react-native-reanimated` (~4.1.1) drives 60fps node animations. `lottie-react-native` (~7.3.1) provides rich badge unlock celebration animations from free LottieFiles assets (10-30KB per animation). `expo-notifications` (~0.32.15) enables daily challenge reminders via `DailyTriggerInput` with no backend required. The theme system is implemented using React Context + Zustand — the project's existing `StyleSheet.create` pattern means NativeWind or styled-components would require rewriting 40+ component files.
+Only three new npm dependencies are needed. Everything else builds on the existing stack.
 
 See full details: `.planning/research/STACK.md`
 
-**Core technologies:**
-- `react-native-svg` v15.12.1: Skill map DAG rendering (nodes, edges, animated mastery arcs) — already installed, proven in 8 pictorial diagram components
-- `react-native-reanimated` ~4.1.1: Skill map node animations (pulse, glow, unlock transitions) — already drives confetti and manipulative drag
-- `lottie-react-native` ~7.3.1: Badge unlock celebration animations — already in package.json, not yet imported
-- `expo-notifications` ~0.32.15: Daily challenge reminders — already in package.json, not yet imported
-- `zustand` ^5.0.8: 2 new domain slices (achievementSlice, dailyChallengeSlice) — follows established slice pattern
-- React Context: ThemeProvider for dynamic color palette — minimal migration cost for a theme-per-context approach
+**New dependencies:**
+- **react-native-purchases ^9.11**: RevenueCat IAP/subscription management -- handles receipt validation, cross-platform restore, subscription analytics server-side. Free under $2.5K MRR. Confirmed compatible with Expo SDK 54 / RN 0.81.
+- **react-native-purchases-ui ^9.11**: Pre-built paywall and customer center UI -- reduces subscription screen development time significantly. Customizable via RevenueCat dashboard.
+- **react-native-gifted-charts ^1.4**: Line/bar/pie charts for parent dashboard -- pure JS, uses already-installed react-native-svg and expo-linear-gradient as peer deps. Zero new native code.
 
-**No-install constraint:** FlashList must stay at v1.x (v2.x crashes on RN 0.81). No Skia, no d3, no graph visualization libraries needed for 14-node DAG.
+**Key rejections:** victory-native (requires Skia, ~2MB native binary, Expo compatibility issues), expo-iap (less mature, no server-side receipt validation), chart-kit (stale, limited animation).
+
+**Critical constraint:** IAP requires EAS Build development builds. Purchases do not work in Expo Go. This must be set up before IAP work begins.
 
 ### Expected Features
 
 See full details: `.planning/research/FEATURES.md`
 
-**Must have (table stakes) — these make the app feel gamified:**
-- Achievement badges for mastery milestones — every major competitor has these; children need visible proof of learning
-- Achievement badges for effort/behavior — rewards persistence over speed, aligns with growth mindset research
-- Progress visualization (skill map) — highest-complexity v0.7 feature; children need concrete representation of abstract progress
-- Avatar selection from presets — already partially implemented (8 emoji animals); needs expansion to 12-15 with unlock states
-- Session-end summary with rewards — extend existing Results screen to show badge unlocks and challenge progress
+**Must have (table stakes):**
+- Multi-child profile switcher with independent progress tracking per child
+- Profile CRUD (add/edit/delete children, max 5)
+- Parent dashboard with progress overview and skill analytics per child
+- Daily session time limit (configurable by parent per child)
+- Subscription paywall with clear free vs premium tiers
+- Restore purchases (App Store requirement -- rejection risk if missing)
+- Free tier with meaningful daily practice value (3 sessions, all skills, all manipulatives)
 
 **Should have (differentiators):**
-- Visual skill map with prerequisite DAG — no competitor shows actual skill relationships as an interactive tree; this is the standout feature
-- Daily challenges with rotating themes — bonus XP, no penalty for skipping, date-seeded rotation (fully offline, no backend)
-- Unlockable avatars/frames via achievements — all cosmetics achievement-unlockable, zero paywall (ethically superior to Prodigy's FTC-complaint model)
-- Unlockable UI color themes — 3-5 palette variants earned through badges
-- Remediation achievement badges — no competitor rewards overcoming misconceptions; leverages existing misconceptionSlice
+- Misconception analytics for parents -- no competitor surfaces specific reasoning errors
+- Trend graphs over time -- most competitors show snapshots, not trajectories
+- Bedtime lockout schedule -- built-in without requiring system-level parental controls
+- Break reminders during sessions -- research-backed focus management for ages 6-9
+- Single family subscription covering all children (simpler than per-child pricing)
 
-**Defer to v0.8+:**
-- Social badges (requires family groups)
-- Animated mascot integration (higher asset cost)
-- Badge showcase/trophy wall screen (nice-to-have, not structural)
-- Sound effects for badge unlocks (incremental polish)
+**Defer (post-v0.8):**
+- Push notifications to parents (requires server infrastructure)
+- Cross-device data sync (requires cloud backend)
+- Detailed session replays (high storage cost, moderate value)
 
-**Anti-features to avoid explicitly:**
-- Coins/virtual currency — creates loss aversion and is an FTC complaint target (Prodigy precedent)
-- Collectible items/gacha — compulsive behavior in children; explicitly excluded from milestone scope
-- Competitive leaderboards — COPPA implications; harms self-esteem in ages 6-9
-- Daily login streak separate from weekly — causes anxiety documented in parent complaints; weekly streak is the correct granularity
-- Pay-to-unlock cosmetics — violates project values; all cosmetics must be earned through gameplay
-- Complex avatar builder — implementation cost disproportionate to value for emoji-based system
+**Anti-features (explicitly do NOT build):**
+- Ads in free tier (COPPA violation risk)
+- Upselling UI shown to children (FTC complaint risk, violates design principles)
+- Child-visible subscription status or locked-feature indicators
+- Cross-child comparisons in parent dashboard
+- Push notifications to children
 
 ### Architecture Approach
 
-The gamification layer integrates with the existing codebase via two new Zustand slices (achievementSlice, dailyChallengeSlice), minimal modifications to gamificationSlice (two new fields), and a single integration point at `commitSessionResults()` in sessionOrchestrator.ts. The achievement engine is a pure function evaluator — stateless, takes a snapshot of store state, returns newly-earned badge IDs — making it fully testable without store mocking. The skill map is a pure derivation of the existing `SKILLS` array (already defines the prerequisite DAG). Daily challenges are generated deterministically from a UTC date seed using the existing Mulberry32 PRNG — no backend required. Theme switching uses React Context over Zustand-persisted `equippedThemeId`, avoiding storage of full color palettes.
+The recommended architecture uses a "copy-on-switch" pattern for multi-child support: a single Zustand store with a `children: Record<childId, ChildData>` map and an `activeChildId` pointer. The active child's data lives in the existing flat store shape during use (preserving all existing slice interfaces and selectors unchanged), and gets serialized back to the children map on profile switch or app background. Three new slices are needed: `profilesSlice` (children map management), `parentControlsSlice` (per-child time/bedtime config), and `subscriptionSlice` (ephemeral IAP state, NOT persisted). Subscription state is intentionally ephemeral -- RevenueCat is the source of truth, queried on every app foreground, with a 24-hour offline grace period.
 
 See full details: `.planning/research/ARCHITECTURE.md`
 
 **Major components:**
-1. `achievementSlice` + `achievementEngine` — foundation; pure function evaluator called once at session commit; stores earned badge IDs + timestamps
-2. `dailyChallengeSlice` + `dailyChallengeScheduler` — date-seeded rotation; ephemeral state (today's challenge only); extends existing session modes
-3. `SkillMapScreen` + `skillMapLayout` service — reads existing SKILLS DAG + skillStates; custom SVG rendering; no new data structures
-4. `ThemeProvider` — React Context wrapping app root; reads `equippedThemeId` from store; components migrate from direct `colors` import to `useTheme()` hook
-5. `AvatarScreen` — combines avatar + frame + theme selection; depends on badge system for unlock conditions
+1. **profilesSlice** — Children map, activeChildId, switchChild (hydrate/dehydrate), auto-save on background
+2. **parentControlsSlice** — Per-child daily time cap, bedtime window, break interval configuration
+3. **subscriptionSlice** — Ephemeral subscription tier and entitlements (NOT persisted in AsyncStorage)
+4. **subscriptionService** — RevenueCat lifecycle: init, purchase, restore, entitlement listener
+5. **paywallGuard** — Pure function `canAccess(feature, tier)` for defense-in-depth feature gating
+6. **dashboardAnalytics** — Pure computation from session history; on-demand, not pre-computed
+7. **timeControlService** — Enforcement logic: daily cap check, bedtime comparison, break scheduling
+8. **ParentNavigator** — Nested navigation stack accessed after PIN verification
 
-**Store migration plan:** STORE_VERSION 8 → 9 (achievements, lifetime stats, equipped theme/frame) → 10 (daily challenge state). Two separate migration hops to allow phased rollout.
-
-**Build order from architecture research:** achievements (1) → badge UI (2) → badge integration (3) → skill map parallel track → daily challenges (4) → theme system (5) → avatar frames + AvatarScreen (6).
+**Store migrations:** v12->v13 (multi-child restructure), v13->v14 (parent controls), v14->v15 (session history bootstrap). Three migration hops matching three natural phase boundaries.
 
 ### Critical Pitfalls
 
 See full details: `.planning/research/PITFALLS.md`
 
-1. **Store migration cascade corruption** — Adding 5+ new features means multiple new persisted fields; a botched migration drops user data silently. Prevention: bump STORE_VERSION once per phase; write a roundtrip migration test (v8 fixture → v9/v10 → verify all fields intact); always update `partialize` in the same commit as the migration.
+1. **Store migration v12->v13 is a structural reshape, not additive** — All 12 prior migrations were "add field with default." This one MOVES existing data into a nested structure. Must delete old flat fields after copying, ensure idempotency, and test with three fixture scenarios (fresh install, full v12 state, minimal v12 state). Migration bugs risk total data loss with no recovery path.
 
-2. **Overjustification effect** — Prominent badges shift children from "I enjoy math" to "I want the next badge," reducing learning outcomes (Hanus & Fox 2015). Prevention: informational framing ("You earned this!"), cap 1 badge pop-up per session, never show grayed-out locked badge checklists, focus badge categories on effort/persistence not performance speed/accuracy.
+2. **Existing users lose previously-free features** — AI tutor has been free since v0.5, themes since v0.7. Gating these behind premium violates user trust and the "no paywall" design principle. Must grandfather existing users or restructure the free/premium split so premium adds NEW capabilities only, not restrictions on existing ones.
 
-3. **Skill map SVG rendering tanks on low-end Android** — 50-100+ SVG elements with animations cause multi-second render times on low-end devices. Prevention: technology spike before full build; limit animations to 2-3 active/next-unlockable nodes; use `useMemo` for layout computation; consider Skia or View-based layout as alternative.
+3. **Apple Kids Category + subscription = heightened review scrutiny** — Kids Category apps require parental gate before ANY purchase UI, visible subscription terms before the buy button, and a working restore purchases button. Missing any causes rejection. Budget 2-3 rejection cycles into the timeline.
 
-4. **Theme system breaks existing accessibility guarantees** — `StyleSheet.create` captures static values at module load time, not render time; a "just wrap it in a context provider" approach without careful refactoring silently breaks color values. Prevention: use `useTheme()` hook + `createThemedStyles(theme)` factory pattern; preserve Lexend font across all themes; require WCAG AA contrast ratios for all palette variants; update `AppNavigator.tsx` contentStyle to avoid "White Flash of Death."
+4. **Profile switching during active session corrupts data** — Session flow accumulates Elo/XP changes in refs and commits atomically at session end. Switching profiles mid-session commits one child's results to another child's data. Must guard `switchChild` with `isSessionActive` check and hide the switcher during sessions.
 
-5. **Daily challenges create hidden punitive mechanics** — Even "optional" challenges become obligatory when they are the primary source of bonus XP and special badges. Prevention: no exclusive daily-challenge-only badges; cap XP bonus at 10-20% of standard session; multi-day availability windows; never show "missed challenge" messaging.
-
-6. **HomeScreen and SessionScreen file size bloat** — SessionScreen is already at 552 lines (over the 500-line limit); adding gamification elements to HomeScreen, SessionScreen, and ResultsScreen will push all three well past the guardrail. Prevention: refactor SessionScreen below 500 lines BEFORE gamification work begins; extract every gamification element as its own component before integrating into screens.
+5. **COPPA 2025 amendments expand scope** — Compliance deadline April 22, 2026. Subscription data linked to child profiles may trigger expanded "personal information" requirements. Keep subscription state entirely separate from child learning data. Disclose RevenueCat in privacy policy.
 
 ## Implications for Roadmap
 
-Based on combined research, the dependency graph dictates a clear phase structure. The badge system must come first because unlockable avatars, frames, and themes all use badges as their unlock mechanism. The skill map can be built in parallel (it reads only existing data). Themes must come last to avoid destabilizing earlier work.
+Based on research, suggested phase structure:
 
-### Phase 0: Pre-work — Screen Refactoring
-**Rationale:** SessionScreen is already at 552 lines, violating the 500-line guardrail. Adding gamification to it without first refactoring guarantees an unmaintainable file. This must happen before any feature work.
-**Delivers:** SessionScreen refactored below 500 lines; extraction of candidate components for gamification hook points
-**Avoids:** Pitfall 6 (HomeScreen/SessionScreen file size bloat)
-**Research flag:** SKIP — this is a refactor of existing code, no new patterns needed
+### Phase 1: Multi-Child Store Foundation
+**Rationale:** Everything depends on this. The store restructure is a prerequisite for per-child dashboard, per-child time controls, and per-child session counting for free tier limits. This is also the highest-risk change -- isolating it allows focused testing before building features on top.
+**Delivers:** `profilesSlice` with children map, `switchChild` action, v12->v13 migration, `useActiveChild` hook, `useSaveActiveChild` auto-save hook, `ChildData` type definition, session history schema (begin collecting before dashboard exists).
+**Addresses:** Multi-child profile architecture, per-child state isolation.
+**Avoids:** Pitfall 1 (flat store assumption), Pitfall 2 (structural migration), Pitfall 11 (no historical data -- start collecting early).
 
-### Phase 1: Achievement System Foundation
-**Rationale:** Everything else — daily challenges, unlockable avatars, frames, themes — depends on the badge system existing. Store migration pattern for v8→v9 must be established correctly here; mistakes here corrupt all subsequent phases.
-**Delivers:** achievementSlice, achievementEngine (pure function evaluator), achievementDefinitions (~30 badges covering skill mastery + effort + exploration + remediation), STORE_VERSION 8→9 migration, badge state persistence
-**Addresses:** Achievement badges for mastery (table stakes), achievement badges for effort/behavior (table stakes)
-**Avoids:** Store migration cascade (Pitfall 1), overjustification effect (Pitfall 2 — badge definition framing must be correct from day 1)
-**Research flag:** SKIP — architecture is fully specified; patterns are established in codebase
+### Phase 2: Profile Management UI
+**Rationale:** With the store foundation in place, build the user-facing profile management. This validates the copy-on-switch pattern with real UI interaction before layering analytics on top.
+**Delivers:** ProfileSwitcherScreen, AddChildScreen, ChildSwitcher component on HomeScreen, PIN-gated profile management, grade-aware initial state for new children.
+**Addresses:** Profile switcher on home screen, add/edit/delete children.
+**Avoids:** Pitfall 9 (children accessing siblings' profiles -- PIN-gate from day one), Pitfall 13 (empty new-child profiles -- grade-aware initialization).
 
-### Phase 2: Badge UI + Results Integration
-**Rationale:** Once the data layer exists, the display layer can be built and wired to the session flow. Keeping this separate from Phase 1 enforces the boundary between data (engine, store) and presentation (components, screens).
-**Delivers:** BadgeCard, BadgePopup, BadgeGrid components; ResultsScreen extended with badge unlock display; HomeScreen badge count indicator; session commit wired to achievement evaluation
-**Uses:** lottie-react-native (badge unlock celebration), react-native-reanimated (entrance animations)
-**Implements:** Badge display layer from architecture
-**Avoids:** Badge-during-session interruption (queue all unlocks for ResultsScreen, never mid-session)
-**Research flag:** SKIP — well-documented Lottie + Reanimated patterns; component structure fully specified
+### Phase 3: Session History and Analytics Engine
+**Rationale:** The parent dashboard needs historical data to display anything beyond current-state snapshots. Session history must accumulate before the dashboard can show trends. Building the data layer and computation engine before the UI ensures the dashboard has real data to render.
+**Delivers:** SessionHistoryEntry type, append-on-session-complete logic (capped at 200 entries), dashboardAnalytics service (pure computation), trendCalculator service.
+**Addresses:** Trend graphs requirement, session history logging.
+**Avoids:** Pitfall 11 (no historical data for dashboard).
 
-### Phase 3: Visual Skill Map
-**Rationale:** The skill map reads only existing data (SKILLS array + skillStates) so it has no dependencies on the badge system. It is the highest-complexity single feature and benefits from its own phase. A performance validation spike must happen before committing to full SVG rendering.
-**Delivers:** SkillMapScreen, skillMapLayout service, SkillNode + SkillEdge + MapCanvas components; HomeScreen entry point
-**Uses:** react-native-svg + react-native-reanimated for node/edge rendering and animations
-**Avoids:** SVG performance on low-end devices (Pitfall 4 — spike first, measure time-to-interactive < 500ms on low-end Android before full build)
-**Research flag:** NEEDS RESEARCH — validate rendering approach (SVG vs. View-based absolute positioning vs. Skia) with a performance spike before building full feature
+### Phase 4: Parent Dashboard
+**Rationale:** With multi-child data and session history in place, the dashboard can now display meaningful analytics. Builds on Phase 1 (children map for all-children view) and Phase 3 (historical data for trends).
+**Delivers:** ParentNavigator (nested stack), ParentDashboardScreen, ChildProgressScreen, ProgressChart, MisconceptionBreakdown, TrendLine, SessionHistoryList components.
+**Uses:** react-native-gifted-charts for chart rendering.
+**Avoids:** Pitfall 8 (re-renders -- use snapshot pattern with `getState()`), Pitfall 15 (navigation confusion -- separate parent stack with PIN gate).
 
-### Phase 4: Daily Challenges
-**Rationale:** Daily challenges depend on the badge system (challenge completion triggers badge awards and bonus XP). By this phase, the session orchestrator integration pattern is understood from Phase 2's badge integration work.
-**Delivers:** dailyChallengeScheduler (date-seeded, offline), dailyChallengeSlice, DailyChallengeCard component, SessionScreen challenge mode integration (banner, shortened session config), ResultsScreen challenge result display, STORE_VERSION 9→10 migration
-**Addresses:** Daily challenges with rotating themes (differentiator)
-**Avoids:** Hidden punitive mechanics (Pitfall 5 — no exclusive badges, XP cap, multi-day windows, no "missed" messaging); session orchestrator god-function (Pitfall 7 — strategy pattern for Standard/Remediation/Challenge)
-**Research flag:** SKIP — deterministic date-seeded pattern established; strategy extraction is architectural refactoring
+### Phase 5: Parental Time Controls
+**Rationale:** Time controls are configured within the parent dashboard flow and require per-child data isolation (different limits per child). Placing this after the dashboard means the configuration UI naturally lives inside the parent navigator.
+**Delivers:** parentControlsSlice, v13->v14 migration, timeControlService, useTimeControls hook, TimeControlsScreen, daily cap enforcement, bedtime lockout, break reminders via expo-notifications.
+**Addresses:** Daily session time limit, bedtime lockout, break reminders.
+**Avoids:** Pitfall 7 (bypassable controls -- frame as advisory, use monotonic elapsed-time tracking).
 
-### Phase 5: Unlockable Avatars and Frames
-**Rationale:** Depends on the badge system (badges are the unlock mechanism). The avatar type migration (from the constrained `AvatarId` union to a broader unlockable system) requires care to preserve existing users' avatar selections.
-**Delivers:** Expanded avatar pool (12-15 vs. current 8), avatar frame ring system (5-7 frames), AvatarDisplay composable component (frame + emoji + badge overlay), AvatarScreen with avatar/frame selection, HomeScreen avatar with frame rendering
-**Addresses:** Unlockable avatars/frames via achievements (differentiator)
-**Avoids:** Avatar type migration breaking existing selection (use separate `equippedAvatarId: string` field, keep `AvatarId` for presets); dead-end progression (extensible `UnlockCondition` union type supporting `achievement`, `level`, `time` variants)
-**Research flag:** SKIP — avatar extension is straightforward; migration pattern follows established chain
-
-### Phase 6: UI Themes
-**Rationale:** Themes must come last because the existing `StyleSheet.create` pattern requires careful refactoring to work with dynamic theming. Building themes last means the refactoring scope is controlled and existing screens are stable before being theme-aware. The "White Flash of Death" and contrast-ratio concerns require dedicated QA.
-**Delivers:** ThemeProvider (React Context), THEMES registry (3-5 color palettes), `useTheme()` hook, theme-aware screens (HomeScreen, ResultsScreen, AvatarScreen), ThemePicker in AvatarScreen, AppNavigator.tsx contentStyle updated
-**Addresses:** Unlockable UI color themes (differentiator)
-**Avoids:** Theme breaking accessibility (Pitfall 3 — WCAG AA validation, Lexend font preserved, White Flash prevention, manipulative colors exempted from theming)
-**Research flag:** NEEDS RESEARCH — validate `createThemedStyles(theme)` factory approach vs. hook-per-component approach; determine which screens require full migration vs. cosmetic overlay only
+### Phase 6: Freemium Subscription and IAP
+**Rationale:** Subscription gating is purely additive -- it layers access controls on top of working features. Building it last means all features can be tested ungated first, and IAP integration issues do not block other work. Also requires resolving the grandfathering product decision before implementation.
+**Delivers:** RevenueCat integration, subscriptionSlice (ephemeral), subscriptionService, paywallGuard, SubscriptionScreen (paywall), useSubscription hook, useSessionCounter hook, feature gating on AI tutor/themes/sessions/analytics, v14->v15 migration.
+**Uses:** react-native-purchases, react-native-purchases-ui.
+**Avoids:** Pitfall 3 (Expo Go limitation -- EAS Build pre-work), Pitfall 4 (Kids Category rejection -- parental gate on all purchase UI), Pitfall 5 (losing free features -- grandfather existing users), Pitfall 6 (COPPA -- separate subscription from child data), Pitfall 10 (state desync -- ephemeral state + RevenueCat listener), Pitfall 14 (punitive paywall -- child-friendly messaging).
 
 ### Phase Ordering Rationale
 
-- **Dependency order is mandatory:** Badges → (Daily Challenges, Avatar Frames, Themes) because all three unlock mechanisms depend on the achievement system. Skill map is independent and can be Phase 3 or inserted anywhere after Phase 2.
-- **Performance-risk isolation:** Skill map (highest technical risk) and themes (highest integration risk) are given their own phases rather than bundled with other features. This ensures failures in these areas don't block other deliverables.
-- **Migration sequencing:** Two store version bumps (v9 for achievements, v10 for daily challenges) match two natural phase boundaries. Never bundle all migrations into one hop.
-- **COPPA compliance is a cross-cutting concern:** No free-text input anywhere in gamification; all timestamps in UTC; gamification state never sent to external services. Verify in every phase.
+- **Phase 1 before everything:** The children map is the data foundation. No per-child feature works without it.
+- **Phase 2 immediately after Phase 1:** Validates the store restructure with real user interaction before building analytics.
+- **Phase 3 before Phase 4:** Dashboard needs data to display. Starting history collection early maximizes available data by the time the dashboard ships.
+- **Phase 4 before Phase 5:** Time control configuration UI lives inside the parent dashboard navigator.
+- **Phase 6 last:** Feature gating is additive. Testing ungated features first is faster and cleaner. IAP has external dependencies (RevenueCat account, App Store Connect, Play Console setup, EAS Build) that benefit from parallel preparation while other phases execute.
 
 ### Research Flags
 
-Phases needing deeper research during planning:
-- **Phase 3 (Skill Map):** Rendering approach must be validated with a performance spike before committing. Options: (a) react-native-svg + useAnimatedProps, (b) View-based absolute positioning with Reanimated, (c) react-native-skia. Measure time-to-interactive on a low-end Android device. Target < 500ms.
-- **Phase 6 (Themes):** Need to validate `createThemedStyles(theme)` factory approach works with `StyleSheet.create` caching. Need to confirm which components require full `useTheme()` migration vs. which can use cosmetic overlays without touching the `StyleSheet` layer.
+Phases likely needing deeper research during planning:
+- **Phase 1:** The v12->v13 migration needs careful field-by-field mapping from the actual codebase. Research the exact fields in `partialize` and all slice interfaces to build the `PER_CHILD_FIELDS` constant. The copy-on-switch pattern must be validated against the full list of per-child state.
+- **Phase 6:** RevenueCat SDK integration patterns, Apple sandbox testing setup, Google Play internal test tracks, Kids Category review requirements, and the grandfathering product decision all need phase-level research. EAS Build pipeline setup is a prerequisite.
 
 Phases with standard patterns (skip research-phase):
-- **Phase 0:** Established refactoring — no new patterns
-- **Phase 1:** Architecture fully specified; pure function evaluator pattern is standard; Zustand slice pattern established across 7 existing slices
-- **Phase 2:** Lottie integration is well-documented; component structure fully specified in ARCHITECTURE.md
-- **Phase 4:** Date-seeded PRNG pattern already used by math engine; strategy pattern extraction is standard refactoring
-- **Phase 5:** Avatar extension is additive; migration pattern follows established chain
+- **Phase 2:** Standard CRUD UI + React Navigation screens. Well-documented patterns.
+- **Phase 3:** Pure TypeScript data transformation services. No external dependencies or complex patterns.
+- **Phase 4:** Standard chart rendering with react-native-gifted-charts. Well-documented API. Parent navigation is a standard nested stack.
+- **Phase 5:** Straightforward time comparison logic + expo-notifications local scheduling (already used in v0.7 for daily challenge reminders).
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All libraries already in package.json and verified against Expo SDK 54 compatibility; no new dependencies required; alternatives documented and rejected with rationale |
-| Features | HIGH | Competitor analysis is current and documented (Khan Academy, Prodigy, SplashLearn, Duolingo); psychology research on overjustification and punitive mechanics is well-sourced; feature dependencies mapped explicitly |
-| Architecture | HIGH | Based on direct codebase analysis of existing slices, services, and patterns; build order derived from actual dependency graph, not assumptions; all integration points identified |
-| Pitfalls | HIGH | Primary pitfalls documented with academic sources (Hanus & Fox 2015, Petrovych et al. 2022); technical pitfalls based on known react-native-svg performance benchmarks and confirmed RN/Expo behavior |
+| Stack | HIGH | Only 3 new dependencies, all verified compatible with Expo SDK 54 / RN 0.81. RevenueCat has official Expo partnership and documentation. react-native-gifted-charts uses already-installed peer deps. |
+| Features | HIGH | Competitive analysis covers SplashLearn, Prodigy, Khan Academy with current pricing. Feature split (free vs premium) is benchmarked against industry medians. Anti-features clearly identified with COPPA/FTC rationale. |
+| Architecture | HIGH | Copy-on-switch pattern well-reasoned against alternatives (separate stores, dynamic persist keys). Existing codebase analyzed in detail (36+ files with useAppStore selectors, 12 migration versions, all 9 slices). Migration strategy includes concrete code examples. |
+| Pitfalls | HIGH | 15 pitfalls identified across critical/moderate/minor severity with prevention strategies and phase assignments. COPPA 2025 amendments researched with compliance deadline (April 22, 2026). Recovery strategies documented for each critical pitfall. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Skill map rendering performance on low-end Android:** Research identifies the risk and recommends a spike, but exact element count + animation configuration that stays under 500ms is not pre-validated. Resolve with a focused performance spike at the start of Phase 3.
-- **Theme migration scope:** The research specifies the approach (createThemedStyles factory + useTheme hook) but does not enumerate which of the ~40 existing component files require migration vs. which can remain static. Resolve during Phase 6 planning with a file audit.
-- **Badge count and categories:** Research defines the structure (skill mastery, effort, exploration, challenge, remediation) and examples, but the full badge catalog (targeting 30-50 definitions) needs to be authored during Phase 1. Badge design should be reviewed against the overjustification criteria before shipping.
-- **Lottie asset sourcing:** Research recommends LottieFiles as the source for badge unlock animations. Specific animation selections and their file size validation need to happen during Phase 2 execution, not planning.
+- **Grandfathering product decision:** Research identifies the risk of losing free features but the exact free/premium split for existing users needs a product decision before Phase 6 implementation. Options: (a) full grandfather for pre-v0.8 users, (b) limited free AI tutor (3 uses/day) instead of full gating, (c) premium-only themes are NEW themes, existing earned themes stay free. This decision affects feature gating implementation and must be resolved during Phase 6 planning.
+- **Pricing validation:** Proposed $5.99/mo / $49.99/yr is research-informed but untested. Consider A/B testing via RevenueCat's experiment features post-launch.
+- **EAS Build pipeline:** The team needs development builds for IAP testing. This is infrastructure work that should be prepared during Phases 4-5 so it is ready for Phase 6.
+- **RevenueCat account and store setup:** Creating the RevenueCat project, configuring products in App Store Connect and Play Console, and setting up entitlements requires lead time. Start this during Phase 4-5 so it is ready for Phase 6.
+- **Privacy policy update:** COPPA compliance requires disclosing RevenueCat as a data processor before the subscription feature ships. Legal review may be needed. Must be completed before Phase 6 ships.
+- **Free tier profile limit:** Research suggests 2 profiles free, 5 premium. This limit needs product validation -- too restrictive risks conversion friction; too generous removes upgrade incentive.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-
-**Stack:**
-- Expo SDK 54 Notifications docs: https://docs.expo.dev/versions/latest/sdk/notifications/ — DailyTriggerInput API verified
-- react-native-reanimated docs: https://docs.swmansion.com/react-native-reanimated/docs/core/useAnimatedProps/ — SVG animated props pattern
-- react-native-svg GitHub v15.x: https://github.com/software-mansion/react-native-svg — RN 0.81 compatibility confirmed
-- Expo color themes guide: https://docs.expo.dev/develop/user-interface/color-themes/ — React Context theming pattern
-- Existing codebase: `src/theme/index.ts`, `src/store/constants/avatars.ts`, `src/services/mathEngine/skills.ts`, `src/store/migrations.ts`
-
-**Features:**
-- Prodigy FTC Complaint: https://www.nbcnews.com/tech/tech-news/child-protection-nonprofit-alleges-manipulative-upselling-math-game-prodigy-n1258294
-- Gamification dark patterns (children): https://www.researchgate.net/publication/378448656_Dark_Patterns_of_Cuteness_Popular_Learning_App_Design_as_a_Risk_to_Children's_Autonomy
-- Existing project research: `.planning/07-gamification.md`, `.planning/09-child-ux-design.md`
-
-**Architecture:**
-- Codebase analysis: `src/store/`, `src/services/`, `src/screens/`, `src/navigation/`
-- SKILLS DAG: `src/services/mathEngine/skills.ts` (14 skills, 2 root nodes, prerequisites array)
-- Session orchestrator: `src/services/session/sessionOrchestrator.ts`
-- Migration chain: `src/store/migrations.ts` (versions 1-8)
-
-**Pitfalls:**
-- Overjustification effect: https://www.psychologyofgames.com/2016/10/the-overjustification-effect-and-game-achievements/
-- Daily Quests or Daily Pests (ACM 2022): https://dl.acm.org/doi/10.1145/3549489
-- White Flash of Death (React Native themes): https://medium.com/@ripenapps-technologies/the-white-flash-of-death-solving-theme-flickering-in-react-native-production-apps-d732af3b4cae
-- react-native-svg performance: https://github.com/software-mansion/react-native-svg/issues/2660
-- FTC COPPA 2025 amendments: https://securiti.ai/ftc-coppa-final-rule-amendments/
+- [RevenueCat Expo Installation Docs](https://www.revenuecat.com/docs/getting-started/installation/expo) -- Expo managed workflow setup
+- [Expo IAP Guide](https://docs.expo.dev/guides/in-app-purchases/) -- official Expo IAP guidance
+- [Expo + RevenueCat Tutorial](https://expo.dev/blog/expo-revenuecat-in-app-purchase-tutorial) -- official Expo partnership
+- [Apple Kids Category Guidelines](https://developer.apple.com/kids/) -- parental gate requirements
+- [App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) -- Guideline 1.3
+- [COPPA 2025 Compliance Guide](https://blog.promise.legal/startup-central/coppa-compliance-in-2025-a-practical-guide-for-tech-edtech-and-kids-apps/)
+- [FTC COPPA Rule Amendments 2025](https://www.federalregister.gov/documents/2025/04/22/2025-05904/childrens-online-privacy-protection-rule)
 
 ### Secondary (MEDIUM confidence)
+- [react-native-gifted-charts GitHub](https://github.com/Abhinandan-Kushwaha/react-native-gifted-charts) -- Expo compatibility, peer deps
+- [react-native-purchases npm](https://www.npmjs.com/package/react-native-purchases) -- version compatibility
+- [Khan Academy Parent Dashboard](https://support.khanacademy.org/hc/en-us/articles/360039664491) -- competitor feature analysis
+- [SplashLearn Parent Features](https://www.splashlearn.com/features/parents) -- competitor feature analysis
+- [Prodigy Parent Dashboard](https://prodigygame.zendesk.com/hc/en-us/articles/115001744726) -- competitor feature analysis
+- [Education App Revenue Benchmarks](https://www.mirava.io/blog/subscription-benchmarks-education-apps) -- median annual price $44.99
 
-- SplashLearn gamification: https://brighterly.com/blog/splashlearn-reviews/
-- Duolingo achievement system: https://duolingoguides.com/all-duolingo-achievements/
-- Gamification in children's education meta-analysis: https://slejournal.springeropen.com/articles/10.1186/s40561-019-0085-2
-- Zustand migration best practices: https://github.com/pmndrs/zustand/discussions/1717
+### Codebase Analysis
+- `src/store/appStore.ts` (STORE_VERSION=12, flat partialize with all child fields at root)
+- `src/store/migrations.ts` (12 additive migrations, all null-coalesce pattern)
+- `src/store/slices/` (9 slices, all assuming single-child flat state)
+- `src/services/consent/parentalPin.ts` (existing PIN gate, reusable for parent dashboard)
+- `app.json` (existing plugins configuration)
 
 ---
-*Research completed: 2026-03-04*
+*Research completed: 2026-03-05*
 *Ready for roadmap: yes*

@@ -1,205 +1,188 @@
-# Feature Research
+# Feature Landscape
 
-**Domain:** Gamification for children's math learning app (ages 6-9)
-**Researched:** 2026-03-04
+**Domain:** Multi-child profiles, parent dashboard, time controls, and freemium IAP subscription for children's math learning app (ages 6-9)
+**Researched:** 2026-03-05
 **Confidence:** HIGH
 
-## Feature Landscape
+## Table Stakes
 
-### Table Stakes (Users Expect These)
-
-Features parents and children expect from any modern gamified educational app. Missing these makes the product feel bare compared to Khan Academy Kids, SplashLearn, or Prodigy.
+Features parents expect from any children's education app that supports multiple children and charges a subscription. Missing these makes the product feel incomplete compared to SplashLearn, Prodigy, and Khan Academy.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Achievement badges for mastery milestones | Every major competitor (Khan Academy, Duolingo, SplashLearn) has badges for skill completion. Children expect visible proof of what they have learned. | MEDIUM | Already designed in `07-gamification.md` research. Need badge definition registry, unlock evaluation engine, persisted badge state in store, and badge award animation. Depends on existing BKT mastery data in `skillStatesSlice`. |
-| Achievement badges for effort/behavior | Duolingo has 10+ behavior-based badges (streak, XP totals, lessons completed). Rewarding persistence over ability aligns with growth mindset research (Dweck, 2006). | MEDIUM | Categories: streak milestones, session count, problem count, remediation victories. Must be non-comparative (no leaderboard badges). Evaluation runs post-session. |
-| Progress visualization (skill map) | Khan Academy, SplashLearn, and Prodigy all show visual progress. Children need concrete representation of abstract progress (Piaget concrete operational stage). Parents expect to see "what my child has learned." | HIGH | The prerequisite DAG already exists in `skills.ts` (14 skills, 2 root nodes, chain structure). Visualization must show: locked/unlocked/in-progress/mastered states. This is the most complex UI feature in v0.7 -- requires custom graph layout, node rendering, edge drawing, and scroll/zoom behavior. |
-| Avatar selection from presets | Khan Academy, Prodigy, and SplashLearn all let children pick an avatar. Current app already has 8 emoji avatars in `avatars.ts`. Bare minimum is already met. | LOW | Already implemented at a basic level (8 emoji animals). Expanding to 12-15 is trivial -- just add entries to the `AVATARS` constant. |
-| Session-end summary with rewards | SplashLearn and Khan Academy Kids both show post-session reward summaries. Current Results screen shows score/XP/streak but not badge unlocks or challenge progress. | LOW | Extend existing `Results` screen route params to include `badgesUnlocked` and `challengeProgress`. Render badge unlock animations on the Results screen. |
+| Multi-child profile switcher | SplashLearn family plan supports up to 3 kids. Prodigy has per-child accounts. Parents with 2-3 children in the target age range need independent progress tracking per child. Without this, families must use separate devices or lose progress switching. | HIGH | Current architecture is single-child: one flat `childProfileSlice` with `childName/childAge/childGrade`, one `skillStatesSlice`, one `gamificationSlice`, one `misconceptionSlice`. Moving to multi-child requires either (a) namespacing all per-child state under a `children: Record<childId, ChildState>` with an `activeChildId` selector, or (b) separate persisted stores per child. Option (a) is cleaner with Zustand. Needs STORE_VERSION migration to restructure entire store. This is the highest-risk feature -- a migration of all existing single-child data into the multi-child structure. |
+| Add/edit/delete child profiles | Parents need to manage children: add a new child, update age/grade as child grows, remove a profile if no longer needed. Standard in every multi-child app. | MEDIUM | Profile CRUD operations. Add creates new child entry with defaults. Edit updates name/age/grade/avatar. Delete requires parental PIN confirmation (safety net against child accidentally deleting sibling's progress). Max 5 children per family is reasonable limit (SplashLearn uses 3). |
+| Profile switcher on home screen | Quick switching without navigating deep menus. Khan Academy shows child avatars at top of parent dashboard. SplashLearn Parent Connect shows all children in a list. | LOW | Avatar row or dropdown on home screen. Each avatar shows child's name and current level. Tap to switch `activeChildId`. Must be gated behind parental PIN if the child could switch to a sibling's profile and mess with their progress. |
+| Parent dashboard: progress overview | SplashLearn shows "last week's progress" and "overall Math Score." Prodigy shows "recent activity" with topics and correctness. Khan Academy shows "Activity Overview Report." Parents need at-a-glance understanding of how each child is doing. | MEDIUM | Summary cards per child: sessions completed this week, problems attempted/correct, current level/XP, weekly streak status, active skills. Data already exists in `skillStatesSlice` (BKT mastery per skill), `gamificationSlice` (XP, level, streak), and `sessionStateSlice`. This is primarily a read-only view composing existing data. |
+| Parent dashboard: skill analytics | Prodigy shows "grade level your child is performing at" and "Report Card with breakdown by skill." SplashLearn shows "mastery of skills" and "trouble spots." Parents want to know WHAT their child is learning, not just how much. | MEDIUM | Per-skill mastery display using existing BKT P(L) values. Group by category (addition/subtraction). Show mastered vs in-progress vs struggling skills. Leverage existing prerequisite DAG for visual context. Color-coded mastery levels. |
+| Daily session time limit | Every major parental control app (Boomerang, Apple Screen Time, Google Family Link) offers daily time limits. Parents expect educational apps to support self-limiting. American Academy of Pediatrics recommends managing screen time even for educational content. | MEDIUM | Timer service tracking cumulative session time per day. When limit reached, show friendly "Time's up for today!" screen. Must persist across app restarts (store daily elapsed time). Default off -- parent opts in via dashboard. Suggested presets: 15/30/45/60 minutes. |
+| Subscription paywall for premium features | SplashLearn ($7.99-$11.99/mo), Prodigy (~$60/yr), Education.com (tiered). Freemium with clear free tier is standard monetization for children's education apps. Parents expect to try before buying. | HIGH | RevenueCat integration (Expo-compatible, handles receipt validation, cross-platform). Subscription state persisted and synced. Paywall screen showing free vs premium comparison. Must comply with COPPA: all purchase flows require parental interaction, no upselling to children. |
+| Restore purchases | Apple and Google both require restore functionality. Users switch devices, reinstall, etc. Without restore, subscriptions appear lost. App store review rejection risk. | LOW | RevenueCat handles this automatically via `restorePurchases()`. Need a "Restore Purchases" button in parent settings. |
+| Free tier with meaningful functionality | Khan Academy Kids is 100% free. SplashLearn and Prodigy offer substantial free tiers. If the free tier feels crippled, parents uninstall rather than subscribe. The free tier IS the conversion funnel. | LOW (design) | Design decision, not implementation complexity. Free tier must provide real daily practice value: 3 sessions/day, all 14 skills, full adaptive engine, all manipulatives. Premium adds: unlimited sessions, AI tutor, all themes, parent analytics. The math learning must not be paywalled. |
 
-### Differentiators (Competitive Advantage)
+## Differentiators
 
-Features that set Tiny Tallies apart. Not required, but create meaningful engagement advantages over competitors.
+Features that set Tiny Tallies apart from competitors. Not universally expected, but high-value.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Visual skill map with prerequisite DAG | Most competitors show flat progress bars or lists. Rendering the actual prerequisite graph as an interactive tree/map lets children SEE how skills connect -- addition leads to subtraction, single-digit leads to multi-digit. This makes the learning journey tangible and explorable, not just a percentage. | HIGH | No off-the-shelf React Native skill-tree component exists. Must be custom-built. The existing `SKILLS` array with `prerequisites` fields provides the data. Layout algorithm: topological sort into grade-based rows, draw edges with react-native-svg or Reanimated paths. Node states driven by `skillStatesSlice` BKT data (locked=gray, unlocked=pulsing, in-progress=partial fill, mastered=glowing). |
-| Daily challenges with rotating themes | SplashLearn has daily goals; Duolingo has daily quests. But themed daily challenges (e.g., "Addition Adventure Monday," "Speed Round Wednesday") with bonus XP create a reason to return beyond normal practice. Rotating content prevents habituation. | MEDIUM | Need: daily challenge definition system (theme + skill filter + goal type), server-free date-seeded rotation (Mulberry32 PRNG already exists), challenge progress tracking per day, bonus XP award, special daily-challenge badges. No backend required -- seed from date. |
-| Unlockable avatars/frames via achievements | Prodigy locks cosmetics behind paywall (criticized by FTC complaint). Tiny Tallies can differentiate by making ALL cosmetics achievement-unlockable with zero paywall. This is ethically superior and still drives engagement. | MEDIUM | Badge definitions include `reward` field pointing to avatar/frame unlock. Need: `unlockedAvatars` and `equippedFrame` in store. Frame = border decoration around avatar circle on home screen. ~5-7 special avatars + ~5-7 frames earned through achievement milestones. |
-| Theme/skin unlocking via achievements | SplashLearn and Prodigy gate cosmetics behind payment. Unlocking UI color schemes and session "wrappers" (themed problem contexts like space, underwater, jungle) through achievements gives children ownership over their experience. | MEDIUM | UI themes: 3-5 color palette variants applied via theme context. Session wrappers: cosmetic context text/imagery around math problems (purely visual, does not affect math engine). Both stored as unlocked/equipped in gamification store. |
-| Remediation achievement badges | No major competitor specifically rewards overcoming misconceptions. Celebrating "You fixed your carry mistake!" turns a struggle into a triumph -- directly supporting growth mindset. | LOW | Leverages existing `misconceptionSlice` resolved status. Badge triggers when misconception status transitions to `resolved`. Minimal new logic needed. |
-| Non-punitive daily challenge design | Duolingo's daily streak has been widely criticized for causing anxiety in children (documented in parent complaints). Daily challenges in Tiny Tallies should offer BONUS rewards for completion, never penalties for skipping. Challenge resets daily with no "missed challenge" messaging. | LOW | Design constraint, not implementation complexity. Ensure challenge UI shows "Bonus challenge available!" not "You missed yesterday's challenge!" No challenge streak -- use the existing weekly streak only. |
+| Misconception analytics for parents | No major competitor shows parents WHAT misconceptions their child has (e.g., "forgets to carry in addition"). Prodigy shows grade level, SplashLearn shows skill mastery, but neither surfaces the specific reasoning errors. Tiny Tallies already tracks misconceptions with the Bug Library + 2-then-3 confirmation system. Exposing this to parents is a genuine differentiator. | MEDIUM | Read from existing `misconceptionSlice`. Display confirmed misconceptions with human-readable descriptions from Bug Library. Show status (suspected/confirmed/resolved) and remediation progress. This is the "aha moment" for parents -- "Oh, THAT's what my child struggles with." |
+| Trend graphs over time | SplashLearn shows "improvement in grade" but most competitors show point-in-time snapshots, not trajectories. Parents want to see "is my child getting better?" over weeks/months. | HIGH | Requires historical data that is NOT currently stored. Need to add session history records (date, problems attempted, correct count, time spent, skills practiced, misconceptions encountered). Lightweight session log appended after each session. Chart rendering with react-native-svg or victory-native. Weekly/monthly aggregation. |
+| Bedtime lockout schedule | Apple Screen Time has "Downtime" scheduling. Google Family Link has bedtime mode. Building this into the app directly means parents don't need a separate parental control app. Convenient for parents who want education-specific limits without system-wide restrictions. | MEDIUM | Schedule definition: start time, end time, days of week. When active, app shows a calming "sleeping" screen. No app-level enforcement can prevent OS-level bypass, but the gentle friction is usually sufficient for ages 6-9. Store schedule in parent settings, check on app foreground. |
+| Break reminders during sessions | Research shows children ages 6-9 lose focus after 15-20 minutes of concentrated activity. No major competitor actively reminds children to take breaks. This is a health-conscious differentiator that parents appreciate. | LOW | Simple timer during active sessions. At configurable interval (default 20 min), show a brief "Take a stretch break!" interstitial with a 30-second timer. Child can dismiss or wait. Not blocking -- just a nudge. |
+| Per-child subscription (family plan pricing) | SplashLearn charges ~$135/year for a 3-child family plan vs ~$90/year for single child. A single subscription covering all children in the app is simpler and more parent-friendly than per-child pricing. | LOW (design) | One subscription = all children. No per-child pricing tiers. This simplifies IAP logic and is more generous than competitors. Marketing angle: "One subscription, whole family." |
 
-### Anti-Features (Commonly Requested, Often Problematic)
+## Anti-Features
 
-Features that seem good but create problems, especially for children ages 6-9.
+Features to explicitly NOT build, even if competitors have them.
 
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Coins/virtual currency with shop | Prodigy, SplashLearn use coins to "buy" cosmetics. Creates sense of economy and choice. | Creates loss aversion ("I can't afford that"), introduces opportunity cost anxiety, and is a gateway to IAP dark patterns. Prodigy was subject to an FTC complaint for manipulative coin/membership tactics. Children 6-7 do not understand economic tradeoffs well enough for this to be fair. The milestone context explicitly says NO coins/economy. | Unlock cosmetics directly via achievement badges. No intermediate currency. Earning a badge = cosmetic unlocks immediately. Zero economic anxiety. |
-| Collectible items/stickers | Gacha/collection mechanics drive engagement in adult apps and older-child games. | Collection completion pressure ("I need them all") creates compulsive behavior. Research on dark patterns in educational apps (2024 arxiv study) identifies forced collection as a manipulation tactic targeting children. Random/gacha distribution is especially harmful. The milestone context explicitly says NO collectibles. | Deterministic badge unlocks. Children know exactly what they need to do to earn each reward. No randomness, no FOMO. |
-| Timed daily challenges with countdown | Creates urgency, drives daily engagement. Duolingo uses time-limited events effectively for adults. | Countdown timers cause anxiety in children ages 6-9 (documented in child UX research). Time pressure undermines learning by prioritizing speed over understanding. | Daily challenges reset at midnight with no countdown. Available all day. Missed days have zero consequence. |
-| Competitive leaderboards | Khan Academy had energy-point leaderboards. Drives engagement for top performers. | Discourages bottom-half children. Social comparison harms self-esteem in ages 6-9. Existing research in `07-gamification.md` explicitly calls this out as an anti-pattern. COPPA implications for showing other users' data. | Self-comparison only: "Your best session this week" vs "Last week's best." Personal records, never rankings. |
-| Daily login streak (separate from weekly) | Duolingo's most famous mechanic. Drives DAU metrics. | Widely documented to cause anxiety, guilt, and "meltdowns" in children when broken. Parents report negative emotional reactions. The app already uses weekly streaks specifically to avoid this. Adding a daily streak contradicts the design philosophy. | Weekly streak (already implemented) is the engagement mechanic. Daily challenges provide a daily touchpoint without streak pressure. |
-| Pay-to-unlock cosmetics/themes (IAP) | Revenue model for Prodigy ($60/year membership). Funds development. | Prodigy received FTC complaint for "rubbing non-membership status in kids' faces." Creates inequality in classrooms. Children feel inferior when they cannot access content peers have. Explicitly against project values. | All cosmetics earned through gameplay. Revenue model is separate concern (v0.8 subscription for parent features, not child cosmetics). |
-| Speed/accuracy leaderboards for challenges | Creates competitive engagement around daily challenges. | Same problems as general leaderboards, amplified by the daily cadence. Children who are slower processors feel excluded. Speed emphasis undermines the "understanding over speed" philosophy. | Personal bests only. "You answered 12 correct today -- that's 2 more than your average!" |
-| Complex avatar builder (face/hair/clothes/accessories) | Prodigy has a full character creator. Children enjoy detailed customization. | High implementation cost (asset pipeline, rendering layers, combinations). Ages 6-7 have difficulty with multi-step customization. Bloats app size with assets. For emoji-based avatars, this is architectural overreach. | Preset avatars (12-15 options) plus frame decorations (5-7 options). Two simple choices, not a full builder. Each avatar is a complete design, not assembled from parts. |
+| Anti-Feature | Why Avoid | What to Do Instead |
+|--------------|-----------|-------------------|
+| Ads in free tier | COPPA prohibits behavioral advertising to children under 13. Even "kid-safe" ad networks (e.g., SuperAwesome) disrupt learning flow and erode parent trust. Khan Academy Kids proves ads-free is viable. | Session limit (3/day free) is the conversion lever, not ads. The free experience must be clean and focused. |
+| Upselling UI shown to children | Prodigy received FTC complaint for showing premium-locked items to children in-game, creating "nag factor." Children cannot consent to purchases and should not be pressured. | Paywall screen is only accessible from parent dashboard (behind parental PIN). Children never see "upgrade" prompts. Premium features silently unavailable in free tier -- not locked with a visible padlock. |
+| Child-visible subscription status | Showing "FREE" vs "PREMIUM" badges or locked icons in the child experience creates a have/have-not dynamic. | Free tier simply does not show AI tutor button or locked themes. The child experience is complete within its tier. No indicators that "more" exists. |
+| Detailed usage analytics sent to server | COPPA restricts collection of persistent identifiers and behavioral data from children. Server-side analytics create compliance risk and require privacy infrastructure. | All analytics computed on-device from local session history. No telemetry, no server-side user profiles. Parent dashboard reads local store data only. |
+| Social/comparative features between children | Showing one child's progress vs another sibling creates competition and resentment. "Your sister is ahead of you" is toxic for learning motivation. | Each child's dashboard is independent. No cross-child comparisons. Parent sees each child's progress separately, never side-by-side rankings. |
+| Free trial that auto-converts | Many apps use 7-day free trial that silently charges. This is widely disliked by parents and potentially a COPPA issue if a child initiated the trial. | If offering a trial, require explicit parental confirmation at trial start AND at conversion. RevenueCat supports trial management. Prefer a generous free tier over trial. |
+| Push notifications to children | Notifications bypass parental mediation. Children ages 6-9 should not receive app notifications. | Notifications only go to parent (if parent opts in). Child-facing app never sends push. Session reminders are parent-only features. |
+| Locking existing free features behind paywall | If math practice, manipulatives, or badges were free in v0.7, they must remain free. "Rug-pulling" free features into premium destroys trust. | All existing v0.7 features stay free. Premium adds NEW capabilities (AI tutor, unlimited sessions, analytics, themes) that were never available in free tier before. |
 
 ## Feature Dependencies
 
 ```
-Achievement Badge System (registry + evaluation + store)
+Multi-Child Profile Architecture (store restructure)
     |
-    |----> Badge Award Animation (Results screen + toast)
+    |----> Profile CRUD (add/edit/delete children)
     |           |
-    |           +----> Unlockable Avatars (badge reward = avatar unlock)
+    |           +----> Profile Switcher UI (home screen)
+    |
+    |----> Per-Child State Isolation
     |           |
-    |           +----> Unlockable Frames (badge reward = frame unlock)
+    |           +----> Parent Dashboard (reads per-child data)
+    |           |           |
+    |           |           +----> Progress Overview Cards
+    |           |           |
+    |           |           +----> Skill Analytics View
+    |           |           |
+    |           |           +----> Misconception Breakdown
+    |           |           |
+    |           |           +----> Trend Graphs (requires session history)
     |           |
-    |           +----> Unlockable Themes (badge reward = theme unlock)
+    |           +----> Parental Time Controls (per-child settings)
+    |                       |
+    |                       +----> Daily Session Time Limit
+    |                       |
+    |                       +----> Bedtime Lockout Schedule
+    |                       |
+    |                       +----> Break Reminders
+
+Subscription System (RevenueCat integration)
     |
-    +----> Daily Challenges (challenge badges depend on badge system)
+    |----> Subscription State Slice (active/expired/free)
     |           |
-    |           +----> Challenge-specific badges
-    |
-    +----> Visual Skill Map (mastery badges shown on map nodes)
+    |           +----> Feature Gating Service (checks entitlements)
+    |           |           |
+    |           |           +----> Session Limit Enforcement (3/day free)
+    |           |           |
+    |           |           +----> AI Tutor Gating (premium only)
+    |           |           |
+    |           |           +----> Theme Gating (premium unlocks all)
+    |           |
+    |           +----> Paywall Screen (parent-only, behind PIN)
+    |           |
+    |           +----> Restore Purchases
 
-Existing BKT Mastery (skillStatesSlice)
+Session History Log (NEW data layer)
     |
-    +----> Achievement Badge Evaluation (mastery-based badges need BKT data)
+    +----> Trend Graphs (requires historical records)
     |
-    +----> Visual Skill Map Node States (locked/unlocked/mastered from BKT)
-
-Existing Prerequisite DAG (skills.ts)
-    |
-    +----> Visual Skill Map Layout (edges from prerequisites array)
-
-Existing Misconception Tracking (misconceptionSlice)
-    |
-    +----> Remediation Badges (resolved misconception triggers badge)
-
-Existing XP/Level System (gamificationSlice)
-    |
-    +----> Daily Challenge Bonus XP (challenge awards bonus XP)
-
-Avatar Selection (childProfileSlice.avatarId)
-    |
-    +----> Unlockable Avatars (extends avatar pool)
-    |
-    +----> Unlockable Frames (decorates avatar display)
-
-Theme System (new slice)
-    |
-    +----> UI Color Themes (app-wide color palette swap)
-    |
-    +----> Session Cosmetic Wrappers (problem context theming)
+    +----> Parent Dashboard Enhanced Analytics
 ```
 
-### Dependency Notes
+### Critical Dependency Notes
 
-- **Achievement Badge System is the foundation.** Everything else -- daily challenges, unlockable avatars, themes -- depends on the badge system existing first. It must be built in the first phase.
-- **Visual Skill Map has no upstream dependencies on other v0.7 features.** It reads existing `skillStatesSlice` and `skills.ts` data. It can be built in parallel with the badge system.
-- **Daily Challenges depend on the badge system** because challenge completion triggers badge awards and bonus XP.
-- **Unlockable Avatars/Frames/Themes depend on badges** because badges are the unlock mechanism (no coins, no shop).
-- **Theme system is purely cosmetic** and has no dependency on the skill map or daily challenges. It depends only on badges for unlocking.
-- **Store migration required:** New persisted state (badges, unlockedAvatars, equippedFrame, unlockedThemes, equippedTheme, dailyChallengeProgress) needs STORE_VERSION bump(s). Plan migration(s) carefully -- one version bump per phase is cleanest.
+- **Multi-child profile restructure is the prerequisite for everything.** The entire store must be reorganized before parent dashboard or per-child time controls can exist. This is the riskiest and most complex change.
+- **Subscription system is independent of multi-child profiles.** It can be built in parallel -- subscription state is family-level, not per-child.
+- **Parent dashboard requires both multi-child profiles AND session history logging** for full functionality. Basic dashboard (current state snapshot) can ship without history; trend graphs need accumulated data.
+- **Time controls require multi-child profiles** because limits are per-child (a 6-year-old gets different limits than an 8-year-old).
+- **Feature gating (free vs premium) can start simple** and does not block multi-child work. A boolean `isPremium` checked at key points.
 
-## MVP Definition
+## MVP Recommendation
 
-### Build First (Foundation Phase)
+### Prioritize (Build First)
 
-Core infrastructure that everything else depends on.
+1. **Multi-child store restructure + migration** -- Everything depends on this. Wrap all per-child state under `children: Record<childId, ChildState>` with `activeChildId`. Migrate existing single-child data to first child entry. STORE_VERSION 13.
+2. **Profile CRUD + switcher UI** -- Add/edit/delete children. Profile picker on home screen. PIN-gated delete.
+3. **Subscription integration (RevenueCat)** -- Subscription state slice, paywall screen, restore purchases, basic feature gating (session count, AI tutor access).
+4. **Basic parent dashboard** -- Progress overview cards per child using existing BKT/XP/streak data. Skill mastery grid. Misconception breakdown. No trend graphs yet (needs history).
 
-- [ ] **Achievement badge registry and definitions** -- Static badge catalog with IDs, categories, unlock conditions, reward associations. This is the "schema" for all gamification.
-- [ ] **Badge evaluation engine** -- Service that checks badge unlock conditions against current state (BKT mastery, XP, streak, session count, misconception status). Runs post-session.
-- [ ] **Badge state persistence** -- New fields in gamification store slice: `earnedBadges`, `badgeProgress`. Store migration v8 to v9.
-- [ ] **Badge award animation + Results screen integration** -- Show newly earned badges on Results screen with unlock animation. Toast for mid-session badge unlocks.
-- [ ] **Visual skill map (basic)** -- Render prerequisite DAG as a scrollable tree. Nodes show locked/unlocked/mastered states from BKT. Tap node for detail overlay. This is the highest-complexity feature but can be built in parallel.
+### Prioritize (Build Second)
 
-### Build Second (Engagement Phase)
+5. **Session history logging** -- Append lightweight session record after each session. Enables trend graphs.
+6. **Daily time limit + bedtime lockout** -- Per-child time controls with schedule.
+7. **Trend graphs** -- Weekly/monthly progress charts from session history.
+8. **Break reminders** -- Simple in-session timer nudge.
 
-Features that leverage the badge system for daily engagement and personalization.
+### Defer
 
-- [ ] **Daily challenge system** -- Date-seeded challenge rotation, challenge definitions (theme + skill filter + goal), progress tracking, bonus XP, challenge-specific badges.
-- [ ] **Unlockable avatars and frames** -- Extend avatar pool with achievement-gated special avatars. Add frame decoration system. Avatar picker shows locked items with badge requirement.
-- [ ] **Avatar/frame display on home screen** -- Update HomeScreen profile section to render equipped frame around avatar.
+- **Push notifications to parents** -- Requires server infrastructure (no backend currently). Defer to post-v0.8.
+- **Cross-device sync** -- Would require cloud backend. All data is device-local. Defer.
+- **Detailed session replays** -- Showing parents exactly which problems the child got wrong. High storage cost, moderate value. Defer.
 
-### Build Third (Polish Phase)
+## Competitive Pricing Analysis
 
-Cosmetic features that add depth but are not structurally required.
+| App | Free Tier | Premium Price | What Premium Adds |
+|-----|-----------|---------------|-------------------|
+| Khan Academy Kids | 100% free | N/A | N/A (nonprofit) |
+| SplashLearn | Limited daily access | $7.99-11.99/mo ($89-135/yr family) | Full curriculum, detailed reports, up to 3 kids |
+| Prodigy Math | Core game free | ~$60/yr per child | Parent tools, video lessons, premium rewards |
+| Education.com | 3 downloads/mo | ~$9.99/mo | Unlimited access, all grades |
+| Duolingo | Full course free | $7-14/mo | No ads, unlimited hearts, offline |
+| **Tiny Tallies (proposed)** | 3 sessions/day, all skills, all manipulatives, basic badges | $5.99/mo or $49.99/yr | Unlimited sessions, AI tutor, all themes, parent analytics, time controls |
 
-- [ ] **UI color themes** -- 3-5 color palette variants (default dark, ocean blue, forest green, sunset warm, space purple). Applied via React context/provider. Unlocked via achievement badges.
-- [ ] **Session cosmetic wrappers** -- Themed context text/imagery around math problems (space theme, underwater theme, jungle theme). Purely visual wrapper, does not affect math engine. Unlocked via badges.
-- [ ] **Theme picker screen** -- Screen to preview and equip unlocked themes. Shows locked themes with badge requirement.
+### Pricing Rationale
 
-### Future Consideration (v0.8+)
+- **$5.99/mo / $49.99/yr** undercuts SplashLearn ($7.99+) and Prodigy (~$60/yr) while offering comparable features.
+- Median education app annual price is $44.99 (industry benchmark). $49.99/yr is competitive.
+- Annual discount (30% off monthly rate) incentivizes commitment and reduces churn.
+- Single subscription covers all children -- no per-child pricing complexity.
 
-- [ ] **Social badges** -- "Help a friend" badges. Requires family groups (v0.8 scope).
-- [ ] **Animated mascot integration** -- Character mascot that reacts to badges. Higher asset and implementation cost. Defer to post-gamification polish.
-- [ ] **Badge showcase/profile** -- Dedicated screen showing all earned badges as a trophy wall. Nice to have but not essential for v0.7.
-- [ ] **Sound effects for badge unlocks** -- Audio feedback (expo-av). Desirable but can be added as incremental polish.
+### Free vs Premium Feature Split
 
-## Feature Prioritization Matrix
+| Feature | Free | Premium |
+|---------|------|---------|
+| Daily practice sessions | 3 per day | Unlimited |
+| All 14 math skills | Yes | Yes |
+| Adaptive difficulty (Elo + BKT) | Yes | Yes |
+| Virtual manipulatives (all 6) | Yes | Yes |
+| Achievement badges | Yes | Yes |
+| Daily challenges | Yes | Yes |
+| Visual skill map | Yes | Yes |
+| Avatar customization | Basic (8 avatars) | All avatars + frames |
+| AI Tutor (Gemini) | No | Yes |
+| Color themes (beyond default) | No | Yes |
+| Parent dashboard | Basic (current snapshot) | Full (analytics + trends + misconceptions) |
+| Time controls | No | Yes |
+| Multi-child profiles | Up to 2 | Up to 5 |
+| Session history/trends | No | Yes |
 
-| Feature | User Value | Implementation Cost | Priority | Phase |
-|---------|------------|---------------------|----------|-------|
-| Badge registry + evaluation engine | HIGH | MEDIUM | P1 | Foundation |
-| Badge persistence (store slice) | HIGH | LOW | P1 | Foundation |
-| Badge award animation | HIGH | MEDIUM | P1 | Foundation |
-| Visual skill map | HIGH | HIGH | P1 | Foundation |
-| Daily challenges | HIGH | MEDIUM | P2 | Engagement |
-| Unlockable avatars/frames | MEDIUM | MEDIUM | P2 | Engagement |
-| Avatar/frame home screen display | MEDIUM | LOW | P2 | Engagement |
-| UI color themes | MEDIUM | MEDIUM | P3 | Polish |
-| Session cosmetic wrappers | LOW | MEDIUM | P3 | Polish |
-| Theme picker screen | LOW | LOW | P3 | Polish |
-| Remediation badges | MEDIUM | LOW | P1 | Foundation (part of badge registry) |
-
-**Priority key:**
-- P1: Must have -- defines the gamification system and provides visible progress
-- P2: Should have -- drives daily engagement and personalization
-- P3: Nice to have -- cosmetic depth, can ship without
-
-## Competitor Feature Analysis
-
-| Feature | Khan Academy | Prodigy Math | SplashLearn | Duolingo (reference) | Tiny Tallies Approach |
-|---------|-------------|-------------|-------------|---------------------|----------------------|
-| **Badges** | 5 tiers (Meteorite to Black Hole) based on points/mastery/behavior | Skill mastery badges, event badges | Daily completion rewards + milestone badges | 10+ achievements with tiered levels (Wildfire, XP Olympian, etc.) | Two categories: mastery milestones (skill/category/grade) + behavior rewards (streak/challenges/remediation). Tiered levels within each badge. |
-| **Skill visualization** | Course map with unit completion bars | RPG world map (geography-themed) | Flat progress bars per skill | Course tree with checkpoints | Interactive prerequisite DAG tree showing actual skill relationships. Nodes reflect BKT mastery with visual states. |
-| **Daily content** | Recommended practice based on mastery | Daily login rewards + battles | Daily learning cards + unlock reward | Daily quests (3 tasks) | Themed daily challenges with date-seeded rotation. Bonus XP, no penalty for skipping. |
-| **Avatar** | Unlockable avatars via energy points | Full character creator + pets + clothing (paywall gated) | Character collection via coins | Duo mascot (not customizable) | 12-15 preset avatars (8 existing + 4-7 unlockable via badges). Frames as decorations. No paywall. |
-| **Themes/cosmetics** | None | Extensive (clothing, pets, furniture) -- partially paywalled | Character skins via coins | None | UI color themes + session cosmetic wrappers. All earned through achievement badges. No currency, no shop. |
-| **Currency** | Energy points (earn-only) | Coins + premium Wishcoins (IAP) -- FTC complained | Coins earned in-game | Gems (earn + buy) | NONE. Direct badge-to-reward unlocking. Explicitly no intermediate currency. |
-| **Anti-patterns** | Minimal -- non-punitive | Paywalled cosmetics, manipulative upselling to children, FTC complaint filed | Coin economy creates mild loss aversion | Daily streak anxiety, aggressive notifications | Zero punitive mechanics, zero paywall, zero currency, zero streaks beyond weekly, zero comparison. |
-
-## Design Constraints from Existing Research
-
-The following constraints from `.planning/07-gamification.md` and `.planning/09-child-ux-design.md` directly inform feature design:
-
-1. **Intrinsic over extrinsic** -- Badges celebrate understanding, not just completion
-2. **Effort over ability** -- Behavior badges reward persistence, not speed or accuracy percentages
-3. **No punitive mechanics** -- No hearts, lives, game over, or streak-loss anxiety
-4. **COPPA compliant** -- No social comparison, no personal info in badge displays
-5. **Max 6 interactive elements per screen** -- Skill map must be scrollable, not cluttered
-6. **Max 2.5s celebration animation** -- Badge unlock animation capped
-7. **Tap to skip animations** -- All celebrations skippable after initial play
-8. **48dp minimum touch targets** -- Skill map nodes must be tappable
-9. **Reduced motion support** -- Badge animations must have opacity-fade fallback
-10. **2 navigation levels max** -- Badge list/skill map are single-level screens
+**Key design principle:** The free tier must provide a genuinely good daily math practice experience. A child using only the free tier should still learn effectively. Premium adds convenience (unlimited sessions), intelligence (AI tutor), insight (parent analytics), and polish (themes/cosmetics).
 
 ## Sources
 
-- Khan Academy badges and avatar system: [Khan Academy Help Center](https://support.khanacademy.org/hc/en-us/articles/202487710-What-are-energy-points-badges-and-avatars)
-- Prodigy Math features and criticism: [NBC News FTC Complaint](https://www.nbcnews.com/tech/tech-news/child-protection-nonprofit-alleges-manipulative-upselling-math-game-prodigy-n1258294), [Prodigy Wikipedia](https://en.wikipedia.org/wiki/Prodigy_Math_Game)
-- SplashLearn gamification: [SplashLearn on App Store](https://apps.apple.com/us/app/splashlearn-kids-learning-app/id672658828), [Brighterly Review](https://brighterly.com/blog/splashlearn-reviews/)
-- Duolingo achievement system: [Lingoly.io Achievements Guide](https://lingoly.io/duolingo-achievements/), [DuolingoGuides All Achievements](https://duolingoguides.com/all-duolingo-achievements/)
-- Gamification dark patterns research: [arxiv Dark Patterns of Cuteness](https://www.researchgate.net/publication/378448656_Dark_Patterns_of_Cuteness_Popular_Learning_App_Design_as_a_Risk_to_Children's_Autonomy), [arxiv Game Dark Patterns](https://arxiv.org/html/2401.06247v1)
-- Gamification EdTech analysis: [Prodwrks Gamification in EdTech](https://prodwrks.com/gamification-in-edtech-lessons-from-duolingo-khan-academy-ixl-and-kahoot/)
-- Prodigy Fairplay criticism: [Fairplay 7 Reasons](https://fairplayforkids.org/pf/prodigy/)
-- Children's math gamification best practices: [Fremont Math Hub](https://fremontmathhub.com/how-gamification-makes-math-fun-for-kids/), [Codeyoung](https://www.codeyoung.com/blog/how-gamification-improves-math-learning-in-kids)
-- Existing project research: `.planning/07-gamification.md`, `.planning/09-child-ux-design.md`
+- [Khan Academy Parent Dashboard](https://support.khanacademy.org/hc/en-us/articles/360039664491-Guide-to-the-Parent-Dashboard) -- dashboard features, multi-child management
+- [Khan Academy creating child accounts](https://support.khanacademy.org/hc/en-us/articles/202262994-How-do-I-create-child-accounts) -- add-child flow
+- [Prodigy Parent Dashboard](https://prodigygame.zendesk.com/hc/en-us/articles/115001744726-Parent-Dashboard) -- goal overview, recent activity, grade level display
+- [SplashLearn Parent Features](https://www.splashlearn.com/features/parents) -- real-time progress, mastery notifications, trouble spots
+- [SplashLearn Pricing](https://www.myengineeringbuddy.com/blog/splashlearn-reviews-alternatives-pricing-offerings/) -- $7.99-$11.99/mo, family plans
+- [RevenueCat Expo Integration](https://www.revenuecat.com/docs/getting-started/installation/expo) -- Expo managed workflow support
+- [Expo IAP Guide](https://docs.expo.dev/guides/in-app-purchases/) -- official Expo in-app purchase documentation
+- [RevenueCat Expo Tutorial](https://expo.dev/blog/expo-revenuecat-in-app-purchase-tutorial) -- official Expo blog on RevenueCat integration
+- [COPPA Compliance Guide 2025](https://blog.promise.legal/startup-central/coppa-compliance-in-2025-a-practical-guide-for-tech-edtech-and-kids-apps/) -- SDK audit, parental consent, persistent identifiers
+- [Education App Revenue Benchmarks](https://www.mirava.io/blog/subscription-benchmarks-education-apps) -- median annual price $44.99
+- [Education App Monetization Strategies](https://www.ptolemay.com/post/how-to-monetize-your-educational-app-strategies-for-success) -- freemium best practices
+- Existing project context: `.planning/PROJECT.md`, `src/store/appStore.ts`, `src/store/slices/childProfileSlice.ts`
 
 ---
-*Feature research for: Gamification v0.7 (achievement badges, visual skill map, daily challenges, avatar customization, themes)*
-*Researched: 2026-03-04*
+*Feature research for: v0.8 Multi-child profiles, parent dashboard, time controls, freemium IAP subscription*
+*Researched: 2026-03-05*

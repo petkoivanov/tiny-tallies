@@ -1,310 +1,221 @@
-# Stack Research: v0.7 Gamification Features
+# Stack Research: v0.8 Multi-Child Profiles, Parent Dashboard, IAP Subscription
 
-**Domain:** Children's math learning app gamification (achievement badges, skill map, daily challenges, avatar customization, UI themes)
-**Researched:** 2026-03-04
+**Domain:** Children's math learning app -- multi-child profiles, parent analytics dashboard, parental time controls, freemium subscription with in-app purchases
+**Researched:** 2026-03-05
 **Confidence:** HIGH
 
 ## Executive Summary
 
-The existing stack already contains every library needed for v0.7 gamification. No new npm dependencies are required. The project has react-native-svg (used extensively for manipulative pictorial diagrams), react-native-reanimated (used for 60fps drag primitives and confetti animations), expo-notifications (in deps, not yet imported), and lottie-react-native (in deps, not yet imported). The work is entirely architectural: new Zustand slices, new services, new components, and a theme provider pattern built on React Context.
+v0.8 requires **three new npm dependencies**: `react-native-purchases` (RevenueCat for IAP/subscriptions), `react-native-purchases-ui` (pre-built paywall screens), and `react-native-gifted-charts` (analytics charts for parent dashboard). Everything else -- multi-child profile architecture, parental time controls, subscription state gating -- is pure Zustand/TypeScript architecture work on top of existing libraries. The current single-child store design needs a fundamental restructuring to support per-child isolated state, which is the most architecturally significant change in this milestone.
 
 ## Recommended Stack
 
-### Core Technologies (Already Installed -- No Changes)
+### New Dependencies
 
-| Technology | Version | Purpose for v0.7 | Why No Change Needed |
-|------------|---------|-------------------|---------------------|
-| react-native-svg | 15.12.1 | Skill map graph rendering (nodes, edges, mastery arcs) | Already used for 8 pictorial diagram components; SVG is the right primitive for a DAG visualization with circles, paths, and text |
-| react-native-reanimated | ~4.1.1 | Animated skill map nodes (pulse, glow, unlock transitions), badge celebration animations, theme transition fades | Already used for confetti + manipulative drag; `useAnimatedProps` works with react-native-svg for animated stroke-dashoffset mastery arcs |
-| lottie-react-native | ~7.3.1 | Badge unlock celebration animations, level-up effects | Already in package.json but not imported; Lottie JSON animations are smaller and richer than hand-coded Reanimated for one-shot celebrations |
-| expo-notifications | ~0.32.15 | Daily challenge reminder notifications | Already in package.json but not imported; `DailyTriggerInput` with `repeats: true` handles recurring daily reminders without a backend |
-| expo-haptics | ~15.0.7 | Haptic feedback on badge unlock, skill node tap, avatar selection | Already used in `src/components/manipulatives/shared/haptics.ts`; extend to new interactions |
-| expo-linear-gradient | ~15.0.7 | Theme gradient backgrounds, skill map region shading, badge cards | Already in package.json; provides native gradient rendering |
-| zustand | ^5.0.8 | New slices for achievements, daily challenges, avatar/theme state | Already the state management foundation; extend with 2-3 new slices following established domain slice pattern |
-| zod | ^4.1.13 | Validation of achievement definitions, theme schemas, challenge configs | Already used at system boundaries; apply to new config types |
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| react-native-purchases | ^9.11 | IAP subscription management (Apple/Google) | RevenueCat is the industry standard for mobile subscriptions. Handles receipt validation, subscription status, cross-platform parity, renewal/cancellation, and App Store/Play Store compliance server-side. Expo-first integration with config plugin. Eliminates months of native IAP plumbing. Free tier covers up to $2.5K MTR. |
+| react-native-purchases-ui | ^9.11 | Pre-built paywall and customer center UI | RevenueCat's paywall components handle subscription presentation, product display, pricing localization, and restore purchases flow. Dramatically reduces paywall UI development time. Customizable templates. |
+| react-native-gifted-charts | ^1.4 | Line/bar/pie charts for parent analytics dashboard | Only peer deps are react-native-svg (already at 15.12.1) and expo-linear-gradient (already at ~15.0.7) -- zero new transitive dependencies. Pure JS (no native code), works in Expo managed workflow. Supports animated transitions, tooltips, gradient fills, and responsive sizing. Feature-rich enough for progress-over-time line charts, skill mastery bar charts, and session distribution pie charts. |
 
-### What Each Feature Needs
+### Existing Dependencies (No Changes, New Usage)
 
-#### 1. Achievement Badges
-
-**Libraries:** None new. Pure TypeScript service + Zustand slice + Reanimated/Lottie animations.
-
-| Component | Technology | Notes |
-|-----------|-----------|-------|
-| Badge definitions | TypeScript constants (like `SKILLS` array) | Static `AchievementDefinition[]` with id, name, category, criteria, icon |
-| Badge state tracking | New `achievementSlice` in Zustand | `earnedBadges: Record<string, EarnedBadge>`, persisted via `partialize` |
-| Criteria evaluation | Pure function service `achievementEvaluator.ts` | Check after session complete, skill mastery, streak update; deterministic, testable |
-| Unlock animation | Lottie for celebration + Reanimated for entrance | Use `lottie-react-native` LottieView for badge-specific unlock anims; JSON assets from LottieFiles |
-| Badge gallery UI | react-native-svg for badge icons OR emoji-based (like current avatars) | SVG preferred for scalable, themeable badges; emoji fallback is simpler |
-| Store migration | v8 -> v9: add `earnedBadges: {}` | Follows established migration chain pattern |
-
-#### 2. Visual Skill Map
-
-**Libraries:** None new. react-native-svg + react-native-reanimated (both already installed).
-
-| Component | Technology | Notes |
-|-----------|-----------|-------|
-| Graph layout | Custom layout algorithm in TypeScript service | 14 nodes, 2 operation chains -- small enough for hand-tuned positions; no graph layout library needed |
-| Node rendering | react-native-svg `Circle`, `Text`, `G` | Each skill = circle node with label, color-coded by mastery state |
-| Edge rendering | react-native-svg `Path` or `Line` | Prerequisite arrows between nodes; straight lines or gentle curves |
-| Mastery indicator | Animated SVG arc via `useAnimatedProps` | `strokeDashoffset` on arc path animated by `withTiming` when mastery changes |
-| Node states | Reanimated `useAnimatedStyle` | Locked=gray+scale(0.8), active=pulse animation, mastered=glow+full color |
-| Tap interaction | react-native-gesture-handler `Pressable` or RN `Pressable` | Tap node -> show skill detail popup; 48dp minimum touch target |
-| Pan/zoom | react-native-gesture-handler `PanGestureHandler` + `PinchGestureHandler` | Only if map is larger than viewport; 14 nodes may fit without scrolling |
-| Scroll container | `ScrollView` with `contentContainerStyle` | Simpler alternative to pan/zoom for the initial implementation |
-
-**Why NOT use a graph visualization library:**
-- The DAG has only 14 nodes and ~15 edges -- trivially small
-- External graph libraries (react-d3-graph, vis-network) are web-only, not React Native compatible
-- react-native-graph (Margelo) is for line/area charts, not node-edge graphs
-- Custom SVG gives full control over child-friendly styling, animations, and touch targets
-- The prerequisite relationships are already defined in `SKILLS` array with `prerequisites[]`
-
-#### 3. Daily Challenges
-
-**Libraries:** None new. expo-notifications (already in deps) + pure TypeScript scheduling service.
-
-| Component | Technology | Notes |
-|-----------|-----------|-------|
-| Challenge definitions | TypeScript constants | Challenge templates: "5 addition problems under 2 minutes", "Master a new skill today", etc. |
-| Daily rotation | Deterministic selection from `Mulberry32` PRNG seeded by date | Same pattern as problem generation; ensures same challenge for retries on same day |
-| Challenge state | New `challengeSlice` in Zustand OR extend `gamificationSlice` | `dailyChallenge: { date, challengeId, status, progress }`, persisted |
-| Reminder notifications | `expo-notifications` `scheduleNotificationAsync` with `DailyTriggerInput` | Schedule at parent-configured time; requires notification permission prompt |
-| Completion tracking | Pure function service | Check challenge criteria after each session; award bonus XP + special badge |
-| Store migration | v9 -> v10 (or combined with badges migration) | Add `dailyChallenge` state |
-
-**Notification scheduling pattern:**
-```typescript
-import * as Notifications from 'expo-notifications';
-
-await Notifications.scheduleNotificationAsync({
-  content: {
-    title: "Daily Challenge Ready!",
-    body: "Your math challenge is waiting!",
-  },
-  trigger: {
-    type: Notifications.SchedulableTriggerInputTypes.DAILY,
-    hour: 16, // 4 PM, configurable by parent
-    minute: 0,
-    repeats: true,
-  },
-});
-```
-
-#### 4. Avatar Customization
-
-**Libraries:** None new. Extend existing `src/store/constants/avatars.ts` pattern.
-
-| Component | Technology | Notes |
-|-----------|-----------|-------|
-| Base avatars | Existing `AVATARS` constant (8 animal emojis) | Keep as-is; these are the free presets |
-| Unlockable avatars | Extend `AVATARS` with `unlockCriteria?: string` field | e.g., "Master all addition" unlocks "Math Dragon" |
-| Avatar frames | react-native-svg `Circle` with decorative border | Gold frame for all-skills-mastered, silver for streak milestones |
-| Avatar selection UI | Existing pattern + locked overlay for unearned | Reuse current onboarding avatar picker with lock/unlock states |
-| Equipped state | Extend `childProfileSlice` with `equippedFrame?: FrameId` | Minimal state addition; single migration |
-
-#### 5. UI Themes (Skins + Session Cosmetic Wrappers)
-
-**Libraries:** None new. React Context + Zustand for theme state.
-
-| Component | Technology | Notes |
-|-----------|-----------|-------|
-| Theme definitions | TypeScript constants extending `src/theme/index.ts` pattern | Multiple color palettes: "Ocean Deep" (current dark navy), "Forest Green", "Sunset Warm", "Space Purple" |
-| Theme context | React `createContext` + `useContext` hook | `ThemeProvider` wrapping app root; components read colors from context instead of direct import |
-| Theme persistence | Add `activeThemeId` to gamification/achievement slice | Persisted in Zustand store; survives app restart |
-| Session cosmetics | Purely visual wrappers (background pattern, answer button style variants) | Config objects mapping theme -> component style overrides |
-| Theme unlock | Tied to achievement system | Earn "Forest Explorer" badge -> unlock "Forest Green" theme |
-| Migration path | Refactor `src/theme/index.ts` from static export to theme registry | Current `colors` object becomes the "default" theme; new themes follow same shape |
-
-**Theme architecture pattern:**
-```typescript
-// src/theme/themes.ts
-export interface ThemeColors {
-  background: string;
-  backgroundLight: string;
-  surface: string;
-  surfaceLight: string;
-  primary: string;
-  primaryLight: string;
-  primaryDark: string;
-  correct: string;
-  incorrect: string;
-  textPrimary: string;
-  textSecondary: string;
-  textMuted: string;
-}
-
-export const THEMES: Record<string, ThemeColors> = {
-  'ocean-deep': { /* current colors */ },
-  'forest-green': { /* green palette */ },
-  'sunset-warm': { /* warm palette */ },
-  'space-purple': { /* purple palette */ },
-};
-
-// src/theme/ThemeProvider.tsx
-const ThemeContext = createContext<ThemeColors>(THEMES['ocean-deep']);
-export const useThemeColors = () => useContext(ThemeContext);
-```
-
-### Supporting Libraries (Already Installed -- No Changes)
-
-| Library | Version | Purpose for v0.7 | When to Use |
-|---------|---------|-------------------|-------------|
-| lucide-react-native | ^0.554.0 | Icons for badge gallery, skill map legend, challenge cards | UI iconography throughout new screens |
-| @react-navigation/native-stack | ^7.8.2 | New screens: BadgeGallery, SkillMap, DailyChallenge, AvatarCustomizer, ThemeSelector | Standard navigation pattern |
-| @expo-google-fonts/lexend | ^0.4.1 | Typography in new screens | Consistent with existing UI |
-| expo-crypto | ~15.0.8 | Hash-based deterministic daily challenge selection (if Mulberry32 is insufficient) | Edge case only |
+| Technology | Version | New Usage in v0.8 | Notes |
+|------------|---------|-------------------|-------|
+| zustand | ^5.0.8 | Multi-child profile architecture: per-child state isolation, profile switcher, new parentalSlice, subscriptionSlice | Major architectural rework of store partitioning -- not a library change but the biggest technical effort |
+| expo-secure-store | ^15.0.7 | Store parental PIN (already used), RevenueCat API key | Sensitive data storage; already integrated for COPPA consent gate |
+| expo-notifications | ~0.32.15 | Break reminders, session time warnings, bedtime lockout alerts | Already installed and configured in app.json plugins; used for daily challenge reminders in v0.7 |
+| react-native-svg | 15.12.1 | Chart rendering (peer dep of gifted-charts), progress visualizations | Already installed; gifted-charts renders via SVG |
+| expo-linear-gradient | ~15.0.7 | Chart gradient fills (peer dep of gifted-charts), dashboard backgrounds | Already installed |
+| @react-navigation/native-stack | ^7.8.2 | Parent dashboard screens, profile management screens, subscription screens | Standard navigation; add new screens to navigation tree |
+| zod | ^4.1.13 | Validation of profile data, subscription state, parental control config | Runtime validation at boundaries |
+| expo-dev-client | ~6.0.18 | Required for testing IAP (purchases don't work in Expo Go) | Already installed; EAS Build needed for IAP testing |
+| @react-native-async-storage/async-storage | ^2.2.0 | Per-child state persistence (keyed by child profile ID) | May need multiple storage keys or namespaced approach for multi-child |
 
 ### Development Tools (No Changes)
 
 | Tool | Purpose | Notes |
 |------|---------|-------|
-| Jest + jest-expo | Test achievement evaluator, challenge scheduler, theme system | All new services are pure functions; highly testable |
-| TypeScript strict mode | Type-safe badge/theme/challenge definitions | Leverage discriminated unions for badge criteria types |
+| Jest + jest-expo | Test subscription state logic, profile switching, parental controls, chart data transforms | Pure function services are highly testable; mock RevenueCat SDK in tests |
+| TypeScript strict mode | Type-safe profile/subscription/control types | Discriminated unions for subscription tiers, profile states |
+| EAS Build | Required for IAP testing on physical devices | `eas build --profile development` for dev client with native IAP modules |
 
 ## Installation
 
 ```bash
-# No new packages to install.
-# All required libraries are already in package.json:
-#   - react-native-svg@15.12.1
-#   - react-native-reanimated@~4.1.1
-#   - lottie-react-native@~7.3.1
-#   - expo-notifications@~0.32.15
-#   - expo-haptics@~15.0.7
-#   - expo-linear-gradient@~15.0.7
-#   - zustand@^5.0.8
-#   - zod@^4.1.13
+# New dependencies
+npx expo install react-native-purchases react-native-purchases-ui react-native-gifted-charts
+
+# No new dev dependencies needed
 ```
+
+### app.json Plugin Configuration
+
+Add RevenueCat config plugin:
+
+```json
+{
+  "plugins": [
+    "react-native-purchases"
+  ]
+}
+```
+
+RevenueCat's config plugin auto-configures the native billing modules (StoreKit on iOS, Google Play Billing on Android) during `expo prebuild`.
+
+## Feature-to-Stack Mapping
+
+### 1. Multi-Child Profiles
+
+**New libraries:** None. Pure Zustand architecture.
+
+| Component | Technology | Notes |
+|-----------|-----------|-------|
+| Profile data model | Zustand `profilesSlice` | `Record<string, ChildProfile>` with `activeProfileId`. Each child gets unique UUID. |
+| Per-child state isolation | Zustand store keying or namespace pattern | All existing slices (skills, sessions, achievements, misconceptions, challenges) become per-child. Two approaches: (A) single store with `childId` keys on all data, or (B) store-per-child with dynamic persistence key. Approach A is simpler. |
+| Profile switcher UI | React Navigation modal + existing avatar components | Profile list with avatar circles, add/edit/delete, PIN-protected |
+| Profile CRUD | Zustand actions + AsyncStorage | Create profile with name/age/grade/avatar, generates fresh initial state for all slices |
+| Store migration | STORE_VERSION 12 -> 13 | Wrap existing single-child state into first profile entry. Most complex migration to date. |
+
+### 2. Parent Dashboard
+
+**New libraries:** react-native-gifted-charts.
+
+| Component | Technology | Notes |
+|-----------|-----------|-------|
+| Progress overview | react-native-gifted-charts `LineChart` | Sessions completed over time, XP growth, streak history per child |
+| Skill analytics | react-native-gifted-charts `BarChart` | Mastery levels across skill categories (addition, subtraction), reading from BKT state |
+| Misconception breakdown | react-native-gifted-charts `PieChart` or `BarChart` | Confirmed vs resolved misconceptions by category |
+| Session history | FlatList (standard RN) | Scrollable list of past sessions with date, score, duration |
+| Data aggregation | Pure TypeScript service | `dashboardDataService.ts` transforms raw store state into chart-ready data structures |
+| Child selector | Profile avatar tabs at top of dashboard | Quick switch between children's analytics |
+| PIN-protected access | Existing parental PIN gate | Dashboard is parent-only; reuse COPPA consent gate pattern |
+
+### 3. Parental Time Controls
+
+**New libraries:** None. Zustand + expo-notifications.
+
+| Component | Technology | Notes |
+|-----------|-----------|-------|
+| Time control config | New `parentalSlice` in Zustand | `dailyTimeLimitMinutes`, `bedtimeHour`, `breakIntervalMinutes`, `breakDurationMinutes` |
+| Session time tracking | `Date.now()` diffs in session orchestrator | Track cumulative daily session time; compare against limit |
+| Time limit enforcement | Session start guard + mid-session check | Block session start if daily limit reached; show friendly "come back tomorrow" screen |
+| Bedtime lockout | Time comparison on app foreground + session start | Check current hour against bedtime config; show sleep-themed lockout screen |
+| Break reminders | expo-notifications local notifications | Schedule break notification after configured interval using `TimeIntervalTriggerInput` |
+| Session timer display | Reanimated animated text (already available) | Optional countdown shown to child during sessions |
+| Config persistence | Zustand persist (per-profile or global) | Controls are per-child (different bedtimes for different ages) |
+
+### 4. Freemium Subscription
+
+**New libraries:** react-native-purchases, react-native-purchases-ui.
+
+| Component | Technology | Notes |
+|-----------|-----------|-------|
+| Subscription SDK init | `Purchases.configure({ apiKey })` | Initialize on app launch with RevenueCat API key from expo-secure-store or env |
+| Subscription tiers | RevenueCat Offerings + Products | Free tier: 3 sessions/day, no AI tutor, default theme only. Premium tier: unlimited sessions, AI tutor, all themes. |
+| Paywall screen | `react-native-purchases-ui` `RevenueCatUI.Paywall` | Pre-built, App Store compliant paywall with product cards, pricing, terms. Customizable via RevenueCat dashboard. |
+| Purchase flow | `Purchases.purchasePackage()` | Handles Apple/Google payment sheets natively |
+| Restore purchases | `Purchases.restorePurchases()` | Required by App Store guidelines; RevenueCat handles receipt validation |
+| Subscription state | New `subscriptionSlice` in Zustand + RevenueCat listener | `CustomerInfo` listener updates local state on subscription changes. Store caches subscription status for offline access. |
+| Feature gating | Pure function: `canAccess(feature, subscriptionTier)` | Centralized access control. Check before AI tutor invocation, session start (count check), theme unlock. |
+| Session counting | Extend session tracking in store | Count sessions per day for free tier limit. Reset daily. |
+| Customer Center | `react-native-purchases-ui` `RevenueCatUI.CustomerCenter` | Pre-built subscription management (cancel, change plan, billing issues) |
 
 ## Alternatives Considered
 
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| Skill map rendering | Custom react-native-svg | react-native-graph (Margelo/Skia) | react-native-graph is for line/area charts, not node-edge DAGs; our graph has 14 nodes, not thousands of data points |
-| Skill map rendering | Custom react-native-svg | d3-force + react-native-svg | d3-force is overkill for a static 14-node DAG with known topology; adds 60KB+ dependency for layout we can hand-code in 50 lines |
-| Skill map rendering | Custom react-native-svg | react-native-skia | Skia is powerful but adds a heavy dependency (~2MB); SVG is already installed, proven in codebase, and sufficient for 14 nodes |
-| Badge animations | Lottie (already installed) | Rive (rive-react-native) | Rive is more powerful but adds a new dependency; Lottie is already in package.json and has a massive free animation library |
-| Badge animations | Lottie + Reanimated | Hand-coded Reanimated only | Lottie JSON animations from LottieFiles are faster to create, richer, and smaller than hand-coding complex celebration sequences |
-| Theme system | React Context + Zustand | NativeWind / Tailwind | Project uses StyleSheet.create pattern (per CLAUDE.md); switching to NativeWind would require rewriting 40+ component files |
-| Theme system | React Context + Zustand | react-native-paper ThemeProvider | Paper is a full UI component library; project has custom components; importing Paper just for theming adds unnecessary weight |
-| Theme system | React Context + Zustand | styled-components | Adds a runtime dependency for what React Context + Zustand handle natively; project doesn't use styled-components anywhere |
-| Notifications | expo-notifications (already installed) | react-native-push-notification | expo-notifications is the Expo-blessed solution; alternatives break managed workflow |
-| State persistence | AsyncStorage (current) | react-native-mmkv | MMKV is faster but adds native dependency complexity; AsyncStorage is already working, proven, and sufficient for the data volume |
+| Category | Recommended | Alternative | Why Not Alternative |
+|----------|-------------|-------------|---------------------|
+| IAP/Subscriptions | RevenueCat (react-native-purchases) | expo-iap | expo-iap is newer and less battle-tested; RevenueCat has 10+ years of IAP infrastructure, handles receipt validation server-side, provides analytics dashboard, and has proven Expo integration. expo-iap still notes subscriptions need "careful testing." |
+| IAP/Subscriptions | RevenueCat | Manual StoreKit/Play Billing | Months of native plumbing, receipt validation server, edge cases (family sharing, grace periods, refunds). RevenueCat solves all of this. |
+| IAP/Subscriptions | RevenueCat | Adapty | Adapty is solid but RevenueCat has larger community, better Expo docs, and official Expo partnership (featured on expo.dev blog). |
+| Charts | react-native-gifted-charts | victory-native | Victory-native v41 requires @shopify/react-native-skia as peer dependency. Skia adds ~2MB native binary, introduces a new rendering pipeline, and has known compatibility issues with Expo 53/54. Gifted-charts uses react-native-svg (already installed) with zero new native deps. |
+| Charts | react-native-gifted-charts | react-native-chart-kit | Chart-kit is older (last meaningful update 2022), less actively maintained, limited animation support, and fewer chart types. Gifted-charts is actively maintained (v1.4.57 released recently), has better animation, and more chart variety. |
+| Charts | react-native-gifted-charts | Custom SVG charts | Building chart components from scratch on react-native-svg is possible but slow. A parent dashboard needs line charts with multiple data series, tooltips, axis labels, animations -- gifted-charts provides all this out of the box. |
+| Charts | react-native-gifted-charts | recharts / nivo | Web-only libraries. Do not work with React Native. |
+| Multi-child state | Keyed state in single store | Separate store per child | Multiple stores complicate shared state (parental controls, subscription status), migration logic, and profile switching UX. A single store with per-child namespacing is simpler and aligns with existing Zustand patterns. |
+| Multi-child state | Keyed state in single store | AsyncStorage key-per-child | Loses Zustand reactivity benefits. Profile switching would require full store rehydration, causing UI flicker and complexity. |
+| Parental controls | expo-notifications (local) | expo-background-fetch | Background fetch is for periodic data sync, not time enforcement. Local notifications + foreground time checks are sufficient. Background enforcement would require native modules and battery impact. |
 
 ## What NOT to Use
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| FlashList v2.x | Crashes on RN 0.81 (requires new architecture) -- per CLAUDE.md guardrail | FlashList v1.x if you need a virtualized list for badge gallery (but FlatList is fine for <50 badges) |
-| react-native-skia | Heavy (~2MB), new dependency for a feature achievable with existing react-native-svg | react-native-svg + react-native-reanimated (both already installed) |
-| d3 / d3-force | Web-focused, adds 60KB+, requires complex RN adaptation for a 14-node graph | Hand-coded SVG layout with known skill topology |
-| react-native-paper | Full UI framework; would clash with existing custom component patterns | React Context for theming, custom components for UI |
-| NativeWind / Tailwind CSS | Project uses `StyleSheet.create` (per CLAUDE.md); migration would touch every component | Keep `StyleSheet.create`; use `useThemeColors()` hook for dynamic colors |
-| Any coin/currency system | Research doc (07-gamification.md) describes coins, but v0.7 scope is achievements/themes/challenges only | Achievement-based unlocks (earn badge -> unlock theme/avatar) without intermediate currency |
-| External achievement/gamification SDKs | Over-engineered for 30-50 achievement definitions; adds vendor lock-in | Pure TypeScript achievement evaluator service |
-
-## Store Schema Changes
-
-The gamification features require extending the Zustand store. Estimated migration path:
-
-| Migration | Fields Added | Slice |
-|-----------|-------------|-------|
-| v8 -> v9 | `earnedBadges: Record<string, EarnedBadge>` | New `achievementSlice` |
-| v8 -> v9 | `activeThemeId: string` (default: `'ocean-deep'`) | Extend `gamificationSlice` or new slice |
-| v8 -> v9 | `equippedFrame: FrameId \| null` | Extend `childProfileSlice` |
-| v8 -> v9 | `dailyChallenge: DailyChallengeState \| null` | New `challengeSlice` or extend `gamificationSlice` |
-
-**Recommendation:** Combine into a single STORE_VERSION=9 migration that adds all new fields at once. This avoids multiple migration hops and follows the existing pattern of one migration per milestone.
-
-**Partialize additions:** New persisted fields must be added to the `partialize` function in `appStore.ts`.
-
-## New File Structure (Recommended)
-
-```
-src/
-  services/
-    gamification/
-      achievementDefinitions.ts    -- Static AchievementDefinition[] (like SKILLS[])
-      achievementEvaluator.ts      -- Pure function: (state) => newBadges[]
-      challengeDefinitions.ts      -- Static ChallengeDefinition[]
-      challengeScheduler.ts        -- Deterministic daily challenge selection
-      challengeEvaluator.ts        -- Pure function: (session, challenge) => completed?
-  store/
-    slices/
-      achievementSlice.ts          -- earnedBadges state + actions
-      challengeSlice.ts            -- dailyChallenge state + actions
-    constants/
-      avatars.ts                   -- Extend with unlockable avatars + frames
-  theme/
-    index.ts                       -- Keep as backward-compat re-export
-    themes.ts                      -- ThemeColors interface + THEMES registry
-    ThemeProvider.tsx               -- React Context provider
-    useThemeColors.ts              -- Hook for consuming theme
-  components/
-    skillMap/
-      SkillMapView.tsx             -- Main SVG skill map component
-      SkillNode.tsx                -- Individual node with mastery arc
-      SkillEdge.tsx                -- Prerequisite connection line
-    badges/
-      BadgeCard.tsx                -- Single badge display
-      BadgeGallery.tsx             -- Grid of all badges
-      BadgeUnlockCelebration.tsx   -- Lottie/Reanimated unlock animation
-    challenges/
-      DailyChallengeCard.tsx       -- Challenge display on home screen
-    avatar/
-      AvatarCustomizer.tsx         -- Avatar + frame selection
-    animations/
-      BadgeCelebration.tsx         -- Badge-specific Lottie animation
-  screens/
-    SkillMapScreen.tsx
-    BadgeGalleryScreen.tsx
-    AvatarScreen.tsx
-    ThemeScreen.tsx
-```
+| expo-iap | Newer, less mature, subscription edge cases still being worked out, smaller community | react-native-purchases (RevenueCat) |
+| @shopify/react-native-skia | Heavy native dependency (~2MB), compatibility issues with Expo SDK 54, only needed if using victory-native | react-native-svg (already installed) via react-native-gifted-charts |
+| victory-native | Requires Skia peer dependency; adds significant bundle size and native complexity for a parent dashboard that doesn't need GPU-accelerated rendering | react-native-gifted-charts (SVG-based, zero new native deps) |
+| react-native-chart-kit | Stale maintenance, limited customization, weaker animation support | react-native-gifted-charts |
+| Any backend/server for IAP | RevenueCat provides the backend (receipt validation, subscription status API, webhooks) | RevenueCat cloud service (free tier: up to $2.5K MTR) |
+| react-native-background-timer | Not needed for time controls; foreground checks + notifications are sufficient; adds native dependency | Date.now() comparisons + expo-notifications |
+| FlashList v2.x | Crashes on RN 0.81 (per CLAUDE.md guardrail) | FlatList or FlashList v1.x for any long lists in dashboard |
+| expo-in-app-purchases | Deprecated Expo package, removed from SDK | react-native-purchases (RevenueCat) |
 
 ## Version Compatibility
 
 | Package | Compatible With | Notes |
 |---------|-----------------|-------|
-| react-native-svg@15.12.1 | react-native-reanimated@~4.1.1 | `Animated.createAnimatedComponent(Circle)` + `useAnimatedProps` works for animated mastery arcs |
-| react-native-svg@15.12.1 | React Native 0.81.5 | Installed via `expo install`; Expo SDK 54 compatible |
-| lottie-react-native@~7.3.1 | Expo SDK 54 | Listed in Expo SDK 54 compatible packages; supports managed workflow |
-| expo-notifications@~0.32.15 | Expo SDK 54 | `DailyTriggerInput` available; requires `expo-notifications` permission setup in app.json |
-| zustand@^5.0.8 | AsyncStorage + persist middleware | Established pattern; new slices follow `StateCreator<AppState>` pattern |
+| react-native-purchases@^9.11 | React Native >= 0.73.0 | RN 0.81.5 is well above minimum. Config plugin works with Expo managed workflow via expo-dev-client. |
+| react-native-purchases-ui@^9.11 | react-native-purchases@^9.11 | Must match major version with react-native-purchases. Same config plugin. |
+| react-native-gifted-charts@^1.4 | react-native-svg@15.x, expo-linear-gradient@~15.x | Both already installed at compatible versions. Pure JS -- no native code, no Expo SDK version constraints. |
+| react-native-gifted-charts@^1.4 | React Native 0.81.5 | Peer dep is react-native >=0.64. Well within range. |
+| expo-notifications@~0.32.15 | Expo SDK 54 | Already installed and configured. DailyTriggerInput and TimeIntervalTriggerInput available. |
+| zustand@^5.0.8 | AsyncStorage@^2.2.0 | Existing persist middleware pattern. Multi-child keying is a data structure change, not a library compatibility concern. |
 
 ## Integration Points
+
+### RevenueCat Setup Requirements
+
+1. **RevenueCat account** -- Create project at app.revenuecat.com
+2. **App Store Connect** -- Create subscription product IDs, configure pricing
+3. **Google Play Console** -- Create subscription product IDs, configure pricing
+4. **API keys** -- Store per-platform API keys in expo-secure-store (not .env, per guardrails)
+5. **Entitlements** -- Configure "premium" entitlement in RevenueCat dashboard mapping to subscription products
+6. **EAS Build** -- Required for testing; IAP does not work in Expo Go
+
+### Feature Gating Architecture
+
+```
+Free Tier:                          Premium Tier:
+- 3 sessions/day                    - Unlimited sessions
+- No AI tutor                       - Full AI tutor (HINT/TEACH/BOOST)
+- Default theme only                - All 5 themes unlocked
+- Core gamification (XP, streaks)   - All gamification features
+- 1 child profile                   - Up to 5 child profiles
+```
+
+Gating implemented as pure function checking subscription status from store -- no network call at gate time.
+
+### Multi-Child Store Migration Strategy
+
+The v12 -> v13 migration is the most complex yet:
+1. Current flat state (childName, childAge, skills, sessions, etc.) gets wrapped into `profiles[defaultId]`
+2. New `activeProfileId` field points to the migrated profile
+3. All slice data (skills, achievements, misconceptions, challenges) moves under profile namespace
+4. Shared state (parental controls, subscription status, parental PIN) stays at root level
 
 ### With Existing Systems
 
 | Existing System | Integration Point | How |
 |----------------|-------------------|-----|
-| Session completion | Badge evaluation trigger | Call `evaluateAchievements(state)` in session commit handler |
-| BKT mastery changes | Skill map node updates | Skill map reads from `skillStates` (already reactive via Zustand) |
-| BKT mastery locked | Badge criteria check | "Master all addition" checks `masteryLocked` for addition skills |
-| Weekly streak | Badge + challenge criteria | Streak milestones trigger badge checks |
-| XP/Level system | Challenge rewards | Daily challenge completion awards bonus XP through existing `addXp` |
-| Prerequisite DAG | Skill map edges | `SKILLS[].prerequisites` already defines the graph topology |
-| Misconception resolution | Badge criteria | "Overcome 5 misconceptions" checks `misconceptions` with `status: 'resolved'` |
-
-### Lottie Asset Strategy
-
-Lottie JSON animation files should be stored in `assets/animations/` and loaded at build time. For badge celebrations:
-
-- Source free animations from LottieFiles (lottiefiles.com)
-- Keep file sizes under 50KB each (target: 10-30KB)
-- Use `autoPlay={false}` with `ref.current.play()` for trigger-on-demand
-- Badge-specific animations vs. a single generic celebration: start with one generic, add specific ones iteratively
+| Session orchestrator | Free tier session count check | Guard at session start: check daily count vs limit |
+| AI tutor (Gemini) | Premium gate | Check subscription before enabling HelpButton; show upgrade prompt for free users |
+| Theme system | Premium gate | Free users get default theme; premium unlocks all 5 |
+| Achievement system | Per-child isolation | Badge evaluation reads from active child's state |
+| BKT/Leitner | Per-child isolation | Skill mastery and spaced repetition are per-child |
+| COPPA parental PIN | Reuse for dashboard access + profile management | Same PIN gate; already implemented |
+| Misconception tracking | Per-child isolation + parent dashboard | Per-child data feeds into dashboard analytics |
 
 ## Sources
 
-- Expo SDK 54 Notifications docs: https://docs.expo.dev/versions/latest/sdk/notifications/ -- DailyTriggerInput API verified
-- Expo SDK 54 Lottie docs: https://docs.expo.dev/versions/v53.0.0/sdk/lottie/ -- lottie-react-native compatibility confirmed
-- react-native-reanimated useAnimatedProps: https://docs.swmansion.com/react-native-reanimated/docs/core/useAnimatedProps/ -- SVG animated props pattern verified
-- react-native-svg GitHub: https://github.com/software-mansion/react-native-svg -- v15.x compatible with RN 0.81
-- Expo color themes guide: https://docs.expo.dev/develop/user-interface/color-themes/ -- React Context theming pattern
-- Existing codebase: `src/theme/index.ts` (current static theme), `src/store/constants/avatars.ts` (avatar pattern), `src/services/mathEngine/skills.ts` (DAG topology), `src/store/migrations.ts` (migration chain pattern)
+- [RevenueCat Expo Installation Docs](https://www.revenuecat.com/docs/getting-started/installation/expo) -- Expo managed workflow setup, config plugin
+- [Expo IAP Guide](https://docs.expo.dev/guides/in-app-purchases/) -- Expo's official IAP guidance, recommends RevenueCat
+- [Expo + RevenueCat Tutorial (Expo Blog)](https://expo.dev/blog/expo-revenuecat-in-app-purchase-tutorial) -- Official Expo partnership, step-by-step integration
+- [react-native-purchases npm](https://www.npmjs.com/package/react-native-purchases) -- v9.11.1, min RN 0.73.0
+- [react-native-gifted-charts npm](https://www.npmjs.com/package/react-native-gifted-charts) -- v1.4.57, peer deps verified (react-native-svg, expo-linear-gradient)
+- [react-native-gifted-charts GitHub](https://github.com/Abhinandan-Kushwaha/react-native-gifted-charts) -- Expo compatibility confirmed, pure JS
+- [Expo Notifications Docs](https://docs.expo.dev/versions/latest/sdk/notifications/) -- Local scheduled notifications API
+- [Victory Native Skia Issue](https://github.com/FormidableLabs/victory-native-xl/issues/616) -- Skia v2 compatibility problems, confirms heavy dependency
+- Existing codebase: `src/store/slices/childProfileSlice.ts` (current single-child model), `src/store/appStore.ts` (STORE_VERSION=12), `app.json` (existing plugins)
 
 ---
-*Stack research for: Tiny Tallies v0.7 Gamification*
-*Researched: 2026-03-04*
+*Stack research for: Tiny Tallies v0.8 Multi-Child Profiles, Parent Dashboard, IAP Subscription*
+*Researched: 2026-03-05*
