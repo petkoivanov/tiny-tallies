@@ -9,6 +9,7 @@
 - ✅ **v0.5 AI Tutor** — Phases 21-25 (shipped 2026-03-04)
 - ✅ **v0.6 Misconception Detection** — Phases 26-30 (shipped 2026-03-05)
 - ✅ **v0.7 Gamification** — Phases 31-37 (shipped 2026-03-06)
+- **v0.8 Social & Subscription** — Phases 38-43
 
 ## Phases
 
@@ -91,6 +92,86 @@
 
 </details>
 
+### v0.8 Social & Subscription (Phases 38-43)
+
+- [ ] **Phase 38: Multi-Child Store Foundation** - Restructure Zustand store from single-child to multi-child keyed architecture
+- [ ] **Phase 39: Profile Management UI** - Profile switcher, add/edit/delete children from home screen
+- [ ] **Phase 40: Session History & Analytics Engine** - Session history collection and pure-computation analytics services
+- [ ] **Phase 41: Parent Dashboard** - PIN-gated parent navigator with progress, misconception, and trend views
+- [ ] **Phase 42: Parental Time Controls** - Daily session caps, bedtime lockout, and break reminders per child
+- [ ] **Phase 43: Freemium Subscription & IAP** - RevenueCat integration, paywall, feature gating, restore purchases
+
+## Phase Details
+
+### Phase 38: Multi-Child Store Foundation
+**Goal**: Each child's learning data is isolated and independently persisted so the app can support multiple learners on one device
+**Depends on**: Nothing (first phase of v0.8)
+**Requirements**: PROF-05, PROF-06, PROF-07, PROF-08
+**Success Criteria** (what must be TRUE):
+  1. App migrates existing single-child data into a children map without data loss (v12->v13 migration)
+  2. Switching active child hydrates that child's complete state (Elo, BKT, skills, XP, achievements, cosmetics, misconceptions) into the store
+  3. A new child profile initializes with grade-appropriate skill unlocks and starting difficulty
+  4. Active child data auto-saves when the app goes to background or when switching profiles
+  5. Store enforces a maximum of 5 child profiles per device
+**Plans**: TBD
+
+### Phase 39: Profile Management UI
+**Goal**: Parents can manage multiple child profiles and children can switch between them from the home screen
+**Depends on**: Phase 38
+**Requirements**: PROF-01, PROF-02, PROF-03, PROF-04
+**Success Criteria** (what must be TRUE):
+  1. Child can tap a profile switcher on the home screen and switch to a different child's profile
+  2. Parent can add a new child profile with name, age, and grade level after entering the parental PIN
+  3. Parent can edit an existing child profile's name, age, and grade level
+  4. Parent can delete a child profile with a confirmation prompt
+**Plans**: TBD
+
+### Phase 40: Session History & Analytics Engine
+**Goal**: The app collects session-level data and computes analytics that power the parent dashboard
+**Depends on**: Phase 38
+**Requirements**: DASH-03, DASH-04
+**Success Criteria** (what must be TRUE):
+  1. Every completed session appends a history entry with date, duration, problems attempted, accuracy, and skills practiced
+  2. Session history is capped (200 entries per child) and persisted across app restarts
+  3. Analytics service computes skill mastery trends over time from session history
+  4. Analytics service computes per-session detail views from stored history entries
+**Plans**: TBD
+
+### Phase 41: Parent Dashboard
+**Goal**: Parents can view their children's learning progress, misconceptions, and session history through a dedicated dashboard
+**Depends on**: Phase 38, Phase 40
+**Requirements**: DASH-01, DASH-02, DASH-05
+**Success Criteria** (what must be TRUE):
+  1. Parent can access the dashboard from the home screen after entering the parental PIN
+  2. Parent can view a per-child progress overview showing mastery percentage, total sessions, current streak, and time spent
+  3. Parent can view misconception analytics showing each child's specific reasoning errors with descriptions
+  4. Parent can view trend graphs showing skill mastery and performance changes over time
+  5. Parent can scroll through a session history list with per-session details (date, accuracy, duration, skills)
+**Plans**: TBD
+
+### Phase 42: Parental Time Controls
+**Goal**: Parents can configure time boundaries to promote healthy practice habits per child
+**Depends on**: Phase 41
+**Requirements**: CTRL-01, CTRL-02, CTRL-03, CTRL-04
+**Success Criteria** (what must be TRUE):
+  1. Parent can set a daily session time cap per child from within the parent dashboard
+  2. Parent can set a bedtime lockout window per child (e.g., 8pm-7am) that prevents starting new sessions
+  3. App shows a break reminder after a configurable amount of continuous practice time
+  4. When daily time cap is reached, the app prevents starting new sessions with a friendly message
+**Plans**: TBD
+
+### Phase 43: Freemium Subscription & IAP
+**Goal**: The app monetizes through a freemium model with clear value tiers while keeping all purchase interactions behind parental gates
+**Depends on**: Phase 42
+**Requirements**: SUB-01, SUB-02, SUB-03, SUB-04, SUB-05, SUB-06
+**Success Criteria** (what must be TRUE):
+  1. App displays a paywall screen with a clear comparison of free vs premium tiers
+  2. Free tier users can complete 3 practice sessions per day with the full adaptive engine (no AI tutor, limited themes)
+  3. Premium tier users have unlimited sessions, AI tutor access, and all color themes
+  4. User can restore previous purchases on reinstall or new device
+  5. All purchase and subscription UI is accessible only after entering the parental PIN
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -132,3 +213,9 @@
 | 35. Daily Challenges | v0.7 | 2/2 | Complete | 2026-03-05 |
 | 36. Avatars & Frames | v0.7 | 2/2 | Complete | 2026-03-05 |
 | 37. UI Themes | v0.7 | 4/4 | Complete | 2026-03-06 |
+| 38. Multi-Child Store Foundation | v0.8 | 0/? | Not started | - |
+| 39. Profile Management UI | v0.8 | 0/? | Not started | - |
+| 40. Session History & Analytics Engine | v0.8 | 0/? | Not started | - |
+| 41. Parent Dashboard | v0.8 | 0/? | Not started | - |
+| 42. Parental Time Controls | v0.8 | 0/? | Not started | - |
+| 43. Freemium Subscription & IAP | v0.8 | 0/? | Not started | - |

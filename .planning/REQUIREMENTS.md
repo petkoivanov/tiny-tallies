@@ -79,35 +79,35 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROF-01 | — | Pending |
-| PROF-02 | — | Pending |
-| PROF-03 | — | Pending |
-| PROF-04 | — | Pending |
-| PROF-05 | — | Pending |
-| PROF-06 | — | Pending |
-| PROF-07 | — | Pending |
-| PROF-08 | — | Pending |
-| DASH-01 | — | Pending |
-| DASH-02 | — | Pending |
-| DASH-03 | — | Pending |
-| DASH-04 | — | Pending |
-| DASH-05 | — | Pending |
-| CTRL-01 | — | Pending |
-| CTRL-02 | — | Pending |
-| CTRL-03 | — | Pending |
-| CTRL-04 | — | Pending |
-| SUB-01 | — | Pending |
-| SUB-02 | — | Pending |
-| SUB-03 | — | Pending |
-| SUB-04 | — | Pending |
-| SUB-05 | — | Pending |
-| SUB-06 | — | Pending |
+| PROF-01 | Phase 39 | Pending |
+| PROF-02 | Phase 39 | Pending |
+| PROF-03 | Phase 39 | Pending |
+| PROF-04 | Phase 39 | Pending |
+| PROF-05 | Phase 38 | Pending |
+| PROF-06 | Phase 38 | Pending |
+| PROF-07 | Phase 38 | Pending |
+| PROF-08 | Phase 38 | Pending |
+| DASH-01 | Phase 41 | Pending |
+| DASH-02 | Phase 41 | Pending |
+| DASH-03 | Phase 40 | Pending |
+| DASH-04 | Phase 40 | Pending |
+| DASH-05 | Phase 41 | Pending |
+| CTRL-01 | Phase 42 | Pending |
+| CTRL-02 | Phase 42 | Pending |
+| CTRL-03 | Phase 42 | Pending |
+| CTRL-04 | Phase 42 | Pending |
+| SUB-01 | Phase 43 | Pending |
+| SUB-02 | Phase 43 | Pending |
+| SUB-03 | Phase 43 | Pending |
+| SUB-04 | Phase 43 | Pending |
+| SUB-05 | Phase 43 | Pending |
+| SUB-06 | Phase 43 | Pending |
 
 **Coverage:**
 - v0.8 requirements: 23 total
-- Mapped to phases: 0
-- Unmapped: 23
+- Mapped to phases: 23
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-05*
-*Last updated: 2026-03-05 after initial definition*
+*Last updated: 2026-03-06 after roadmap creation*
