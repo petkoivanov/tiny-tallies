@@ -217,7 +217,7 @@ Plans:
 | 35. Daily Challenges | v0.7 | 2/2 | Complete | 2026-03-05 |
 | 36. Avatars & Frames | v0.7 | 2/2 | Complete | 2026-03-05 |
 | 37. UI Themes | v0.7 | 4/4 | Complete | 2026-03-06 |
-| 38. Multi-Child Store Foundation | 3/3 | Complete   | 2026-03-06 | - |
+| 38. Multi-Child Store Foundation | 3/3 | Complete    | 2026-03-06 | - |
 | 39. Profile Management UI | v0.8 | 0/? | Not started | - |
 | 40. Session History & Analytics Engine | v0.8 | 0/? | Not started | - |
 | 41. Parent Dashboard | v0.8 | 0/? | Not started | - |
