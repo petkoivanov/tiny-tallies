@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './types';
 import HomeScreen from '@/screens/HomeScreen';
@@ -11,15 +12,30 @@ import SkillMapScreen from '@/screens/SkillMapScreen';
 import AvatarPickerScreen from '@/screens/AvatarPickerScreen';
 import ThemePickerScreen from '@/screens/ThemePickerScreen';
 import { useTheme } from '@/theme';
+import { useAppStore } from '@/store/appStore';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+/** Minimal placeholder -- Phase 39 replaces with full ProfileCreationWizard */
+function ProfileSetupPlaceholder() {
+  return (
+    <View style={styles.placeholder}>
+      <Text>Profile Setup (Phase 39)</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  placeholder: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+});
+
 export default function AppNavigator() {
   const { colors } = useTheme();
+  const childCount = useAppStore((s) => Object.keys(s.children).length);
 
   return (
     <Stack.Navigator
-      initialRouteName="Home"
+      initialRouteName={childCount > 0 ? 'Home' : 'ProfileSetup'}
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: colors.background },
@@ -40,6 +56,11 @@ export default function AppNavigator() {
       <Stack.Screen
         name="Consent"
         component={ConsentScreen}
+        options={{ gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="ProfileSetup"
+        component={ProfileSetupPlaceholder}
         options={{ gestureEnabled: false }}
       />
     </Stack.Navigator>

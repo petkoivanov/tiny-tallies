@@ -13,6 +13,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AppNavigator from '@/navigation/AppNavigator';
 import { ThemeProvider } from '@/theme';
+import { useAutoSave } from '@/hooks/useAutoSave';
 
 // Prevent splash screen from hiding before fonts load (module-level per Expo docs)
 SplashScreen.preventAutoHideAsync();
@@ -24,6 +25,8 @@ export default function App() {
     Lexend_600SemiBold,
     Lexend_700Bold,
   });
+
+  useAutoSave();
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
