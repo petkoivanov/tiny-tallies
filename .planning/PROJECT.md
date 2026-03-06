@@ -2,7 +2,7 @@
 
 ## What This Is
 
-An AI-powered math learning mobile app for children ages 6-9 (grades 1-3). Features adaptive daily practice sessions with programmatic problem generation, misconception-based distractors via Bug Library pattern, Elo-based adaptive difficulty, gamification (XP/levels/streaks), polished UI with animated feedback, a full adaptive learning engine (BKT, Leitner spaced repetition, prerequisite graph, smart session orchestration), six interactive virtual manipulatives with CPA progression (Concrete → Pictorial → Abstract), an on-demand AI tutor powered by Gemini that provides Socratic hints, CPA-aware teaching with manipulative integration, and deep scaffolding — auto-escalating support based on struggle level with full COPPA-compliant safety pipeline, and a cross-session misconception detection system with 2-then-3 confirmation, adaptive session mix, tutor context enrichment, and dedicated remediation mini-sessions. Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
+An AI-powered math learning mobile app for children ages 6-9 (grades 1-3). Features adaptive daily practice sessions with programmatic problem generation, misconception-based distractors via Bug Library pattern, Elo-based adaptive difficulty, deep gamification (XP/levels/streaks, 31 achievement badges, daily challenges, visual skill map), polished UI with animated feedback and 5 unlockable color themes, a full adaptive learning engine (BKT, Leitner spaced repetition, prerequisite graph, smart session orchestration), six interactive virtual manipulatives with CPA progression (Concrete -> Pictorial -> Abstract), an on-demand AI tutor powered by Gemini that provides Socratic hints, CPA-aware teaching with manipulative integration, and deep scaffolding — auto-escalating support based on struggle level with full COPPA-compliant safety pipeline, cross-session misconception detection with 2-then-3 confirmation, adaptive session mix, tutor context enrichment, and dedicated remediation mini-sessions, plus avatar/frame customization with achievement-unlockable cosmetics. Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
 
 ## Core Value
 
@@ -41,23 +41,21 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - ✓ Parental consent gate with PIN verification for COPPA compliance — v0.5
 
 - ✓ Cross-session misconception tracking with 2-then-3 confirmation — v0.6
-- ✓ Misconception history in store with persistence (STORE_VERSION 6→8) — v0.6
+- ✓ Misconception history in store with persistence (STORE_VERSION 6->8) — v0.6
 - ✓ Session mix adaptation for confirmed misconceptions (BKT-inverse weighted) — v0.6
 - ✓ AI tutor misconception-aware explanations (per-mode guidance, no PII) — v0.6
 - ✓ Remediation mini-sessions (5-problem dedicated practice, resolution at 3 correct) — v0.6
 
+- ✓ Achievement badge system with 31-badge registry, evaluation engine, celebration UI — v0.7
+- ✓ Visual skill map with interactive DAG, mastery states, detail overlay — v0.7
+- ✓ Daily challenges with date-seeded rotation, themed sets, bonus XP, special badges — v0.7
+- ✓ Avatar/frame customization with 14 regular + 5 special avatars + 6 frames — v0.7
+- ✓ Dynamic color theming with 5 palettes, ThemeProvider, session cosmetic wrappers — v0.7
+- ✓ All gamification cosmetics earned through achievements, zero paywall — v0.7
+
 ### Active
 
-## Current Milestone: v0.7 Gamification
-
-**Goal:** Deep gamification layer — achievement badges, visual skill map, daily challenges, avatar customization, and unlockable themes — building intrinsic motivation through progression and personalization.
-
-**Target features:**
-- Achievement badges (mastery milestones + behavior rewards)
-- Visual skill map (prerequisite DAG tree with mastery visualization)
-- Daily challenges (rotating themed sets + streak/accuracy goals, bonus XP, special badges)
-- Avatar customization (presets with achievement-unlockable special avatars/frames)
-- Themes (UI skins + session cosmetic wrappers, unlocked via achievements)
+(Next milestone requirements to be defined via /gsd:new-milestone)
 
 ### Out of Scope
 
@@ -72,7 +70,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ## Context
 
-**Current state:** Shipped v0.6 Misconception Detection with ~31,380 LOC TypeScript. 1,148 tests passing. Full adaptive learning pipeline + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor with three-mode auto-escalation (HINT/TEACH/BOOST), Gemini LLM backend, multi-layer safety pipeline, COPPA-compliant parental consent gate, and cross-session misconception detection with confirmation engine, adaptive session mix, tutor context enrichment, and remediation mini-sessions.
+**Current state:** Shipped v0.7 Gamification with ~40,434 LOC TypeScript. 1,411 tests passing. Full adaptive learning pipeline + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor with three-mode auto-escalation (HINT/TEACH/BOOST), Gemini LLM backend, multi-layer safety pipeline, COPPA-compliant parental consent gate, cross-session misconception detection with confirmation engine, adaptive session mix, tutor context enrichment, and remediation mini-sessions + deep gamification layer with 31 achievement badges, visual skill map, daily challenges, avatar/frame customization, and 5 unlockable color themes.
 
 **Architecture (implemented through v0.4):**
 - Programmatic math engine: 14 skills across addition/subtraction (Common Core grades 1-3)
@@ -81,7 +79,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - Gaussian-weighted problem selection targeting 85% success rate
 - Frustration guard (3 consecutive wrong → easier problem)
 - Session orchestrator: 15-problem queue (3 warmup + 9 practice + 3 cooldown) with 60/30/10 review/new/challenge mix
-- Zustand persist with versioned migrations (STORE_VERSION=5) and AsyncStorage
+- Zustand persist with versioned migrations (STORE_VERSION=12) and AsyncStorage
 - 6 virtual manipulatives (Counters, TenFrame, NumberLine, BaseTenBlocks, FractionStrips, BarModel) with 60fps drag primitives
 - CPA progression: BKT-driven concrete/pictorial/abstract stage tracking with one-way advancement
 - ManipulativePanel animated drawer for session-embedded concrete mode; PictorialDiagram SVG renderers for pictorial mode
@@ -110,9 +108,20 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - Remediation mini-sessions: REMEDIATION_SESSION_CONFIG (0+5+0), remediationOnly queue mode, HomeScreen entry at 2+ confirmed
 - STORE_VERSION 8 with v6→v7 (misconceptions map) and v7→v8 (remediationCorrectCount) migrations
 
+**Architecture (implemented in v0.7):**
+- achievementSlice: 31-badge registry with discriminated union conditions, pure-function evaluation engine, idempotent addEarnedBadges
+- Badge UI: BadgeIcon (emoji+tier border), BadgeUnlockPopup (scale+glow sequential), BadgeCollectionScreen (3-column categorized grid)
+- Visual skill map: layout engine computing 14 node positions + 18 edges, SVG rendering with Reanimated entrance animations, outer fringe pulse
+- Daily challenges: 5 themed challenge sets with date-seeded PRNG rotation, challenge session mode reusing remediationOnly path
+- challengeSlice: completions keyed by date with persistent counter, 4 challenge-specific badges
+- Avatar/frame system: 14 regular + 5 special avatars + 6 frames, badge-unlock mapping, AvatarCircle with sparkle animation
+- ThemeProvider: React Context with 5 palettes (12 color tokens each), useTheme() + useMemo pattern app-wide
+- SessionWrapper: per-theme ambient decorations at screen edges, pointerEvents=none, slow cycles
+- STORE_VERSION 9->10->11->12 across 4 migration steps (badges, challenges, frames, themes)
+
 **Tech stack:**
 - React Native 0.81.5 / Expo 54 / TypeScript 5.9 (strict mode)
-- Zustand 5 for state management (domain slices pattern, STORE_VERSION=8)
+- Zustand 5 for state management (domain slices pattern, STORE_VERSION=12)
 - React Navigation 7 native-stack
 - react-native-gesture-handler + react-native-reanimated (manipulatives, 60fps)
 - Gemini (@google/genai v1.43.0) for LLM tutoring layer
@@ -123,7 +132,6 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tutoring engine design, virtual manipulatives specs, misconception detection patterns, spaced repetition algorithms, gamification design, onboarding/placement testing, child UX design, sound/audio design, math anxiety mitigation, COPPA privacy compliance, problem generation engine.
 
 **Future milestones:**
-- v0.7: (current milestone)
 - v0.8: Social & subscription (family groups, parent dashboard, IAP)
 
 ## Constraints
@@ -185,6 +193,16 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | Resolution threshold of 3 correct | Three correct answers in remediation clears confirmed→resolved | ✓ Good — achievable but meaningful |
 | Per-mode misconception guidance in tutor | HINT steers away, TEACH addresses step-by-step, BOOST explains why | ✓ Good — pedagogically differentiated |
 | Cap 3 misconceptions per prompt | Controls prompt length, focuses on most frequent | ✓ Good — balanced signal-to-noise |
+| Pure-function badge evaluation engine | No store coupling, single-pass iteration, testable | ✓ Good — 31 badges evaluated in one call |
+| Badge IDs as discriminated union conditions | Type-safe unlock logic per category | ✓ Good — 6 condition types, exhaustive matching |
+| Animated.View wrapper for SVG nodes | Each node/edge gets own Svg in Animated.View | ✓ Good — works around SVG animation limitations |
+| InteractionManager deferred graph render | Waits for nav transition before skill map render | ✓ Good — smooth screen transition |
+| Date-seeded PRNG for daily challenges | Deterministic rotation, fully offline, no backend | ✓ Good — same challenge for everyone each day |
+| Challenge mode reuses remediationOnly path | Theme-filtered 10-problem sessions via existing queue logic | ✓ Good — minimal new code |
+| All cosmetics earned through badges (zero paywall) | Intrinsic motivation, no IAP dark patterns, COPPA-safe | ✓ Good — values-aligned |
+| useTheme() + useMemo pattern for theming | StyleSheet.create inside component body with memoized colors | ✓ Good — full app migration across 47+ files |
+| SessionWrapper ambient decorations (pointerEvents=none) | Per-theme visual flair without interaction interference | ✓ Good — low opacity, slow cycles, edges only |
+| STORE_VERSION 9-12 across v0.7 phases | One migration per gamification feature, clean chaining | ✓ Good — 4 sequential migrations |
 
 ---
-*Last updated: 2026-03-04 after v0.7 milestone started*
+*Last updated: 2026-03-06 after v0.7 milestone*

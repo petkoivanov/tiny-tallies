@@ -1,5 +1,22 @@
 # Milestones
 
+## v0.7 Gamification (Shipped: 2026-03-06)
+
+**Phases completed:** 7 phases, 17 plans
+**Timeline:** 2 days (2026-03-04 -> 2026-03-06)
+**LOC:** ~40,434 TypeScript | 177 files changed (+22,890 / -2,321)
+**Tests:** 1,411 passing
+
+**Key accomplishments:**
+- Achievement system with 31-badge registry (mastery, behavior, challenge categories), pure-function evaluation engine, and persisted badge state (STORE_VERSION 9)
+- Badge UI: celebration popup with scale+glow animation, categorized badge collection grid, Results screen integration, HomeScreen badge count
+- Interactive visual skill map rendering the 14-skill prerequisite DAG with locked/unlocked/in-progress/mastered states, tap-for-detail overlay, and animated mastery fill
+- Daily challenges with date-seeded PRNG rotation across 5 themed sets, streak/accuracy goals, bonus XP, 4 challenge-specific badges, and non-punitive design
+- Avatar/frame customization: 14 regular + 5 special avatars + 6 decorative frames, all unlockable through achievement badges with live-preview picker
+- Dynamic color theming: ThemeProvider with 5 palettes (dark, ocean, forest, sunset, space), full app migration to useTheme() across 47+ files, session ambient decorations, and theme picker with preview
+
+---
+
 ## v0.6 Misconception Detection (Shipped: 2026-03-05)
 
 **Phases completed:** 5 phases, 7 plans, 14 tasks

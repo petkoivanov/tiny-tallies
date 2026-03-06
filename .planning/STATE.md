@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v0.7
 milestone_name: Gamification
 status: completed
-stopped_at: Completed 37-04-PLAN.md (Phase 37 complete)
-last_updated: "2026-03-06T04:34:42.362Z"
-last_activity: 2026-03-06 -- Completed Phase 37 Plan 04 (Session wrapper & theme picker)
+stopped_at: Milestone v0.7 archived
+last_updated: "2026-03-06"
+last_activity: 2026-03-06 -- Milestone v0.7 Gamification archived and completed
 progress:
   total_phases: 7
   completed_phases: 7
@@ -18,19 +18,16 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-04)
+See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.7 Gamification -- Phase 37 (UI Themes)
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 37 of 37 (UI Themes)
-Plan: 4 of 4 complete
-Status: Complete
-Last activity: 2026-03-06 -- Completed Phase 37 Plan 04 (Session wrapper & theme picker)
-
-Progress: [##########] 100% of Phase 37 (4/4 plans)
+Milestone v0.7 Gamification: COMPLETE
+All 7 phases (31-37), 17 plans shipped.
+Next: /gsd:new-milestone to start v0.8
 
 ## Performance Metrics
 
@@ -41,26 +38,7 @@ Progress: [##########] 100% of Phase 37 (4/4 plans)
 - v0.4: 17 plans in 1 day
 - v0.5: 13 plans in 1 day
 - v0.6: 7 plans in 1 day
-
-| Phase | Plan | Duration | Tasks | Files |
-|-------|------|----------|-------|-------|
-| 31 | P01 | 6m24s | 2 | 7 |
-| 32 | P01 | 3m24s | 2 | 6 |
-| 32 | P02 | 4m | 2 | 7 |
-| 33 | P01 | 6m7s | 2 | 10 |
-| 33 | P02 | 3m54s | 2 | 9 |
-| 33 | P03 | 3m38s | 2 | 6 |
-| 34 | P01 | 4m10s | 2 | 10 |
-| 34 | P02 | 6m32s | 2 | 7 |
-| 34 | P03 | 3m50s | 2 | 5 |
-| 35 | P01 | 11m52s | 2 | 15 |
-| Phase 35 PP02 | 11m10s | 2 tasks | 12 files |
-| 36 | P01 | 5m2s | 2 | 11 |
-| Phase 36 P02 | 4m16s | 2 tasks | 10 files |
-| 37 | P01 | 3m5s | 2 | 9 |
-| 37 | P02 | 8m | 2 | 21 |
-| Phase 37 P03 | 45min | 2 tasks | 29 files |
-| 37 | P04 | 5m34s | 2 | 10 |
+- v0.7: 17 plans in 2 days
 
 ## Accumulated Context
 
@@ -68,93 +46,17 @@ Progress: [##########] 100% of Phase 37 (4/4 plans)
 
 Full decision log in PROJECT.md Key Decisions table.
 
-Key context for v0.7:
-- STORE_VERSION = 8 (will bump to 9 for achievements, 10 for daily challenges)
-- SessionScreen at 552 lines -- must refactor below 500 before gamification work
-- All gamification cosmetics earned through achievements, zero paywall
-- No coins, no virtual currency, no competitive leaderboards
-- Badge system is the unlock mechanism for avatars, frames, and themes
-- Themes must come last (StyleSheet.create is hostile to dynamic theming)
-- Skill map reads existing SKILLS DAG + BKT data, independent of badge system
-- No new npm dependencies required for v0.7
-- 1,203 tests passing, TypeScript clean
-- [Phase 31]: Kept lastWrongContext state in SessionScreen, passed setLastWrongContext to hook
-- [Phase 31]: HelpButton pulsing simplified to shouldPulse (hook manages helpUsed internally)
-- [Phase 32 P01]: Badge IDs follow mastery.{skillId} / mastery.category.{op} / mastery.grade.{n} / behavior.{metric}.{tier} convention
-- [Phase 32 P01]: 27 badges total: 14 skill-mastery (gold), 2 category-mastery, 3 grade-mastery, 3 streak, 3 sessions, 2 remediation
-- [Phase 32 P01]: BadgeCategory = 'mastery' | 'behavior' (exploration/remediation realized as behavior badges)
-- [Phase 32 P02]: STORE_VERSION = 9 with earnedBadges and sessionsCompleted persisted via partialize
-- [Phase 32 P02]: EarnedBadge stores only earnedAt timestamp; badge metadata resolved from registry at read time
-- [Phase 32 P02]: sessionsCompleted in gamificationSlice (not achievementSlice) since it is a general session counter
-- [Phase 32 P02]: 1,215 tests passing, TypeScript clean
-- [Phase 33 P01]: evaluateBadges receives earnedBadges Record directly (not Object.keys) matching actual function signature
-- [Phase 33 P01]: useAppStore.getState() used for badge snapshot (synchronous post-commit reads)
-- [Phase 33 P01]: incrementSessionsCompleted called before evaluateBadges for session-count badge detection
-- [Phase 33 P01]: BadgeIcon pattern: emoji in View circle with tier-colored border (bronze=#cd7f32, silver=#c0c0c0, gold=#ffd700)
-- [Phase 33 P02]: BadgeUnlockPopup uses 400ms entrance delay with Reanimated scale+glow, sequential tap-to-advance through badges
-- [Phase 33 P02]: BadgesSummary renders own divider so null return leaves no artifacts; View All uses CommonActions.reset with Home in back stack
-- [Phase 33 P02]: HomeScreen badge count uses Object.keys(earnedBadges).length and BADGES.length (27) for display
-- [Phase 33 P03]: Centered modal pattern for BadgeDetailOverlay, consistent with BadgeUnlockPopup
-- [Phase 33 P03]: 3-column flexWrap grid for badge layout, buildSections() splits mastery by condition type
-- [Phase 33 P03]: 1,249 tests passing, TypeScript clean
-- [Phase 34 P01]: GitBranch icon for skill map button (visually suggests DAG structure)
-- [Phase 34 P01]: Pure layout functions (computeNodePositions, computeEdgePaths) separate from rendering
-- [Phase 34 P01]: Cross-column edges use quadratic bezier (Q), same-column use straight lines (L)
-- [Phase 34 P02]: Animated.View wrapper approach for SVG animations (each node/edge gets own Svg in Animated.View)
-- [Phase 34 P02]: InteractionManager defers graph render until navigation transition completes
-- [Phase 34 P02]: Outer fringe pulse: 1.08x scale at 1200ms for unlocked nodes, 0-0.4 opacity glow at 1500ms for fringe edges
-- [Phase 34 P02]: 1,273 tests passing, TypeScript clean
-- [Phase 34 P03]: Unicode emoji for operation indicators and trophy/checkmarks (no extra icon imports)
-- [Phase 34 P03]: Sub-components per NodeState keep SkillDetailOverlay under 500 lines
-- [Phase 34 P03]: SkillDetailOverlay rendered at SkillMapScreen level using React Native Modal
-- [Phase 34 P03]: 1,283 tests passing, TypeScript clean
-- [Phase 35 P01]: Challenge themes use date-seeded PRNG (createRng) for deterministic daily rotation
-- [Phase 35 P01]: Skill filtering falls back to all unlocked skills when theme filter produces empty set
-- [Phase 35 P01]: STORE_VERSION = 10 with challengeCompletions and challengesCompleted persisted via partialize
-- [Phase 35 P01]: 4 challenge badges (challenges-completed and perfect-challenge condition types), 31 badges total
-- [Phase 35 P01]: 1,314 tests passing, TypeScript clean (2 pre-existing TS2366 errors in badge UI)
-- [Phase 35 P02]: Challenge mode reuses remediationOnly=true path for theme-filtered 10-problem sessions
-- [Phase 35 P02]: commitChallengeCompletion extracted as helper to keep useSession under 500 lines
-- [Phase 35 P02]: 1,336 tests passing, TypeScript clean (2 pre-existing TS2366 errors in badge UI)
-- [Phase 35]: Challenge mode uses remediationOnly=true path in generateSessionQueue for theme-filtered skills
-- [Phase 35]: commitChallengeCompletion extracted as helper to keep useSession under 500 lines
-- [Phase 36 P01]: STORE_VERSION = 11 with frameId persisted via partialize
-- [Phase 36 P01]: 14 regular + 5 special avatars + 6 frames, all with typed IDs and badge-unlock mapping
-- [Phase 36 P01]: AvatarCircle component: sparkle animation (4s rotation + 1s opacity pulse), optional frame border, conditional Pressable
-- [Phase 36 P01]: resolveAvatar returns widened { id, label, emoji } type for simpler consumer usage
-- [Phase 36]: BADGE_EMOJIS lookup for overlay badge display (BadgeDefinition has no emoji field)
-- [Phase 36]: Frame unequip via re-tap toggle for intuitive UX
-- [Phase 36]: 1380 tests passing, TypeScript clean (2 pre-existing TS2366 errors in badge UI)
-- [Phase 37 P01]: STORE_VERSION = 12 with themeId persisted via partialize
-- [Phase 37 P01]: Static colors export removed from theme/index.ts, replaced with ThemeProvider + useTheme() hook
-- [Phase 37 P01]: 5 theme palettes (dark, ocean, forest, sunset, space) with 12 color tokens each
-- [Phase 37 P01]: Feedback colors (correct/incorrect) universal across all themes
-- [Phase 37 P01]: THEME_COSMETICS with 4 badge-gated themes following SPECIAL_AVATARS/FRAMES pattern
-- [Phase 37 P01]: 1399 tests (19 new), TypeScript has expected errors from removed static colors export (45+ consumers need migration in Plans 02/03)
-- [Phase 37 P02]: ThemeProvider wraps NavigationContainer in App.tsx (inside SafeAreaProvider, outside NavigationContainer)
-- [Phase 37 P02]: useTheme() + useMemo pattern for all screens and components; StyleSheet.create moves inside component body
-- [Phase 37 P02]: Helper functions referencing colors (getMotivationalColor, getPhaseColor) accept ThemeColors parameter
-- [Phase 37 P02]: Sub-components sharing styles: inline (ConsentScreen), prop-pass (CompactAnswerButton), closure (CpaSessionContent)
-- [Phase 37 P02]: 21 files migrated (8 screens + AppNavigator + App.tsx + Header + 5 session + 5 chat components), 84 screen tests passing
-- [Phase 37]: Used createStyles factory for complex multi-subcomponent files (DailyChallengeCard, SkillDetailOverlay)
-- [Phase 37]: ConfettiCelebration uses colorIndex in particle config, resolving theme colors at render time
-- [Phase 37 P04]: SessionWrapper ambient decorations at screen edges only, pointerEvents=none, slow cycles (4-8s), low opacity (0.1-0.3)
-- [Phase 37 P04]: ThemePickerScreen reuses CosmeticDetailOverlay for locked theme items
-- [Phase 37 P04]: BadgeUnlockPopup already handled theme cosmetic text via getCosmeticUnlockText -- no changes needed
-- [Phase 37 P04]: 1411 tests (12 new), TypeScript clean, 1 pre-existing appStore version test failure
-
 ### Pending Todos
 
 None.
 
 ### Blockers/Concerns
 
-- Skill map SVG rendering needs performance validation spike on low-end Android (target < 500ms TTI)
-- Theme system `createThemedStyles` factory approach needs validation vs. hook-per-component
+None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T04:30:34Z
-Stopped at: Completed 37-04-PLAN.md (Phase 37 complete)
+Last session: 2026-03-06
+Stopped at: Milestone v0.7 archived
 Resume file: None
-Resume command: Phase 37 complete
+Resume command: /gsd:new-milestone

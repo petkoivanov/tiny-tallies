@@ -261,6 +261,54 @@
 
 ---
 
+## Milestone: v0.7 — Gamification
+
+**Shipped:** 2026-03-06
+**Phases:** 7 (Phases 31-37) | **Plans:** 17
+
+### What Was Built
+- Achievement system: 31-badge registry with pure-function evaluation engine, celebration popup with scale+glow animation, categorized badge collection grid
+- Visual skill map: 14-skill prerequisite DAG with SVG rendering, mastery states (locked/unlocked/in-progress/mastered), detail overlay with BKT/Leitner data
+- Daily challenges: 5 themed challenge sets rotating via date-seeded PRNG, streak/accuracy goals, bonus XP, 4 challenge-specific badges, non-punitive design
+- Avatar/frame customization: 14 regular + 5 special avatars + 6 decorative frames, all badge-unlockable, with live-preview picker
+- Dynamic color theming: ThemeProvider with 5 palettes (dark, ocean, forest, sunset, space), full migration of 47+ files to useTheme(), session ambient decorations
+- SessionScreen refactored below 500-line guardrail as prep work
+
+### What Worked
+- Badge evaluation as pure function (no store coupling) — clean, testable, 31 badges evaluated in single pass
+- Reusing remediationOnly session queue path for challenge mode — minimal new code for themed sessions
+- Date-seeded PRNG for daily challenges — fully offline, deterministic, no backend needed
+- useTheme() + useMemo pattern for dynamic theming — clean replacement for static StyleSheet.create
+- All cosmetics earned through achievements (zero paywall) — values-aligned, COPPA-safe
+- 4-step store migration chain (v9-v12) executed cleanly across phases
+
+### What Was Inefficient
+- Phase 37 Plans 02-03 (theme color migration) required touching 47+ files — largest single-file-count change in project history, took ~45min for Plan 03 alone
+- No milestone audit performed — skipped in yolo mode, all 29 requirements were complete so low risk
+- SUMMARY.md one_liner fields still not populated (null extraction) — template compliance continues to regress
+
+### Patterns Established
+- Discriminated union for badge unlock conditions — type-safe exhaustive matching across 6 condition types
+- Animated.View wrapper for SVG node animations (Reanimated + react-native-svg interop)
+- InteractionManager.runAfterInteractions for deferred graph rendering
+- createStyles factory for complex multi-subcomponent themed files
+- CosmeticDetailOverlay reuse pattern (badges, avatars, frames, themes all share same overlay)
+- Badge-unlock-to-cosmetic mapping pattern (SPECIAL_AVATARS, FRAMES, THEME_COSMETICS)
+
+### Key Lessons
+1. Theme migration across 47+ files is a large but mechanical task — plan it as 2 separate phases to avoid single-plan overload
+2. Reusing existing session paths (remediationOnly) for new session modes avoids UI duplication
+3. Pure-function evaluation engines scale cleanly — 31 badges with no performance concern
+4. Store migration chaining (4 versions in one milestone) works when each migration is independent and sequential
+5. pointerEvents=none ambient decorations add visual richness without interaction interference
+
+### Cost Observations
+- Model mix: ~65% opus (executor), ~25% sonnet (checker, verifier), ~10% haiku (research)
+- Notable: 17 plans in 2 days — same velocity as v0.4 despite gamification complexity
+- Average plan execution: ~5min (excluding 45min outlier for theme migration Plan 03)
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -273,6 +321,7 @@
 | v0.4 | 17 | 6 | Virtual manipulatives with CPA progression and 60fps drag |
 | v0.5 | 13 | 5 | AI tutor with 3-mode escalation and safety pipeline |
 | v0.6 | 7 | 5 | Misconception detection, confirmation, remediation pipeline |
+| v0.7 | 17 | 7 | Achievement badges, skill map, daily challenges, avatars, themes |
 
 ### Cumulative Quality
 
@@ -284,6 +333,7 @@
 | v0.4 | 742 | ~21,900 | 0 |
 | v0.5 | 1,051 | ~29,092 | @google/genai v1.43.0 |
 | v0.6 | 1,148 | ~31,380 | 0 |
+| v0.7 | 1,411 | ~40,434 | 0 |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -297,3 +347,6 @@
 8. TypeScript type separation prevents accidental answer leaks in AI tutoring (v0.5)
 9. One-way status transitions simplify state logic vs bidirectional (v0.6)
 10. Session deduplication is essential for any per-answer recording system (v0.6)
+11. Theme migration across many files is mechanical but time-consuming — split into multiple plans (v0.7)
+12. Pure-function evaluation engines scale cleanly for badge/achievement systems (v0.7)
+13. Reusing existing session queue paths for new modes (challenge, remediation) minimizes code duplication (v0.7)
