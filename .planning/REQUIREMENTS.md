@@ -13,9 +13,9 @@ Requirements for Social & Subscription milestone. Each maps to roadmap phases.
 - [ ] **PROF-02**: Parent can add a new child profile with name, age, and grade level (PIN-gated)
 - [ ] **PROF-03**: Parent can edit an existing child profile's name, age, and grade level
 - [ ] **PROF-04**: Parent can delete a child profile with confirmation
-- [ ] **PROF-05**: Each child profile has independent progress (Elo, BKT, skills, XP, achievements, cosmetics)
+- [x] **PROF-05**: Each child profile has independent progress (Elo, BKT, skills, XP, achievements, cosmetics)
 - [ ] **PROF-06**: App supports up to 5 child profiles per device
-- [ ] **PROF-07**: New child profiles initialize with grade-appropriate skill unlocks and difficulty
+- [x] **PROF-07**: New child profiles initialize with grade-appropriate skill unlocks and difficulty
 - [ ] **PROF-08**: Active child data auto-saves on app background and profile switch
 
 ### Parent Dashboard
@@ -83,9 +83,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROF-02 | Phase 39 | Pending |
 | PROF-03 | Phase 39 | Pending |
 | PROF-04 | Phase 39 | Pending |
-| PROF-05 | Phase 38 | Pending |
+| PROF-05 | Phase 38 | Complete |
 | PROF-06 | Phase 38 | Pending |
-| PROF-07 | Phase 38 | Pending |
+| PROF-07 | Phase 38 | Complete |
 | PROF-08 | Phase 38 | Pending |
 | DASH-01 | Phase 41 | Pending |
 | DASH-02 | Phase 41 | Pending |

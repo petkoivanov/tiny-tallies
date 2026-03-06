@@ -115,7 +115,7 @@
   5. Store enforces a maximum of 5 child profiles per device
 **Plans**: 3 plans
 Plans:
-- [ ] 38-01-PLAN.md — ChildData types, hydrate/dehydrate helpers, grade-appropriate initialization
+- [x] 38-01-PLAN.md — ChildData types, hydrate/dehydrate helpers, grade-appropriate initialization
 - [ ] 38-02-PLAN.md — ProfilesSlice, appStore restructure, v12->v13 migration
 - [ ] 38-03-PLAN.md — Auto-save hook, conditional navigation, integration verification
 
