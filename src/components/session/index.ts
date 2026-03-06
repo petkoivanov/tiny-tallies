@@ -3,3 +3,4 @@ export { CompactAnswerRow } from './CompactAnswerRow';
 export { CpaModeIcon } from './CpaModeIcon';
 export { CpaSessionContent } from './CpaSessionContent';
 export { SessionHeader } from './SessionHeader';
+export { SessionWrapper } from './SessionWrapper';

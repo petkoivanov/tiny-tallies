@@ -14,7 +14,7 @@ import { useCpaMode } from '@/hooks/useCpaMode';
 import { useTutor } from '@/hooks/useTutor';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useChatOrchestration } from '@/hooks/useChatOrchestration';
-import { CpaSessionContent, SessionHeader } from '@/components/session';
+import { CpaSessionContent, SessionHeader, SessionWrapper } from '@/components/session';
 import { HelpButton, ChatPanel, ChatBanner } from '@/components/chat';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -170,6 +170,7 @@ export default function SessionScreen() {
   const options = currentProblem?.presentation.options ?? [];
 
   return (
+    <SessionWrapper>
     <View
       style={[
         styles.container,
@@ -228,5 +229,6 @@ export default function SessionScreen() {
         responseMode={responseMode}
       />
     </View>
+    </SessionWrapper>
   );
 }
