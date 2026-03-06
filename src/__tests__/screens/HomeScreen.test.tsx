@@ -61,6 +61,14 @@ jest.mock('@/components/home', () => {
   };
 });
 
+// Mock ProfileSwitcherSheet as a simple View
+jest.mock('@/components/profile', () => {
+  const { View } = require('react-native');
+  return {
+    ProfileSwitcherSheet: () => <View testID="profile-switcher-sheet" />,
+  };
+});
+
 // Mock store state
 let mockStoreState: Record<string, unknown> = {};
 jest.mock('@/store/appStore', () => ({
@@ -83,6 +91,10 @@ function setMockState(overrides: Record<string, unknown> = {}) {
     misconceptions: {},
     earnedBadges: {},
     frameId: null,
+    isSessionActive: false,
+    children: {},
+    activeChildId: null,
+    switchChild: jest.fn(),
     ...overrides,
   };
 }

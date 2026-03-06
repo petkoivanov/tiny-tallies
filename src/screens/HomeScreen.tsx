@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -7,6 +7,7 @@ import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { AVATARS, DEFAULT_AVATAR_ID, SPECIAL_AVATARS, FRAMES, resolveAvatar } from '@/store/constants/avatars';
 import { AvatarCircle } from '@/components/avatars';
+import { ProfileSwitcherSheet } from '@/components/profile';
 import { calculateLevelFromXp } from '@/services/gamification/levelProgression';
 import { isSameISOWeek } from '@/services/gamification/weeklyStreak';
 import { BADGES } from '@/services/achievement';
@@ -17,9 +18,11 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const [switcherVisible, setSwitcherVisible] = useState(false);
 
   const childName = useAppStore((state) => state.childName);
   const avatarId = useAppStore((state) => state.avatarId);
+  const isSessionActive = useAppStore((state) => state.isSessionActive);
   const xp = useAppStore((state) => state.xp);
   const level = useAppStore((state) => state.level);
   const weeklyStreak = useAppStore((state) => state.weeklyStreak);
@@ -246,6 +249,7 @@ export default function HomeScreen() {
   }), [colors]);
 
   return (
+    <>
     <ScrollView
       style={[styles.container, { paddingTop: insets.top }]}
       contentContainerStyle={[
@@ -261,7 +265,11 @@ export default function HomeScreen() {
             size={AVATAR_SIZE}
             frameColor={frameColor}
             isSpecial={isSpecial}
-            onPress={() => navigation.navigate('AvatarPicker' as never)}
+            onPress={() => {
+              if (!isSessionActive) {
+                setSwitcherVisible(true);
+              }
+            }}
           />
         </View>
         <Text style={styles.greeting}>{greeting}</Text>
@@ -409,6 +417,16 @@ export default function HomeScreen() {
         )}
       </View>
     </ScrollView>
+
+      <ProfileSwitcherSheet
+        visible={switcherVisible}
+        onClose={() => setSwitcherVisible(false)}
+        onManageProfiles={() => {
+          setSwitcherVisible(false);
+          navigation.navigate('ProfileManagement' as never);
+        }}
+      />
+    </>
   );
 }
 
