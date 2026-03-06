@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: executing
-stopped_at: Completed 39-01-PLAN.md
-last_updated: "2026-03-06T13:55:00.000Z"
-last_activity: 2026-03-06 -- Completed 39-01 (Profile switcher and PIN gate)
+stopped_at: Completed 39-02-PLAN.md
+last_updated: "2026-03-06T14:03:41.658Z"
+last_activity: 2026-03-06 -- Completed 39-02 (Profile creation wizard and setup screen)
 progress:
   total_phases: 6
   completed_phases: 1
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-03-05)
 ## Current Position
 
 Phase: 39 (Profile Management UI) -- in progress
-Plan: 01 of 3 complete
+Plan: 02 of 3 complete
 Status: Executing phase 39
-Last activity: 2026-03-06 -- Completed 39-01 (Profile switcher and PIN gate)
+Last activity: 2026-03-06 -- Completed 39-02 (Profile creation wizard and setup screen)
 
 ```
 [==........] 17% (1/6 phases in progress)
@@ -68,6 +68,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 39]: PinGate uses refs to avoid stale closure bugs in async digit handler
 - [Phase 39]: ProfileSwitcherSheet reads active child from flat state (not stale map)
 - [Phase 39]: HomeScreen avatar tap changed from AvatarPicker to profile switcher
+- [Phase 39]: Wizard uses local state until Done, then calls addChild atomically
+- [Phase 39]: Navigation.reset to Home after profile creation prevents back-button
 
 ### Pending Todos
 
@@ -84,7 +86,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-06T13:55:00.000Z
-Stopped at: Completed 39-01-PLAN.md
+Last session: 2026-03-06T14:03:00.000Z
+Stopped at: Completed 39-02-PLAN.md
 Resume file: None
-Resume command: /gsd:execute-phase 39 (continues with plan 02)
+Resume command: /gsd:execute-phase 39 (continues with plan 03)
