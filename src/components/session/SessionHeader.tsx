@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { X } from 'lucide-react-native';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
+import type { ThemeColors } from '@/theme';
 import { CpaModeIcon } from './CpaModeIcon';
 import type { SessionPhase } from '@/services/session';
 import type { CpaStage } from '@/services/cpa/cpaTypes';
@@ -31,7 +32,7 @@ function formatPhaseLabel(phase: SessionPhase): string {
 }
 
 /** Get progress bar fill color based on session phase */
-function getPhaseColor(phase: SessionPhase): string {
+function getPhaseColor(phase: SessionPhase, colors: ThemeColors): string {
   switch (phase) {
     case 'warmup':
       return colors.primaryLight;
@@ -52,9 +53,52 @@ export function SessionHeader({
   feedbackState,
   onQuit,
 }: SessionHeaderProps) {
+  const { colors } = useTheme();
+
   const progressDone = currentIndex + (feedbackState ? 1 : 0);
   const progressPercent =
     totalProblems > 0 ? (progressDone / totalProblems) * 100 : 0;
+
+  const styles = useMemo(() => StyleSheet.create({
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+    },
+    phaseLabel: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.md,
+      color: colors.textSecondary,
+      minWidth: 80,
+    },
+    progressText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.lg,
+      color: colors.textPrimary,
+    },
+    quitButton: {
+      minWidth: layout.minTouchTarget,
+      minHeight: layout.minTouchTarget,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    progressBarContainer: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.sm,
+    },
+    progressBarBackground: {
+      height: 8,
+      borderRadius: layout.borderRadius.round,
+      backgroundColor: colors.surface,
+      overflow: 'hidden',
+    },
+    progressBarFill: {
+      height: '100%',
+      borderRadius: layout.borderRadius.round,
+    },
+  }), [colors]);
 
   return (
     <>
@@ -84,7 +128,7 @@ export function SessionHeader({
               styles.progressBarFill,
               {
                 width: `${progressPercent}%`,
-                backgroundColor: getPhaseColor(sessionPhase),
+                backgroundColor: getPhaseColor(sessionPhase, colors),
               },
             ]}
             testID="progress-bar-fill"
@@ -94,44 +138,3 @@ export function SessionHeader({
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-  },
-  phaseLabel: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.md,
-    color: colors.textSecondary,
-    minWidth: 80,
-  },
-  progressText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.lg,
-    color: colors.textPrimary,
-  },
-  quitButton: {
-    minWidth: layout.minTouchTarget,
-    minHeight: layout.minTouchTarget,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  progressBarContainer: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
-  },
-  progressBarBackground: {
-    height: 8,
-    borderRadius: layout.borderRadius.round,
-    backgroundColor: colors.surface,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: layout.borderRadius.round,
-  },
-});

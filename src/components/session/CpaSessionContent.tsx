@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -7,7 +7,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 import { useCpaMode } from '@/hooks/useCpaMode';
 import { AnswerFeedbackAnimation } from '@/components/animations/AnswerFeedbackAnimation';
 import {
@@ -104,6 +104,7 @@ export function CpaSessionContent({
   teachExpand = false,
   boostHighlightAnswer = null,
 }: CpaSessionContentProps) {
+  const { colors } = useTheme();
   const { stage, manipulativeType } = useCpaMode(skillId);
 
   // Panel expansion state
@@ -168,6 +169,97 @@ export function CpaSessionContent({
     ? MANIPULATIVE_LABELS[manipulativeType]
     : undefined;
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+    },
+    problemText: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.display,
+      color: colors.textPrimary,
+      marginBottom: spacing.xl,
+      textAlign: 'center',
+    },
+    optionsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      gap: spacing.md,
+      width: '100%',
+      maxWidth: 320,
+    },
+    optionButton: {
+      backgroundColor: colors.surface,
+      borderRadius: layout.borderRadius.lg,
+      minHeight: layout.minTouchTarget + 16,
+      width: '100%',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: spacing.md,
+      borderWidth: 2,
+      borderColor: 'transparent',
+    },
+    optionButtonPressed: {
+      backgroundColor: colors.surfaceLight,
+    },
+    optionButtonScaled: {
+      transform: [{ scale: 0.95 }],
+    },
+    optionButtonDisabled: {
+      opacity: 0.6,
+    },
+    optionButtonCorrect: {
+      borderColor: colors.correct,
+      backgroundColor: '#84cc1620',
+      opacity: 1,
+    },
+    optionButtonIncorrect: {
+      borderColor: colors.incorrect,
+      backgroundColor: '#f8717120',
+      opacity: 1,
+    },
+    optionButtonRevealCorrect: {
+      borderColor: colors.correct,
+      backgroundColor: '#84cc1620',
+      opacity: 1,
+    },
+    optionButtonBoostHighlight: {
+      borderColor: '#a78bfa',
+      borderWidth: 3,
+      backgroundColor: '#a78bfa20',
+    },
+    optionText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.xxl,
+      color: colors.textPrimary,
+    },
+    needHelpButton: {
+      minHeight: 48,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      marginBottom: spacing.md,
+    },
+    needHelpText: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.md,
+      color: colors.primaryLight,
+      textDecorationLine: 'underline',
+    },
+    guidedHint: {
+      marginBottom: spacing.sm,
+      alignItems: 'center',
+    },
+    guidedHintText: {
+      fontSize: typography.fontSize.sm,
+      color: colors.primaryLight,
+      fontFamily: typography.fontFamily.medium,
+    },
+  }), [colors]);
+
   // Render the manipulative component inside the panel
   const renderManipulative = () => {
     if (!manipulativeType) return null;
@@ -195,6 +287,26 @@ export function CpaSessionContent({
       />
     );
   };
+
+  /** Compute the feedback style for an answer button */
+  function getOptionFeedbackStyle(
+    optionValue: number,
+  ): object | undefined {
+    if (!feedbackActive) return undefined;
+
+    if (optionValue === selectedAnswer) {
+      if (optionValue === correctAnswer) {
+        return styles.optionButtonCorrect;
+      }
+      return styles.optionButtonIncorrect;
+    }
+
+    if (showCorrectAnswer && optionValue === correctAnswer) {
+      return styles.optionButtonRevealCorrect;
+    }
+
+    return undefined;
+  }
 
   // Render answer buttons: compact row when panel expanded, standard 2x2 grid otherwise
   const renderAnswers = () => {
@@ -242,13 +354,7 @@ export function CpaSessionContent({
                     isBoostHighlighted &&
                       !feedbackActive &&
                       styles.optionButtonBoostHighlight,
-                    getOptionFeedbackStyle(
-                      option.value,
-                      feedbackActive,
-                      selectedAnswer,
-                      correctAnswer,
-                      showCorrectAnswer,
-                    ),
+                    getOptionFeedbackStyle(option.value),
                   ]}
                   accessibilityRole="button"
                   accessibilityLabel={`Answer ${option.value}`}
@@ -358,118 +464,3 @@ function BoostHighlightWrapper({
 
   return <Animated.View style={animatedStyle}>{children}</Animated.View>;
 }
-
-/** Compute the feedback style for an answer button */
-function getOptionFeedbackStyle(
-  optionValue: number,
-  feedbackActive: boolean,
-  selectedAnswer: number | null,
-  correctAnswer: number | null,
-  showCorrectAnswer: boolean,
-): object | undefined {
-  if (!feedbackActive) return undefined;
-
-  if (optionValue === selectedAnswer) {
-    if (optionValue === correctAnswer) {
-      return styles.optionButtonCorrect;
-    }
-    return styles.optionButtonIncorrect;
-  }
-
-  if (showCorrectAnswer && optionValue === correctAnswer) {
-    return styles.optionButtonRevealCorrect;
-  }
-
-  return undefined;
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  problemText: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.display,
-    color: colors.textPrimary,
-    marginBottom: spacing.xl,
-    textAlign: 'center',
-  },
-  optionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: spacing.md,
-    width: '100%',
-    maxWidth: 320,
-  },
-  optionButton: {
-    backgroundColor: colors.surface,
-    borderRadius: layout.borderRadius.lg,
-    minHeight: layout.minTouchTarget + 16,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.md,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  optionButtonPressed: {
-    backgroundColor: colors.surfaceLight,
-  },
-  optionButtonScaled: {
-    transform: [{ scale: 0.95 }],
-  },
-  optionButtonDisabled: {
-    opacity: 0.6,
-  },
-  optionButtonCorrect: {
-    borderColor: colors.correct,
-    backgroundColor: '#84cc1620',
-    opacity: 1,
-  },
-  optionButtonIncorrect: {
-    borderColor: colors.incorrect,
-    backgroundColor: '#f8717120',
-    opacity: 1,
-  },
-  optionButtonRevealCorrect: {
-    borderColor: colors.correct,
-    backgroundColor: '#84cc1620',
-    opacity: 1,
-  },
-  optionButtonBoostHighlight: {
-    borderColor: '#a78bfa',
-    borderWidth: 3,
-    backgroundColor: '#a78bfa20',
-  },
-  optionText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.xxl,
-    color: colors.textPrimary,
-  },
-  needHelpButton: {
-    minHeight: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing.md,
-  },
-  needHelpText: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.md,
-    color: colors.primaryLight,
-    textDecorationLine: 'underline',
-  },
-  guidedHint: {
-    marginBottom: spacing.sm,
-    alignItems: 'center',
-  },
-  guidedHintText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.primaryLight,
-    fontFamily: typography.fontFamily.medium,
-  },
-});

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -9,7 +9,7 @@ import Animated, {
   withRepeat,
 } from 'react-native-reanimated';
 
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 
 interface AnswerOption {
   readonly value: number;
@@ -42,6 +42,58 @@ export function CompactAnswerRow({
   showCorrectAnswer,
   boostHighlightAnswer = null,
 }: CompactAnswerRowProps) {
+  const { colors } = useTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    row: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      paddingHorizontal: spacing.md,
+    },
+    buttonWrapper: {
+      flex: 1,
+    },
+    button: {
+      flex: 1,
+      minHeight: layout.minTouchTarget,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: layout.borderRadius.md,
+      borderWidth: 2,
+      borderColor: 'transparent',
+      paddingVertical: spacing.sm,
+    },
+    buttonDisabled: {
+      opacity: 0.6,
+    },
+    buttonCorrect: {
+      borderColor: colors.correct,
+      backgroundColor: '#84cc1620',
+      opacity: 1,
+    },
+    buttonIncorrect: {
+      borderColor: colors.incorrect,
+      backgroundColor: '#f8717120',
+      opacity: 1,
+    },
+    buttonRevealCorrect: {
+      borderColor: colors.correct,
+      backgroundColor: '#84cc1620',
+      opacity: 1,
+    },
+    buttonBoostHighlight: {
+      borderColor: '#a78bfa',
+      borderWidth: 3,
+      backgroundColor: '#a78bfa20',
+    },
+    buttonText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.lg,
+      color: colors.textPrimary,
+    },
+  }), [colors]);
+
   return (
     <View style={styles.row}>
       {options.map((option, index) => (
@@ -55,6 +107,7 @@ export function CompactAnswerRow({
           correctAnswer={correctAnswer}
           showCorrectAnswer={showCorrectAnswer}
           boostHighlightAnswer={boostHighlightAnswer}
+          styles={styles}
         />
       ))}
     </View>
@@ -70,6 +123,7 @@ interface CompactAnswerButtonProps {
   correctAnswer: number | null;
   showCorrectAnswer: boolean;
   boostHighlightAnswer?: number | null;
+  styles: ReturnType<typeof StyleSheet.create>;
 }
 
 function CompactAnswerButton({
@@ -81,6 +135,7 @@ function CompactAnswerButton({
   correctAnswer,
   showCorrectAnswer,
   boostHighlightAnswer = null,
+  styles,
 }: CompactAnswerButtonProps) {
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
@@ -171,53 +226,3 @@ function CompactAnswerButton({
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-  },
-  buttonWrapper: {
-    flex: 1,
-  },
-  button: {
-    flex: 1,
-    minHeight: layout.minTouchTarget,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: layout.borderRadius.md,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    paddingVertical: spacing.sm,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonCorrect: {
-    borderColor: colors.correct,
-    backgroundColor: '#84cc1620',
-    opacity: 1,
-  },
-  buttonIncorrect: {
-    borderColor: colors.incorrect,
-    backgroundColor: '#f8717120',
-    opacity: 1,
-  },
-  buttonRevealCorrect: {
-    borderColor: colors.correct,
-    backgroundColor: '#84cc1620',
-    opacity: 1,
-  },
-  buttonBoostHighlight: {
-    borderColor: '#a78bfa',
-    borderWidth: 3,
-    backgroundColor: '#a78bfa20',
-  },
-  buttonText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.lg,
-    color: colors.textPrimary,
-  },
-});

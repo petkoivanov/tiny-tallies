@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -7,7 +7,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Blocks, ChevronUp, ChevronDown } from 'lucide-react-native';
 
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 
 /** Panel height: ~50% of screen for generous manipulative workspace. */
 const PANEL_HEIGHT = Dimensions.get('window').height * 0.5;
@@ -45,6 +45,7 @@ export function ManipulativePanel({
   children,
   testID,
 }: ManipulativePanelProps) {
+  const { colors } = useTheme();
   const translateY = useSharedValue(PANEL_HEIGHT);
 
   useEffect(() => {
@@ -61,6 +62,35 @@ export function ManipulativePanel({
   const label = manipulativeLabel ?? 'blocks';
   const toggleLabel = expanded ? `Hide ${label}` : `Show ${label}`;
   const ChevronIcon = expanded ? ChevronDown : ChevronUp;
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      overflow: 'hidden',
+    },
+    toggleButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.sm,
+      minHeight: layout.minTouchTarget,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      backgroundColor: colors.surface,
+      borderTopLeftRadius: layout.borderRadius.lg,
+      borderTopRightRadius: layout.borderRadius.lg,
+    },
+    toggleLabel: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.md,
+      color: colors.textSecondary,
+    },
+    panelBody: {
+      height: PANEL_HEIGHT,
+      backgroundColor: colors.backgroundLight,
+      borderTopWidth: 1,
+      borderTopColor: colors.surfaceLight,
+    },
+  }), [colors]);
 
   return (
     <View style={styles.container} testID={testID}>
@@ -84,32 +114,3 @@ export function ManipulativePanel({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    overflow: 'hidden',
-  },
-  toggleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    minHeight: layout.minTouchTarget,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: layout.borderRadius.lg,
-    borderTopRightRadius: layout.borderRadius.lg,
-  },
-  toggleLabel: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.md,
-    color: colors.textSecondary,
-  },
-  panelBody: {
-    height: PANEL_HEIGHT,
-    backgroundColor: colors.backgroundLight,
-    borderTopWidth: 1,
-    borderTopColor: colors.surfaceLight,
-  },
-});

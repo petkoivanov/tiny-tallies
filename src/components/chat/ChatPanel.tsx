@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -8,7 +8,7 @@ import Animated, {
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import { X } from 'lucide-react-native';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 import type { TutorMessage } from '@/services/tutor/types';
 import { ChatMessageList } from './ChatMessageList';
 import { ResponseButtons } from './ResponseButtons';
@@ -55,6 +55,7 @@ export function ChatPanel({
   onResponse,
   responseMode = 'standard',
 }: ChatPanelProps) {
+  const { colors } = useTheme();
   const translateY = useSharedValue(PANEL_HEIGHT);
 
   useEffect(() => {
@@ -82,6 +83,99 @@ export function ChatPanel({
 
   // Inline offline indicator for mid-conversation disconnect
   const offlineInline = !isOnline && messages.length > 0;
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: PANEL_HEIGHT,
+      backgroundColor: colors.backgroundLight,
+      borderTopLeftRadius: layout.borderRadius.lg,
+      borderTopRightRadius: layout.borderRadius.lg,
+      zIndex: 10,
+      overflow: 'hidden',
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.surfaceLight,
+    },
+    headerTitle: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.lg,
+      color: colors.textPrimary,
+    },
+    closeButton: {
+      minWidth: layout.minTouchTarget,
+      minHeight: layout.minTouchTarget,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    offlineContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+    },
+    offlineText: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.md,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: spacing.lg,
+    },
+    retryButton: {
+      backgroundColor: colors.primary,
+      borderRadius: layout.borderRadius.md,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      minHeight: layout.minTouchTarget,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    retryButtonText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.md,
+      color: colors.textPrimary,
+    },
+    offlineInline: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      backgroundColor: colors.surface,
+      marginHorizontal: spacing.md,
+      borderRadius: layout.borderRadius.sm,
+    },
+    offlineInlineText: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.sm,
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+    footer: {
+      paddingBottom: spacing.sm,
+    },
+    tryAgainButton: {
+      backgroundColor: colors.primary,
+      borderRadius: layout.borderRadius.md,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      minHeight: layout.minTouchTarget,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginHorizontal: spacing.md,
+    },
+    tryAgainText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.md,
+      color: colors.textPrimary,
+    },
+  }), [colors]);
 
   return (
     <Animated.View
@@ -156,96 +250,3 @@ export function ChatPanel({
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: PANEL_HEIGHT,
-    backgroundColor: colors.backgroundLight,
-    borderTopLeftRadius: layout.borderRadius.lg,
-    borderTopRightRadius: layout.borderRadius.lg,
-    zIndex: 10,
-    overflow: 'hidden',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.surfaceLight,
-  },
-  headerTitle: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.lg,
-    color: colors.textPrimary,
-  },
-  closeButton: {
-    minWidth: layout.minTouchTarget,
-    minHeight: layout.minTouchTarget,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  offlineContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  offlineText: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.md,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  retryButton: {
-    backgroundColor: colors.primary,
-    borderRadius: layout.borderRadius.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    minHeight: layout.minTouchTarget,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  retryButtonText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.md,
-    color: colors.textPrimary,
-  },
-  offlineInline: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.surface,
-    marginHorizontal: spacing.md,
-    borderRadius: layout.borderRadius.sm,
-  },
-  offlineInlineText: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-  footer: {
-    paddingBottom: spacing.sm,
-  },
-  tryAgainButton: {
-    backgroundColor: colors.primary,
-    borderRadius: layout.borderRadius.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    minHeight: layout.minTouchTarget,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: spacing.md,
-  },
-  tryAgainText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.md,
-    color: colors.textPrimary,
-  },
-});

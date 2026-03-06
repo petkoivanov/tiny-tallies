@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -8,7 +8,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { CircleHelp } from 'lucide-react-native';
-import { colors, layout, spacing, typography } from '@/theme';
+import { useTheme, layout, spacing, typography } from '@/theme';
 
 interface HelpButtonProps {
   visible: boolean;
@@ -17,6 +17,7 @@ interface HelpButtonProps {
 }
 
 export function HelpButton({ visible, onPress, pulsing }: HelpButtonProps) {
+  const { colors } = useTheme();
   const scale = useSharedValue(1);
 
   useEffect(() => {
@@ -38,6 +39,35 @@ export function HelpButton({ visible, onPress, pulsing }: HelpButtonProps) {
     transform: [{ scale: scale.value }],
   }));
 
+  const styles = useMemo(() => StyleSheet.create({
+    pressable: {
+      position: 'absolute',
+      bottom: spacing.lg,
+      right: spacing.lg,
+    },
+    fab: {
+      minWidth: layout.minTouchTarget,
+      minHeight: layout.minTouchTarget,
+      backgroundColor: colors.primary,
+      borderRadius: layout.borderRadius.round,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 6,
+      elevation: 5,
+    },
+    label: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.xs,
+      marginTop: spacing.xs,
+    },
+  }), [colors]);
+
   if (!visible) return null;
 
   return (
@@ -55,32 +85,3 @@ export function HelpButton({ visible, onPress, pulsing }: HelpButtonProps) {
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  pressable: {
-    position: 'absolute',
-    bottom: spacing.lg,
-    right: spacing.lg,
-  },
-  fab: {
-    minWidth: layout.minTouchTarget,
-    minHeight: layout.minTouchTarget,
-    backgroundColor: colors.primary,
-    borderRadius: layout.borderRadius.round,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 5,
-  },
-  label: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.xs,
-    marginTop: spacing.xs,
-  },
-});

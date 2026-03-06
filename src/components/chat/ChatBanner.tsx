@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import { colors, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout } from '@/theme';
 
 interface ChatBannerProps {
   message: string;
@@ -28,6 +28,7 @@ const BANNER_SPRING_CONFIG = {
  * ManipulativePanel. Animates in/out with spring opacity and translateY.
  */
 export function ChatBanner({ message, onTap, visible }: ChatBannerProps) {
+  const { colors } = useTheme();
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(-60);
 
@@ -40,6 +41,30 @@ export function ChatBanner({ message, onTap, visible }: ChatBannerProps) {
     opacity: opacity.value,
     transform: [{ translateY: translateY.value }],
   }));
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 15,
+    },
+    pressable: {
+      backgroundColor: '#4338ca',
+      borderBottomLeftRadius: layout.borderRadius.lg,
+      borderBottomRightRadius: layout.borderRadius.lg,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      minHeight: layout.minTouchTarget,
+      justifyContent: 'center',
+    },
+    text: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.md,
+      color: colors.textPrimary,
+    },
+  }), [colors]);
 
   if (!visible) return null;
 
@@ -58,27 +83,3 @@ export function ChatBanner({ message, onTap, visible }: ChatBannerProps) {
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 15,
-  },
-  pressable: {
-    backgroundColor: '#4338ca',
-    borderBottomLeftRadius: layout.borderRadius.lg,
-    borderBottomRightRadius: layout.borderRadius.lg,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    minHeight: layout.minTouchTarget,
-    justifyContent: 'center',
-  },
-  text: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.md,
-    color: colors.textPrimary,
-  },
-});
