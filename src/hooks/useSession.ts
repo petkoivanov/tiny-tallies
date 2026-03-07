@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppStore } from '../store/appStore';
+import { pushSync, queueDeltas, type ScoreDelta } from '../services/sync/syncService';
 import type { SkillState } from '../store/slices/skillStatesSlice';
 import type { FrustrationState } from '../services/adaptive/types';
 import {
@@ -428,6 +429,30 @@ export function useSession(options?: {
             newBadges,
             ...(challengeResult ?? {}),
           });
+
+          // Cloud sync: queue deltas and trigger push
+          const syncState = useAppStore.getState();
+          if (syncState.activeChildId) {
+            const now = Math.floor(Date.now() / 1000);
+            const syncDeltas: ScoreDelta[] = [];
+            pendingUpdatesRef.current.forEach((update, skillId) => {
+              const original = getOrCreateSkillState(skillStates, skillId);
+              syncDeltas.push({
+                skillId,
+                eloDelta: update.newElo - original.eloRating,
+                xpDelta: totalXpEarnedRef.current,
+                correct: update.correct,
+                timestamp: now,
+              });
+            });
+            const syncBadges = newBadges.map((id) => ({
+              badgeId: id,
+              earnedAt: now,
+            }));
+            queueDeltas(syncState.activeChildId, syncDeltas, syncBadges).then(
+              () => pushSync(),
+            );
+          }
         } else {
           setCurrentIndex(nextIndex);
         }

@@ -15,6 +15,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AppNavigator from '@/navigation/AppNavigator';
 import { ThemeProvider } from '@/theme';
 import { useAutoSave } from '@/hooks/useAutoSave';
+import { useSyncTrigger } from '@/hooks/useSyncTrigger';
 import { initSentry } from '@/services/sentry/sentryService';
 
 // Prevent splash screen from hiding before fonts load (module-level per Expo docs)
@@ -29,6 +30,7 @@ function App() {
   });
 
   useAutoSave();
+  useSyncTrigger();
 
   useEffect(() => {
     initSentry();
