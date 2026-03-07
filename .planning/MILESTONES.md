@@ -1,5 +1,30 @@
 # Milestones
 
+## v0.8 Social & Subscription (In Progress)
+
+**Phases completed so far:** 3 of 7 phases (38-40), 10 plans
+**Timeline:** 2 days (2026-03-06 → 2026-03-07, ongoing)
+**LOC:** ~47,423 TypeScript | 208 source files
+**Tests:** 1,597 passing across 113 test suites
+
+**Key accomplishments (so far):**
+- Multi-child store: copy-on-switch architecture with ChildData map, v12→v13 structural migration, grade-appropriate initialization, auto-save on background/switch
+- Profile management: PinGate component, ProfileSwitcherSheet, ProfileCreationWizard (3-step), ProfileManagementScreen with edit/delete
+- Privacy disclosure: COPPA-compliant PrivacyDisclosure component in ProfileSetupScreen (PIN → Disclosure → Wizard)
+- Sentry error tracking: @sentry/react-native with PII scrubbing (child names, ages, emails), opt-out toggle, module-level init
+- Authentication: Google/Apple Sign-In with backend JWT verification via jose JWKS, authSlice in store (v13→v14 migration)
+- Backend: Cloudflare Workers + D1 deployed at `https://tiny-tallies-api.magic-mirror-works.workers.dev` with auth, consent, sync, config, and data deletion endpoints
+- Cloud sync: incremental delta-based sync with offline queue in AsyncStorage, NetInfo connectivity trigger, additive badge merge, MAX-based skill state merge
+- ParentalControlsScreen: PIN-gated settings with Privacy & Data (Sentry toggle), Account (sign in/out, delete), AI Helper (tutor consent)
+
+**Remaining phases:**
+- Phase 41: Session History & Analytics Engine
+- Phase 42: Parent Dashboard
+- Phase 43: Parental Time Controls
+- Phase 44: Freemium Subscription & IAP
+
+---
+
 ## v0.7 Gamification (Shipped: 2026-03-06)
 
 **Phases completed:** 7 phases, 17 plans

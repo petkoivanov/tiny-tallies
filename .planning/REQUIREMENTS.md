@@ -11,8 +11,8 @@ Requirements for Social & Subscription milestone. Each maps to roadmap phases.
 
 - [x] **PROF-01**: User can switch between child profiles from the home screen
 - [x] **PROF-02**: Parent can add a new child profile with name, age, and grade level (PIN-gated)
-- [ ] **PROF-03**: Parent can edit an existing child profile's name, age, and grade level
-- [ ] **PROF-04**: Parent can delete a child profile with confirmation
+- [x] **PROF-03**: Parent can edit an existing child profile's name, age, and grade level
+- [x] **PROF-04**: Parent can delete a child profile with confirmation
 - [x] **PROF-05**: Each child profile has independent progress (Elo, BKT, skills, XP, achievements, cosmetics)
 - [x] **PROF-06**: App supports up to 5 child profiles per device
 - [x] **PROF-07**: New child profiles initialize with grade-appropriate skill unlocks and difficulty
@@ -33,6 +33,16 @@ Requirements for Social & Subscription milestone. Each maps to roadmap phases.
 - [ ] **CTRL-03**: App shows break reminders after configurable continuous practice time
 - [ ] **CTRL-04**: Time controls are configured within the parent dashboard
 
+### Privacy, Auth & Sync (Phase 40)
+
+- [x] **PRIV-01**: Privacy disclosure shown during first profile setup with COPPA-compliant content
+- [x] **PRIV-02**: Sentry error tracking with PII scrubbing (child names, ages, emails) and opt-out toggle
+- [x] **AUTH-01**: Google Sign-In with backend JWT verification and user creation
+- [x] **AUTH-02**: Apple Sign-In with backend JWT verification and user creation
+- [x] **SYNC-01**: Cloud sync of child progress (incremental deltas, badges, skill states) with offline queue
+- [x] **SYNC-02**: Data deletion flow (remote + local cleanup + sign out) accessible from ParentalControlsScreen
+- [x] **CTRL-05**: ParentalControlsScreen with privacy settings, account management, and AI helper toggle
+
 ### Subscription
 
 - [ ] **SUB-01**: App displays a freemium paywall with clear free vs premium tier comparison
@@ -49,10 +59,10 @@ Requirements for Social & Subscription milestone. Each maps to roadmap phases.
 - **NOTF-01**: Parent receives push notification summary of child's daily progress
 - **NOTF-02**: Parent receives notification when child achieves a milestone badge
 
-### Cloud Sync
+### Cloud Sync (Advanced)
 
-- **SYNC-01**: Child progress syncs across devices via cloud backend
-- **SYNC-02**: Family group shared across devices
+- ~~**SYNC-01**: Child progress syncs across devices via cloud backend~~ ✓ Done in Phase 40
+- **SYNC-03**: Family group shared across devices
 
 ### Advanced Analytics
 
@@ -63,7 +73,7 @@ Requirements for Social & Subscription milestone. Each maps to roadmap phases.
 
 | Feature | Reason |
 |---------|--------|
-| Cross-device sync | Requires cloud backend infrastructure, deferred to future |
+| ~~Cross-device sync~~ | ✓ Implemented in Phase 40 |
 | Push notifications to parents | Requires server infrastructure |
 | Push notifications to children | COPPA compliance risk |
 | Ads in free tier | COPPA violation risk, violates design principles |
@@ -81,8 +91,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | PROF-01 | Phase 39 | Complete |
 | PROF-02 | Phase 39 | Complete |
-| PROF-03 | Phase 39 | Pending |
-| PROF-04 | Phase 39 | Pending |
+| PROF-03 | Phase 39 | Complete |
+| PROF-04 | Phase 39 | Complete |
 | PROF-05 | Phase 38 | Complete |
 | PROF-06 | Phase 38 | Complete |
 | PROF-07 | Phase 38 | Complete |
@@ -101,13 +111,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SUB-03 | Phase 43 | Pending |
 | SUB-04 | Phase 43 | Pending |
 | SUB-05 | Phase 43 | Pending |
-| SUB-06 | Phase 43 | Pending |
+| SUB-06 | Phase 44 | Pending |
+| PRIV-01 | Phase 40 | Complete |
+| PRIV-02 | Phase 40 | Complete |
+| AUTH-01 | Phase 40 | Complete |
+| AUTH-02 | Phase 40 | Complete |
+| SYNC-01 | Phase 40 | Complete |
+| SYNC-02 | Phase 40 | Complete |
+| CTRL-05 | Phase 40 | Complete |
 
 **Coverage:**
-- v0.8 requirements: 23 total
-- Mapped to phases: 23
+- v0.8 requirements: 30 total
+- Mapped to phases: 30
 - Unmapped: 0
+- Complete: 17 | Pending: 13
 
 ---
 *Requirements defined: 2026-03-05*
-*Last updated: 2026-03-06 after roadmap creation*
+*Last updated: 2026-03-07 after Phase 40 completion*

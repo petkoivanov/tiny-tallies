@@ -1,7 +1,20 @@
 # Phase 40 — Privacy, Auth, Backend & Cloud Sync
 
 **Created:** 2026-03-07
-**Status:** Planning Complete — Ready for Execution
+**Status:** COMPLETE — All 7 waves implemented, backend deployed
+**Completed:** 2026-03-07
+
+---
+
+## Deployment
+
+- **Backend URL:** https://tiny-tallies-api.magic-mirror-works.workers.dev
+- **D1 Database:** tiny-tallies-db (ID: f871e708-9a2e-4d1d-b367-c5e14d4a25b6, region: ENAM)
+- **Secrets set:** APP_API_KEY, APPLE_BUNDLE_ID, GOOGLE_WEB_CLIENT_ID
+- **Health check:** `GET /health` → `{"status":"ok"}`
+- **STORE_VERSION:** 14 (v12→v13 multi-child, v13→v14 auth state)
+- **Tests:** 1,597 passing across 113 test suites (including 45 new tests for Phase 40)
+- **Commits:** 7 (feat 40-01/02 through 40-07) + Sentry init fix + backend deployment
 
 ---
 

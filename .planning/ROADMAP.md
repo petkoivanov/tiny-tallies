@@ -92,14 +92,15 @@
 
 </details>
 
-### v0.8 Social & Subscription (Phases 38-43)
+### v0.8 Social & Subscription (Phases 38-44)
 
 - [x] **Phase 38: Multi-Child Store Foundation** - Restructure Zustand store from single-child to multi-child keyed architecture (completed 2026-03-06)
-- [ ] **Phase 39: Profile Management UI** - Profile switcher, add/edit/delete children from home screen
-- [ ] **Phase 40: Session History & Analytics Engine** - Session history collection and pure-computation analytics services
-- [ ] **Phase 41: Parent Dashboard** - PIN-gated parent navigator with progress, misconception, and trend views
-- [ ] **Phase 42: Parental Time Controls** - Daily session caps, bedtime lockout, and break reminders per child
-- [ ] **Phase 43: Freemium Subscription & IAP** - RevenueCat integration, paywall, feature gating, restore purchases
+- [x] **Phase 39: Profile Management UI** - Profile switcher, add/edit/delete children from home screen (completed 2026-03-06)
+- [x] **Phase 40: Privacy, Auth, Backend & Cloud Sync** - COPPA privacy disclosure, Sentry, Google/Apple Sign-In, Cloudflare Workers backend, cloud sync (completed 2026-03-07)
+- [ ] **Phase 41: Session History & Analytics Engine** - Session history collection and pure-computation analytics services
+- [ ] **Phase 42: Parent Dashboard** - PIN-gated parent navigator with progress, misconception, and trend views
+- [ ] **Phase 43: Parental Time Controls** - Daily session caps, bedtime lockout, and break reminders per child
+- [ ] **Phase 44: Freemium Subscription & IAP** - RevenueCat integration, paywall, feature gating, restore purchases
 
 ## Phase Details
 
@@ -116,25 +117,43 @@
 **Plans**: 3 plans
 Plans:
 - [x] 38-01-PLAN.md — ChildData types, hydrate/dehydrate helpers, grade-appropriate initialization
-- [ ] 38-02-PLAN.md — ProfilesSlice, appStore restructure, v12->v13 migration
-- [ ] 38-03-PLAN.md — Auto-save hook, conditional navigation, integration verification
+- [x] 38-02-PLAN.md — ProfilesSlice, appStore restructure, v12->v13 migration
+- [x] 38-03-PLAN.md — Auto-save hook, conditional navigation, integration verification
 
 ### Phase 39: Profile Management UI
 **Goal**: Parents can manage multiple child profiles and children can switch between them from the home screen
 **Depends on**: Phase 38
 **Requirements**: PROF-01, PROF-02, PROF-03, PROF-04
+**Status**: Complete (2026-03-06)
 **Success Criteria** (what must be TRUE):
-  1. Child can tap a profile switcher on the home screen and switch to a different child's profile
-  2. Parent can add a new child profile with name, age, and grade level after entering the parental PIN
-  3. Parent can edit an existing child profile's name, age, and grade level
-  4. Parent can delete a child profile with a confirmation prompt
+  1. ✓ Child can tap a profile switcher on the home screen and switch to a different child's profile
+  2. ✓ Parent can add a new child profile with name, age, and grade level after entering the parental PIN
+  3. ✓ Parent can edit an existing child profile's name, age, and grade level
+  4. ✓ Parent can delete a child profile with a confirmation prompt
 **Plans**: 3 plans
 Plans:
-- [ ] 39-01-PLAN.md — updateChild store action, PinGate component, ProfileSwitcherSheet, HomeScreen integration
-- [ ] 39-02-PLAN.md — ProfileCreationWizard, ProfileSetupScreen, navigation wiring
-- [ ] 39-03-PLAN.md — ProfileManagementScreen with edit/delete, end-to-end verification
+- [x] 39-01-PLAN.md — updateChild store action, PinGate component, ProfileSwitcherSheet, HomeScreen integration
+- [x] 39-02-PLAN.md — ProfileCreationWizard, ProfileSetupScreen, navigation wiring
+- [x] 39-03-PLAN.md — ProfileManagementScreen with edit/delete, end-to-end verification
 
-### Phase 40: Session History & Analytics Engine
+### Phase 40: Privacy, Auth, Backend & Cloud Sync
+**Goal**: COPPA-compliant privacy disclosure, error tracking, authentication, backend API, and cloud sync
+**Depends on**: Phase 38, Phase 39
+**Status**: Complete (2026-03-07)
+**Requirements**: PRIV-01, PRIV-02, AUTH-01, AUTH-02, SYNC-01, SYNC-02
+**Success Criteria** (what must be TRUE):
+  1. ✓ Privacy disclosure shown during first profile setup (PIN → Disclosure → Wizard)
+  2. ✓ Sentry error tracking with PII scrubbing and opt-out toggle
+  3. ✓ Google/Apple Sign-In with backend JWT verification
+  4. ✓ Cloudflare Workers backend deployed with D1 (auth, consent, sync, data deletion)
+  5. ✓ Cloud sync with offline queue, incremental deltas, additive badge merge
+  6. ✓ ParentalControlsScreen with privacy, account, and AI helper sections
+  7. ✓ Data deletion flow (remote + local cleanup + sign out)
+**Plans**: 7 waves (implemented without GSD plan files)
+**Backend**: https://tiny-tallies-api.magic-mirror-works.workers.dev
+**Commits**: 7 (feat 40-01/02 through 40-07)
+
+### Phase 41: Session History & Analytics Engine
 **Goal**: The app collects session-level data and computes analytics that power the parent dashboard
 **Depends on**: Phase 38
 **Requirements**: DASH-03, DASH-04
@@ -145,9 +164,9 @@ Plans:
   4. Analytics service computes per-session detail views from stored history entries
 **Plans**: TBD
 
-### Phase 41: Parent Dashboard
+### Phase 42: Parent Dashboard
 **Goal**: Parents can view their children's learning progress, misconceptions, and session history through a dedicated dashboard
-**Depends on**: Phase 38, Phase 40
+**Depends on**: Phase 38, Phase 41
 **Requirements**: DASH-01, DASH-02, DASH-05
 **Success Criteria** (what must be TRUE):
   1. Parent can access the dashboard from the home screen after entering the parental PIN
@@ -157,9 +176,9 @@ Plans:
   5. Parent can scroll through a session history list with per-session details (date, accuracy, duration, skills)
 **Plans**: TBD
 
-### Phase 42: Parental Time Controls
+### Phase 43: Parental Time Controls
 **Goal**: Parents can configure time boundaries to promote healthy practice habits per child
-**Depends on**: Phase 41
+**Depends on**: Phase 42
 **Requirements**: CTRL-01, CTRL-02, CTRL-03, CTRL-04
 **Success Criteria** (what must be TRUE):
   1. Parent can set a daily session time cap per child from within the parent dashboard
@@ -168,9 +187,9 @@ Plans:
   4. When daily time cap is reached, the app prevents starting new sessions with a friendly message
 **Plans**: TBD
 
-### Phase 43: Freemium Subscription & IAP
+### Phase 44: Freemium Subscription & IAP
 **Goal**: The app monetizes through a freemium model with clear value tiers while keeping all purchase interactions behind parental gates
-**Depends on**: Phase 42
+**Depends on**: Phase 43
 **Requirements**: SUB-01, SUB-02, SUB-03, SUB-04, SUB-05, SUB-06
 **Success Criteria** (what must be TRUE):
   1. App displays a paywall screen with a clear comparison of free vs premium tiers
@@ -221,9 +240,10 @@ Plans:
 | 35. Daily Challenges | v0.7 | 2/2 | Complete | 2026-03-05 |
 | 36. Avatars & Frames | v0.7 | 2/2 | Complete | 2026-03-05 |
 | 37. UI Themes | v0.7 | 4/4 | Complete | 2026-03-06 |
-| 38. Multi-Child Store Foundation | 3/3 | Complete    | 2026-03-06 | - |
-| 39. Profile Management UI | 2/3 | In Progress|  | - |
-| 40. Session History & Analytics Engine | v0.8 | 0/? | Not started | - |
-| 41. Parent Dashboard | v0.8 | 0/? | Not started | - |
-| 42. Parental Time Controls | v0.8 | 0/? | Not started | - |
-| 43. Freemium Subscription & IAP | v0.8 | 0/? | Not started | - |
+| 38. Multi-Child Store Foundation | v0.8 | 3/3 | Complete | 2026-03-06 |
+| 39. Profile Management UI | v0.8 | 3/3 | Complete | 2026-03-06 |
+| 40. Privacy, Auth, Backend & Cloud Sync | v0.8 | 7/7 | Complete | 2026-03-07 |
+| 41. Session History & Analytics Engine | v0.8 | 0/? | Not started | - |
+| 42. Parent Dashboard | v0.8 | 0/? | Not started | - |
+| 43. Parental Time Controls | v0.8 | 0/? | Not started | - |
+| 44. Freemium Subscription & IAP | v0.8 | 0/? | Not started | - |

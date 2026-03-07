@@ -322,6 +322,7 @@
 | v0.5 | 13 | 5 | AI tutor with 3-mode escalation and safety pipeline |
 | v0.6 | 7 | 5 | Misconception detection, confirmation, remediation pipeline |
 | v0.7 | 17 | 7 | Achievement badges, skill map, daily challenges, avatars, themes |
+| v0.8 (in progress) | 10+ | 3/7 | Multi-child, privacy, auth, backend, cloud sync |
 
 ### Cumulative Quality
 
@@ -334,6 +335,7 @@
 | v0.5 | 1,051 | ~29,092 | @google/genai v1.43.0 |
 | v0.6 | 1,148 | ~31,380 | 0 |
 | v0.7 | 1,411 | ~40,434 | 0 |
+| v0.8 (in progress) | 1,597 | ~47,423 | @sentry/react-native, @react-native-google-signin/google-signin, expo-apple-authentication, @react-native-community/netinfo |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -350,3 +352,7 @@
 11. Theme migration across many files is mechanical but time-consuming — split into multiple plans (v0.7)
 12. Pure-function evaluation engines scale cleanly for badge/achievement systems (v0.7)
 13. Reusing existing session queue paths for new modes (challenge, remediation) minimizes code duplication (v0.7)
+14. Sentry.init must be synchronous at module level when using Sentry.wrap — async opt-out applied separately (v0.8)
+15. Copy-on-switch multi-child store pattern minimizes API surface changes while supporting full data isolation (v0.8)
+16. Deploy backend early — "Network request failed" on physical device is often missing backend, not network issues (v0.8)
+17. Cloudflare Workers + D1 is a proven pattern for child app backends — same stack as Tiny Tales (v0.8)

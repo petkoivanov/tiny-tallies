@@ -53,6 +53,15 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - ✓ Dynamic color theming with 5 palettes, ThemeProvider, session cosmetic wrappers — v0.7
 - ✓ All gamification cosmetics earned through achievements, zero paywall — v0.7
 
+- ✓ Multi-child store foundation with copy-on-switch, grade-appropriate initialization — v0.8
+- ✓ Profile management UI with PIN-gated add/edit/delete, profile switcher — v0.8
+- ✓ Privacy disclosure component with COPPA-compliant content — v0.8
+- ✓ Sentry error tracking with PII scrubbing and opt-out toggle — v0.8
+- ✓ Google/Apple Sign-In with JWT verification backend — v0.8
+- ✓ Cloudflare Workers backend with D1 (auth, consent, sync, data deletion) — v0.8
+- ✓ Cloud sync with incremental deltas, offline queue, additive badge merge — v0.8
+- ✓ ParentalControlsScreen with privacy, account, and AI helper sections — v0.8
+
 ### Active
 
 ## Current Milestone: v0.8 Social & Subscription
@@ -60,7 +69,8 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 **Goal:** Add multi-child profiles, parent dashboard with analytics and time controls, and freemium subscription with IAP.
 
 **Target features:**
-- Multi-child profile switcher (add/edit/delete children, independent progress per child)
+- ~~Multi-child profile switcher (add/edit/delete children, independent progress per child)~~ ✓ Done (Phases 38-39)
+- ~~Privacy, auth, backend, cloud sync~~ ✓ Done (Phase 40)
 - Parent dashboard (progress overview, skill analytics, misconception breakdown, trend graphs)
 - Parental controls (daily session time cap, bedtime lockout, break reminders)
 - Freemium subscription (free: 3 sessions/day no AI tutor; premium: unlimited + AI tutor + all themes)
@@ -79,7 +89,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ## Context
 
-**Current state:** Shipped v0.7 Gamification with ~40,434 LOC TypeScript. 1,411 tests passing. Full adaptive learning pipeline + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor with three-mode auto-escalation (HINT/TEACH/BOOST), Gemini LLM backend, multi-layer safety pipeline, COPPA-compliant parental consent gate, cross-session misconception detection with confirmation engine, adaptive session mix, tutor context enrichment, and remediation mini-sessions + deep gamification layer with 31 achievement badges, visual skill map, daily challenges, avatar/frame customization, and 5 unlockable color themes.
+**Current state:** v0.8 in progress with ~47,423 LOC TypeScript across 208 source files. 1,597 tests passing across 113 test suites. Phases 38-40 complete (multi-child profiles, profile management UI, privacy/auth/backend/cloud sync). Full adaptive learning pipeline + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor + deep gamification + multi-child profiles + cloud sync backend.
 
 **Architecture (implemented through v0.4):**
 - Programmatic math engine: 14 skills across addition/subtraction (Common Core grades 1-3)
@@ -88,7 +98,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - Gaussian-weighted problem selection targeting 85% success rate
 - Frustration guard (3 consecutive wrong → easier problem)
 - Session orchestrator: 15-problem queue (3 warmup + 9 practice + 3 cooldown) with 60/30/10 review/new/challenge mix
-- Zustand persist with versioned migrations (STORE_VERSION=12) and AsyncStorage
+- Zustand persist with versioned migrations (STORE_VERSION=14) and AsyncStorage
 - 6 virtual manipulatives (Counters, TenFrame, NumberLine, BaseTenBlocks, FractionStrips, BarModel) with 60fps drag primitives
 - CPA progression: BKT-driven concrete/pictorial/abstract stage tracking with one-way advancement
 - ManipulativePanel animated drawer for session-embedded concrete mode; PictorialDiagram SVG renderers for pictorial mode
@@ -128,12 +138,34 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - SessionWrapper: per-theme ambient decorations at screen edges, pointerEvents=none, slow cycles
 - STORE_VERSION 9->10->11->12 across 4 migration steps (badges, challenges, frames, themes)
 
+**Architecture (implemented in v0.8 — Phases 38-40):**
+- Multi-child store: copy-on-switch pattern with ChildData map, hydrate/dehydrate helpers, grade-appropriate skill initialization
+- ProfilesSlice: addChild, removeChild, updateChild, switchChild with auto-save on switch
+- v12→v13 migration: single-child to multi-child store restructure (highest-risk migration)
+- v13→v14 migration: auth state fields (userId, authProvider, userEmail, isSignedIn)
+- Profile management: PinGate component, ProfileSwitcherSheet, ProfileCreationWizard (3-step)
+- Privacy disclosure: PrivacyDisclosure component in ProfileSetupScreen (PIN → Disclosure → Wizard)
+- Sentry: @sentry/react-native with PII scrubbing (child names, ages, emails), opt-out toggle
+- Auth: Google/Apple Sign-In → backend JWT verification via jose JWKS → user creation/linking
+- Backend: Cloudflare Workers + D1 (SQLite) at `https://tiny-tallies-api.magic-mirror-works.workers.dev`
+  - D1 schema: users, consent_records, child_profiles, score_deltas, badges, skill_states
+  - Endpoints: auth/verify, consent/acknowledge, consent/status, sync/push, sync/pull, user/data (DELETE), config
+  - API key auth via X-API-Key header, user ID via X-User-Id header
+- Cloud sync: incremental deltas (append-only), additive badge merge, MAX-based skill state merge
+  - Offline queue in AsyncStorage, NetInfo connectivity trigger
+  - useSyncTrigger hook: pull on sign-in, flush pending on connectivity return
+- ParentalControlsScreen: PIN-gated settings (Privacy & Data, Account, AI Helper sections)
+
 **Tech stack:**
 - React Native 0.81.5 / Expo 54 / TypeScript 5.9 (strict mode)
-- Zustand 5 for state management (domain slices pattern, STORE_VERSION=12)
+- Zustand 5 for state management (domain slices pattern, STORE_VERSION=14)
 - React Navigation 7 native-stack
 - react-native-gesture-handler + react-native-reanimated (manipulatives, 60fps)
 - Gemini (@google/genai v1.43.0) for LLM tutoring layer
+- @sentry/react-native for error tracking with PII scrubbing
+- @react-native-google-signin/google-signin + expo-apple-authentication for auth
+- Cloudflare Workers + D1 for backend (jose for JWT verification)
+- @react-native-community/netinfo for connectivity detection
 - Zod for runtime validation at system boundaries
 - Jest + jest-expo + React Native Testing Library
 
@@ -212,6 +244,14 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | useTheme() + useMemo pattern for theming | StyleSheet.create inside component body with memoized colors | ✓ Good — full app migration across 47+ files |
 | SessionWrapper ambient decorations (pointerEvents=none) | Per-theme visual flair without interaction interference | ✓ Good — low opacity, slow cycles, edges only |
 | STORE_VERSION 9-12 across v0.7 phases | One migration per gamification feature, clean chaining | ✓ Good — 4 sequential migrations |
+| Copy-on-switch multi-child store | Keep flat slice interfaces, hydrate/dehydrate on switch | ✓ Good — minimal API surface change |
+| v12→v13 structural reshape migration | Single-child to multi-child with children map | ✓ Good — highest-risk migration succeeded |
+| Cloudflare Workers + D1 backend | Same stack as Tiny Tales; proven pattern | ✓ Good — deployed, 17 API tests passing |
+| JWT verification via jose JWKS | No Firebase dependency; same pattern as Tiny Tales | ✓ Good — Google/Apple tokens verified server-side |
+| Incremental delta sync | Append-only score deltas, additive badges, MAX skill states | ✓ Good — no data loss, works offline |
+| Sentry with PII scrubbing | Default-on error tracking, opt-out in ParentalControls | ✓ Good — COPPA-compliant, child data never sent |
+| Module-level Sentry.init (synchronous) | Must run before Sentry.wrap(App); opt-out applied async | ✓ Good — eliminates "init before wrap" warning |
+| Privacy disclosure in ProfileSetupScreen | PIN → Disclosure → Wizard flow; minimal nav restructuring | ✓ Good — clean integration |
 
 ---
-*Last updated: 2026-03-05 after v0.8 milestone started*
+*Last updated: 2026-03-07 after Phase 40 completion and backend deployment*
