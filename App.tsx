@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import * as Sentry from '@sentry/react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import {
   useFonts,
@@ -14,11 +15,12 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AppNavigator from '@/navigation/AppNavigator';
 import { ThemeProvider } from '@/theme';
 import { useAutoSave } from '@/hooks/useAutoSave';
+import { initSentry } from '@/services/sentry/sentryService';
 
 // Prevent splash screen from hiding before fonts load (module-level per Expo docs)
 SplashScreen.preventAutoHideAsync();
 
-export default function App() {
+function App() {
   const [fontsLoaded, fontError] = useFonts({
     Lexend_400Regular,
     Lexend_500Medium,
@@ -27,6 +29,10 @@ export default function App() {
   });
 
   useAutoSave();
+
+  useEffect(() => {
+    initSentry();
+  }, []);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -51,3 +57,5 @@ export default function App() {
     </GestureHandlerRootView>
   );
 }
+
+export default Sentry.wrap(App);

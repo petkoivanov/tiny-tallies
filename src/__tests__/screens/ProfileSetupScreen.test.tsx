@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 
 // Mock navigation
 const mockReset = jest.fn();
@@ -19,6 +19,18 @@ jest.mock('@/components/profile/PinGate', () => {
       <View testID="pin-gate" accessibilityHint={title}>
         {children}
       </View>
+    ),
+  };
+});
+
+// Mock PrivacyDisclosure
+jest.mock('@/components/profile/PrivacyDisclosure', () => {
+  const { Pressable, Text } = require('react-native');
+  return {
+    PrivacyDisclosure: ({ onAccept }: any) => (
+      <Pressable testID="privacy-disclosure" onPress={onAccept}>
+        <Text>Privacy Disclosure</Text>
+      </Pressable>
     ),
   };
 });
@@ -52,6 +64,16 @@ jest.mock('@/components/profile/ProfileCreationWizard', () => {
   };
 });
 
+// Mock privacy storage
+const mockHasPrivacyAcknowledged = jest.fn();
+const mockSetPrivacyAcknowledged = jest.fn();
+jest.mock('@/services/consent/privacyStorage', () => ({
+  hasPrivacyAcknowledged: (...args: unknown[]) =>
+    mockHasPrivacyAcknowledged(...args),
+  setPrivacyAcknowledged: (...args: unknown[]) =>
+    mockSetPrivacyAcknowledged(...args),
+}));
+
 // Mock store
 const mockAddChild = jest.fn().mockReturnValue('child-1');
 const mockSetMigrationComplete = jest.fn();
@@ -77,23 +99,50 @@ describe('ProfileSetupScreen', () => {
     jest.clearAllMocks();
     mockChildren = {};
     mockNeedsMigrationPrompt = false;
+    mockHasPrivacyAcknowledged.mockResolvedValue(true);
+    mockSetPrivacyAcknowledged.mockResolvedValue(undefined);
   });
 
   describe('fresh install (no children)', () => {
-    it('passes Parent Setup title to PinGate', () => {
+    it('passes Parent Setup title to PinGate', async () => {
       const { getByTestId } = render(<ProfileSetupScreen />);
       const pinGate = getByTestId('pin-gate');
       expect(pinGate.props.accessibilityHint).toBe('Parent Setup');
     });
 
-    it('does not show cancel on wizard for fresh install', () => {
-      const { queryByTestId } = render(<ProfileSetupScreen />);
+    it('shows privacy disclosure when not yet acknowledged', async () => {
+      mockHasPrivacyAcknowledged.mockResolvedValue(false);
+      const { findByTestId, queryByTestId } = render(<ProfileSetupScreen />);
+      expect(await findByTestId('privacy-disclosure')).toBeTruthy();
+      expect(queryByTestId('wizard-complete')).toBeNull();
+    });
+
+    it('shows wizard after accepting disclosure', async () => {
+      mockHasPrivacyAcknowledged.mockResolvedValue(false);
+      const { findByTestId } = render(<ProfileSetupScreen />);
+      const disclosure = await findByTestId('privacy-disclosure');
+      fireEvent.press(disclosure);
+      expect(mockSetPrivacyAcknowledged).toHaveBeenCalled();
+      expect(await findByTestId('wizard-complete')).toBeTruthy();
+    });
+
+    it('skips disclosure when already acknowledged', async () => {
+      mockHasPrivacyAcknowledged.mockResolvedValue(true);
+      const { findByTestId, queryByTestId } = render(<ProfileSetupScreen />);
+      expect(await findByTestId('wizard-complete')).toBeTruthy();
+      expect(queryByTestId('privacy-disclosure')).toBeNull();
+    });
+
+    it('does not show cancel on wizard for fresh install', async () => {
+      const { findByTestId, queryByTestId } = render(<ProfileSetupScreen />);
+      await findByTestId('wizard-complete');
       expect(queryByTestId('wizard-cancel')).toBeNull();
     });
 
-    it('calls addChild and resets to Home on complete', () => {
-      const { getByTestId } = render(<ProfileSetupScreen />);
-      fireEvent.press(getByTestId('wizard-complete'));
+    it('calls addChild and resets to Home on complete', async () => {
+      const { findByTestId } = render(<ProfileSetupScreen />);
+      const btn = await findByTestId('wizard-complete');
+      fireEvent.press(btn);
 
       expect(mockAddChild).toHaveBeenCalledWith({
         childName: 'TestChild',
@@ -118,40 +167,48 @@ describe('ProfileSetupScreen', () => {
     it('does not pass custom title to PinGate when children exist', () => {
       const { getByTestId } = render(<ProfileSetupScreen />);
       const pinGate = getByTestId('pin-gate');
-      // Title should be undefined (default PinGate behavior)
       expect(pinGate.props.accessibilityHint).toBeUndefined();
     });
 
-    it('shows cancel on wizard when children exist', () => {
-      const { getByTestId } = render(<ProfileSetupScreen />);
-      expect(getByTestId('wizard-cancel')).toBeTruthy();
+    it('skips disclosure for additional children', async () => {
+      const { findByTestId, queryByTestId } = render(<ProfileSetupScreen />);
+      expect(await findByTestId('wizard-complete')).toBeTruthy();
+      expect(queryByTestId('privacy-disclosure')).toBeNull();
     });
 
-    it('wizard cancel calls goBack', () => {
-      const { getByTestId } = render(<ProfileSetupScreen />);
-      fireEvent.press(getByTestId('wizard-cancel'));
+    it('shows cancel on wizard when children exist', async () => {
+      const { findByTestId } = render(<ProfileSetupScreen />);
+      expect(await findByTestId('wizard-cancel')).toBeTruthy();
+    });
+
+    it('wizard cancel calls goBack', async () => {
+      const { findByTestId } = render(<ProfileSetupScreen />);
+      const btn = await findByTestId('wizard-cancel');
+      fireEvent.press(btn);
       expect(mockGoBack).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('migration prompt', () => {
-    it('shows migration banner when _needsMigrationPrompt is true', () => {
+    it('shows migration banner when _needsMigrationPrompt is true', async () => {
       mockNeedsMigrationPrompt = true;
-      const { getByText } = render(<ProfileSetupScreen />);
-      expect(getByText(/Welcome/i)).toBeTruthy();
+      const { findByText } = render(<ProfileSetupScreen />);
+      expect(await findByText(/Welcome/i)).toBeTruthy();
     });
 
-    it('calls setMigrationComplete on wizard complete', () => {
+    it('calls setMigrationComplete on wizard complete', async () => {
       mockNeedsMigrationPrompt = true;
-      const { getByTestId } = render(<ProfileSetupScreen />);
-      fireEvent.press(getByTestId('wizard-complete'));
+      const { findByTestId } = render(<ProfileSetupScreen />);
+      const btn = await findByTestId('wizard-complete');
+      fireEvent.press(btn);
       expect(mockSetMigrationComplete).toHaveBeenCalledTimes(1);
     });
 
-    it('does not call setMigrationComplete when flag is false', () => {
+    it('does not call setMigrationComplete when flag is false', async () => {
       mockNeedsMigrationPrompt = false;
-      const { getByTestId } = render(<ProfileSetupScreen />);
-      fireEvent.press(getByTestId('wizard-complete'));
+      const { findByTestId } = render(<ProfileSetupScreen />);
+      const btn = await findByTestId('wizard-complete');
+      fireEvent.press(btn);
       expect(mockSetMigrationComplete).not.toHaveBeenCalled();
     });
   });

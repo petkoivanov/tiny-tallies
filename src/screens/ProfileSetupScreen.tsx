@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { PinGate } from '@/components/profile/PinGate';
+import { PrivacyDisclosure } from '@/components/profile/PrivacyDisclosure';
 import { ProfileCreationWizard } from '@/components/profile/ProfileCreationWizard';
 import { useAppStore } from '@/store/appStore';
 import type { NewChildProfile } from '@/store/helpers/childDataHelpers';
+import {
+  hasPrivacyAcknowledged,
+  setPrivacyAcknowledged,
+} from '@/services/consent/privacyStorage';
 
 /**
  * ProfileSetupScreen handles two flows:
- * 1. Fresh install (no children): PinGate create -> wizard -> Home (no back)
+ * 1. Fresh install (no children): PinGate create -> Disclosure -> wizard -> Home
  * 2. Add another child (children exist): PinGate verify -> wizard -> Home
  *
  * Also handles _needsMigrationPrompt for v0.7 -> v0.8 migration.
@@ -25,6 +30,25 @@ export default function ProfileSetupScreen() {
 
   const isFreshInstall = childCount === 0;
 
+  const [showDisclosure, setShowDisclosure] = useState(false);
+  const [disclosureChecked, setDisclosureChecked] = useState(false);
+
+  useEffect(() => {
+    if (isFreshInstall) {
+      hasPrivacyAcknowledged().then((acked) => {
+        setShowDisclosure(!acked);
+        setDisclosureChecked(true);
+      });
+    } else {
+      setDisclosureChecked(true);
+    }
+  }, [isFreshInstall]);
+
+  const handleDisclosureAccept = useCallback(async () => {
+    await setPrivacyAcknowledged();
+    setShowDisclosure(false);
+  }, []);
+
   function handleComplete(profile: NewChildProfile) {
     addChild(profile);
 
@@ -32,7 +56,6 @@ export default function ProfileSetupScreen() {
       setMigrationComplete();
     }
 
-    // Reset to Home with no back button to prevent returning to setup
     navigation.reset({
       index: 0,
       routes: [{ name: 'Home' }],
@@ -41,7 +64,6 @@ export default function ProfileSetupScreen() {
 
   function handlePinCancel() {
     if (isFreshInstall) {
-      // Can't cancel on fresh install -- nowhere to go
       return;
     }
     navigation.goBack();
@@ -56,17 +78,23 @@ export default function ProfileSetupScreen() {
           isFreshInstall ? 'Create a PIN to manage profiles' : undefined
         }
       >
-        {needsMigrationPrompt && (
-          <View style={styles.migrationBanner}>
-            <Text style={styles.migrationText}>
-              {"Welcome! Let's set up your learner's profile."}
-            </Text>
-          </View>
+        {disclosureChecked && showDisclosure ? (
+          <PrivacyDisclosure onAccept={handleDisclosureAccept} />
+        ) : (
+          <>
+            {needsMigrationPrompt && (
+              <View style={styles.migrationBanner}>
+                <Text style={styles.migrationText}>
+                  {"Welcome! Let's set up your learner's profile."}
+                </Text>
+              </View>
+            )}
+            <ProfileCreationWizard
+              onComplete={handleComplete}
+              onCancel={isFreshInstall ? undefined : () => navigation.goBack()}
+            />
+          </>
         )}
-        <ProfileCreationWizard
-          onComplete={handleComplete}
-          onCancel={isFreshInstall ? undefined : () => navigation.goBack()}
-        />
       </PinGate>
     </View>
   );

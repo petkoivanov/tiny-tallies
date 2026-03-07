@@ -49,7 +49,14 @@
           "iosUrlScheme": "com.googleusercontent.apps.83762615868-7m9m4hbfuke1n3lnp3dia3e49bplnu13"
         }
       ],
-      "./plugins/withUnifiedKeystore"
+      "./plugins/withUnifiedKeystore",
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "magic-mirror-works",
+          "project": "tiny-tallies"
+        }
+      ]
     ],
     "owner": "magic.mirror.works",
     "runtimeVersion": {
