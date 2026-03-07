@@ -1,0 +1,25 @@
+# Cloudflare Worker configuration for Tiny Tallies API
+name = "tiny-tallies-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+[dev]
+port = 8788
+local_protocol = "http"
+
+[vars]
+ENVIRONMENT = "production"
+
+# D1 database for user data, consent, and progress sync
+# Create with: wrangler d1 create tiny-tallies-db
+# Apply schema: wrangler d1 execute tiny-tallies-db --file=./src/db/schema.sql
+[[d1_databases]]
+binding = "DB"
+database_name = "tiny-tallies-db"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+# Secrets (set via `wrangler secret put <SECRET_NAME>`)
+# - APP_API_KEY: App authentication key
+# - APPLE_BUNDLE_ID: com.magicmirror.tinytallies
+# - GOOGLE_WEB_CLIENT_ID: 83762615868-5so1eb9clpl2uvml1tiemhn664ft547h.apps.googleusercontent.com
