@@ -53,6 +53,7 @@ Sister product to [Tiny Tales](../tiny-tales/) (children's storytelling app). Sh
 - No punitive mechanics (hearts, lives, game over) — see gamification research.
 - COPPA compliance required for all social features — no chat, no personal info.
 - FlashList v1.x only — v2.x requires new architecture and will crash on RN 0.81.
+- **Build changes via Expo config plugins**: Never edit generated files in `android/` or `ios/` directly — `npx expo prebuild --clean` regenerates them. Use Expo config plugins in `plugins/` so changes persist across clean rebuilds.
 
 ## Project Context
 

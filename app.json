@@ -27,7 +27,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1a1a2e"
       },
-      "package": "com.magic.mirror.tinytallies",
+      "package": "com.magicmirror.tinytallies",
       "versionCode": 1,
       "edgeToEdgeEnabled": true
     },
@@ -46,9 +46,10 @@
       [
         "@react-native-google-signin/google-signin",
         {
-          "iosUrlScheme": "REPLACE_WITH_GOOGLE_CLIENT_IOS_SCHEME"
+          "iosUrlScheme": "com.googleusercontent.apps.83762615868-7m9m4hbfuke1n3lnp3dia3e49bplnu13"
         }
-      ]
+      ],
+      "./plugins/withUnifiedKeystore"
     ],
     "owner": "magic.mirror.works",
     "runtimeVersion": {
