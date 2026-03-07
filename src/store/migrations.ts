@@ -132,8 +132,17 @@ export function migrateStore(
     // Flat fields remain for immediate hydration after migration
   }
 
+  if (version < 14) {
+    // v13 -> v14: Add auth state fields
+    state.userId ??= null;
+    state.authProvider ??= null;
+    state.userEmail ??= null;
+    state.userDisplayName ??= null;
+    state.isSignedIn ??= false;
+  }
+
   // Future migrations chain here:
-  // if (version < 14) { ... }
+  // if (version < 15) { ... }
 
   return state;
 }
