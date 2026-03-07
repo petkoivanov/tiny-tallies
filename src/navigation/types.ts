@@ -41,6 +41,7 @@ export type RootStackParamList = {
   Consent: { returnTo?: 'Session' } | undefined;
   ProfileSetup: undefined;
   ProfileManagement: undefined;
+  ParentalControls: undefined;
 };
 
 declare global {

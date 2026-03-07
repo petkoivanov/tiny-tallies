@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Flame, Check, Focus, GitBranch, Palette } from 'lucide-react-native';
+import { Flame, Check, Focus, GitBranch, Palette, Settings } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { AVATARS, DEFAULT_AVATAR_ID, SPECIAL_AVATARS, FRAMES, resolveAvatar } from '@/store/constants/avatars';
@@ -74,6 +74,19 @@ export default function HomeScreen() {
     container: {
       flex: 1,
       backgroundColor: colors.background,
+    },
+    settingsRow: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.sm,
+    },
+    settingsButton: {
+      padding: spacing.sm,
+      minWidth: layout.minTouchTarget,
+      minHeight: layout.minTouchTarget,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     profileSection: {
       alignItems: 'center',
@@ -257,6 +270,19 @@ export default function HomeScreen() {
         { paddingBottom: insets.bottom },
       ]}
     >
+      {/* Settings Button */}
+      <View style={styles.settingsRow}>
+        <Pressable
+          style={styles.settingsButton}
+          onPress={() => navigation.navigate('ParentalControls' as never)}
+          accessibilityLabel="Parental Controls"
+          accessibilityRole="button"
+          testID="settings-button"
+        >
+          <Settings size={22} color={colors.textMuted} />
+        </Pressable>
+      </View>
+
       {/* Profile Section */}
       <View style={styles.profileSection}>
         <View style={styles.avatarContainer}>

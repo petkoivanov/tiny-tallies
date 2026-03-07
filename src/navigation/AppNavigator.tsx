@@ -12,6 +12,7 @@ import AvatarPickerScreen from '@/screens/AvatarPickerScreen';
 import ThemePickerScreen from '@/screens/ThemePickerScreen';
 import ProfileSetupScreen from '@/screens/ProfileSetupScreen';
 import ProfileManagementScreen from '@/screens/ProfileManagementScreen';
+import ParentalControlsScreen from '@/screens/ParentalControlsScreen';
 import { useTheme } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 
@@ -52,6 +53,7 @@ export default function AppNavigator() {
         options={{ gestureEnabled: false }}
       />
       <Stack.Screen name="ProfileManagement" component={ProfileManagementScreen} />
+      <Stack.Screen name="ParentalControls" component={ParentalControlsScreen} />
     </Stack.Navigator>
   );
 }

@@ -44,6 +44,7 @@ jest.mock('lucide-react-native', () => {
     Focus: (props: any) => <View testID="focus-icon" {...props} />,
     GitBranch: (props: any) => <View testID="git-branch-icon" {...props} />,
     Palette: (props: any) => <View testID="palette-icon" {...props} />,
+    Settings: (props: any) => <View testID="settings-icon" {...props} />,
   };
 });
 
