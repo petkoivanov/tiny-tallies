@@ -31,6 +31,8 @@ import {
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { PinGate } from '@/components/profile/PinGate';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import {
   getSentryOptOut,
   setSentryOptOut,
@@ -127,6 +129,7 @@ export default function ParentalControlsScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            // Remote data deletion
             if (userId) {
               try {
                 await deleteUserData(userId);
@@ -134,9 +137,25 @@ export default function ParentalControlsScreen() {
                 // Continue with local cleanup even if remote fails
               }
             }
+            // Sign out from provider
             await authSignOut();
+            // Clear local data: AsyncStorage (store), SecureStore (PIN, tokens, preferences)
+            await AsyncStorage.clear();
+            for (const key of [
+              'parental-pin',
+              'auth-id-token',
+              'auth-provider',
+              'privacy-acknowledged',
+              'sentry-opt-out',
+            ]) {
+              await SecureStore.deleteItemAsync(key).catch(() => {});
+            }
             clearAuth();
-            Alert.alert('Done', 'Your account data has been deleted.');
+            // Reset navigation to fresh setup
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'ProfileSetup' as never }],
+            });
           },
         },
       ],

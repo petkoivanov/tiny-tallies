@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Lock, Check } from 'lucide-react-native';
+import { ChevronLeft, Lock, Check } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { THEMES } from '@/theme/colors';
 import type { ThemeId, ThemeColors } from '@/theme/colors';
@@ -125,6 +125,28 @@ export default function ThemePickerScreen() {
       flex: 1,
       backgroundColor: colors.background,
     },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    backButton: {
+      width: layout.minTouchTarget,
+      height: layout.minTouchTarget,
+      borderRadius: layout.borderRadius.round,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    headerText: {
+      flex: 1,
+      marginLeft: spacing.sm,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.xl,
+    },
     scrollContent: {
       paddingHorizontal: spacing.md,
     },
@@ -186,6 +208,20 @@ export default function ThemePickerScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.header}>
+        <Pressable
+          testID="back-button"
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <ChevronLeft size={28} color={colors.textPrimary} />
+        </Pressable>
+        <View style={styles.headerText}>
+          <Text style={styles.title}>Themes</Text>
+        </View>
+      </View>
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
