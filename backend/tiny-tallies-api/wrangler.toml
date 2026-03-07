@@ -17,7 +17,7 @@ ENVIRONMENT = "production"
 [[d1_databases]]
 binding = "DB"
 database_name = "tiny-tallies-db"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "f871e708-9a2e-4d1d-b367-c5e14d4a25b6"
 
 # Secrets (set via `wrangler secret put <SECRET_NAME>`)
 # - APP_API_KEY: App authentication key

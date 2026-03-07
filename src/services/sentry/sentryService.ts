@@ -11,7 +11,6 @@ import { getSentryOptOut } from '../consent/privacyStorage';
 const SENTRY_DSN =
   'https://2c43d29d84b9771541720d5df45c5477@o4510677327675392.ingest.us.sentry.io/4511004483977216';
 
-let initialized = false;
 let optedOut = false;
 
 /**
@@ -59,17 +58,16 @@ function scrubEventData(
   return result;
 }
 
-export async function initSentry(): Promise<void> {
-  if (initialized) return;
-
-  optedOut = await getSentryOptOut();
-
+/**
+ * Initialize Sentry synchronously at module level so it's ready before Sentry.wrap().
+ * Opt-out preference is applied asynchronously after init.
+ */
+export function initSentry(): void {
   Sentry.init({
     dsn: SENTRY_DSN,
-    enabled: !optedOut,
     environment: __DEV__ ? 'development' : 'production',
     // COPPA: no user tracking, no session replay
-    enableAutoSessionTracking: !optedOut,
+    enableAutoSessionTracking: true,
     // PII scrubbing
     beforeSend(event) {
       if (optedOut) return null;
@@ -110,7 +108,10 @@ export async function initSentry(): Promise<void> {
     },
   });
 
-  initialized = true;
+  // Apply opt-out preference asynchronously
+  getSentryOptOut().then((out) => {
+    if (out) updateSentryOptOut(true);
+  });
 }
 
 /**

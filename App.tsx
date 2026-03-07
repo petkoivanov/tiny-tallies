@@ -18,6 +18,9 @@ import { useAutoSave } from '@/hooks/useAutoSave';
 import { useSyncTrigger } from '@/hooks/useSyncTrigger';
 import { initSentry } from '@/services/sentry/sentryService';
 
+// Initialize Sentry before Sentry.wrap() — must be synchronous at module level
+initSentry();
+
 // Prevent splash screen from hiding before fonts load (module-level per Expo docs)
 SplashScreen.preventAutoHideAsync();
 
@@ -31,10 +34,6 @@ function App() {
 
   useAutoSave();
   useSyncTrigger();
-
-  useEffect(() => {
-    initSentry();
-  }, []);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {

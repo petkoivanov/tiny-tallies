@@ -8,11 +8,9 @@
 import NetInfo from '@react-native-community/netinfo';
 import { getStoredToken } from '../auth/authService';
 
-const API_BASE_URL = __DEV__
-  ? 'http://10.0.2.2:8788' // Android emulator -> host
-  : 'https://tiny-tallies-api.YOUR_DOMAIN.workers.dev'; // TODO: replace after deploy
+const API_BASE_URL = 'https://tiny-tallies-api.magic-mirror-works.workers.dev';
 
-const API_KEY = 'REPLACE_WITH_PRODUCTION_API_KEY'; // TODO: move to env/config
+const API_KEY = '14336e463b53d67ba0eff93ded9be0e37841f8c4d79ac12d89e96797288a93a8';
 
 export class ApiError extends Error {
   constructor(

@@ -18,48 +18,49 @@ jest.mock('@/services/consent/privacyStorage', () => ({
   getSentryOptOut: () => mockGetSentryOptOut(),
 }));
 
-import { initSentry } from '../sentryService';
-
 describe('sentryService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset module state — initSentry guards against double init
     jest.resetModules();
   });
 
-  it('calls Sentry.init with DSN', async () => {
+  it('calls Sentry.init with DSN', () => {
     mockGetSentryOptOut.mockResolvedValue(false);
-    // Re-import to reset initialized flag
-    const { initSentry: freshInit } = require('../sentryService');
-    await freshInit();
+    const { initSentry } = require('../sentryService');
+    initSentry();
     expect(mockInit).toHaveBeenCalledTimes(1);
     const config = mockInit.mock.calls[0][0];
     expect(config.dsn).toContain('sentry.io');
   });
 
-  it('disables Sentry when opted out', async () => {
+  it('applies opt-out asynchronously via updateSentryOptOut', async () => {
     mockGetSentryOptOut.mockResolvedValue(true);
-    const { initSentry: freshInit } = require('../sentryService');
-    await freshInit();
-    const config = mockInit.mock.calls[0][0];
-    expect(config.enabled).toBe(false);
+    const mockOptions = { enabled: true };
+    mockGetClient.mockReturnValue({ getOptions: () => mockOptions });
+    const { initSentry } = require('../sentryService');
+    initSentry();
+    // Wait for the async opt-out check to resolve
+    await new Promise((r) => setTimeout(r, 0));
+    expect(mockOptions.enabled).toBe(false);
   });
 
-  it('enables Sentry when not opted out', async () => {
+  it('leaves Sentry enabled when not opted out', async () => {
     mockGetSentryOptOut.mockResolvedValue(false);
-    const { initSentry: freshInit } = require('../sentryService');
-    await freshInit();
-    const config = mockInit.mock.calls[0][0];
-    expect(config.enabled).toBe(true);
+    const { initSentry } = require('../sentryService');
+    initSentry();
+    // Wait for the async opt-out check to resolve
+    await new Promise((r) => setTimeout(r, 0));
+    // getClient should not be called to disable
+    expect(mockGetClient).not.toHaveBeenCalled();
   });
 
   describe('PII scrubbing via beforeSend', () => {
     let beforeSend: (event: any) => any;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       mockGetSentryOptOut.mockResolvedValue(false);
-      const { initSentry: freshInit } = require('../sentryService');
-      await freshInit();
+      const { initSentry } = require('../sentryService');
+      initSentry();
       beforeSend = mockInit.mock.calls[0][0].beforeSend;
     });
 
