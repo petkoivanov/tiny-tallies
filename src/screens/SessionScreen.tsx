@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   useNavigation,
@@ -16,6 +16,7 @@ import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useChatOrchestration } from '@/hooks/useChatOrchestration';
 import { CpaSessionContent, SessionHeader, SessionWrapper } from '@/components/session';
 import { HelpButton, ChatPanel, ChatBanner } from '@/components/chat';
+import { AppDialog } from '@/components/AppDialog';
 import type { RootStackParamList } from '@/navigation/types';
 
 type SessionNavProp = NativeStackNavigationProp<RootStackParamList, 'Session'>;
@@ -87,25 +88,30 @@ export default function SessionScreen() {
 
   const isFeedbackActive = feedbackState !== null;
 
+  // Quit confirmation dialog state
+  const [quitDialogVisible, setQuitDialogVisible] = useState(false);
+  const pendingNavAction = useRef<any>(null);
+
   // Prevent back navigation while session is active
   const isSessionActive = !isComplete;
   usePreventRemove(isSessionActive, ({ data }) => {
-    Alert.alert(
-      'Quit Practice?',
-      "Are you sure? Your progress won't be saved.",
-      [
-        { text: 'Keep Going', style: 'cancel' },
-        {
-          text: 'Quit',
-          style: 'destructive',
-          onPress: () => {
-            handleQuit();
-            navigation.dispatch(data.action);
-          },
-        },
-      ],
-    );
+    pendingNavAction.current = data.action;
+    setQuitDialogVisible(true);
   });
+
+  const handleQuitConfirm = useCallback(() => {
+    setQuitDialogVisible(false);
+    handleQuit();
+    if (pendingNavAction.current) {
+      navigation.dispatch(pendingNavAction.current);
+      pendingNavAction.current = null;
+    }
+  }, [handleQuit, navigation]);
+
+  const handleQuitCancel = useCallback(() => {
+    setQuitDialogVisible(false);
+    pendingNavAction.current = null;
+  }, []);
 
   // Navigate to Results when session completes
   useEffect(() => {
@@ -122,6 +128,7 @@ export default function SessionScreen() {
         cpaAdvances: sessionResult.feedback?.cpaAdvances ?? [],
         isRemediation: sessionMode === 'remediation',
         newBadges: sessionResult.newBadges,
+        totalNewBadges: sessionResult.totalNewBadges,
         isChallenge: sessionResult.isChallenge,
         challengeBonusXp: sessionResult.challengeBonusXp,
         accuracyGoalMet: sessionResult.accuracyGoalMet,
@@ -227,6 +234,17 @@ export default function SessionScreen() {
         isOnline={isOnline}
         onResponse={handleResponse}
         responseMode={responseMode}
+      />
+      {/* Quit confirmation dialog */}
+      <AppDialog
+        visible={quitDialogVisible}
+        title="Quit Practice?"
+        message="Are you sure? Your progress won't be saved."
+        buttons={[
+          { text: 'Keep Going', style: 'cancel', onPress: handleQuitCancel },
+          { text: 'Quit', style: 'destructive', onPress: handleQuitConfirm },
+        ]}
+        onDismiss={handleQuitCancel}
       />
     </View>
     </SessionWrapper>

@@ -10,7 +10,16 @@ import React, { useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 
 import { useTheme, spacing } from '@/theme';
-import { COUNTER_COLORS, MAX_GRID_DIMENSION } from './CountersTypes';
+import {
+  COUNTER_COLORS,
+  COUNTER_SIZE,
+  GRID_COUNTER_SPACING,
+  STAGGER_OFFSET,
+  MAX_GRID_DIMENSION,
+  type CounterState,
+  type CounterColor,
+} from './CountersTypes';
+import { computeGridPositions } from './CountersGrid';
 
 // ---- Custom dual-color counter display ----
 
@@ -114,6 +123,58 @@ export function DimensionStepper({ label, value, onChange, testID }: DimensionSt
       </Pressable>
     </View>
   );
+}
+
+// ---- Builder helpers (extracted from Counters.tsx for line count) ----
+
+export function buildGridCounters(
+  rows: number,
+  cols: number,
+  existing: CounterState[],
+  nextIdRef: React.MutableRefObject<number>,
+): CounterState[] {
+  const cellSize = COUNTER_SIZE + GRID_COUNTER_SPACING;
+  const positions = computeGridPositions({
+    rows,
+    cols,
+    cellSize,
+    originX: spacing.md,
+    originY: spacing.md,
+  });
+
+  const total = rows * cols;
+  const result: CounterState[] = [];
+
+  for (let i = 0; i < total; i++) {
+    if (i < existing.length) {
+      result.push({ ...existing[i], x: positions[i].x, y: positions[i].y });
+    } else {
+      const id = `c-${nextIdRef.current++}`;
+      result.push({ id, color: 'red' as CounterColor, x: positions[i].x, y: positions[i].y });
+    }
+  }
+
+  return result;
+}
+
+export function buildScaffoldedCounters(
+  count: number,
+  color: CounterColor,
+  nextIdRef: React.MutableRefObject<number>,
+): CounterState[] {
+  const counters: CounterState[] = [];
+  const cols = 5;
+  for (let i = 0; i < count; i++) {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    counters.push({
+      id: `c-${nextIdRef.current++}`,
+      color,
+      x: spacing.md + col * STAGGER_OFFSET,
+      y: spacing.md + row * STAGGER_OFFSET,
+    });
+  }
+  return counters;
 }
 
 const styles = StyleSheet.create({

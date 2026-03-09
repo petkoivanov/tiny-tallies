@@ -34,14 +34,14 @@ describe('Skill Manipulative Map', () => {
   });
 
   describe('mapping categories', () => {
-    it('single-digit skills map to counters, ten_frame, bar_model', () => {
-      const expected: ManipulativeType[] = ['counters', 'ten_frame', 'bar_model'];
+    it('single-digit skills map to counters, bar_model', () => {
+      const expected: ManipulativeType[] = ['counters', 'bar_model'];
       expect(getManipulativesForSkill('addition.single-digit.no-carry')).toEqual(expected);
       expect(getManipulativesForSkill('subtraction.single-digit.no-borrow')).toEqual(expected);
     });
 
-    it('within-20 skills map to ten_frame, number_line, bar_model', () => {
-      const expected: ManipulativeType[] = ['ten_frame', 'number_line', 'bar_model'];
+    it('within-20 skills map to number_line, bar_model', () => {
+      const expected: ManipulativeType[] = ['number_line', 'bar_model'];
       expect(getManipulativesForSkill('addition.within-20.no-carry')).toEqual(expected);
       expect(getManipulativesForSkill('addition.within-20.with-carry')).toEqual(expected);
       expect(getManipulativesForSkill('subtraction.within-20.no-borrow')).toEqual(expected);
@@ -87,7 +87,7 @@ describe('Skill Manipulative Map', () => {
   describe('getManipulativesForSkill', () => {
     it('returns manipulatives for a valid skill', () => {
       const result = getManipulativesForSkill('addition.single-digit.no-carry');
-      expect(result).toEqual(['counters', 'ten_frame', 'bar_model']);
+      expect(result).toEqual(['counters', 'bar_model']);
     });
 
     it('returns empty array for nonexistent skill', () => {

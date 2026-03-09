@@ -7,32 +7,34 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import LottieView from 'lottie-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useCpaMode } from '@/hooks/useCpaMode';
 import { AnswerFeedbackAnimation } from '@/components/animations/AnswerFeedbackAnimation';
 import {
   Counters,
-  TenFrame,
   BaseTenBlocks,
   NumberLine,
   FractionStrips,
   BarModel,
-  ManipulativeShell,
 } from '@/components/manipulatives';
 import { ManipulativePanel } from './ManipulativePanel';
 import { CompactAnswerRow } from './CompactAnswerRow';
 import { PictorialDiagram } from './pictorial/PictorialDiagram';
 import { getNextGuidedStep } from '@/services/cpa';
+import { getPrimaryManipulative } from '@/services/cpa/skillManipulativeMap';
 import type { ManipulativeType } from '@/services/cpa/cpaTypes';
 import type { Problem } from '@/services/mathEngine/types';
 
+/** Session-supported manipulative types (ten_frame excluded — sandbox only) */
+type SessionManipulative = Exclude<ManipulativeType, 'ten_frame'>;
+
 /** Map ManipulativeType to its React component */
 const MANIPULATIVE_COMPONENTS: Record<
-  ManipulativeType,
+  SessionManipulative,
   React.ComponentType<{ testID?: string; guidedTargetId?: string | null }>
 > = {
   counters: Counters,
-  ten_frame: TenFrame,
   base_ten_blocks: BaseTenBlocks,
   number_line: NumberLine,
   fraction_strips: FractionStrips,
@@ -40,9 +42,8 @@ const MANIPULATIVE_COMPONENTS: Record<
 };
 
 /** Human-readable labels for toggle button text */
-const MANIPULATIVE_LABELS: Record<ManipulativeType, string> = {
+const MANIPULATIVE_LABELS: Record<SessionManipulative, string> = {
   counters: 'counters',
-  ten_frame: 'ten frame',
   base_ten_blocks: 'blocks',
   number_line: 'number line',
   fraction_strips: 'strips',
@@ -84,11 +85,9 @@ function formatOperator(operation: string): string {
 /**
  * CPA-branching renderer for session problems.
  *
- * Switches between concrete, pictorial, and abstract modes based on the
- * skill's CPA stage (resolved via useCpaMode hook):
- * - Concrete: auto-expanded ManipulativePanel with interactive manipulative
- * - Pictorial: inline static diagram + "Need help?" button for panel scaffolding
- * - Abstract: plain problem text + standard 2x2 answer grid
+ * All modes show the problem text, answer buttons, and a "Need help?" link.
+ * Tapping "Need help?" opens the ManipulativePanel with the skill's primary
+ * manipulative. Pictorial mode also shows an inline diagram above the answers.
  */
 export function CpaSessionContent({
   problem,
@@ -107,18 +106,20 @@ export function CpaSessionContent({
   const { colors } = useTheme();
   const { stage, manipulativeType } = useCpaMode(skillId);
 
-  // Panel expansion state
-  const [panelExpanded, setPanelExpanded] = useState(stage === 'concrete');
-  // Tracks whether "Need help?" was activated in pictorial mode
+  // Resolve a manipulative for scaffolding, even in abstract mode
+  const scaffoldManipulative = manipulativeType ?? getPrimaryManipulative(skillId);
+
+  // Panel state — always collapsed by default; kids tap "Need help?" to open
+  const [panelExpanded, setPanelExpanded] = useState(false);
   const [needHelpActive, setNeedHelpActive] = useState(false);
 
-  // Guided mode state -- active only in concrete CPA mode
+  // Guided mode state -- only populated after help is activated
   const [guidedTargetId, setGuidedTargetId] = useState<string | null>(null);
   const [guidedHintText, setGuidedHintText] = useState<string | null>(null);
 
   // Reset panel state when problem advances or stage changes
   useEffect(() => {
-    setPanelExpanded(stage === 'concrete');
+    setPanelExpanded(false);
     setNeedHelpActive(false);
   }, [currentIndex, stage]);
 
@@ -136,12 +137,12 @@ export function CpaSessionContent({
     }
   }, [teachExpand]);
 
-  // Compute guided step for concrete mode
+  // Compute guided step only after help is activated
   useEffect(() => {
-    if (stage === 'concrete' && manipulativeType) {
+    if (needHelpActive && scaffoldManipulative) {
       const step = getNextGuidedStep(
         problem.operation,
-        manipulativeType,
+        scaffoldManipulative,
         problem.operands,
         0, // Initial count -- manipulative starts fresh each problem
       );
@@ -151,9 +152,9 @@ export function CpaSessionContent({
       setGuidedTargetId(null);
       setGuidedHintText(null);
     }
-  }, [stage, manipulativeType, problem, currentIndex]);
+  }, [needHelpActive, scaffoldManipulative, problem, currentIndex]);
 
-  const showPanel = stage === 'concrete' || needHelpActive;
+  const showPanel = needHelpActive;
   const isExpanded = panelExpanded;
 
   const handleTogglePanel = () => {
@@ -165,16 +166,18 @@ export function CpaSessionContent({
     setPanelExpanded(true);
   };
 
-  const manipulativeLabel = manipulativeType
-    ? MANIPULATIVE_LABELS[manipulativeType]
+  const manipulativeLabel = scaffoldManipulative && scaffoldManipulative in MANIPULATIVE_LABELS
+    ? MANIPULATIVE_LABELS[scaffoldManipulative as SessionManipulative]
     : undefined;
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
-      justifyContent: 'center',
       alignItems: 'center',
       paddingHorizontal: spacing.lg,
+    },
+    topSpacer: {
+      flex: 1,
     },
     problemText: {
       fontFamily: typography.fontFamily.bold,
@@ -237,17 +240,23 @@ export function CpaSessionContent({
       color: colors.textPrimary,
     },
     needHelpButton: {
-      minHeight: 48,
-      justifyContent: 'center',
+      flexDirection: 'row',
       alignItems: 'center',
-      paddingHorizontal: spacing.md,
-      marginBottom: spacing.md,
+      justifyContent: 'center',
+      gap: spacing.sm,
+      minHeight: 48,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      marginTop: spacing.lg,
+      backgroundColor: colors.surface,
+      borderRadius: layout.borderRadius.full,
+      borderWidth: 1,
+      borderColor: colors.primaryLight + '40',
     },
     needHelpText: {
-      fontFamily: typography.fontFamily.medium,
+      fontFamily: typography.fontFamily.semiBold,
       fontSize: typography.fontSize.md,
       color: colors.primaryLight,
-      textDecorationLine: 'underline',
     },
     guidedHint: {
       marginBottom: spacing.sm,
@@ -262,23 +271,25 @@ export function CpaSessionContent({
 
   // Render the manipulative component inside the panel
   const renderManipulative = () => {
-    if (!manipulativeType) return null;
+    if (!scaffoldManipulative) return null;
     const targetId = stage === 'concrete' ? guidedTargetId : null;
 
-    // TenFrame: pass initialFrames=2 when answer > 10 (double ten frame for make-a-ten strategies)
-    if (manipulativeType === 'ten_frame') {
-      const frames = problem.correctAnswer > 10 ? 2 : 1;
+    // Counters: pass problem data for scaffolded mode (counting-on / take-away)
+    if (scaffoldManipulative === 'counters') {
       return (
-        <TenFrame
+        <Counters
           key={`manip-${currentIndex}`}
-          initialFrames={frames}
           guidedTargetId={targetId}
+          problemOperands={problem.operands}
+          problemOperation={problem.operation as 'addition' | 'subtraction'}
           testID="session-manipulative"
         />
       );
     }
 
-    const Component = MANIPULATIVE_COMPONENTS[manipulativeType];
+    // Skip unsupported manipulatives (e.g. ten_frame — sandbox only)
+    if (!(scaffoldManipulative in MANIPULATIVE_COMPONENTS)) return null;
+    const Component = MANIPULATIVE_COMPONENTS[scaffoldManipulative as SessionManipulative];
     return (
       <Component
         key={`manip-${currentIndex}`}
@@ -372,59 +383,60 @@ export function CpaSessionContent({
 
   return (
     <View style={styles.container}>
+      {/* Top spacer — centers problem + answers */}
+      <View style={styles.topSpacer} />
+
       {/* Problem Text */}
       <Text style={styles.problemText}>
         {problem.operands[0]} {formatOperator(problem.operation)}{' '}
         {problem.operands[1]} = ?
       </Text>
 
-      {/* Pictorial Mode: inline diagram + "Need help?" */}
-      {stage === 'pictorial' && manipulativeType && (
-        <>
-          <PictorialDiagram
-            type={manipulativeType}
-            problem={problem}
-            testID="pictorial-diagram"
-          />
-          {!needHelpActive && (
-            <Pressable
-              onPress={handleNeedHelp}
-              style={styles.needHelpButton}
-              accessibilityRole="button"
-              accessibilityLabel="Need help?"
-              testID="need-help-button"
-            >
-              <Text style={styles.needHelpText}>Need help?</Text>
-            </Pressable>
-          )}
-        </>
+      {/* Pictorial Mode: inline diagram */}
+      {stage === 'pictorial' && scaffoldManipulative && (
+        <PictorialDiagram
+          type={scaffoldManipulative}
+          problem={problem}
+          testID="pictorial-diagram"
+        />
       )}
 
       {/* Answer Buttons */}
       {renderAnswers()}
 
-      {/* Guided hint text (concrete mode only, supplementary to glow) */}
-      {guidedHintText && stage === 'concrete' && (
+      {/* "Show me!" button — all modes, before panel is activated */}
+      {!needHelpActive && scaffoldManipulative && (
+        <Pressable
+          onPress={handleNeedHelp}
+          style={styles.needHelpButton}
+          accessibilityRole="button"
+          accessibilityLabel="Show me how"
+          testID="need-help-button"
+        >
+          <GlowingLightbulb />
+          <Text style={styles.needHelpText}>Show me!</Text>
+        </Pressable>
+      )}
+
+      {/* Bottom spacer — pushes help panel to bottom */}
+      <View style={styles.topSpacer} />
+
+      {/* Guided hint text (above panel, no overlap with answers) */}
+      {guidedHintText && showPanel && (
         <View style={styles.guidedHint}>
           <Text style={styles.guidedHintText}>{guidedHintText}</Text>
         </View>
       )}
 
-      {/* Manipulative Panel (concrete mode or "Need help?" in pictorial) */}
-      {showPanel && manipulativeType && (
+      {/* Manipulative Panel (any mode, after "Need help?" activated) */}
+      {showPanel && scaffoldManipulative && (
         <ManipulativePanel
           expanded={isExpanded}
           onToggle={handleTogglePanel}
           manipulativeLabel={manipulativeLabel}
           testID="manipulative-panel"
         >
-          <ManipulativeShell
-            count={0}
-            onReset={() => {}}
-            testID="manipulative-shell"
-          >
-            {renderManipulative()}
-          </ManipulativeShell>
+          {renderManipulative()}
         </ManipulativePanel>
       )}
     </View>
@@ -464,3 +476,22 @@ function BoostHighlightWrapper({
 
   return <Animated.View style={animatedStyle}>{children}</Animated.View>;
 }
+
+/** Animated Lottie lightbulb icon for the "Show me!" button. */
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bulbAnimation = require('../../../assets/animations/bulb.json');
+
+function GlowingLightbulb() {
+  return (
+    <LottieView
+      source={bulbAnimation}
+      autoPlay
+      loop
+      style={glowStyles.bulb}
+    />
+  );
+}
+
+const glowStyles = StyleSheet.create({
+  bulb: { width: 36, height: 36 },
+});

@@ -87,7 +87,7 @@ describe('BadgeUnlockPopup', () => {
     expect(getByText('Master adding within 10')).toBeTruthy();
   });
 
-  it('pressing the overlay advances to next badge', () => {
+  it('pressing dismiss button advances to next badge', () => {
     const { getByText, getByTestId } = render(
       <BadgeUnlockPopup
         badgeIds={['badge-1', 'badge-2']}
@@ -96,20 +96,27 @@ describe('BadgeUnlockPopup', () => {
     );
     expect(getByText('Addition Starter')).toBeTruthy();
 
-    fireEvent.press(getByTestId('badge-popup-overlay'));
+    fireEvent.press(getByTestId('badge-popup-dismiss'));
 
     expect(getByText('Quick Adder')).toBeTruthy();
     expect(getByText('Master adding within 20')).toBeTruthy();
   });
 
-  it('pressing on the last badge calls onComplete callback', () => {
+  it('pressing dismiss on the last badge calls onComplete callback', () => {
     const { getByTestId } = render(
       <BadgeUnlockPopup badgeIds={['badge-1']} onComplete={mockOnComplete} />,
     );
 
-    fireEvent.press(getByTestId('badge-popup-overlay'));
+    fireEvent.press(getByTestId('badge-popup-dismiss'));
 
     expect(mockOnComplete).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders Awesome! dismiss button', () => {
+    const { getByText } = render(
+      <BadgeUnlockPopup badgeIds={['badge-1']} onComplete={mockOnComplete} />,
+    );
+    expect(getByText('Awesome!')).toBeTruthy();
   });
 
   it('renders BadgeIcon with correct emoji for the displayed badge', () => {

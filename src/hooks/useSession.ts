@@ -35,8 +35,8 @@ import type { CpaStage } from '../services/cpa/cpaTypes';
 import { getOrCreateSkillState } from '../store/helpers/skillStateHelpers';
 import type { MisconceptionRecord } from '../store/slices/misconceptionSlice';
 import { getConfirmedMisconceptions } from '../store/slices/misconceptionSlice';
-import { evaluateBadges } from '../services/achievement';
-import type { BadgeEvaluationSnapshot } from '../services/achievement';
+import { evaluateBadges, getBadgeById } from '../services/achievement';
+import type { BadgeEvaluationSnapshot, BadgeTier } from '../services/achievement';
 import {
   getChallengeSkillIds,
   evaluateChallengeGoals,
@@ -102,13 +102,11 @@ export interface UseSessionReturn {
 /** Generates session queue synchronously during ref initialization. */
 function initializeSession(
   skillStates: Record<string, SkillState>,
-  startSession: () => void,
   misconceptions: Record<string, MisconceptionRecord>,
   mode: SessionMode = 'standard',
   remediationSkillIds?: readonly string[],
   challengeThemeId?: string,
 ): { queue: SessionProblem[]; startTime: number; challengeStartDate: string } {
-  startSession();
   const seed = Date.now();
   const startTime = Date.now();
 
@@ -189,12 +187,17 @@ export function useSession(options?: {
     initializedRef.current = true;
     resetSessionDedup();
     const { queue, startTime, challengeStartDate } = initializeSession(
-      skillStates, startSession, misconceptions, mode, remediationSkillIds, challengeThemeId,
+      skillStates, misconceptions, mode, remediationSkillIds, challengeThemeId,
     );
     sessionQueueRef.current = queue;
     sessionStartTimeRef.current = startTime;
     challengeStartDateRef.current = challengeStartDate;
   }
+
+  // Mark session active in a layout effect to avoid setState-during-render warning
+  useEffect(() => {
+    startSession();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [feedbackState, setFeedbackState] = useState<FeedbackState | null>(null);
@@ -398,11 +401,23 @@ export function useSession(options?: {
             lastChallengeScore: challengeResult
               ? { score: finalScore, total: totalProblems }
               : undefined,
+            childGrade: useAppStore.getState().childGrade ?? 1,
           };
-          const newBadges = evaluateBadges(badgeSnapshot, useAppStore.getState().earnedBadges);
-          if (newBadges.length > 0) {
-            useAppStore.getState().addEarnedBadges(newBadges);
+          const allNewBadges = evaluateBadges(badgeSnapshot, useAppStore.getState().earnedBadges);
+          if (allNewBadges.length > 0) {
+            useAppStore.getState().addEarnedBadges(allNewBadges);
           }
+          // Show only the single highest-tier badge to avoid overwhelming the child.
+          // All badges are still persisted above — only the popup/summary is limited.
+          const TIER_RANK: Record<BadgeTier, number> = { bronze: 1, silver: 2, gold: 3 };
+          const bestBadge = allNewBadges.length > 0
+            ? allNewBadges.reduce((best, id) => {
+                const bestTier = getBadgeById(best)?.tier ?? 'bronze';
+                const curTier = getBadgeById(id)?.tier ?? 'bronze';
+                return TIER_RANK[curTier] > TIER_RANK[bestTier] ? id : best;
+              })
+            : null;
+          const newBadges = bestBadge ? [bestBadge] : [];
 
           // Compute CPA advances by comparing snapshot with pending updates
           const cpaAdvances: Array<{ skillId: string; from: CpaStage; to: CpaStage }> = [];
@@ -427,6 +442,7 @@ export function useSession(options?: {
             pendingUpdates: new Map(pendingUpdatesRef.current),
             feedback: feedbackWithCpa,
             newBadges,
+            totalNewBadges: allNewBadges.length,
             ...(challengeResult ?? {}),
           });
 

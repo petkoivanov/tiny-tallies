@@ -45,6 +45,7 @@ jest.mock('lucide-react-native', () => {
     GitBranch: (props: any) => <View testID="git-branch-icon" {...props} />,
     Palette: (props: any) => <View testID="palette-icon" {...props} />,
     Settings: (props: any) => <View testID="settings-icon" {...props} />,
+    Award: (props: any) => <View testID="award-icon" {...props} />,
   };
 });
 
@@ -133,7 +134,7 @@ describe('HomeScreen', () => {
     setMockState({ xp: 150, level: 2 });
 
     const { getByText } = render(<HomeScreen />);
-    expect(getByText('30 / 140 XP')).toBeTruthy();
+    expect(getByText('30/140 XP')).toBeTruthy();
   });
 
   it('renders streak count', () => {
@@ -298,7 +299,7 @@ describe('HomeScreen', () => {
     });
 
     const { getByText } = render(<HomeScreen />);
-    expect(getByText('3 / 31 Badges')).toBeTruthy();
+    expect(getByText('3/31 \uD83C\uDFC5')).toBeTruthy();
   });
 
   it('badge count button navigates to BadgeCollection', () => {

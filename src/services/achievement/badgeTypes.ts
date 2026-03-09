@@ -30,4 +30,6 @@ export interface BadgeEvaluationSnapshot {
   misconceptions: Record<string, { status: string }>;
   challengesCompleted: number;
   lastChallengeScore?: { score: number; total: number };
+  /** Child's grade level — skills below this grade are pre-mastered and ineligible for badges */
+  childGrade: number;
 }

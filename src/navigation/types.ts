@@ -28,6 +28,7 @@ export type RootStackParamList = {
     cpaAdvances: Array<{ skillId: string; from: CpaStage; to: CpaStage }>;
     isRemediation?: boolean;
     newBadges?: string[];
+    totalNewBadges?: number;
     isChallenge?: boolean;
     challengeBonusXp?: number;
     accuracyGoalMet?: boolean;

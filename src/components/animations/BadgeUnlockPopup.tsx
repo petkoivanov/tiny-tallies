@@ -73,13 +73,25 @@ export function BadgeUnlockPopup({ badgeIds, onComplete }: BadgeUnlockPopupProps
       textAlign: 'center',
       maxWidth: 260,
     },
-    hintText: {
-      fontFamily: typography.fontFamily.regular,
-      fontSize: typography.fontSize.sm,
-      color: colors.textSecondary,
-      position: 'absolute',
-      bottom: 80,
+    dismissButton: {
+      backgroundColor: colors.primary,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.xxl,
+      borderRadius: layout.borderRadius.lg,
+      minHeight: layout.minTouchTarget,
+      minWidth: 160,
+      justifyContent: 'center',
+      alignItems: 'center',
       zIndex: 1,
+      marginTop: spacing.lg,
+    },
+    dismissButtonPressed: {
+      backgroundColor: colors.primaryDark,
+    },
+    dismissText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.lg,
+      color: colors.textPrimary,
     },
   }), [colors]);
 
@@ -152,11 +164,7 @@ export function BadgeUnlockPopup({ badgeIds, onComplete }: BadgeUnlockPopupProps
 
   return (
     <View style={StyleSheet.absoluteFillObject} pointerEvents="auto">
-      <Pressable
-        testID="badge-popup-overlay"
-        style={styles.overlay}
-        onPress={handleTap}
-      >
+      <View testID="badge-popup-overlay" style={styles.overlay}>
         <Animated.View style={[styles.backdrop, backdropStyle]} />
         <Animated.View style={[styles.card, cardStyle]}>
           {/* Glow effect behind badge */}
@@ -177,8 +185,19 @@ export function BadgeUnlockPopup({ badgeIds, onComplete }: BadgeUnlockPopupProps
             </Text>
           )}
         </Animated.View>
-        <Text style={styles.hintText}>Tap to continue</Text>
-      </Pressable>
+        <Pressable
+          testID="badge-popup-dismiss"
+          onPress={handleTap}
+          style={({ pressed }) => [
+            styles.dismissButton,
+            pressed && styles.dismissButtonPressed,
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Awesome! Dismiss badge"
+        >
+          <Text style={styles.dismissText}>Awesome!</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }

@@ -27,6 +27,10 @@ export interface CountersProps {
   gridRows?: number;
   /** Grid cols for session auto-config (auto-switches to grid mode). */
   gridCols?: number;
+  /** Problem operands for scaffolded mode — pre-seeds first operand, guides second. */
+  problemOperands?: readonly number[];
+  /** Problem operation for scaffolded mode — determines add vs. remove guidance. */
+  problemOperation?: 'addition' | 'subtraction';
   /** Test ID for the component root. */
   testID?: string;
 }

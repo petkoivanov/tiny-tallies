@@ -28,6 +28,7 @@ Sister product to [Tiny Tales](../tiny-tales/) (children's storytelling app). Sh
 - Use `lucide-react-native` for icons — no other icon libraries.
 - Use `StyleSheet.create` for styles, not inline style objects in render.
 - Zod for runtime validation at system boundaries.
+- **No native `Alert.alert`** — use `AppDialog` component (`src/components/AppDialog.tsx`) for all confirmations and error messages. It renders a themed in-app modal that matches the active theme. All dialogs must go through this centralized component.
 
 ## Architecture
 

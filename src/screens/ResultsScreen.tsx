@@ -72,6 +72,7 @@ export default function ResultsScreen() {
     cpaAdvances = [],
     isRemediation = false,
     newBadges = [],
+    totalNewBadges = 0,
     isChallenge = false,
     challengeBonusXp = 0,
     accuracyGoalMet = false,
@@ -458,6 +459,7 @@ export default function ResultsScreen() {
 
           <BadgesSummary
             badgeIds={newBadges}
+            totalEarned={totalNewBadges}
             onViewAll={() =>
               navigation.dispatch(
                 CommonActions.reset({

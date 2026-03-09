@@ -1,6 +1,5 @@
 import React from 'react';
-import { Alert } from 'react-native';
-import { render, fireEvent } from '@testing-library/react-native';
+import { act, render, fireEvent } from '@testing-library/react-native';
 import type { UseSessionReturn } from '@/hooks/useSession';
 
 // Mock react-native-reanimated
@@ -274,6 +273,29 @@ jest.mock('@/components/chat', () => {
   };
 });
 
+// Mock AppDialog — renders buttons that call onPress when tapped
+jest.mock('@/components/AppDialog', () => {
+  const { View, Text, Pressable } = require('react-native');
+  return {
+    AppDialog: ({ visible, title, message, buttons }: any) =>
+      visible ? (
+        <View testID="app-dialog">
+          <Text testID="app-dialog-title">{title}</Text>
+          {message && <Text testID="app-dialog-message">{message}</Text>}
+          {(buttons ?? []).map((btn: any, i: number) => (
+            <Pressable
+              key={i}
+              testID={`dialog-button-${btn.text.toLowerCase().replace(/\s+/g, '-')}`}
+              onPress={() => btn.onPress?.()}
+            >
+              <Text>{btn.text}</Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null,
+  };
+});
+
 // Mock navigation
 const mockNavigate = jest.fn();
 const mockGoBack = jest.fn();
@@ -321,9 +343,6 @@ jest.mock('lucide-react-native', () => {
     CircleHelp: () => <View />,
   };
 });
-
-// Alert.alert spy
-jest.spyOn(Alert, 'alert');
 
 import SessionScreen from '@/screens/SessionScreen';
 
@@ -462,34 +481,34 @@ describe('SessionScreen', () => {
   });
 
   it('quit button triggers confirmation dialog via usePreventRemove', () => {
-    render(<SessionScreen />);
+    const { getByTestId, queryByTestId } = render(<SessionScreen />);
     expect(mockPreventRemoveCallback).not.toBeNull();
 
-    const mockAction = { type: 'GO_BACK' };
-    mockPreventRemoveCallback!({ data: { action: mockAction } });
+    // Dialog not visible initially
+    expect(queryByTestId('app-dialog')).toBeNull();
 
-    expect(Alert.alert).toHaveBeenCalledWith(
-      'Quit Practice?',
+    const mockAction = { type: 'GO_BACK' };
+    act(() => {
+      mockPreventRemoveCallback!({ data: { action: mockAction } });
+    });
+
+    // AppDialog now visible with correct content
+    expect(getByTestId('app-dialog-title').props.children).toBe('Quit Practice?');
+    expect(getByTestId('app-dialog-message').props.children).toBe(
       "Are you sure? Your progress won't be saved.",
-      expect.arrayContaining([
-        expect.objectContaining({ text: 'Keep Going', style: 'cancel' }),
-        expect.objectContaining({ text: 'Quit', style: 'destructive' }),
-      ]),
     );
   });
 
   it('confirming quit calls handleQuit and dispatches navigation action', () => {
-    render(<SessionScreen />);
+    const { getByTestId } = render(<SessionScreen />);
 
     const mockAction = { type: 'GO_BACK' };
-    mockPreventRemoveCallback!({ data: { action: mockAction } });
+    act(() => {
+      mockPreventRemoveCallback!({ data: { action: mockAction } });
+    });
 
-    const alertCall = (Alert.alert as jest.Mock).mock.calls[0];
-    const buttons = alertCall[2];
-    const quitButton = buttons.find(
-      (b: { text: string }) => b.text === 'Quit',
-    );
-    quitButton.onPress();
+    // Tap the "Quit" button in the dialog
+    fireEvent.press(getByTestId('dialog-button-quit'));
 
     expect(mockHandleQuit).toHaveBeenCalled();
     expect(mockDispatch).toHaveBeenCalledWith(mockAction);
@@ -516,6 +535,7 @@ describe('SessionScreen', () => {
           practicedThisWeek: true,
         },
         newBadges: [],
+        totalNewBadges: 0,
       },
     };
 
@@ -559,6 +579,7 @@ describe('SessionScreen', () => {
           practicedThisWeek: true,
         },
         newBadges: [],
+        totalNewBadges: 0,
       },
     };
     mockRouteParams = {
@@ -589,6 +610,7 @@ describe('SessionScreen', () => {
         pendingUpdates: new Map(),
         feedback: null,
         newBadges: [],
+        totalNewBadges: 0,
       },
     };
 

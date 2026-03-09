@@ -1,6 +1,15 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 
+// Mock lottie-react-native
+jest.mock('lottie-react-native', () => {
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: (props: any) => <View testID={props.testID ?? 'lottie-view'} />,
+  };
+});
+
 // Mock react-native-reanimated
 jest.mock('react-native-reanimated', () => {
   const { View } = require('react-native');
@@ -116,7 +125,7 @@ const baseProblem: Problem = {
   operands: [3, 5],
   correctAnswer: 8,
   questionText: '3 + 5 = ?',
-  skillId: 'addition.single',
+  skillId: 'addition.single-digit.no-carry',
   standards: ['1.OA.1'],
   grade: 1,
   baseElo: 800,
@@ -132,7 +141,7 @@ const baseOptions = [
 
 const baseProps = {
   problem: baseProblem,
-  skillId: 'addition.single',
+  skillId: 'addition.single-digit.no-carry',
   options: baseOptions,
   currentIndex: 0,
   onAnswer: jest.fn(),
@@ -149,10 +158,10 @@ describe('CpaSessionContent', () => {
   });
 
   describe('abstract mode', () => {
-    it('renders problem text and standard answer grid (no panel, no diagram)', () => {
+    it('renders problem text, answer grid, and "Need help?" button', () => {
       mockCpaModeResult = { stage: 'abstract', manipulativeType: null };
 
-      const { getByText, queryByTestId } = render(
+      const { getByText, queryByTestId, getByTestId } = render(
         <CpaSessionContent {...baseProps} />,
       );
 
@@ -164,35 +173,41 @@ describe('CpaSessionContent', () => {
       expect(getByText('8')).toBeTruthy();
       expect(getByText('7')).toBeTruthy();
 
-      // No panel, no diagram
+      // No panel, no diagram (until help tapped)
       expect(queryByTestId('manipulative-panel')).toBeNull();
       expect(queryByTestId('pictorial-diagram')).toBeNull();
       expect(queryByTestId('compact-answer-row')).toBeNull();
-      expect(queryByTestId('need-help-button')).toBeNull();
+
+      // "Need help?" is available (resolves via getPrimaryManipulative)
+      expect(getByTestId('need-help-button')).toBeTruthy();
     });
   });
 
   describe('concrete mode', () => {
-    it('renders ManipulativePanel with expanded=true', () => {
+    it('shows "Need help?" and no panel by default', () => {
       mockCpaModeResult = { stage: 'concrete', manipulativeType: 'counters' };
 
-      const { getByTestId } = render(
+      const { getByTestId, queryByTestId } = render(
         <CpaSessionContent {...baseProps} />,
       );
 
-      expect(getByTestId('manipulative-panel')).toBeTruthy();
-      expect(getByTestId('panel-expanded').props.children).toBe('true');
+      // Panel not visible until help requested
+      expect(queryByTestId('manipulative-panel')).toBeNull();
+      expect(getByTestId('need-help-button')).toBeTruthy();
     });
 
-    it('renders CompactAnswerRow when panel is expanded', () => {
+    it('"Need help?" expands ManipulativePanel and shows CompactAnswerRow', () => {
       mockCpaModeResult = { stage: 'concrete', manipulativeType: 'counters' };
 
       const { getByTestId, queryAllByTestId } = render(
         <CpaSessionContent {...baseProps} />,
       );
 
+      fireEvent.press(getByTestId('need-help-button'));
+
+      expect(getByTestId('manipulative-panel')).toBeTruthy();
+      expect(getByTestId('panel-expanded').props.children).toBe('true');
       expect(getByTestId('compact-answer-row')).toBeTruthy();
-      // Standard answer-option-* should not be present
       expect(queryAllByTestId(/^answer-option-/)).toHaveLength(0);
     });
   });
@@ -209,7 +224,7 @@ describe('CpaSessionContent', () => {
       );
 
       expect(getByTestId('pictorial-diagram')).toBeTruthy();
-      expect(getByText('Need help?')).toBeTruthy();
+      expect(getByText('Show me!')).toBeTruthy();
       expect(getByTestId('need-help-button')).toBeTruthy();
     });
 
@@ -256,7 +271,7 @@ describe('CpaSessionContent', () => {
   });
 
   describe('panel expansion switches answer layout', () => {
-    it('abstract mode always shows standard grid', () => {
+    it('shows standard grid before help is tapped', () => {
       mockCpaModeResult = { stage: 'abstract', manipulativeType: null };
 
       const { queryByTestId, getAllByTestId } = render(

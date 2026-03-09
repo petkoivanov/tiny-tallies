@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Flame, Check, Focus, GitBranch, Palette, Settings } from 'lucide-react-native';
+import { Flame, Check, Focus, GitBranch, Palette, Settings, Award } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { AVATARS, DEFAULT_AVATAR_ID, SPECIAL_AVATARS, FRAMES, resolveAvatar } from '@/store/constants/avatars';
@@ -46,12 +46,6 @@ export default function HomeScreen() {
     lastSessionDate !== null &&
     isSameISOWeek(new Date(lastSessionDate), new Date());
 
-  const progressFraction =
-    xpNeededForNextLevel > 0
-      ? xpIntoCurrentLevel / xpNeededForNextLevel
-      : 0;
-  const progressPercent = Math.min(progressFraction * 100, 100);
-
   const avatar = resolveAvatar(avatarId ?? DEFAULT_AVATAR_ID) ?? AVATARS[0];
   const isSpecial = SPECIAL_AVATARS.some((a) => a.id === avatarId);
   const frameColor = frameId
@@ -75,13 +69,15 @@ export default function HomeScreen() {
       flex: 1,
       backgroundColor: colors.background,
     },
-    settingsRow: {
+    toolbar: {
       flexDirection: 'row',
       justifyContent: 'flex-end',
-      paddingHorizontal: spacing.lg,
-      paddingTop: spacing.sm,
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      paddingTop: spacing.xs,
+      gap: spacing.xs,
     },
-    settingsButton: {
+    toolbarButton: {
       padding: spacing.sm,
       minWidth: layout.minTouchTarget,
       minHeight: layout.minTouchTarget,
@@ -103,11 +99,31 @@ export default function HomeScreen() {
       textAlign: 'center',
       marginBottom: spacing.xs,
     },
-    levelBadge: {
+    statsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginTop: spacing.xs,
+      marginBottom: spacing.md,
+    },
+    statsRowLevel: {
       fontFamily: typography.fontFamily.semiBold,
-      fontSize: typography.fontSize.xl,
+      fontSize: typography.fontSize.md,
       color: colors.primaryLight,
-      marginBottom: spacing.xl,
+    },
+    statsRowSeparator: {
+      fontSize: typography.fontSize.md,
+      color: colors.textMuted,
+    },
+    statsRowXp: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.md,
+      color: colors.textSecondary,
+    },
+    statsRowBadgeText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.md,
+      color: colors.textPrimary,
     },
     scrollContent: {
       flexGrow: 1,
@@ -119,27 +135,6 @@ export default function HomeScreen() {
     exploreSection: {
       paddingHorizontal: spacing.lg,
       paddingTop: spacing.lg,
-    },
-    xpContainer: {
-      gap: spacing.sm,
-    },
-    xpText: {
-      fontFamily: typography.fontFamily.medium,
-      fontSize: typography.fontSize.md,
-      color: colors.textSecondary,
-    },
-    xpBarBackground: {
-      width: '100%',
-      height: 12,
-      borderRadius: layout.borderRadius.round,
-      backgroundColor: colors.surface,
-      overflow: 'hidden',
-    },
-    xpBarFill: {
-      height: '100%',
-      borderRadius: layout.borderRadius.round,
-      backgroundColor: colors.primary,
-      minWidth: 0,
     },
     streakContainer: {
       gap: spacing.xs,
@@ -159,51 +154,6 @@ export default function HomeScreen() {
       fontSize: typography.fontSize.sm,
       color: colors.textSecondary,
       marginLeft: 28,
-    },
-    badgeCountButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-      paddingVertical: spacing.sm,
-      paddingHorizontal: spacing.md,
-      backgroundColor: colors.surface,
-      borderRadius: layout.borderRadius.lg,
-    },
-    badgeCountEmoji: {
-      fontSize: 20,
-    },
-    badgeCountText: {
-      fontFamily: typography.fontFamily.semiBold,
-      fontSize: typography.fontSize.md,
-      color: colors.textPrimary,
-    },
-    skillMapButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-      paddingVertical: spacing.sm,
-      paddingHorizontal: spacing.md,
-      backgroundColor: colors.surface,
-      borderRadius: layout.borderRadius.lg,
-    },
-    skillMapButtonText: {
-      fontFamily: typography.fontFamily.semiBold,
-      fontSize: typography.fontSize.md,
-      color: colors.textPrimary,
-    },
-    themeButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-      paddingVertical: spacing.sm,
-      paddingHorizontal: spacing.md,
-      backgroundColor: colors.surface,
-      borderRadius: layout.borderRadius.lg,
-    },
-    themeButtonText: {
-      fontFamily: typography.fontFamily.semiBold,
-      fontSize: typography.fontSize.md,
-      color: colors.textPrimary,
     },
     challengeSection: {
       paddingHorizontal: spacing.lg,
@@ -270,16 +220,43 @@ export default function HomeScreen() {
         { paddingBottom: insets.bottom },
       ]}
     >
-      {/* Settings Button */}
-      <View style={styles.settingsRow}>
+      {/* Top Toolbar */}
+      <View style={styles.toolbar}>
         <Pressable
-          style={styles.settingsButton}
+          style={styles.toolbarButton}
+          onPress={() => navigation.navigate('BadgeCollection')}
+          accessibilityLabel={`${earnedBadgeCount} of ${BADGES.length} badges earned. View all badges.`}
+          accessibilityRole="button"
+          testID="badge-count-button"
+        >
+          <Award size={20} color={colors.textMuted} />
+        </Pressable>
+        <Pressable
+          style={styles.toolbarButton}
+          onPress={() => navigation.navigate('SkillMap')}
+          accessibilityLabel="View skill map"
+          accessibilityRole="button"
+          testID="skill-map-button"
+        >
+          <GitBranch size={20} color={colors.textMuted} />
+        </Pressable>
+        <Pressable
+          style={styles.toolbarButton}
+          onPress={() => navigation.navigate('ThemePicker')}
+          accessibilityLabel="Choose theme"
+          accessibilityRole="button"
+          testID="theme-picker-button"
+        >
+          <Palette size={20} color={colors.textMuted} />
+        </Pressable>
+        <Pressable
+          style={styles.toolbarButton}
           onPress={() => navigation.navigate('ParentalControls' as never)}
           accessibilityLabel="Parental Controls"
           accessibilityRole="button"
           testID="settings-button"
         >
-          <Settings size={22} color={colors.textMuted} />
+          <Settings size={20} color={colors.textMuted} />
         </Pressable>
       </View>
 
@@ -299,32 +276,22 @@ export default function HomeScreen() {
           />
         </View>
         <Text style={styles.greeting}>{greeting}</Text>
-        <Text style={styles.levelBadge}>Level {level}</Text>
+        {/* Level · XP · Badges — compact single row */}
+        <View style={styles.statsRow}>
+          <Text style={styles.statsRowLevel}>Level {level}</Text>
+          <Text style={styles.statsRowSeparator}>{'\u00B7'}</Text>
+          <Text style={styles.statsRowXp}>
+            {xpIntoCurrentLevel}/{xpNeededForNextLevel} XP
+          </Text>
+          <Text style={styles.statsRowSeparator}>|</Text>
+          <Text style={styles.statsRowBadgeText}>
+            {earnedBadgeCount}/{BADGES.length} {'\uD83C\uDFC5'}
+          </Text>
+        </View>
       </View>
 
-      {/* Stats Section */}
+      {/* Streak Display */}
       <View style={styles.statsSection}>
-        {/* XP Progress Bar */}
-        <View style={styles.xpContainer}>
-          <Text style={styles.xpText}>
-            {xpIntoCurrentLevel} / {xpNeededForNextLevel} XP
-          </Text>
-          <View style={styles.xpBarBackground}>
-            <View
-              style={[
-                styles.xpBarFill,
-                {
-                  width:
-                    xpIntoCurrentLevel > 0
-                      ? `${Math.max(progressPercent, 2)}%`
-                      : '0%',
-                },
-              ]}
-            />
-          </View>
-        </View>
-
-        {/* Streak Display */}
         <View style={styles.streakContainer}>
           <View style={styles.streakRow}>
             <Flame
@@ -346,54 +313,6 @@ export default function HomeScreen() {
             </Text>
           )}
         </View>
-
-        {/* Badge Count */}
-        <Pressable
-          onPress={() => navigation.navigate('BadgeCollection')}
-          style={styles.badgeCountButton}
-          accessibilityRole="button"
-          accessibilityLabel={`${earnedBadgeCount} of ${BADGES.length} badges earned. View all badges.`}
-          testID="badge-count-button"
-        >
-          <Text style={styles.badgeCountEmoji}>{'\uD83C\uDFC5'}</Text>
-          <Text style={styles.badgeCountText}>
-            {earnedBadgeCount} / {BADGES.length} Badges
-          </Text>
-        </Pressable>
-
-        {/* Skill Map */}
-        <Pressable
-          onPress={() => navigation.navigate('SkillMap')}
-          style={styles.skillMapButton}
-          accessibilityRole="button"
-          accessibilityLabel="View skill map"
-          testID="skill-map-button"
-        >
-          <GitBranch size={20} color={colors.primaryLight} strokeWidth={2} />
-          <Text style={styles.skillMapButtonText}>Skill Map</Text>
-        </Pressable>
-
-        {/* Theme Picker */}
-        <Pressable
-          onPress={() => navigation.navigate('ThemePicker')}
-          style={styles.themeButton}
-          accessibilityRole="button"
-          accessibilityLabel="Choose theme"
-          testID="theme-picker-button"
-        >
-          <Palette size={20} color={colors.primaryLight} strokeWidth={2} />
-          <Text style={styles.themeButtonText}>Themes</Text>
-        </Pressable>
-      </View>
-
-      {/* Explore Section */}
-      <View style={styles.exploreSection}>
-        <ExploreGrid />
-      </View>
-
-      {/* Daily Challenge */}
-      <View style={styles.challengeSection}>
-        <DailyChallengeCard />
       </View>
 
       {/* Start Practice Button */}
@@ -441,6 +360,16 @@ export default function HomeScreen() {
             </Text>
           </Pressable>
         )}
+      </View>
+
+      {/* Daily Challenge */}
+      <View style={styles.challengeSection}>
+        <DailyChallengeCard />
+      </View>
+
+      {/* Explore Section */}
+      <View style={styles.exploreSection}>
+        <ExploreGrid />
       </View>
     </ScrollView>
 

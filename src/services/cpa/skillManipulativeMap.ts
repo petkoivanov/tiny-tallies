@@ -4,8 +4,8 @@ import type { ManipulativeType, SkillManipulativeMapping } from './cpaTypes';
  * Static mapping of all 14 skills to their ranked manipulative preferences.
  *
  * Mapping pattern (locked per user decisions and Common Core pedagogy):
- * - single-digit: counters, ten_frame, bar_model
- * - within-20: ten_frame, number_line, bar_model
+ * - single-digit: counters, bar_model
+ * - within-20: number_line, bar_model
  * - two-digit: base_ten_blocks, number_line, bar_model
  * - three-digit: base_ten_blocks, bar_model
  *
@@ -17,15 +17,15 @@ export const SKILL_MANIPULATIVE_MAP: readonly SkillManipulativeMapping[] = [
   // Addition skills
   {
     skillId: 'addition.single-digit.no-carry',
-    manipulatives: ['counters', 'ten_frame', 'bar_model'],
+    manipulatives: ['counters', 'bar_model'],
   },
   {
     skillId: 'addition.within-20.no-carry',
-    manipulatives: ['ten_frame', 'number_line', 'bar_model'],
+    manipulatives: ['number_line', 'bar_model'],
   },
   {
     skillId: 'addition.within-20.with-carry',
-    manipulatives: ['ten_frame', 'number_line', 'bar_model'],
+    manipulatives: ['number_line', 'bar_model'],
   },
   {
     skillId: 'addition.two-digit.no-carry',
@@ -47,15 +47,15 @@ export const SKILL_MANIPULATIVE_MAP: readonly SkillManipulativeMapping[] = [
   // Subtraction skills (mirrors addition)
   {
     skillId: 'subtraction.single-digit.no-borrow',
-    manipulatives: ['counters', 'ten_frame', 'bar_model'],
+    manipulatives: ['counters', 'bar_model'],
   },
   {
     skillId: 'subtraction.within-20.no-borrow',
-    manipulatives: ['ten_frame', 'number_line', 'bar_model'],
+    manipulatives: ['number_line', 'bar_model'],
   },
   {
     skillId: 'subtraction.within-20.with-borrow',
-    manipulatives: ['ten_frame', 'number_line', 'bar_model'],
+    manipulatives: ['number_line', 'bar_model'],
   },
   {
     skillId: 'subtraction.two-digit.no-borrow',

@@ -17,14 +17,13 @@ import {
   COUNTER_BORDER_COLORS,
   COUNTER_SIZE,
   STAGGER_OFFSET,
-  GRID_COUNTER_SPACING,
   type CounterState,
   type CounterColor,
   type CountersProps,
   type CountersGridState,
 } from './CountersTypes';
-import { CountersGrid, computeGridPositions } from './CountersGrid';
-import { DualCountDisplay, DimensionStepper } from './CountersParts';
+import { CountersGrid } from './CountersGrid';
+import { DualCountDisplay, DimensionStepper, buildGridCounters, buildScaffoldedCounters } from './CountersParts';
 
 // ---- Individual draggable counter ----
 
@@ -109,40 +108,6 @@ function DraggableCounter({ counter, onFlip, onMove }: DraggableCounterProps) {
   );
 }
 
-// ---- Helper: build grid-mode counters ----
-
-function buildGridCounters(
-  rows: number,
-  cols: number,
-  existing: CounterState[],
-  nextIdRef: React.MutableRefObject<number>,
-): CounterState[] {
-  const cellSize = COUNTER_SIZE + GRID_COUNTER_SPACING;
-  const positions = computeGridPositions({
-    rows,
-    cols,
-    cellSize,
-    originX: spacing.md,
-    originY: spacing.md,
-  });
-
-  const total = rows * cols;
-  const result: CounterState[] = [];
-
-  for (let i = 0; i < total; i++) {
-    if (i < existing.length) {
-      // Reposition existing counter
-      result.push({ ...existing[i], x: positions[i].x, y: positions[i].y });
-    } else {
-      // Create new counter to fill grid
-      const id = `c-${nextIdRef.current++}`;
-      result.push({ id, color: 'red' as CounterColor, x: positions[i].x, y: positions[i].y });
-    }
-  }
-
-  return result;
-}
-
 // ---- Main Counters component ----
 
 /**
@@ -158,9 +123,12 @@ export function Counters({
   guidedTargetId,
   gridRows,
   gridCols,
+  problemOperands,
+  problemOperation,
   testID,
 }: CountersProps) {
   const { colors } = useTheme();
+  const isScaffolded = problemOperands != null && problemOperation != null;
   const dynamicStyles = React.useMemo(() => StyleSheet.create({
     tray: {
       height: 72,
@@ -190,6 +158,21 @@ export function Counters({
       borderTopWidth: 1,
       borderTopColor: colors.surfaceLight,
     },
+    promptBar: {
+      height: 48,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderTopWidth: 1,
+      borderTopColor: colors.surfaceLight,
+      paddingHorizontal: spacing.md,
+      gap: spacing.sm,
+    },
+    promptText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.primaryLight,
+    },
   }), [colors]);
 
   const { state: counters, canUndo, pushState, undo, reset } = useActionHistory<CounterState[]>([]);
@@ -202,9 +185,20 @@ export function Counters({
     cols: gridCols ?? 4,
   }));
 
-  // Auto-configure grid mode from session props on mount
+  // Auto-configure from session props on mount
   useEffect(() => {
-    if (gridRows != null && gridCols != null) {
+    if (isScaffolded && problemOperands && problemOperation) {
+      // Scaffolded mode: pre-seed first operand for addition, or all for subtraction
+      nextId.current = 0;
+      if (problemOperation === 'addition') {
+        const seeded = buildScaffoldedCounters(problemOperands[0], 'red', nextId);
+        pushState(seeded);
+      } else {
+        // Subtraction: show all counters (operand[0]), child will remove operand[1]
+        const seeded = buildScaffoldedCounters(problemOperands[0], 'red', nextId);
+        pushState(seeded);
+      }
+    } else if (gridRows != null && gridCols != null) {
       setGridState({ mode: 'grid', rows: gridRows, cols: gridCols });
       const gridCounters = buildGridCounters(gridRows, gridCols, [], nextId);
       pushState(gridCounters);
@@ -217,6 +211,15 @@ export function Counters({
   const atCap = totalCount >= maxCounters;
   const isGridMode = gridState.mode === 'grid';
 
+  // Scaffolded mode: count how many the child has added/removed
+  const scaffoldedTarget = isScaffolded && problemOperands ? problemOperands[1] : 0;
+  const scaffoldedProgress = isScaffolded && problemOperands
+    ? problemOperation === 'addition'
+      ? yellowCount          // child adds yellow counters
+      : problemOperands[0] - totalCount  // child removes red counters
+    : 0;
+  const scaffoldedDone = scaffoldedProgress >= scaffoldedTarget;
+
   const handleAdd = useCallback(() => {
     if (atCap) return;
     const id = `c-${nextId.current++}`;
@@ -225,10 +228,17 @@ export function Counters({
     const row = Math.floor(totalCount / 5) % 4;
     const x = spacing.md + col * STAGGER_OFFSET;
     const y = spacing.md + row * STAGGER_OFFSET;
-    pushState([...counters, { id, color: 'red' as CounterColor, x, y }]);
-  }, [atCap, totalCount, counters, pushState]);
+    const color: CounterColor = isScaffolded && problemOperation === 'addition' ? 'yellow' : 'red';
+    pushState([...counters, { id, color, x, y }]);
+  }, [atCap, totalCount, counters, pushState, isScaffolded, problemOperation]);
 
   const handleFlip = useCallback((id: string) => {
+    // Scaffolded subtraction: tap removes the counter
+    if (isScaffolded && problemOperation === 'subtraction') {
+      triggerSnapHaptic();
+      pushState(counters.filter((c) => c.id !== id));
+      return;
+    }
     triggerSnapHaptic();
     pushState(
       counters.map((c) =>
@@ -237,7 +247,7 @@ export function Counters({
           : c,
       ),
     );
-  }, [counters, pushState]);
+  }, [counters, pushState, isScaffolded, problemOperation]);
 
   const handleMove = useCallback((id: string, x: number, y: number) => {
     pushState(
@@ -343,7 +353,7 @@ export function Counters({
           )}
         </View>
       ) : (
-        <>
+        <View style={styles.freeLayout}>
           {/* Free placement area */}
           <View style={styles.workspace}>
             {counters.map((counter) => (
@@ -360,19 +370,19 @@ export function Counters({
             ))}
           </View>
 
-          {/* Tray -- counter source at bottom */}
-          <View style={dynamicStyles.tray}>
-            {atCap ? (
-              <Text style={dynamicStyles.nudgeText} testID="cap-nudge">
-                Try grouping your counters!
-              </Text>
-            ) : (
-              <GuidedHighlight active={guidedTargetId === 'add-counter-button'}>
+          {/* Tray / Scaffolded prompt */}
+          {isScaffolded && problemOperation === 'addition' ? (
+            <View style={dynamicStyles.promptBar} testID="scaffolded-prompt">
+              {scaffoldedDone ? (
+                <Text style={dynamicStyles.promptText} testID="scaffolded-done">
+                  Now count them all!
+                </Text>
+              ) : (
                 <Pressable
                   onPress={handleAdd}
-                  accessibilityLabel="Add counter"
+                  accessibilityLabel={`Add ${scaffoldedTarget - scaffoldedProgress} more counters`}
                   accessibilityRole="button"
-                  testID="add-counter-button"
+                  testID="scaffolded-add-button"
                   style={styles.addButton}
                 >
                   <View
@@ -380,26 +390,75 @@ export function Counters({
                       styles.counter,
                       styles.trayCounter,
                       {
-                        backgroundColor: COUNTER_COLORS.red,
-                        borderColor: COUNTER_BORDER_COLORS.red,
+                        backgroundColor: COUNTER_COLORS.yellow,
+                        borderColor: COUNTER_BORDER_COLORS.yellow,
                       },
                     ]}
                   />
-                  <Text style={dynamicStyles.addLabel}>+ Add</Text>
+                  <Text style={dynamicStyles.promptText}>
+                    + Add {scaffoldedTarget - scaffoldedProgress} more!
+                  </Text>
                 </Pressable>
-              </GuidedHighlight>
-            )}
-          </View>
-        </>
+              )}
+            </View>
+          ) : isScaffolded && problemOperation === 'subtraction' ? (
+            <View style={dynamicStyles.promptBar} testID="scaffolded-prompt">
+              {scaffoldedDone ? (
+                <Text style={dynamicStyles.promptText} testID="scaffolded-done">
+                  Now count what's left!
+                </Text>
+              ) : (
+                <Text style={dynamicStyles.promptText}>
+                  Tap {scaffoldedTarget - scaffoldedProgress} to take away!
+                </Text>
+              )}
+            </View>
+          ) : (
+            <View style={dynamicStyles.tray}>
+              {atCap ? (
+                <Text style={dynamicStyles.nudgeText} testID="cap-nudge">
+                  Try grouping your counters!
+                </Text>
+              ) : (
+                <GuidedHighlight active={guidedTargetId === 'add-counter-button'}>
+                  <Pressable
+                    onPress={handleAdd}
+                    accessibilityLabel="Add counter"
+                    accessibilityRole="button"
+                    testID="add-counter-button"
+                    style={styles.addButton}
+                  >
+                    <View
+                      style={[
+                        styles.counter,
+                        styles.trayCounter,
+                        {
+                          backgroundColor: COUNTER_COLORS.red,
+                          borderColor: COUNTER_BORDER_COLORS.red,
+                        },
+                      ]}
+                    />
+                    <Text style={dynamicStyles.addLabel}>+ Add</Text>
+                  </Pressable>
+                </GuidedHighlight>
+              )}
+            </View>
+          )}
+        </View>
       )}
     </ManipulativeShell>
   );
 }
 
 const styles = StyleSheet.create({
+  freeLayout: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
   workspace: {
     flex: 1,
     position: 'relative',
+    overflow: 'hidden',
   },
   gridWorkspace: {
     flex: 1,

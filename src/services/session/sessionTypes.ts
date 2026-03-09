@@ -99,6 +99,8 @@ export interface SessionResult {
   pendingUpdates: Map<string, PendingSkillUpdate>;
   feedback: SessionFeedback | null;
   newBadges: string[];
+  /** Total badges earned this session (newBadges may be capped for display) */
+  totalNewBadges: number;
   /** Challenge-specific result fields */
   isChallenge?: boolean;
   challengeBonusXp?: number;

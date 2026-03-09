@@ -9,7 +9,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -31,6 +30,7 @@ import {
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { PinGate } from '@/components/profile/PinGate';
+import { AppDialog } from '@/components/AppDialog';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import {
@@ -64,6 +64,10 @@ export default function ParentalControlsScreen() {
   const [appleAvailable, setAppleAvailable] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Dialog state for error messages and confirmations
+  const [errorDialog, setErrorDialog] = useState<{ title: string; message: string } | null>(null);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+
   useEffect(() => {
     getSentryOptOut().then(setSentryOptedOut);
     isAppleSignInAvailable().then(setAppleAvailable);
@@ -90,7 +94,7 @@ export default function ParentalControlsScreen() {
         displayName: verified.displayName,
       });
     } catch (e) {
-      Alert.alert('Sign-in failed', (e as Error).message);
+      setErrorDialog({ title: 'Sign-in failed', message: (e as Error).message });
     } finally {
       setLoading(false);
     }
@@ -108,7 +112,7 @@ export default function ParentalControlsScreen() {
         displayName: verified.displayName,
       });
     } catch (e) {
-      Alert.alert('Sign-in failed', (e as Error).message);
+      setErrorDialog({ title: 'Sign-in failed', message: (e as Error).message });
     } finally {
       setLoading(false);
     }
@@ -119,48 +123,40 @@ export default function ParentalControlsScreen() {
     clearAuth();
   }, [clearAuth]);
 
-  const handleDeleteAccount = useCallback(async () => {
-    Alert.alert(
-      'Delete Account',
-      'This will permanently delete all your data from our servers and sign you out. This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            // Remote data deletion
-            if (userId) {
-              try {
-                await deleteUserData(userId);
-              } catch {
-                // Continue with local cleanup even if remote fails
-              }
-            }
-            // Sign out from provider
-            await authSignOut();
-            // Clear local data: AsyncStorage (store), SecureStore (PIN, tokens, preferences)
-            await AsyncStorage.clear();
-            for (const key of [
-              'parental-pin',
-              'auth-id-token',
-              'auth-provider',
-              'privacy-acknowledged',
-              'sentry-opt-out',
-            ]) {
-              await SecureStore.deleteItemAsync(key).catch(() => {});
-            }
-            clearAuth();
-            // Reset navigation to fresh setup
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'ProfileSetup' as never }],
-            });
-          },
-        },
-      ],
-    );
-  }, [userId, clearAuth]);
+  const handleDeleteAccount = useCallback(() => {
+    setDeleteDialogVisible(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    setDeleteDialogVisible(false);
+    // Remote data deletion
+    if (userId) {
+      try {
+        await deleteUserData(userId);
+      } catch {
+        // Continue with local cleanup even if remote fails
+      }
+    }
+    // Sign out from provider
+    await authSignOut();
+    // Clear local data: AsyncStorage (store), SecureStore (PIN, tokens, preferences)
+    await AsyncStorage.clear();
+    for (const key of [
+      'parental-pin',
+      'auth-id-token',
+      'auth-provider',
+      'privacy-acknowledged',
+      'sentry-opt-out',
+    ]) {
+      await SecureStore.deleteItemAsync(key).catch(() => {});
+    }
+    clearAuth();
+    // Reset navigation to fresh setup
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'ProfileSetup' as never }],
+    });
+  }, [userId, clearAuth, navigation]);
 
   const styles = useMemo(
     () =>
@@ -423,6 +419,27 @@ export default function ParentalControlsScreen() {
           </View>
         </ScrollView>
       </PinGate>
+
+      {/* Error dialog (sign-in failures) */}
+      <AppDialog
+        visible={errorDialog !== null}
+        title={errorDialog?.title ?? ''}
+        message={errorDialog?.message}
+        buttons={[{ text: 'OK' }]}
+        onDismiss={() => setErrorDialog(null)}
+      />
+
+      {/* Delete account confirmation */}
+      <AppDialog
+        visible={deleteDialogVisible}
+        title="Delete Account"
+        message="This will permanently delete all your data from our servers and sign you out. This cannot be undone."
+        buttons={[
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: handleDeleteConfirm },
+        ]}
+        onDismiss={() => setDeleteDialogVisible(false)}
+      />
     </View>
   );
 }

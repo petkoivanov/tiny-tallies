@@ -9,8 +9,8 @@ import { Blocks, ChevronUp, ChevronDown } from 'lucide-react-native';
 
 import { useTheme, spacing, typography, layout } from '@/theme';
 
-/** Panel height: ~50% of screen for generous manipulative workspace. */
-const PANEL_HEIGHT = Dimensions.get('window').height * 0.5;
+/** Panel height: ~38% of screen for balanced manipulative workspace. */
+const PANEL_HEIGHT = Dimensions.get('window').height * 0.38;
 
 /** Spring config for panel slide animation (~300ms perceptual spring). */
 const PANEL_SPRING_CONFIG = {
@@ -66,6 +66,7 @@ export function ManipulativePanel({
   const styles = useMemo(() => StyleSheet.create({
     container: {
       overflow: 'hidden',
+      alignSelf: 'stretch',
     },
     toggleButton: {
       flexDirection: 'row',

@@ -9,6 +9,7 @@ function createEmptySnapshot(): BadgeEvaluationSnapshot {
     sessionsCompleted: 0,
     misconceptions: {},
     challengesCompleted: 0,
+    childGrade: 1,
   };
 }
 
