@@ -16,6 +16,9 @@ export function migrateStore(
 ): Record<string, unknown> {
   const state = (persistedState ?? {}) as Record<string, unknown>;
 
+  // Fast path: skip all checks when store is already current
+  if (version >= 17) return state;
+
   if (version < 2) {
     // v1 -> v2: First persistence enablement.
     // Ensure all persisted fields exist with sensible defaults.

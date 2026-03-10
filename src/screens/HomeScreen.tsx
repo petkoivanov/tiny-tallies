@@ -26,27 +26,27 @@ export default function HomeScreen() {
   const avatarId = useAppStore((state) => state.avatarId);
   const isSessionActive = useAppStore((state) => state.isSessionActive);
   const xp = useAppStore((state) => state.xp);
-  const skillStates = useAppStore((state) => state.skillStates);
 
-  // Level derived from average Elo (matches ParentReportsScreen)
-  const level = useMemo(() => {
-    const practiced = Object.values(skillStates).filter((s) => s.attempts > 0);
+  // Derived selector: only re-renders when computed level changes, not on every skill update
+  const level = useAppStore((state) => {
+    const practiced = Object.values(state.skillStates).filter((s) => s.attempts > 0);
     if (practiced.length === 0) return 1;
     const avgElo = practiced.reduce((acc, s) => acc + s.eloRating, 0) / practiced.length;
     return eloToLevel(avgElo);
-  }, [skillStates]);
+  });
   const weeklyStreak = useAppStore((state) => state.weeklyStreak);
   const lastSessionDate = useAppStore((state) => state.lastSessionDate);
-  const misconceptions = useAppStore((state) => state.misconceptions);
-  const earnedBadges = useAppStore((state) => state.earnedBadges);
   const frameId = useAppStore((state) => state.frameId);
   const placementComplete = useAppStore((state) => state.placementComplete);
+  const earnedBadgeCount = useAppStore((state) => Object.keys(state.earnedBadges).length);
+
+  // Derived selectors for misconception-based remediation
+  const confirmedMisconceptions = useAppStore((state) =>
+    getConfirmedMisconceptions(state.misconceptions),
+  );
 
   const { suggestReassessment, decayedSkillCount } = useAbsenceCheck();
 
-  const earnedBadgeCount = Object.keys(earnedBadges).length;
-
-  const confirmedMisconceptions = getConfirmedMisconceptions(misconceptions);
   const showRemediation = confirmedMisconceptions.length >= 2;
   const remediationSkillIds = [
     ...new Set(confirmedMisconceptions.map((r) => r.skillId)),
