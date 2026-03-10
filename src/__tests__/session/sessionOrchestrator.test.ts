@@ -20,26 +20,24 @@ const bkt = { masteryProbability: 0.1, consecutiveWrong: 0, masteryLocked: false
 
 describe('sessionOrchestrator', () => {
   describe('getSessionPhase', () => {
-    it('returns warmup for indices 0-2', () => {
+    it('returns warmup for indices 0-1 (default 2+8+2)', () => {
       expect(getSessionPhase(0)).toBe('warmup');
       expect(getSessionPhase(1)).toBe('warmup');
-      expect(getSessionPhase(2)).toBe('warmup');
     });
 
-    it('returns practice for indices 3-11', () => {
-      expect(getSessionPhase(3)).toBe('practice');
-      expect(getSessionPhase(7)).toBe('practice');
-      expect(getSessionPhase(11)).toBe('practice');
+    it('returns practice for indices 2-9', () => {
+      expect(getSessionPhase(2)).toBe('practice');
+      expect(getSessionPhase(5)).toBe('practice');
+      expect(getSessionPhase(9)).toBe('practice');
     });
 
-    it('returns cooldown for indices 12-14', () => {
-      expect(getSessionPhase(12)).toBe('cooldown');
-      expect(getSessionPhase(13)).toBe('cooldown');
-      expect(getSessionPhase(14)).toBe('cooldown');
+    it('returns cooldown for indices 10-11', () => {
+      expect(getSessionPhase(10)).toBe('cooldown');
+      expect(getSessionPhase(11)).toBe('cooldown');
     });
 
-    it('returns complete for index 15 and beyond', () => {
-      expect(getSessionPhase(15)).toBe('complete');
+    it('returns complete for index 12 and beyond', () => {
+      expect(getSessionPhase(12)).toBe('complete');
       expect(getSessionPhase(100)).toBe('complete');
     });
 
@@ -125,21 +123,21 @@ describe('sessionOrchestrator', () => {
   });
 
   describe('generateSessionQueue', () => {
-    it('returns exactly 15 problems', () => {
+    it('returns exactly 12 problems with default config', () => {
       const queue = generateSessionQueue({}, DEFAULT_SESSION_CONFIG, 42);
-      expect(queue).toHaveLength(15);
+      expect(queue).toHaveLength(12);
     });
 
-    it('assigns correct phases: 3 warmup, 9 practice, 3 cooldown', () => {
+    it('assigns correct phases: 2 warmup, 8 practice, 2 cooldown', () => {
       const queue = generateSessionQueue({}, DEFAULT_SESSION_CONFIG, 42);
 
       const warmup = queue.filter((p) => p.phase === 'warmup');
       const practice = queue.filter((p) => p.phase === 'practice');
       const cooldown = queue.filter((p) => p.phase === 'cooldown');
 
-      expect(warmup).toHaveLength(3);
-      expect(practice).toHaveLength(9);
-      expect(cooldown).toHaveLength(3);
+      expect(warmup).toHaveLength(2);
+      expect(practice).toHaveLength(8);
+      expect(cooldown).toHaveLength(2);
     });
 
     it('warmup problems use easiest templates for their skill', () => {
@@ -221,7 +219,7 @@ describe('sessionOrchestrator', () => {
     it('produces valid queue for empty skillStates (new user)', () => {
       const queue = generateSessionQueue({}, DEFAULT_SESSION_CONFIG, 99);
 
-      expect(queue).toHaveLength(15);
+      expect(queue).toHaveLength(12);
       for (const item of queue) {
         expect(item.problem).toBeDefined();
         expect(item.presentation).toBeDefined();
@@ -506,7 +504,7 @@ describe('sessionOrchestrator', () => {
     it('empty skillStates (new user) still produces 15 valid problems', () => {
       const queue = generateSessionQueue({}, DEFAULT_SESSION_CONFIG, 99);
 
-      expect(queue).toHaveLength(15);
+      expect(queue).toHaveLength(12);
       for (const item of queue) {
         expect(item.problem).toBeDefined();
         expect(item.presentation).toBeDefined();
@@ -517,7 +515,7 @@ describe('sessionOrchestrator', () => {
       }
     });
 
-    it('all skills mastered falls back gracefully to 15 problems', () => {
+    it('all skills mastered falls back gracefully', () => {
       // Every skill mastered with review far in the future
       const skillStates: Record<string, SkillState> = {
         'addition.single-digit.no-carry': makeSkill({
@@ -595,7 +593,7 @@ describe('sessionOrchestrator', () => {
       const queue = generateSessionQueue(skillStates, DEFAULT_SESSION_CONFIG, 42);
 
       // Should still produce valid 15-problem queue via fallback cascade
-      expect(queue).toHaveLength(15);
+      expect(queue).toHaveLength(12);
       for (const item of queue) {
         expect(item.problem).toBeDefined();
         expect(item.presentation).toBeDefined();
@@ -656,8 +654,8 @@ describe('sessionOrchestrator', () => {
       const queue1 = generateSessionQueue({}, DEFAULT_SESSION_CONFIG, 12345, 7);
       const queue2 = generateSessionQueue({}, DEFAULT_SESSION_CONFIG, 12345, 7);
 
-      expect(queue1).toHaveLength(15);
-      expect(queue2).toHaveLength(15);
+      expect(queue1).toHaveLength(12);
+      expect(queue2).toHaveLength(12);
 
       // Deterministic: same seed + same childAge = same queue
       for (let i = 0; i < queue1.length; i++) {
@@ -701,7 +699,7 @@ describe('sessionOrchestrator', () => {
         skillStates, DEFAULT_SESSION_CONFIG, 42, 8, confirmed,
       );
 
-      expect(queue).toHaveLength(15);
+      expect(queue).toHaveLength(12);
       // Practice phase should contain at least one problem for the confirmed skill
       const practice = queue.filter((p) => p.phase === 'practice');
       const hasConfirmed = practice.some(
@@ -714,8 +712,8 @@ describe('sessionOrchestrator', () => {
       const q1 = generateSessionQueue({}, DEFAULT_SESSION_CONFIG, 42, 8);
       const q2 = generateSessionQueue({}, DEFAULT_SESSION_CONFIG, 42, 8, []);
 
-      expect(q1).toHaveLength(15);
-      expect(q2).toHaveLength(15);
+      expect(q1).toHaveLength(12);
+      expect(q2).toHaveLength(12);
 
       // Same seed + no confirmed misconceptions = identical queues
       for (let i = 0; i < q1.length; i++) {

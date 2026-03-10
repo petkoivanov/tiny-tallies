@@ -12,12 +12,41 @@ export interface SessionConfig {
   readonly cooldownCount: number;
 }
 
-/** Default session: 3 warmup + 9 practice + 3 cooldown = 15 total */
+/** Default session: 2 warmup + 8 practice + 2 cooldown = 12 total */
 export const DEFAULT_SESSION_CONFIG: Readonly<SessionConfig> = {
-  warmupCount: 3,
-  practiceCount: 9,
-  cooldownCount: 3,
+  warmupCount: 2,
+  practiceCount: 8,
+  cooldownCount: 2,
 };
+
+/**
+ * Compute session config scaled by average Elo.
+ *
+ * Beginners (Elo ~1000) get shorter sessions (10 problems).
+ * Advancing students (Elo ~1200+) get the full 15.
+ *
+ * warmup/cooldown: 1-3
+ * practice: 6-9
+ * total: 8-15
+ */
+export function getAdaptiveSessionConfig(
+  skillStates: Record<string, { eloRating: number }>,
+): SessionConfig {
+  const elos = Object.values(skillStates).map((s) => s.eloRating);
+  const avgElo = elos.length > 0
+    ? elos.reduce((sum, e) => sum + e, 0) / elos.length
+    : 1000;
+
+  // Map Elo 900-1300 to a 0-1 progress scale, clamped
+  const progress = Math.min(1, Math.max(0, (avgElo - 900) / 400));
+
+  // warmup/cooldown: 1 at low Elo, 3 at high Elo
+  const bookend = Math.round(1 + progress * 2) as 1 | 2 | 3;
+  // practice: 6 at low Elo, 9 at high Elo
+  const practice = Math.round(6 + progress * 3);
+
+  return { warmupCount: bookend, practiceCount: practice, cooldownCount: bookend };
+}
 
 /** Session mode: standard practice, focused remediation, or daily challenge */
 export type SessionMode = 'standard' | 'remediation' | 'challenge';

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -161,11 +161,18 @@ export function CpaSessionContent({
   const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
       alignItems: 'center',
       paddingHorizontal: spacing.lg,
     },
     topSpacer: {
       flex: 1,
+      minHeight: spacing.lg,
+    },
+    bottomSpacer: {
+      height: spacing.xl,
     },
     problemText: {
       fontFamily: typography.fontFamily.bold,
@@ -173,6 +180,9 @@ export function CpaSessionContent({
       color: colors.textPrimary,
       marginBottom: spacing.xl,
       textAlign: 'center',
+    },
+    problemTextSmall: {
+      fontSize: typography.fontSize.xxl,
     },
     optionsGrid: {
       flexDirection: 'row',
@@ -369,44 +379,52 @@ export function CpaSessionContent({
     );
   };
 
+  const isLongQuestion = problem.questionText.length > 30;
+
   return (
     <View style={styles.container}>
-      {/* Top spacer — centers problem + answers */}
-      <View style={styles.topSpacer} />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
+        {/* Top spacer — centers problem + answers when content fits */}
+        <View style={styles.topSpacer} />
 
-      {/* Problem Text */}
-      <Text style={styles.problemText}>
-        {problem.questionText}
-      </Text>
+        {/* Problem Text */}
+        <Text style={[styles.problemText, isLongQuestion && styles.problemTextSmall]}>
+          {problem.questionText}
+        </Text>
 
-      {/* Pictorial Mode: inline diagram */}
-      {stage === 'pictorial' && scaffoldManipulative && (
-        <PictorialDiagram
-          type={scaffoldManipulative}
-          problem={problem}
-          testID="pictorial-diagram"
-        />
-      )}
+        {/* Pictorial Mode: inline diagram */}
+        {stage === 'pictorial' && scaffoldManipulative && (
+          <PictorialDiagram
+            type={scaffoldManipulative}
+            problem={problem}
+            testID="pictorial-diagram"
+          />
+        )}
 
-      {/* Answer Buttons */}
-      {renderAnswers()}
+        {/* Answer Buttons */}
+        {renderAnswers()}
 
-      {/* "Show me!" button — all modes, before panel is activated */}
-      {!needHelpActive && scaffoldManipulative && (
-        <Pressable
-          onPress={handleNeedHelp}
-          style={styles.needHelpButton}
-          accessibilityRole="button"
-          accessibilityLabel="Show me how"
-          testID="need-help-button"
-        >
-          <GlowingLightbulb />
-          <Text style={styles.needHelpText}>Show me!</Text>
-        </Pressable>
-      )}
+        {/* "Show me!" button — all modes, before panel is activated */}
+        {!needHelpActive && scaffoldManipulative && (
+          <Pressable
+            onPress={handleNeedHelp}
+            style={styles.needHelpButton}
+            accessibilityRole="button"
+            accessibilityLabel="Show me how"
+            testID="need-help-button"
+          >
+            <GlowingLightbulb />
+            <Text style={styles.needHelpText}>Show me!</Text>
+          </Pressable>
+        )}
 
-      {/* Bottom spacer — pushes help panel to bottom */}
-      <View style={styles.topSpacer} />
+        {/* Bottom spacer */}
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
 
       {/* Guided hint text (above panel, no overlap with answers) */}
       {guidedHintText && showPanel && (

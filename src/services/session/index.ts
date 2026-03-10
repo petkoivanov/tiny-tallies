@@ -11,7 +11,7 @@ export type {
   PracticeSlotCounts,
 } from './sessionTypes';
 
-export { DEFAULT_SESSION_CONFIG, REMEDIATION_SESSION_CONFIG, CHALLENGE_SESSION_CONFIG } from './sessionTypes';
+export { DEFAULT_SESSION_CONFIG, REMEDIATION_SESSION_CONFIG, CHALLENGE_SESSION_CONFIG, getAdaptiveSessionConfig } from './sessionTypes';
 
 // Orchestrator
 export {

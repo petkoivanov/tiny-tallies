@@ -23,7 +23,8 @@ describe('useSession', () => {
 
     expect(result.current.currentProblem).not.toBeNull();
     expect(result.current.currentIndex).toBe(0);
-    expect(result.current.totalProblems).toBe(15);
+    // Adaptive: new user (avgElo=1000) → 2+7+2=11
+    expect(result.current.totalProblems).toBe(11);
     expect(result.current.sessionPhase).toBe('warmup');
     expect(result.current.isComplete).toBe(false);
     expect(result.current.score).toBe(0);
@@ -136,8 +137,9 @@ describe('useSession', () => {
     // Initially warmup (index 0)
     expect(result.current.sessionPhase).toBe('warmup');
 
-    // Answer first 3 (warmup) problems
-    for (let i = 0; i < 3; i++) {
+    // Answer warmup problems (adaptive: 2 for new user)
+    const warmupCount = 2; // new user adaptive config
+    for (let i = 0; i < warmupCount; i++) {
       const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
@@ -147,12 +149,13 @@ describe('useSession', () => {
       });
     }
 
-    // Now at index 3 -- should be practice
-    expect(result.current.currentIndex).toBe(3);
+    // After warmup -- should be practice
+    expect(result.current.currentIndex).toBe(warmupCount);
     expect(result.current.sessionPhase).toBe('practice');
 
-    // Answer next 9 (practice) problems
-    for (let i = 0; i < 9; i++) {
+    // Answer practice problems (adaptive: 7 for new user)
+    const practiceCount = 7;
+    for (let i = 0; i < practiceCount; i++) {
       const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
@@ -162,16 +165,16 @@ describe('useSession', () => {
       });
     }
 
-    // Now at index 12 -- should be cooldown
-    expect(result.current.currentIndex).toBe(12);
+    // After practice -- should be cooldown
+    expect(result.current.currentIndex).toBe(warmupCount + practiceCount);
     expect(result.current.sessionPhase).toBe('cooldown');
   });
 
-  it('session completes after all 15 problems', () => {
+  it('session completes after all problems', () => {
     const { result } = renderHook(() => useSession());
 
-    // Answer all 15 problems correctly
-    for (let i = 0; i < 15; i++) {
+    // Answer all problems correctly
+    for (let i = 0; i < result.current.totalProblems; i++) {
       const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
@@ -183,18 +186,19 @@ describe('useSession', () => {
 
     expect(result.current.isComplete).toBe(true);
     expect(result.current.currentProblem).toBeNull();
-    expect(result.current.score).toBe(15);
+    const total = result.current.totalProblems;
+    expect(result.current.score).toBe(total);
     expect(result.current.sessionResult).not.toBeNull();
-    expect(result.current.sessionResult!.score).toBe(15);
-    expect(result.current.sessionResult!.total).toBe(15);
+    expect(result.current.sessionResult!.score).toBe(total);
+    expect(result.current.sessionResult!.total).toBe(total);
     expect(result.current.sessionResult!.xpEarned).toBeGreaterThan(0);
   });
 
   it('completion commits Elo updates to store', () => {
     const { result } = renderHook(() => useSession());
 
-    // Answer all 15 problems correctly
-    for (let i = 0; i < 15; i++) {
+    // Answer all problems correctly
+    for (let i = 0; i < result.current.totalProblems; i++) {
       const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
@@ -222,7 +226,7 @@ describe('useSession', () => {
     const xpBefore = useAppStore.getState().xp;
 
     // Answer all 15 correctly
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < result.current.totalProblems; i++) {
       const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
@@ -339,8 +343,8 @@ describe('useSession', () => {
   it('correct answer advances Leitner box in committed store state', () => {
     const { result } = renderHook(() => useSession());
 
-    // Answer all 15 problems correctly
-    for (let i = 0; i < 15; i++) {
+    // Answer all problems correctly
+    for (let i = 0; i < result.current.totalProblems; i++) {
       const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
@@ -383,7 +387,7 @@ describe('useSession', () => {
     const { result } = renderHook(() => useSession());
 
     // Answer all problems -- deliberately answer some wrong
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < result.current.totalProblems; i++) {
       const problem = result.current.currentProblem!;
       const correctAnswer = answerNumericValue(problem.problem.correctAnswer);
 
@@ -421,8 +425,8 @@ describe('useSession', () => {
   it('completion commits nextReviewDue to store for each skill', () => {
     const { result } = renderHook(() => useSession());
 
-    // Answer all 15 problems correctly
-    for (let i = 0; i < 15; i++) {
+    // Answer all problems correctly
+    for (let i = 0; i < result.current.totalProblems; i++) {
       const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
@@ -468,8 +472,8 @@ describe('useSession', () => {
 
     const { result } = renderHook(() => useSession());
 
-    // Answer all 15 problems correctly
-    for (let i = 0; i < 15; i++) {
+    // Answer all problems correctly
+    for (let i = 0; i < result.current.totalProblems; i++) {
       const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
@@ -493,8 +497,8 @@ describe('useSession', () => {
   it('pending updates include Leitner fields in sessionResult', () => {
     const { result } = renderHook(() => useSession());
 
-    // Answer all 15 problems correctly
-    for (let i = 0; i < 15; i++) {
+    // Answer all problems correctly
+    for (let i = 0; i < result.current.totalProblems; i++) {
       const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);

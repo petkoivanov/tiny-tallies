@@ -22,10 +22,12 @@ import {
   DEFAULT_SESSION_CONFIG,
   REMEDIATION_SESSION_CONFIG,
   CHALLENGE_SESSION_CONFIG,
+  getAdaptiveSessionConfig,
 } from '../services/session';
 import type {
   SessionPhase,
   SessionMode,
+  SessionConfig,
   SessionProblem,
   SessionResult,
   SessionFeedback,
@@ -107,7 +109,7 @@ function initializeSession(
   mode: SessionMode = 'standard',
   remediationSkillIds?: readonly string[],
   challengeThemeId?: string,
-): { queue: SessionProblem[]; startTime: number; challengeStartDate: string } {
+): { queue: SessionProblem[]; startTime: number; challengeStartDate: string; config: SessionConfig } {
   const seed = Date.now();
   const startTime = Date.now();
 
@@ -118,7 +120,7 @@ function initializeSession(
     ? CHALLENGE_SESSION_CONFIG
     : isRemediation
       ? REMEDIATION_SESSION_CONFIG
-      : DEFAULT_SESSION_CONFIG;
+      : getAdaptiveSessionConfig(skillStates);
 
   const confirmedSkillIds: string[] = isChallenge && challengeThemeId
     ? (CHALLENGE_THEMES.find((t) => t.id === challengeThemeId)
@@ -134,7 +136,7 @@ function initializeSession(
   // Capture date key at init for date boundary safety
   const d = new Date();
   const challengeStartDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  return { queue, startTime, challengeStartDate };
+  return { queue, startTime, challengeStartDate, config: sessionConfig };
 }
 
 /** Session lifecycle hook: queue, answer handling, feedback, Elo/XP, commit-on-complete. */
@@ -146,11 +148,6 @@ export function useSession(options?: {
   const mode = options?.mode ?? 'standard';
   const remediationSkillIds = options?.remediationSkillIds;
   const challengeThemeId = options?.challengeThemeId;
-  const sessionConfig = mode === 'challenge'
-    ? CHALLENGE_SESSION_CONFIG
-    : mode === 'remediation'
-      ? REMEDIATION_SESSION_CONFIG
-      : DEFAULT_SESSION_CONFIG;
 
   const skillStates = useAppStore((s) => s.skillStates);
   const startSession = useAppStore((s) => s.startSession);
@@ -183,16 +180,18 @@ export function useSession(options?: {
   const maxStreakRef = useRef(0);
   const currentStreakRef = useRef(0);
   const challengeStartDateRef = useRef('');
+  const sessionConfigRef = useRef<SessionConfig>(DEFAULT_SESSION_CONFIG);
 
   if (!initializedRef.current) {
     initializedRef.current = true;
     resetSessionDedup();
-    const { queue, startTime, challengeStartDate } = initializeSession(
+    const { queue, startTime, challengeStartDate, config } = initializeSession(
       skillStates, misconceptions, mode, remediationSkillIds, challengeThemeId,
     );
     sessionQueueRef.current = queue;
     sessionStartTimeRef.current = startTime;
     challengeStartDateRef.current = challengeStartDate;
+    sessionConfigRef.current = config;
   }
 
   // Mark session active in a layout effect to avoid setState-during-render warning
@@ -207,6 +206,7 @@ export function useSession(options?: {
   const [score, setScore] = useState(0);
   const [sessionResult, setSessionResult] = useState<SessionResult | null>(null);
 
+  const sessionConfig = sessionConfigRef.current;
   const totalProblems =
     sessionConfig.warmupCount +
     sessionConfig.practiceCount +
