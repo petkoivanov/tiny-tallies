@@ -51,7 +51,7 @@ jest.mock('lucide-react-native', () => {
 
 // Mock achievement service
 jest.mock('@/services/achievement', () => ({
-  BADGES: Array.from({ length: 31 }, (_, i) => ({ id: `badge-${i}` })),
+  BADGES: Array.from({ length: 35 }, (_, i) => ({ id: `badge-${i}` })),
 }));
 
 // Mock ExploreGrid as a simple View with testID
@@ -85,7 +85,7 @@ function setMockState(overrides: Record<string, unknown> = {}) {
     childName: null,
     avatarId: null,
     xp: 0,
-    level: 1,
+    skillStates: {},
     weeklyStreak: 0,
     lastSessionDate: null,
     exploredManipulatives: [],
@@ -122,7 +122,12 @@ describe('HomeScreen', () => {
   });
 
   it('renders current level', () => {
-    setMockState({ level: 5 });
+    // Level 5 = Elo 940-1020. Provide a skill at Elo 1000 with attempts > 0.
+    setMockState({
+      skillStates: {
+        'addition.single-digit.no-carry': { eloRating: 1000, attempts: 5 },
+      },
+    });
 
     const { getByText } = render(<HomeScreen />);
     expect(getByText('Level 5')).toBeTruthy();
@@ -131,7 +136,7 @@ describe('HomeScreen', () => {
   it('renders XP progress', () => {
     // Level 2 starts at 120 XP. 150 XP = 30 XP into level 2.
     // Level 3 threshold = 260 XP, so xpNeededForNextLevel = 260 - 120 = 140.
-    setMockState({ xp: 150, level: 2 });
+    setMockState({ xp: 150 });
 
     const { getByText } = render(<HomeScreen />);
     expect(getByText('30/140 XP')).toBeTruthy();
@@ -299,7 +304,7 @@ describe('HomeScreen', () => {
     });
 
     const { getByText } = render(<HomeScreen />);
-    expect(getByText('3/31 \uD83C\uDFC5')).toBeTruthy();
+    expect(getByText('3/35 \uD83C\uDFC5')).toBeTruthy();
   });
 
   it('badge count button navigates to BadgeCollection', () => {

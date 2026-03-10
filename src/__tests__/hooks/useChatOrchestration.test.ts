@@ -86,6 +86,7 @@ function createDefaultParams(
       phase: 'warmup',
       skillId: 'addition.single',
       templateBaseElo: 900,
+      studentElo: 1000,
     } as any,
     currentIndex: 0,
     correctAnswer: 68,

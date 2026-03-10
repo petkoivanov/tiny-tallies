@@ -6,6 +6,8 @@ import {
   generateThreeOps,
   generateWithDivision,
   generateNestedParens,
+  generateOneStepEquation,
+  generateVariableEval,
 } from './generators';
 
 type ExpressionsType =
@@ -13,7 +15,9 @@ type ExpressionsType =
   | 'parentheses'
   | 'three_ops'
   | 'with_division'
-  | 'nested_parens';
+  | 'nested_parens'
+  | 'one_step_equation'
+  | 'variable_eval';
 
 export const expressionsHandler: DomainHandler = {
   generate(template: ProblemTemplate, rng: SeededRng): DomainProblemData {
@@ -29,6 +33,10 @@ export const expressionsHandler: DomainHandler = {
         return generateWithDivision(template, rng);
       case 'nested_parens':
         return generateNestedParens(template, rng);
+      case 'one_step_equation':
+        return generateOneStepEquation(template, rng);
+      case 'variable_eval':
+        return generateVariableEval(template, rng);
       default:
         throw new Error(`Unknown expressions type: ${config.type}`);
     }

@@ -15,6 +15,9 @@ import { measurementHandler } from './measurement';
 import { ratiosHandler } from './ratios';
 import { exponentsHandler } from './exponents';
 import { expressionsHandler } from './expressions';
+import { geometryHandler } from './geometry';
+import { probabilityHandler } from './probability';
+import { numberTheoryHandler } from './numberTheory';
 
 const HANDLERS: Record<Operation, DomainHandler> = {
   addition: arithmeticHandler,
@@ -30,6 +33,9 @@ const HANDLERS: Record<Operation, DomainHandler> = {
   ratios: ratiosHandler,
   exponents: exponentsHandler,
   expressions: expressionsHandler,
+  geometry: geometryHandler,
+  probability: probabilityHandler,
+  number_theory: numberTheoryHandler,
 };
 
 /** Get the domain handler for a given operation */

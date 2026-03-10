@@ -41,4 +41,12 @@ export const EXPONENTS_SKILLS: readonly SkillDefinition[] = [
     standards: ['6.EE.A.1'],
     prerequisites: ['exponents.squares'],
   },
+  {
+    id: 'exponents.negative',
+    name: 'Negative exponents',
+    operation: 'exponents',
+    grade: 8,
+    standards: ['8.EE.A.1'],
+    prerequisites: ['exponents.evaluate'],
+  },
 ];

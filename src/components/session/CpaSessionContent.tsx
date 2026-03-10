@@ -11,6 +11,7 @@ import LottieView from 'lottie-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useCpaMode } from '@/hooks/useCpaMode';
 import { AnswerFeedbackAnimation } from '@/components/animations/AnswerFeedbackAnimation';
+import { MathQuestionDisplay, hasFractionNotation } from './MathQuestionDisplay';
 import {
   Counters,
   BaseTenBlocks,
@@ -20,11 +21,17 @@ import {
 } from '@/components/manipulatives';
 import { ManipulativePanel } from './ManipulativePanel';
 import { CompactAnswerRow } from './CompactAnswerRow';
+import { NumberPad } from './NumberPad';
 import { PictorialDiagram } from './pictorial/PictorialDiagram';
+import { AnalogClock, clockDetailForSkill } from './AnalogClock';
+import { CoinDisplay, shouldShowCoins } from './CoinDisplay';
+import { NarrateButton } from './NarrateButton';
 import { getNextGuidedStep } from '@/services/cpa';
 import { getPrimaryManipulative } from '@/services/cpa/skillManipulativeMap';
 import type { ManipulativeType } from '@/services/cpa/cpaTypes';
 import type { Problem } from '@/services/mathEngine/types';
+import type { FormattedProblem } from '@/services/mathEngine/answerFormats/types';
+import { parseIntegerInput } from '@/services/mathEngine/answerFormats';
 
 /** Session-supported manipulative types (ten_frame excluded — sandbox only) */
 type SessionManipulative = Exclude<ManipulativeType, 'ten_frame'>;
@@ -58,7 +65,7 @@ interface AnswerOption {
 interface CpaSessionContentProps {
   problem: Problem;
   skillId: string;
-  options: readonly AnswerOption[];
+  presentation: FormattedProblem;
   currentIndex: number;
   onAnswer: (value: number) => void;
   feedbackActive: boolean;
@@ -80,7 +87,7 @@ interface CpaSessionContentProps {
 export function CpaSessionContent({
   problem,
   skillId,
-  options,
+  presentation,
   currentIndex,
   onAnswer,
   feedbackActive,
@@ -91,6 +98,10 @@ export function CpaSessionContent({
   teachExpand = false,
   boostHighlightAnswer = null,
 }: CpaSessionContentProps) {
+  const isFreeText = presentation.format === 'free_text';
+  const options: readonly AnswerOption[] = presentation.format === 'multiple_choice'
+    ? presentation.options
+    : [];
   const { colors } = useTheme();
   const { stage, manipulativeType } = useCpaMode(skillId);
 
@@ -183,6 +194,42 @@ export function CpaSessionContent({
     },
     problemTextSmall: {
       fontSize: typography.fontSize.xxl,
+    },
+    wordProblemText: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.lg,
+      color: colors.textPrimary,
+      textAlign: 'left',
+      lineHeight: typography.fontSize.lg * 1.5,
+    },
+    wordProblemRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      width: '100%',
+      marginBottom: spacing.xl,
+    },
+    wordProblemScroll: {
+      maxHeight: 160,
+      flex: 1,
+      paddingHorizontal: spacing.sm,
+    },
+    wordProblemScrollContent: {
+      paddingVertical: spacing.sm,
+    },
+    longQuestionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      width: '100%',
+      marginBottom: spacing.xl,
+      paddingHorizontal: spacing.sm,
+    },
+    inlineVisual: {
+      alignItems: 'center',
+      marginBottom: spacing.md,
+    },
+    problemTextWrap: {
+      marginBottom: spacing.xl,
+      alignItems: 'center',
     },
     optionsGrid: {
       flexDirection: 'row',
@@ -317,8 +364,25 @@ export function CpaSessionContent({
     return undefined;
   }
 
-  // Render answer buttons: compact row when panel expanded, standard 2x2 grid otherwise
+  const handleFreeTextSubmit = (value: string) => {
+    const parsed = parseIntegerInput(value);
+    if (parsed !== null) {
+      onAnswer(parsed);
+    }
+  };
+
+  // Render answer input: NumberPad for free-text, MC buttons otherwise
   const renderAnswers = () => {
+    if (isFreeText) {
+      return (
+        <NumberPad
+          onSubmit={handleFreeTextSubmit}
+          maxDigits={presentation.format === 'free_text' ? presentation.maxDigits : 5}
+          showDecimal={false}
+        />
+      );
+    }
+
     if (isExpanded && showPanel) {
       return (
         <CompactAnswerRow
@@ -380,6 +444,31 @@ export function CpaSessionContent({
   };
 
   const isLongQuestion = problem.questionText.length > 30;
+  const isWordProblem = problem.metadata.wordProblem === true;
+  const isFractionQuestion = problem.operation === 'fractions' && hasFractionNotation(problem.questionText);
+
+  // Inline visuals for time and money problems
+  const showClock = problem.operation === 'time' && problem.metadata.displayTime != null;
+  const showCoins = shouldShowCoins(problem.skillId) && problem.metadata.coinSet != null;
+
+  const renderQuestionText = () => {
+    if (isFractionQuestion) {
+      return (
+        <View style={styles.problemTextWrap}>
+          <MathQuestionDisplay
+            questionText={problem.questionText}
+            isLong={isLongQuestion}
+          />
+        </View>
+      );
+    }
+
+    const textStyle = isWordProblem
+      ? styles.wordProblemText
+      : [styles.problemText, isLongQuestion && styles.problemTextSmall];
+
+    return <Text style={textStyle}>{problem.questionText}</Text>;
+  };
 
   return (
     <View style={styles.container}>
@@ -391,10 +480,54 @@ export function CpaSessionContent({
         {/* Top spacer — centers problem + answers when content fits */}
         <View style={styles.topSpacer} />
 
-        {/* Problem Text */}
-        <Text style={[styles.problemText, isLongQuestion && styles.problemTextSmall]}>
-          {problem.questionText}
-        </Text>
+        {/* Inline visuals: clock for time problems, coins for money problems */}
+        {showClock && (
+          <View style={styles.inlineVisual}>
+            <AnalogClock
+              hours={problem.metadata.displayTime!.hours}
+              minutes={problem.metadata.displayTime!.minutes}
+              detail={clockDetailForSkill(skillId)}
+              size={180}
+            />
+          </View>
+        )}
+        {showCoins && (
+          <View style={styles.inlineVisual}>
+            <CoinDisplay coinSet={problem.metadata.coinSet!} />
+          </View>
+        )}
+
+        {/* Problem Text — word problems get a scrollable container */}
+        {isWordProblem ? (
+          <View style={styles.wordProblemRow}>
+            <ScrollView
+              style={styles.wordProblemScroll}
+              contentContainerStyle={styles.wordProblemScrollContent}
+              showsVerticalScrollIndicator
+              nestedScrollEnabled
+            >
+              {renderQuestionText()}
+            </ScrollView>
+            <NarrateButton
+              text={problem.questionText}
+              resetKey={currentIndex}
+              primaryColor={colors.primary}
+              primaryLightColor={colors.primaryLight}
+            />
+          </View>
+        ) : isLongQuestion ? (
+          <View style={styles.longQuestionRow}>
+            {renderQuestionText()}
+            <NarrateButton
+              text={problem.questionText}
+              resetKey={currentIndex}
+              primaryColor={colors.primary}
+              primaryLightColor={colors.primaryLight}
+            />
+          </View>
+        ) : (
+          renderQuestionText()
+        )}
 
         {/* Pictorial Mode: inline diagram */}
         {stage === 'pictorial' && scaffoldManipulative && (

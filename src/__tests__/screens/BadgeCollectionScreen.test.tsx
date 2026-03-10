@@ -129,8 +129,8 @@ describe('BadgeCollectionScreen', () => {
   it('renders locked badges with dimmed appearance and requirements text', () => {
     const { getAllByText } = render(<BadgeCollectionScreen />);
     const lockedLabels = getAllByText('locked');
-    // 31 total - 2 earned = 29 locked
-    expect(lockedLabels.length).toBe(29);
+    // 35 total - 2 earned = 33 locked
+    expect(lockedLabels.length).toBe(33);
   });
 
   it('shows detail overlay with badge name and description when badge is tapped', () => {

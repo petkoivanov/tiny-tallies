@@ -47,10 +47,11 @@ describe('useSession misconception recording', () => {
   it('records misconception in store when wrong answer has a bugId', () => {
     const { result } = renderHook(() => useSession());
 
-    // Search all 15 problems for one with a bugId distractor
+    // Search all problems for one with MC format and a bugId distractor
     const idx = advanceToMatchingProblem(result, (p) =>
+      p.presentation.format === 'multiple_choice' &&
       p.presentation.options.some(
-        (o) => o.value !== answerNumericValue(p.problem.correctAnswer) && o.bugId,
+        (o: { value: number; bugId?: string }) => o.value !== answerNumericValue(p.problem.correctAnswer) && o.bugId,
       ),
     );
 
@@ -61,9 +62,10 @@ describe('useSession misconception recording', () => {
     }
 
     const problem = result.current.currentProblem!;
+    if (problem.presentation.format !== 'multiple_choice') return;
     const correctAnswer = answerNumericValue(problem.problem.correctAnswer);
     const wrongOptionWithBug = problem.presentation.options.find(
-      (o) => o.value !== correctAnswer && o.bugId,
+      (o: { value: number; bugId?: string }) => o.value !== correctAnswer && o.bugId,
     )!;
 
     act(() => {
@@ -96,10 +98,11 @@ describe('useSession misconception recording', () => {
   it('does NOT record misconception when wrong answer has no bugId', () => {
     const { result } = renderHook(() => useSession());
 
-    // Search for a problem with a wrong option that has no bugId
+    // Search for an MC problem with a wrong option that has no bugId
     const idx = advanceToMatchingProblem(result, (p) =>
+      p.presentation.format === 'multiple_choice' &&
       p.presentation.options.some(
-        (o) => o.value !== answerNumericValue(p.problem.correctAnswer) && !o.bugId,
+        (o: { value: number; bugId?: string }) => o.value !== answerNumericValue(p.problem.correctAnswer) && !o.bugId,
       ),
     );
 
@@ -109,9 +112,10 @@ describe('useSession misconception recording', () => {
     }
 
     const problem = result.current.currentProblem!;
+    if (problem.presentation.format !== 'multiple_choice') return;
     const correctAnswer = answerNumericValue(problem.problem.correctAnswer);
     const wrongOptionNoBug = problem.presentation.options.find(
-      (o) => o.value !== correctAnswer && !o.bugId,
+      (o: { value: number; bugId?: string }) => o.value !== correctAnswer && !o.bugId,
     )!;
 
     // Record how many misconceptions existed before (from correct answers in advanceToMatchingProblem)

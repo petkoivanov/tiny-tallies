@@ -2,11 +2,13 @@
  * ParentReportsScreen — PIN-gated learning progress reports for parents.
  *
  * Displays:
- * - Overall mastery summary (mastered / in-progress / not-started counts)
+ * - AI-generated progress summary (tap to expand session history)
+ * - Mastery donut chart + stats
  * - Elo rating with level and progress bar
- * - Per-domain skill breakdown
+ * - Session performance bar chart
+ * - Per-domain skill breakdown (expandable)
+ * - Activity stats
  * - Detected misconceptions (confirmed + suspected)
- * - Session and streak stats
  *
  * Accessed from ParentalControlsScreen. Parent is already PIN-authenticated.
  */
@@ -23,10 +25,13 @@ import {
 } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
-import { SKILLS } from '@/services/mathEngine/skills';
-import { getSkillById } from '@/services/mathEngine/skills';
+import { SKILLS, getSkillById } from '@/services/mathEngine/skills';
 import { EloOverview } from '@/components/reports/EloOverview';
 import { SkillDomainSummary } from '@/components/reports/SkillDomainSummary';
+import { MasteryDonutChart } from '@/components/reports/MasteryDonutChart';
+import { SessionBarChart } from '@/components/reports/SessionBarChart';
+import { AiSummaryCard } from '@/components/reports/AiSummaryCard';
+import type { ParentSummaryInput } from '@/services/reports';
 import type { MisconceptionRecord } from '@/store/slices/misconceptionSlice';
 
 /** Compute average Elo from all practiced skills */
@@ -34,7 +39,7 @@ function computeAverageElo(
   skillStates: Record<string, { eloRating: number; attempts: number }>,
 ): number {
   const practiced = Object.values(skillStates).filter((s) => s.attempts > 0);
-  if (practiced.length === 0) return 800; // default starting Elo
+  if (practiced.length === 0) return 800;
   const sum = practiced.reduce((acc, s) => acc + s.eloRating, 0);
   return sum / practiced.length;
 }
@@ -70,6 +75,23 @@ function getActiveMisconceptions(
   );
 }
 
+/** Find top 3 domains by mastered-skill count */
+function getTopDomains(
+  skillStates: Record<string, { attempts: number; masteryLocked: boolean }>,
+): string[] {
+  const domainCounts: Record<string, number> = {};
+  for (const skill of SKILLS) {
+    const state = skillStates[skill.id];
+    if (state?.masteryLocked) {
+      domainCounts[skill.operation] = (domainCounts[skill.operation] ?? 0) + 1;
+    }
+  }
+  return Object.entries(domainCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([op]) => op.replace(/_/g, ' '));
+}
+
 export default function ParentReportsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -78,11 +100,11 @@ export default function ParentReportsScreen() {
   const skillStates = useAppStore((s) => s.skillStates);
   const misconceptions = useAppStore((s) => s.misconceptions);
   const xp = useAppStore((s) => s.xp);
-  const level = useAppStore((s) => s.level);
   const weeklyStreak = useAppStore((s) => s.weeklyStreak);
   const sessionsCompleted = useAppStore((s) => s.sessionsCompleted);
   const earnedBadges = useAppStore((s) => s.earnedBadges);
   const childName = useAppStore((s) => s.childName);
+  const sessionHistory = useAppStore((s) => s.sessionHistory);
 
   const averageElo = useMemo(() => computeAverageElo(skillStates), [skillStates]);
   const masteryCounts = useMemo(
@@ -92,6 +114,37 @@ export default function ParentReportsScreen() {
   const activeMisconceptions = useMemo(
     () => getActiveMisconceptions(misconceptions),
     [misconceptions],
+  );
+
+  const recentAccuracy = useMemo(() => {
+    const recent = sessionHistory.slice(0, 5);
+    if (recent.length === 0) return null;
+    const totalScore = recent.reduce((sum, s) => sum + s.score, 0);
+    const totalProblems = recent.reduce((sum, s) => sum + s.total, 0);
+    return totalProblems > 0 ? totalScore / totalProblems : null;
+  }, [sessionHistory]);
+
+  const summaryInput: ParentSummaryInput = useMemo(
+    () => ({
+      childName: childName ?? '',
+      totalSkills: masteryCounts.total,
+      mastered: masteryCounts.mastered,
+      inProgress: masteryCounts.inProgress,
+      sessionsCompleted,
+      weeklyStreak,
+      recentAccuracy,
+      topDomains: getTopDomains(skillStates),
+      misconceptionCount: activeMisconceptions.length,
+    }),
+    [
+      childName,
+      masteryCounts,
+      sessionsCompleted,
+      weeklyStreak,
+      recentAccuracy,
+      skillStates,
+      activeMisconceptions.length,
+    ],
   );
 
   const styles = useMemo(
@@ -139,6 +192,15 @@ export default function ParentReportsScreen() {
           fontFamily: typography.fontFamily.semiBold,
           fontSize: typography.fontSize.lg,
           color: colors.textPrimary,
+        },
+        masteryRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: spacing.lg,
+        },
+        masteryStats: {
+          flex: 1,
+          gap: spacing.sm,
         },
         statsGrid: {
           flexDirection: 'row',
@@ -246,26 +308,39 @@ export default function ParentReportsScreen() {
         ]}
         testID="parent-reports-content"
       >
-        {/* Overall Mastery Summary */}
+        {/* AI Summary + Session History */}
+        <AiSummaryCard
+          summaryInput={summaryInput}
+          sessions={sessionHistory}
+        />
+
+        {/* Mastery Overview with Donut Chart */}
         <View style={styles.summaryCard} testID="mastery-summary">
           <View style={styles.summaryHeader}>
             <BarChart3 size={20} color={colors.primary} />
             <Text style={styles.sectionTitle}>Overall Mastery</Text>
           </View>
-          <View style={styles.statsGrid}>
-            <View style={styles.statBlock}>
-              <Text style={styles.statValueCorrect}>
-                {masteryCounts.mastered}
-              </Text>
-              <Text style={styles.statLabel}>Mastered</Text>
-            </View>
-            <View style={styles.statBlock}>
-              <Text style={styles.statValue}>{masteryCounts.inProgress}</Text>
-              <Text style={styles.statLabel}>In Progress</Text>
-            </View>
-            <View style={styles.statBlock}>
-              <Text style={styles.statValue}>{masteryCounts.notStarted}</Text>
-              <Text style={styles.statLabel}>Not Started</Text>
+          <View style={styles.masteryRow}>
+            <MasteryDonutChart
+              mastered={masteryCounts.mastered}
+              inProgress={masteryCounts.inProgress}
+              notStarted={masteryCounts.notStarted}
+            />
+            <View style={styles.masteryStats}>
+              <View style={styles.statBlock}>
+                <Text style={styles.statValueCorrect}>
+                  {masteryCounts.mastered}
+                </Text>
+                <Text style={styles.statLabel}>Mastered</Text>
+              </View>
+              <View style={styles.statBlock}>
+                <Text style={styles.statValue}>{masteryCounts.inProgress}</Text>
+                <Text style={styles.statLabel}>In Progress</Text>
+              </View>
+              <View style={styles.statBlock}>
+                <Text style={styles.statValue}>{masteryCounts.notStarted}</Text>
+                <Text style={styles.statLabel}>Not Started</Text>
+              </View>
             </View>
           </View>
         </View>
@@ -273,7 +348,10 @@ export default function ParentReportsScreen() {
         {/* Elo / Level Overview */}
         <EloOverview eloRating={averageElo} />
 
-        {/* Skills by Domain */}
+        {/* Session Performance Chart */}
+        <SessionBarChart sessions={sessionHistory} />
+
+        {/* Skills by Domain (expandable) */}
         <SkillDomainSummary skillStates={skillStates} />
 
         {/* Activity Stats */}

@@ -91,3 +91,21 @@ export function generateSquareRoot(
     metadata: {},
   };
 }
+
+/** Grade 8: Negative exponents — "5⁻² = 1/?" → answer is base² */
+export function generateNegative(
+  _template: ProblemTemplate,
+  rng: SeededRng,
+): DomainProblemData {
+  const base = rng.intRange(2, 5);
+  const exp = rng.intRange(1, 3);
+  const denominator = Math.pow(base, exp);
+  const sup = SUPERSCRIPTS[exp] ?? `^${exp}`;
+
+  return {
+    operands: [base, exp],
+    correctAnswer: numericAnswer(denominator),
+    questionText: `${base}\u207B${sup} = 1/?`,
+    metadata: {},
+  };
+}

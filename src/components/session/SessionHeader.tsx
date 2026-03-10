@@ -4,6 +4,7 @@ import { X } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import type { ThemeColors } from '@/theme';
 import { CpaModeIcon } from './CpaModeIcon';
+import { LevelBadge } from './LevelBadge';
 import type { SessionPhase } from '@/services/session';
 import type { CpaStage } from '@/services/cpa/cpaTypes';
 import type { FeedbackState } from '@/hooks/useSession';
@@ -14,6 +15,7 @@ interface SessionHeaderProps {
   currentIndex: number;
   totalProblems: number;
   feedbackState: FeedbackState | null;
+  studentElo: number;
   onQuit: () => void;
 }
 
@@ -51,6 +53,7 @@ export function SessionHeader({
   currentIndex,
   totalProblems,
   feedbackState,
+  studentElo,
   onQuit,
 }: SessionHeaderProps) {
   const { colors } = useTheme();
@@ -105,6 +108,7 @@ export function SessionHeader({
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.phaseLabel}>{formatPhaseLabel(sessionPhase)}</Text>
+        <LevelBadge elo={studentElo} />
         <CpaModeIcon stage={cpaStage} />
         <Text style={styles.progressText}>
           {currentIndex + 1} / {totalProblems}

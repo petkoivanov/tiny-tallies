@@ -5,7 +5,8 @@ import { DEFAULT_SESSION_CONFIG } from './sessionTypes';
 import { selectTemplateForSkill, weightBySuccessProbability, weightedRandomSelect } from '../adaptive/problemSelector';
 import { getUnlockedSkills } from '../adaptive/prerequisiteGating';
 import { getOrCreateSkillState } from '../../store/helpers/skillStateHelpers';
-import { generateProblem, formatAsMultipleChoice, createRng, getTemplatesBySkill } from '../mathEngine';
+import { generateProblem, createRng, getTemplatesBySkill } from '../mathEngine';
+import { selectAndFormatAnswer } from '../mathEngine/answerFormats';
 import { generatePracticeMix, constrainedShuffle, selectRemediationSkillIds } from './practiceMix';
 import type { PracticeMixItem } from './practiceMix';
 import { detectLevelUp, computeStreakUpdate } from '../gamification';
@@ -251,16 +252,17 @@ export function generateSessionQueue(
 
     // Generate the problem using a derived seed to avoid RNG state leaking.
     // Retry with offset seeds if the question text duplicates an earlier problem.
+    const skillState = getOrCreateSkillState(skillStates, skillId);
     let problemSeed = seed + i * 31;
-    let problem = generateProblem({ templateId: template.id, seed: problemSeed });
+    let problem = generateProblem({ templateId: template.id, seed: problemSeed, elo: skillState.eloRating });
 
     for (let retry = 1; retry <= 5 && seenQuestions.has(problem.questionText); retry++) {
       problemSeed = seed + i * 31 + retry * 997;
-      problem = generateProblem({ templateId: template.id, seed: problemSeed });
+      problem = generateProblem({ templateId: template.id, seed: problemSeed, elo: skillState.eloRating });
     }
     seenQuestions.add(problem.questionText);
 
-    const presentation = formatAsMultipleChoice(problem, problemSeed + 7);
+    const presentation = selectAndFormatAnswer(problem, skillState.eloRating, problemSeed + 7);
 
     queue.push({
       problem,
@@ -268,6 +270,7 @@ export function generateSessionQueue(
       phase,
       skillId,
       templateBaseElo: template.baseElo,
+      studentElo: skillState.eloRating,
     });
   }
 

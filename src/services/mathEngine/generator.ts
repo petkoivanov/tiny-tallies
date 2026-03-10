@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createRng } from './seededRng';
 import { findTemplate, getTemplatesBySkill } from './templates';
 import { getHandler } from './domains';
+import { shouldGenerateWordProblem, generateWordProblem } from './wordProblems';
 import type {
   BatchGenerationParams,
   GenerationParams,
@@ -13,6 +14,7 @@ import type {
 export const GenerationParamsSchema = z.object({
   templateId: z.string(),
   seed: z.number().int(),
+  elo: z.number().optional(),
 });
 
 export const BatchGenerationParamsSchema = z.object({
@@ -36,13 +38,31 @@ export function generateProblem(params: GenerationParams): Problem {
     ...data.metadata,
   };
 
+  let questionText = data.questionText;
+
+  // Word problem wrap: probabilistically replace bare equation with narrative
+  if (validated.elo !== undefined && shouldGenerateWordProblem(validated.elo, rng)) {
+    const wp = generateWordProblem(
+      template.operation,
+      data.operands[0],
+      data.operands[1],
+      template.grades[0],
+      rng,
+      data.questionText,
+    );
+    if (wp) {
+      questionText = `${wp.text} ${wp.question}`;
+      metadata.wordProblem = true;
+    }
+  }
+
   return {
     id: `${template.id}_${validated.seed}`,
     templateId: template.id,
     operation: template.operation,
     operands: data.operands,
     correctAnswer: data.correctAnswer,
-    questionText: data.questionText,
+    questionText,
     skillId: template.skillId,
     standards: template.standards,
     grade: template.grades[0],

@@ -2,7 +2,7 @@
 
 ## What This Is
 
-An AI-powered math learning mobile app for children ages 6-9 (grades 1-6). Features adaptive daily practice sessions with programmatic problem generation across 9 math domains (addition, subtraction, multiplication, division, fractions, place value, time, money, patterns) with 76 skills, misconception-based distractors via Bug Library pattern (45+ bug patterns), Elo-based adaptive difficulty, deep gamification (XP/levels/streaks, 31 achievement badges, daily challenges, visual skill map), polished UI with animated feedback and 5 unlockable color themes, a full adaptive learning engine (BKT, Leitner spaced repetition, prerequisite graph, smart session orchestration), six interactive virtual manipulatives with CPA progression (Concrete -> Pictorial -> Abstract), an on-demand AI tutor powered by Gemini that provides Socratic hints, CPA-aware teaching with manipulative integration, and deep scaffolding — auto-escalating support based on struggle level with full COPPA-compliant safety pipeline, cross-session misconception detection with 2-then-3 confirmation, adaptive session mix, tutor context enrichment, and dedicated remediation mini-sessions, plus avatar/frame customization with achievement-unlockable cosmetics. Domain-specific problem generators produce real curriculum-aligned questions (not placeholder arithmetic). Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
+An AI-powered math learning mobile app for children ages 6-9+ (grades 1-8). Features adaptive daily practice sessions with programmatic problem generation across 16 math domains (addition, subtraction, multiplication, division, fractions, place value, time, money, patterns, measurement, ratios, exponents, expressions, decimals, integers, geometry, probability, number theory) with 132 skills, misconception-based distractors via Bug Library pattern (70+ bug patterns), Elo-based adaptive difficulty with probabilistic MC/free-text answer format selection and dynamic MC option count, deep gamification (XP/levels/streaks, 31 achievement badges, daily challenges, visual skill map), polished UI with animated feedback, NumberPad component, and 5 unlockable color themes, a full adaptive learning engine (BKT, Leitner spaced repetition, prerequisite graph, smart session orchestration), six interactive virtual manipulatives with CPA progression (Concrete -> Pictorial -> Abstract), an on-demand AI tutor powered by Gemini that provides Socratic hints, CPA-aware teaching with manipulative integration, and deep scaffolding — auto-escalating support based on struggle level with full COPPA-compliant safety pipeline, cross-session misconception detection with 2-then-3 confirmation, adaptive session mix, tutor context enrichment, and dedicated remediation mini-sessions, plus avatar/frame customization with achievement-unlockable cosmetics. Domain-specific problem generators produce real curriculum-aligned questions (not placeholder arithmetic). Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
 
 ## Core Value
 
@@ -12,7 +12,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ### Validated
 
-- ✓ Programmatic math engine with curriculum-tagged problems (Common Core grades 1-6, 76 skills across 9 domains) — v0.1 + pre-v0.9
+- ✓ Programmatic math engine with curriculum-tagged problems (Common Core grades 1-8, 132 skills across 16 domains) — v0.1 + v0.9
 - ✓ Distractor generation from Bug Library (pre-computed wrong answers for known misconception patterns) — v0.1
 - ✓ Elo rating system for adaptive difficulty targeting 85% success rate — v0.1
 - ✓ Basic session flow (warmup → practice → cooldown) — v0.1
@@ -71,19 +71,61 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - ✓ Patterns domain handler: 5 skills (G1-4), 5 templates, 5 bug patterns — sequences, missing values, I/O tables — pre-v0.9
 - ✓ All placeholder handlers replaced with domain-specific generators — pre-v0.9
 
+- ✓ Type system expansion: Operation type with all 16 values, answer format selection with Elo-based sigmoid probability, dynamic MC option count 4/5/6 — v0.9 Phase 45
+- ✓ Multiplication domain: 11 skills (G2-4), 8 bug patterns, domain handler — v0.9 Phase 46
+- ✓ Division domain: 9 skills (G3-4), 6 bug patterns, domain handler — v0.9 Phase 47
+- ✓ Grade 4 Addition & Subtraction: 3 skills (4-digit add/sub) — v0.9 Phase 53
+- ✓ NumberPad component + answer format system: custom number pad, sigmoid MC/free-text probability, dynamic option count — v0.9 Phase 55
+- ✓ Level indicator: eloToLevel mapping, HomeScreen + SessionScreen LevelBadge display — v0.9 Phase 56
+- ✓ Parent Reports: SessionHistory store slice, MasteryDonutChart, SessionBarChart, ExpandableSkillDomain, AiSummaryCard, SessionHistoryList, ParentReportsScreen — v0.9 Phase 57
+- ✓ Integration Testing: domain handler registry, cross-domain sessions, answer format integration, migration chain — v0.9 Phase 58
+- ✓ Measurement domain: 5 skills (G4-5) — v0.9
+- ✓ Ratios domain: 9 skills (G6-7) — v0.9
+- ✓ Exponents domain: 6 skills (G5-8) — v0.9
+- ✓ Expressions domain: 7 skills (G5-6) — v0.9
+- ✓ Decimals domain: skills implemented — v0.9
+- ✓ Integers domain: skills implemented — v0.9
+- ✓ Geometry domain: 6 skills (G7-8) — v0.9
+- ✓ Probability domain: 2 skills (G7) — v0.9
+- ✓ Number Theory domain: 3 skills (G6) — v0.9
+
 ### Active
 
-## Current Milestone: v0.8 Social & Subscription
+## Current Milestone: v0.9 Full Curriculum Expansion
 
-**Goal:** Add multi-child profiles, parent dashboard with analytics and time controls, and freemium subscription with IAP.
+**Goal:** Expand from 14 addition/subtraction skills to full curriculum coverage across 16 math domains for grades 1-8, add parent reports with AI summaries, and improve answer input UX.
+
+**Status:** NEARLY COMPLETE — 132 skills across 16 operations, 2139 tests passing, grades 1-8. Parent reports and integration testing done.
+
+**Completed:**
+- ✓ Phase 45: Type System & Engine Expansion (all 16 operation values, Answer union, answer format selection, dynamic MC count)
+- ✓ Phase 46: Multiplication Domain (11 skills, 8 bug patterns)
+- ✓ Phase 47: Division Domain (9 skills, 6 bug patterns)
+- ✓ Phase 48: Fractions Domain (14 skills, 9 bug patterns)
+- ✓ Phase 49: Place Value Domain (8 skills, 9 bug patterns)
+- ✓ Phase 50: Time Domain (7 skills, 6 bug patterns; AnalogClock SVG pending)
+- ✓ Phase 51: Money Domain (7 skills, 7 bug patterns; CoinDisplay SVG pending)
+- ✓ Phase 52: Patterns Domain (5 skills, 5 bug patterns)
+- ✓ Phase 53: Grade 4 Add/Sub (3 skills)
+- ✓ Phase 55: NumberPad + Answer Format System
+- ✓ Phase 56: Level Indicator (eloToLevel mapping, HomeScreen + SessionScreen LevelBadge)
+- ✓ Phase 57: Parent Reports (SessionHistory slice, SVG charts, AI summary, reports screen)
+- ✓ Phase 58: Integration Testing (29 new tests: domain registry, cross-domain sessions, answer formats, migration chain)
+- ✓ Additional domains: Measurement, Ratios, Exponents, Expressions, Decimals, Integers, Geometry, Probability, Number Theory
+
+**Remaining:**
+- Phase 54: Word Problem System — NOT STARTED
+- Operation → MathDomain rename — deferred, low priority
+
+## Previous Milestone: v0.8 Social & Subscription (COMPLETE — Phases 38-40)
 
 **Target features:**
 - ~~Multi-child profile switcher (add/edit/delete children, independent progress per child)~~ ✓ Done (Phases 38-39)
 - ~~Privacy, auth, backend, cloud sync~~ ✓ Done (Phase 40)
-- Parent dashboard (progress overview, skill analytics, misconception breakdown, trend graphs)
-- Parental controls (daily session time cap, bedtime lockout, break reminders)
-- Freemium subscription (free: 3 sessions/day no AI tutor; premium: unlimited + AI tutor + all themes)
-- IAP integration (subscription management, restore purchases, subscription state)
+- ~~Parent dashboard~~ ✓ Done (v0.9 Phase 57 — Parent Reports)
+- Parental controls (daily session time cap, bedtime lockout, break reminders) — deferred
+- Freemium subscription (free: 3 sessions/day no AI tutor; premium: unlimited + AI tutor + all themes) — deferred
+- IAP integration (subscription management, restore purchases, subscription state) — deferred
 
 ### Out of Scope
 
@@ -91,23 +133,23 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - Multiple curricula beyond Common Core — reduce scope, add later
 - Ages outside 6-9 — clearest market gap, manageable content scope
 - Platform expansion (web, iOS-specific) — mobile-first
-- Advanced analytics/reporting — parent dashboard in later milestone
+- ~~Advanced analytics/reporting~~ ✓ Done (v0.9 Phase 57 — Parent Reports with AI summaries)
 - Real-time multiplayer — COPPA complexity, defer
 - Chat or social features with personal info — COPPA compliance
-- Free text input UI — architecture supports it, deferred to post-v0.1
+- ~~Free text input UI~~ — ✓ Done (v0.9 Phase 55: NumberPad + answer format selection)
 
 ## Context
 
-**Current state:** v0.8 in progress with ~47,423 LOC TypeScript across 208 source files. 1,597 tests passing across 113 test suites. Phases 38-40 complete (multi-child profiles, profile management UI, privacy/auth/backend/cloud sync). Full adaptive learning pipeline + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor + deep gamification + multi-child profiles + cloud sync backend.
+**Current state:** v0.9 nearly complete with 132 skills across 16 domains (grades 1-8). 2,139 tests passing. v0.8 complete (multi-child profiles, profile management UI, privacy/auth/backend/cloud sync). Full adaptive learning pipeline + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor + deep gamification + multi-child profiles + cloud sync backend + NumberPad component + Elo-based answer format selection + parent reports with AI summaries.
 
 **Architecture (implemented through v0.4):**
-- Programmatic math engine: 14 skills across addition/subtraction (Common Core grades 1-3)
-- Bug Library: 11 misconception patterns with three-phase distractor assembly
+- Programmatic math engine: 132 skills across 16 domains (Common Core grades 1-8)
+- Bug Library: 70+ misconception patterns with three-phase distractor assembly
 - Elo rating system with variable K-factor (K=40 at start, decaying toward K=16)
 - Gaussian-weighted problem selection targeting 85% success rate
 - Frustration guard (3 consecutive wrong → easier problem)
-- Session orchestrator: 15-problem queue (3 warmup + 9 practice + 3 cooldown) with 60/30/10 review/new/challenge mix
-- Zustand persist with versioned migrations (STORE_VERSION=14) and AsyncStorage
+- Session orchestrator: 12-problem queue (2 warmup + 8 practice + 2 cooldown) with 60/30/10 review/new/challenge mix
+- Zustand persist with versioned migrations (STORE_VERSION=15) and AsyncStorage
 - 6 virtual manipulatives (Counters, TenFrame, NumberLine, BaseTenBlocks, FractionStrips, BarModel) with 60fps drag primitives
 - CPA progression: BKT-driven concrete/pictorial/abstract stage tracking with one-way advancement
 - ManipulativePanel animated drawer for session-embedded concrete mode; PictorialDiagram SVG renderers for pictorial mode
@@ -165,9 +207,21 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
   - useSyncTrigger hook: pull on sign-in, flush pending on connectivity return
 - ParentalControlsScreen: PIN-gated settings (Privacy & Data, Account, AI Helper sections)
 
+**Architecture (implemented in v0.9 — Phases 45-58):**
+- Domain handler architecture: DomainHandler interface with per-domain generators, Answer discriminated union (numeric/fraction/comparison/expression/coordinate)
+- 16 domain handlers registered in registry.ts, shared arithmetic handler for add/sub/mul/div
+- Answer format selection: Elo-based sigmoid for MC/free-text probability, dynamic MC option count (4/5/6)
+- NumberPad component: custom keypad for free-text answers, digit-limited input
+- LevelBadge component: Elo-to-level mapping displayed on Home and Session screens
+- sessionHistorySlice: capped at 50 entries (newest first), stores per-session results
+- v14→v15 migration: adds sessionHistory array to store
+- Parent Reports: MasteryDonutChart (SVG donut), SessionBarChart (SVG bars), ExpandableSkillDomain, AiSummaryCard (Gemini), SessionHistoryList
+- AnalogClock SVG: static clock face with configurable detail levels (Phase 50)
+- CoinDisplay SVG: realistic US coin display with proportional sizing (Phase 51)
+
 **Tech stack:**
 - React Native 0.81.5 / Expo 54 / TypeScript 5.9 (strict mode)
-- Zustand 5 for state management (domain slices pattern, STORE_VERSION=14)
+- Zustand 5 for state management (domain slices pattern, STORE_VERSION=15)
 - React Navigation 7 native-stack
 - react-native-gesture-handler + react-native-reanimated (manipulatives, 60fps)
 - Gemini (@google/genai v1.43.0) for LLM tutoring layer
@@ -182,7 +236,8 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tutoring engine design, virtual manipulatives specs, misconception detection patterns, spaced repetition algorithms, gamification design, onboarding/placement testing, child UX design, sound/audio design, math anxiety mitigation, COPPA privacy compliance, problem generation engine.
 
 **Future milestones:**
-- v0.9: TBD (onboarding/placement testing, sound/audio, expanded curriculum)
+- v0.9 remaining: Word Problem System (Phase 54)
+- v1.0: TBD (onboarding/placement testing, sound/audio, parental time controls, freemium subscription, interactive manipulative animations)
 
 ## Constraints
 
@@ -221,8 +276,8 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | 60/30/10 practice mix | Review/new/challenge with fallback cascade | ✓ Good — structured sessions |
 | Gemini for LLM layer | Already integrated in Tiny Tales; good for context/explanations | ✓ Good — lazy singleton, non-streaming, 8s timeout |
 | CPA progression | Research-backed (Singapore Math, NCTM recommended) | ✓ Good — BKT-driven 3-stage with one-way advance |
-| Start Common Core only | Reduce scope; add curricula in later versions | ✓ Good — 14 skills implemented |
-| Ages 6-9 focus | Clearest market gap; manageable content scope | ✓ Good — grade 1-3 content complete |
+| Start Common Core only | Reduce scope; add curricula in later versions | ✓ Good — 132 skills implemented across grades 1-8 |
+| Ages 6-9 focus | Clearest market gap; manageable content scope | ✓ Good — grade 1-8 content complete |
 
 | 60fps drag primitives on UI thread | Reanimated worklets for snap math, no JS bridge lag | ✓ Good — smooth interaction, all 6 manipulatives |
 | Ephemeral manipulative state | Component-local useState, never persisted to store | ✓ Good — clean sandbox, no store bloat |
@@ -263,4 +318,4 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | Privacy disclosure in ProfileSetupScreen | PIN → Disclosure → Wizard flow; minimal nav restructuring | ✓ Good — clean integration |
 
 ---
-*Last updated: 2026-03-07 after Phase 40 completion and backend deployment*
+*Last updated: 2026-03-10 after v0.9 Phases 56-58 (level badge, parent reports, integration testing — 2139 tests)*

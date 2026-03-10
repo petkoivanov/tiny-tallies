@@ -84,4 +84,12 @@ export const MULTIPLICATION_SKILLS: readonly SkillDefinition[] = [
     standards: ['4.NBT.B.5'],
     prerequisites: ['multiplication.two-by-one'],
   },
+  {
+    id: 'multiplication.three-by-two',
+    name: '3-digit \u00d7 2-digit multiplication',
+    operation: 'multiplication',
+    grade: 5,
+    standards: ['5.NBT.B.5'],
+    prerequisites: ['multiplication.two-by-two'],
+  },
 ];

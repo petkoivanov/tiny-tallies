@@ -27,6 +27,8 @@ export function shouldGenerateWordProblem(elo: number, rng: SeededRng): boolean 
 /**
  * Generates a word problem for the given operation and operands.
  * Returns null if no suitable template exists for the operation/grade.
+ *
+ * @param originalQuestionText - The bare equation text, used for prefix-mode templates.
  */
 export function generateWordProblem(
   operation: Operation,
@@ -34,9 +36,13 @@ export function generateWordProblem(
   b: number,
   grade: number,
   rng: SeededRng,
+  originalQuestionText?: string,
 ): GeneratedWordProblem | null {
   const applicable = WORD_PROBLEM_TEMPLATES.filter(
-    (t) => t.operations.includes(operation) && t.minGrade <= grade,
+    (t) =>
+      t.operations.includes(operation) &&
+      t.minGrade <= grade &&
+      (t.maxGrade === undefined || t.maxGrade >= grade),
   );
 
   if (applicable.length === 0) return null;
@@ -72,8 +78,13 @@ export function generateWordProblem(
   };
 
   const text = interpolate(template.template, vars);
-  const question = interpolate(template.question, vars);
 
+  // Prefix mode: prepend scene-setting text before the original questionText
+  if (template.mode === 'prefix' && originalQuestionText) {
+    return { text, question: originalQuestionText };
+  }
+
+  const question = interpolate(template.question, vars);
   return { text, question };
 }
 

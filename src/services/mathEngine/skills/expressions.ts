@@ -41,4 +41,20 @@ export const EXPRESSIONS_SKILLS: readonly SkillDefinition[] = [
     standards: ['5.OA.A.1'],
     prerequisites: ['expressions.three-ops'],
   },
+  {
+    id: 'expressions.one-step-equation',
+    name: 'One-step equations',
+    operation: 'expressions',
+    grade: 6,
+    standards: ['6.EE.B.7'],
+    prerequisites: ['expressions.two-ops'],
+  },
+  {
+    id: 'expressions.variable-eval',
+    name: 'Evaluate expressions with variables',
+    operation: 'expressions',
+    grade: 6,
+    standards: ['6.EE.A.2c'],
+    prerequisites: ['expressions.one-step-equation'],
+  },
 ];

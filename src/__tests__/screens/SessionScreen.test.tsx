@@ -67,6 +67,7 @@ const defaultUseSessionReturn: UseSessionReturn = {
     phase: 'warmup',
     skillId: 'addition.single',
     templateBaseElo: 900,
+    studentElo: 1000,
   },
   currentIndex: 0,
   totalProblems: 15,
@@ -651,13 +652,15 @@ describe('SessionScreen', () => {
           correctAnswer: { type: 'numeric', value: 27 },
         },
         presentation: {
-          ...defaultUseSessionReturn.currentProblem!.presentation,
+          problem: {} as any,
+          format: 'multiple_choice' as const,
           options: [
             { value: 27 },
             { value: 33 },
             { value: 37 },
             { value: 17 },
           ],
+          correctIndex: 0,
         },
       },
     };

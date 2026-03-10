@@ -1,6 +1,12 @@
+export { AnalogClock, clockDetailForSkill } from './AnalogClock';
+export { CoinDisplay, shouldShowCoins } from './CoinDisplay';
+export { NarrateButton } from './NarrateButton';
 export { ManipulativePanel } from './ManipulativePanel';
 export { CompactAnswerRow } from './CompactAnswerRow';
 export { CpaModeIcon } from './CpaModeIcon';
 export { CpaSessionContent } from './CpaSessionContent';
+export { FractionText } from './FractionText';
+export { MathQuestionDisplay, hasFractionNotation, parseQuestionText } from './MathQuestionDisplay';
+export { LevelBadge } from './LevelBadge';
 export { SessionHeader } from './SessionHeader';
 export { SessionWrapper } from './SessionWrapper';

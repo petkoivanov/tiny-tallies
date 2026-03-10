@@ -36,8 +36,43 @@ jest.mock('lucide-react-native', () => {
     BookOpen: (props: Record<string, unknown>) => (
       <View testID="book-icon" {...props} />
     ),
+    ChevronDown: (props: Record<string, unknown>) => (
+      <View testID="chevron-down" {...props} />
+    ),
+    ChevronRight: (props: Record<string, unknown>) => (
+      <View testID="chevron-right" {...props} />
+    ),
+    ChevronUp: (props: Record<string, unknown>) => (
+      <View testID="chevron-up" {...props} />
+    ),
+    Sparkles: (props: Record<string, unknown>) => (
+      <View testID="sparkles-icon" {...props} />
+    ),
+    Clock: (props: Record<string, unknown>) => (
+      <View testID="clock-icon" {...props} />
+    ),
+    Target: (props: Record<string, unknown>) => (
+      <View testID="target-icon" {...props} />
+    ),
   };
 });
+
+// Mock react-native-svg
+jest.mock('react-native-svg', () => {
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: (props: Record<string, unknown>) => <View testID="svg" {...props} />,
+    Circle: (props: Record<string, unknown>) => <View testID="svg-circle" {...props} />,
+    Rect: (props: Record<string, unknown>) => <View testID="svg-rect" {...props} />,
+    Line: (props: Record<string, unknown>) => <View testID="svg-line" {...props} />,
+  };
+});
+
+// Mock parent summary service
+jest.mock('@/services/reports', () => ({
+  generateParentSummary: jest.fn().mockResolvedValue(null),
+}));
 
 // Mock store state
 let mockStoreState: Record<string, unknown> = {};
@@ -59,6 +94,7 @@ function setMockState(overrides: Record<string, unknown> = {}) {
     sessionsCompleted: 0,
     earnedBadges: {},
     childName: 'Alex',
+    sessionHistory: [],
     ...overrides,
   };
 }

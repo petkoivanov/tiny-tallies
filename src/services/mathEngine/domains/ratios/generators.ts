@@ -157,3 +157,41 @@ export function generateProportion(
     metadata: {},
   };
 }
+
+/** Grade 7: Find the whole from a percent — "36 is 25% of what number?" */
+export function generatePercentFindWhole(
+  _template: ProblemTemplate,
+  rng: SeededRng,
+): DomainProblemData {
+  const percents = [10, 20, 25, 50, 75];
+  const percent = percents[rng.intRange(0, percents.length - 1)];
+  const whole = rng.intRange(20, 200);
+  // Ensure clean division: whole must be divisible so part is integer
+  const wholeFinal = Math.round(whole / (100 / percent)) * (100 / percent);
+  const part = (percent / 100) * wholeFinal;
+
+  return {
+    operands: [part, percent],
+    correctAnswer: numericAnswer(wholeFinal),
+    questionText: `${part} is ${percent}% of what number?`,
+    metadata: {},
+  };
+}
+
+/** Grade 7: Scale drawings — "A map uses 1 cm = 5 km. A road is 8 cm. How many km?" */
+export function generateScaleDrawing(
+  _template: ProblemTemplate,
+  rng: SeededRng,
+): DomainProblemData {
+  const scales = [2, 5, 10, 50, 100];
+  const scale = scales[rng.intRange(0, scales.length - 1)];
+  const modelLength = rng.intRange(2, 20);
+  const actual = modelLength * scale;
+
+  return {
+    operands: [scale, modelLength],
+    correctAnswer: numericAnswer(actual),
+    questionText: `A map uses a scale of 1 cm = ${scale} km. A road is ${modelLength} cm on the map. How many km is the actual road?`,
+    metadata: {},
+  };
+}

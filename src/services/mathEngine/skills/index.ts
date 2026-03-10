@@ -15,6 +15,9 @@ import { EXPONENTS_SKILLS } from './exponents';
 import { EXPRESSIONS_SKILLS } from './expressions';
 import { DECIMAL_SKILLS } from './decimals';
 import { INTEGER_SKILLS } from './integers';
+import { GEOMETRY_SKILLS } from './geometry';
+import { PROBABILITY_SKILLS } from './probability';
+import { NUMBER_THEORY_SKILLS } from './numberTheory';
 
 export const SKILLS: readonly SkillDefinition[] = [
   ...ADDITION_SKILLS,
@@ -32,6 +35,9 @@ export const SKILLS: readonly SkillDefinition[] = [
   ...EXPRESSIONS_SKILLS,
   ...DECIMAL_SKILLS,
   ...INTEGER_SKILLS,
+  ...GEOMETRY_SKILLS,
+  ...PROBABILITY_SKILLS,
+  ...NUMBER_THEORY_SKILLS,
 ];
 
 export function getSkillById(id: string): SkillDefinition | undefined {
@@ -64,4 +70,7 @@ export {
   EXPRESSIONS_SKILLS,
   DECIMAL_SKILLS,
   INTEGER_SKILLS,
+  GEOMETRY_SKILLS,
+  PROBABILITY_SKILLS,
+  NUMBER_THEORY_SKILLS,
 };

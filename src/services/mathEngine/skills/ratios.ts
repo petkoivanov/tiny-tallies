@@ -57,4 +57,20 @@ export const RATIOS_SKILLS: readonly SkillDefinition[] = [
     standards: ['7.RP.A.2'],
     prerequisites: ['ratios.equivalent', 'ratios.unit-rate'],
   },
+  {
+    id: 'ratios.percent-find-whole',
+    name: 'Find the whole from percent',
+    operation: 'ratios',
+    grade: 7,
+    standards: ['7.RP.A.3'],
+    prerequisites: ['ratios.percent-of'],
+  },
+  {
+    id: 'ratios.scale-drawing',
+    name: 'Scale drawings',
+    operation: 'ratios',
+    grade: 7,
+    standards: ['7.G.A.1'],
+    prerequisites: ['ratios.proportion'],
+  },
 ];

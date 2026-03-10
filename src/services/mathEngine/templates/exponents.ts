@@ -51,4 +51,14 @@ export const EXPONENTS_TEMPLATES: readonly ProblemTemplate[] = [
     digitCount: 2,
     domainConfig: { type: 'square_root' },
   },
+  {
+    id: 'exp_negative',
+    operation: 'exponents',
+    skillId: 'exponents.negative',
+    standards: ['8.EE.A.1'],
+    grades: [8],
+    baseElo: 1200,
+    digitCount: 2,
+    domainConfig: { type: 'negative' },
+  },
 ];

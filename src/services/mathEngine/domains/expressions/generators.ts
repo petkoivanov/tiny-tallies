@@ -215,3 +215,108 @@ export function generateNestedParens(
     metadata: {},
   };
 }
+
+/**
+ * Grade 6: One-step equations — "x + 5 = 12, what is x?"
+ */
+export function generateOneStepEquation(
+  _template: ProblemTemplate,
+  rng: SeededRng,
+): DomainProblemData {
+  const x = rng.intRange(2, 20);
+  const opIndex = rng.intRange(0, 3);
+
+  let questionText: string;
+  let b: number;
+
+  switch (opIndex) {
+    case 0: {
+      // Addition: x + b = sum
+      b = rng.intRange(1, 15);
+      const sum = x + b;
+      questionText = `x + ${b} = ${sum}. What is x?`;
+      break;
+    }
+    case 1: {
+      // Subtraction: x - b = diff
+      b = rng.intRange(1, Math.min(x - 1, 15));
+      const diff = x - b;
+      questionText = `x \u2212 ${b} = ${diff}. What is x?`;
+      break;
+    }
+    case 2: {
+      // Multiplication: a × x = product
+      const a = rng.intRange(2, 9);
+      const product = a * x;
+      questionText = `${a} \u00d7 x = ${product}. What is x?`;
+      break;
+    }
+    default: {
+      // Division: x ÷ b = quotient
+      b = rng.intRange(2, 9);
+      const quotient = x;
+      const dividend = x * b;
+      questionText = `x \u00f7 ${b} = ${quotient}. What is x?`;
+      return {
+        operands: [dividend, b],
+        correctAnswer: numericAnswer(dividend),
+        questionText,
+        metadata: {},
+      };
+    }
+  }
+
+  return {
+    operands: [x],
+    correctAnswer: numericAnswer(x),
+    questionText,
+    metadata: {},
+  };
+}
+
+/**
+ * Grade 6: Evaluate expressions with variables — "2x + 3 when x = 4"
+ */
+export function generateVariableEval(
+  _template: ProblemTemplate,
+  rng: SeededRng,
+): DomainProblemData {
+  const val = rng.intRange(1, 10);
+  const exprIndex = rng.intRange(0, 2);
+
+  let questionText: string;
+  let answer: number;
+
+  switch (exprIndex) {
+    case 0: {
+      // 2x + c
+      const coeff = rng.intRange(2, 5);
+      const c = rng.intRange(1, 10);
+      answer = coeff * val + c;
+      questionText = `What is ${coeff}x + ${c} when x = ${val}?`;
+      break;
+    }
+    case 1: {
+      // 3x - c
+      const coeff = rng.intRange(2, 5);
+      const c = rng.intRange(1, Math.min(coeff * val - 1, 10));
+      answer = coeff * val - c;
+      questionText = `What is ${coeff}x \u2212 ${c} when x = ${val}?`;
+      break;
+    }
+    default: {
+      // x² + c
+      const c = rng.intRange(1, 10);
+      answer = val * val + c;
+      questionText = `What is x\u00B2 + ${c} when x = ${val}?`;
+      break;
+    }
+  }
+
+  return {
+    operands: [val],
+    correctAnswer: numericAnswer(answer),
+    questionText,
+    metadata: {},
+  };
+}

@@ -1,6 +1,6 @@
 # Complete Skills Reference — v0.9
 
-Every skill to be implemented, with IDs, grades, prerequisites, Elo ranges, standards, and template specifications.
+Every skill in the original 9-domain plan, with IDs, grades, prerequisites, Elo ranges, standards, and template specifications. See "Additional Domains" section at the bottom for the 7 extra domains added beyond the original v0.9 scope (total: 132 skills across 16 domains, grades 1-8).
 
 ## Notation
 - **Elo**: `baseElo` for the easiest template in that skill. Harder templates within the same skill are +50-80 higher.
@@ -128,7 +128,23 @@ Every skill to be implemented, with IDs, grades, prerequisites, Elo ranges, stan
 
 ---
 
-## Total: 72 skills
+## Total (original 9 domains): 72 skills
+
+## Additional Domains (implemented beyond original scope): 60 skills
+
+| Domain | Skills | Grades | Notes |
+|--------|--------|--------|-------|
+| Measurement | 5 | 4-5 | Length, weight, capacity, temperature, unit conversion |
+| Ratios | 9 | 6-7 | Ratios, rates, proportions, percent |
+| Exponents | 6 | 5-8 | Powers, square roots, scientific notation |
+| Expressions | 7 | 5-6 | Variables, evaluating, simplifying, order of operations |
+| Decimals | * | 4-6 | Decimal operations, place value, conversion |
+| Integers | * | 6-7 | Negative numbers, integer operations |
+| Geometry | 6 | 7-8 | Angles, area, volume, coordinate geometry |
+| Probability | 2 | 7 | Simple probability, compound events |
+| Number Theory | 3 | 6 | Factors, multiples, primes |
+
+## Grand Total: 132 skills across 16 domains (grades 1-8)
 
 ## Answer Format Thresholds
 

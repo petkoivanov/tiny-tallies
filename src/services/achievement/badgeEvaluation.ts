@@ -86,6 +86,28 @@ function checkCondition(
         snapshot.lastChallengeScore.score === snapshot.lastChallengeScore.total
       );
 
+    case 'first-session':
+      return snapshot.sessionsCompleted >= 1;
+
+    case 'session-score':
+      return (
+        snapshot.lastSessionScore !== undefined &&
+        snapshot.lastSessionScore.correct >= condition.correctRequired
+      );
+
+    case 'perfect-session':
+      return (
+        snapshot.lastSessionScore !== undefined &&
+        snapshot.lastSessionScore.total > 0 &&
+        snapshot.lastSessionScore.correct === snapshot.lastSessionScore.total
+      );
+
+    case 'skills-practiced':
+      return (
+        snapshot.lastSessionScore !== undefined &&
+        snapshot.lastSessionScore.skillsPracticed >= condition.skillCount
+      );
+
     default:
       return false;
   }

@@ -141,4 +141,18 @@ export const MULTIPLICATION_TEMPLATES: readonly ProblemTemplate[] = [
     baseElo: 1200,
     digitCount: 4,
   },
+  {
+    id: 'mult_three_by_two',
+    operation: 'multiplication',
+    skillId: 'multiplication.three-by-two',
+    standards: ['5.NBT.B.5'],
+    grades: [5],
+    operandRanges: [
+      { min: 100, max: 500 },
+      { min: 10, max: 50 },
+    ],
+    resultRange: { min: 1000, max: 25000 },
+    baseElo: 1100,
+    digitCount: 3,
+  },
 ];

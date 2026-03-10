@@ -168,6 +168,7 @@ export function useSession(options?: {
   const resetSessionDedup = useAppStore((s) => s.resetSessionDedup);
   const misconceptions = useAppStore((s) => s.misconceptions);
   const completeChallenge = useAppStore((s) => s.completeChallenge);
+  const addSessionHistory = useAppStore((s) => s.addSessionHistory);
 
   // Synchronous init: queue available on first render
   const initializedRef = useRef(false);
@@ -241,9 +242,9 @@ export function useSession(options?: {
       // Show feedback
       setFeedbackState({ visible: true, correct: isCorrect });
 
-      // Find bugId from selected choice if wrong
+      // Find bugId from selected choice if wrong (MC only)
       let bugId: string | undefined;
-      if (!isCorrect) {
+      if (!isCorrect && problem.presentation.format === 'multiple_choice') {
         const selectedOption = problem.presentation.options.find(
           (o) => o.value === selectedValue,
         );
@@ -251,11 +252,12 @@ export function useSession(options?: {
       }
 
       // Record answer in store
+      const answerFormat = problem.presentation.format === 'free_text' ? 'free' : 'mc';
       recordAnswer({
         problemId: problem.problem.id,
         answer: selectedValue,
         correct: isCorrect,
-        format: 'mc',
+        format: answerFormat,
         bugId,
       });
 
@@ -405,6 +407,11 @@ export function useSession(options?: {
               ? { score: finalScore, total: totalProblems }
               : undefined,
             childGrade: useAppStore.getState().childGrade ?? 1,
+            lastSessionScore: {
+              correct: finalScore,
+              total: totalProblems,
+              skillsPracticed: pendingUpdatesRef.current.size,
+            },
           };
           const allNewBadges = evaluateBadges(badgeSnapshot, useAppStore.getState().earnedBadges);
           if (allNewBadges.length > 0) {
@@ -447,6 +454,17 @@ export function useSession(options?: {
             newBadges,
             totalNewBadges: allNewBadges.length,
             ...(challengeResult ?? {}),
+          });
+
+          // Record session history for parent reports
+          addSessionHistory({
+            completedAt: new Date().toISOString(),
+            score: isCorrect ? score + 1 : score,
+            total: totalProblems,
+            xpEarned: totalXpEarnedRef.current,
+            durationMs,
+            mode,
+            skillIds: [...pendingUpdatesRef.current.keys()],
           });
 
           // Cloud sync: queue deltas and trigger push
@@ -500,6 +518,7 @@ export function useSession(options?: {
       mode,
       challengeThemeId,
       completeChallenge,
+      addSessionHistory,
     ],
   );
 

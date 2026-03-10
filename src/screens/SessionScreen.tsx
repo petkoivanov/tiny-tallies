@@ -174,7 +174,6 @@ export default function SessionScreen() {
   }
 
   const problem = currentProblem?.problem;
-  const options = currentProblem?.presentation.options ?? [];
 
   return (
     <SessionWrapper>
@@ -190,6 +189,7 @@ export default function SessionScreen() {
         currentIndex={currentIndex}
         totalProblems={totalProblems}
         feedbackState={feedbackState}
+        studentElo={currentProblem?.studentElo ?? 1000}
         onQuit={() => navigation.goBack()}
       />
 
@@ -205,7 +205,7 @@ export default function SessionScreen() {
         <CpaSessionContent
           problem={problem}
           skillId={currentProblem.skillId}
-          options={options}
+          presentation={currentProblem.presentation}
           currentIndex={currentIndex}
           onAnswer={handleAnswerWithBoost}
           feedbackActive={isFeedbackActive}

@@ -6,6 +6,7 @@ import type { AllAvatarId, FrameId } from '../constants/avatars';
 import type { ThemeId } from '@/theme/colors';
 import type { ManipulativeType } from '@/services/cpa/cpaTypes';
 import type { ChallengeCompletion } from '@/services/challenge/challengeTypes';
+import type { SessionHistoryEntry } from '../slices/sessionHistorySlice';
 
 /**
  * Per-child data snapshot — all fields that belong to a single child profile.
@@ -32,6 +33,7 @@ export interface ChildData {
   sessionsCompleted: number;
   challengeCompletions: Record<string, ChallengeCompletion>;
   challengesCompleted: number;
+  sessionHistory: SessionHistoryEntry[];
 }
 
 /**
@@ -67,6 +69,7 @@ export const CHILD_DATA_KEYS: readonly (keyof ChildData)[] = [
   'sessionsCompleted',
   'challengeCompletions',
   'challengesCompleted',
+  'sessionHistory',
 ] as const;
 
 /** Default values for a brand-new child profile (before grade initialization). */
@@ -89,6 +92,7 @@ export const DEFAULT_CHILD_DATA: ChildData = {
   sessionsCompleted: 0,
   challengeCompletions: {},
   challengesCompleted: 0,
+  sessionHistory: [],
 };
 
 /**

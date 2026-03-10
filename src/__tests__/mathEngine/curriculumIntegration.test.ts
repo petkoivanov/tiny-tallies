@@ -108,17 +108,20 @@ describe('Curriculum Integration', () => {
   it('skill counts by domain are correct', () => {
     expect(getSkillsByOperation('addition')).toHaveLength(12);
     expect(getSkillsByOperation('subtraction')).toHaveLength(11);
-    expect(getSkillsByOperation('multiplication')).toHaveLength(13);
-    expect(getSkillsByOperation('division')).toHaveLength(11);
+    expect(getSkillsByOperation('multiplication')).toHaveLength(14);
+    expect(getSkillsByOperation('division')).toHaveLength(12);
     expect(getSkillsByOperation('fractions')).toHaveLength(14);
     expect(getSkillsByOperation('place_value')).toHaveLength(12);
     expect(getSkillsByOperation('time')).toHaveLength(7);
     expect(getSkillsByOperation('money')).toHaveLength(7);
     expect(getSkillsByOperation('patterns')).toHaveLength(5);
     expect(getSkillsByOperation('measurement')).toHaveLength(5);
-    expect(getSkillsByOperation('ratios')).toHaveLength(7);
-    expect(getSkillsByOperation('exponents')).toHaveLength(5);
-    expect(getSkillsByOperation('expressions')).toHaveLength(5);
+    expect(getSkillsByOperation('ratios')).toHaveLength(9);
+    expect(getSkillsByOperation('exponents')).toHaveLength(6);
+    expect(getSkillsByOperation('expressions')).toHaveLength(7);
+    expect(getSkillsByOperation('geometry')).toHaveLength(6);
+    expect(getSkillsByOperation('probability')).toHaveLength(2);
+    expect(getSkillsByOperation('number_theory')).toHaveLength(3);
   });
 
   it('total template count matches skill coverage', () => {

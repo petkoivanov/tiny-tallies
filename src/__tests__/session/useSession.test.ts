@@ -3,6 +3,20 @@ import { useAppStore } from '@/store/appStore';
 import { useSession, FEEDBACK_DURATION_MS } from '@/hooks/useSession';
 import { answerNumericValue } from '@/services/mathEngine/types';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
+import type { SessionProblem } from '@/services/session/sessionTypes';
+
+/** Get a wrong answer value from a session problem (works for both MC and free-text). */
+function getWrongAnswer(problem: SessionProblem): number {
+  const correct = answerNumericValue(problem.problem.correctAnswer);
+  if (problem.presentation.format === 'multiple_choice') {
+    const wrong = problem.presentation.options.find(
+      (o: { value: number }) => o.value !== correct,
+    );
+    return wrong!.value;
+  }
+  // Free-text: just return correct + 1
+  return correct + 1;
+}
 
 // Use fake timers for feedback timeout control
 jest.useFakeTimers();
@@ -53,14 +67,10 @@ describe('useSession', () => {
 
   it('handleAnswer sets feedbackState for incorrect answer', () => {
     const { result } = renderHook(() => useSession());
-    const correctAnswer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
-    // Pick a wrong answer from the options
-    const wrongOption = result.current.currentProblem!.presentation.options.find(
-      (o) => o.value !== correctAnswer,
-    );
+    const wrongAnswer = getWrongAnswer(result.current.currentProblem!);
 
     act(() => {
-      result.current.handleAnswer(wrongOption!.value);
+      result.current.handleAnswer(wrongAnswer);
     });
 
     expect(result.current.feedbackState).toEqual({
@@ -84,13 +94,10 @@ describe('useSession', () => {
 
   it('score does not increment on incorrect answer', () => {
     const { result } = renderHook(() => useSession());
-    const correctAnswer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
-    const wrongOption = result.current.currentProblem!.presentation.options.find(
-      (o) => o.value !== correctAnswer,
-    );
+    const wrongAnswer = getWrongAnswer(result.current.currentProblem!);
 
     act(() => {
-      result.current.handleAnswer(wrongOption!.value);
+      result.current.handleAnswer(wrongAnswer);
     });
 
     expect(result.current.score).toBe(0);
@@ -128,7 +135,7 @@ describe('useSession', () => {
     const answers = useAppStore.getState().sessionAnswers;
     expect(answers).toHaveLength(1);
     expect(answers[0].correct).toBe(true);
-    expect(answers[0].format).toBe('mc');
+    expect(['mc', 'free']).toContain(answers[0].format);
   });
 
   it('sessionPhase transitions through warmup -> practice -> cooldown', () => {
@@ -393,11 +400,9 @@ describe('useSession', () => {
 
       // For the first problem, if it's the skill we set up at Box 3, answer wrong
       if (i === 0 && problem.skillId === 'addition.single-digit.no-carry') {
-        const wrongOption = problem.presentation.options.find(
-          (o) => o.value !== correctAnswer,
-        );
+        const wrongAnswer = getWrongAnswer(problem);
         act(() => {
-          result.current.handleAnswer(wrongOption!.value);
+          result.current.handleAnswer(wrongAnswer);
         });
       } else {
         act(() => {

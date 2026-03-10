@@ -54,11 +54,17 @@ function completeSessionWithPattern(
     const problem = result.current.currentProblem;
     if (!problem) break;
 
-    const answer = pattern[i]
-      ? answerNumericValue(problem.problem.correctAnswer)
-      : problem.presentation.options.find(
-          (o) => o.value !== answerNumericValue(problem.problem.correctAnswer),
-        )!.value;
+    const correctVal = answerNumericValue(problem.problem.correctAnswer);
+    let answer: number;
+    if (pattern[i]) {
+      answer = correctVal;
+    } else if (problem.presentation.format === 'multiple_choice') {
+      answer = problem.presentation.options.find(
+        (o: { value: number }) => o.value !== correctVal,
+      )!.value;
+    } else {
+      answer = correctVal + 1;
+    }
 
     act(() => {
       result.current.handleAnswer(answer);

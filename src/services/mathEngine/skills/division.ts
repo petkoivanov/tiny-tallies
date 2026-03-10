@@ -65,4 +65,12 @@ export const DIVISION_SKILLS: readonly SkillDefinition[] = [
     standards: ['4.OA.A.3'],
     prerequisites: ['division.two-by-one'],
   },
+  {
+    id: 'division.four-by-two',
+    name: '4-digit \u00f7 2-digit division',
+    operation: 'division',
+    grade: 6,
+    standards: ['5.NBT.B.6'],
+    prerequisites: ['division.three-by-one'],
+  },
 ];

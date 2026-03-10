@@ -39,6 +39,9 @@ const BUGS_BY_OPERATION: Record<Operation, readonly BugPattern[]> = {
   ratios: RATIOS_BUGS,
   exponents: EXPONENTS_BUGS,
   expressions: EXPRESSIONS_BUGS,
+  geometry: [],
+  probability: [],
+  number_theory: [],
 };
 
 /**

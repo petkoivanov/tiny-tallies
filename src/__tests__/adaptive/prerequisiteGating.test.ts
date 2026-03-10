@@ -39,7 +39,7 @@ function mastered(overrides?: Partial<SkillState>): SkillState {
 
 describe('DAG validation', () => {
   it('has the expected number of skills', () => {
-    expect(SKILLS.length).toBe(114);
+    expect(SKILLS.length).toBe(132);
   });
 
   it('has no cycles in the prerequisite graph', () => {

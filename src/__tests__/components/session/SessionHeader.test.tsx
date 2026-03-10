@@ -27,6 +27,7 @@ const defaultProps = {
   currentIndex: 0,
   totalProblems: 15,
   feedbackState: null,
+  studentElo: 1000,
   onQuit: jest.fn(),
 };
 
@@ -96,5 +97,21 @@ describe('SessionHeader', () => {
   it('renders CpaModeIcon', () => {
     const { getByTestId } = render(<SessionHeader {...defaultProps} />);
     expect(getByTestId('cpa-mode-icon')).toBeTruthy();
+  });
+
+  it('renders level badge based on studentElo', () => {
+    const { getByText, getByTestId } = render(
+      <SessionHeader {...defaultProps} studentElo={1050} />,
+    );
+    expect(getByTestId('level-badge')).toBeTruthy();
+    // Elo 1050 → Level 6 (1020-1100 range)
+    expect(getByText('6')).toBeTruthy();
+  });
+
+  it('renders Level 1 for low Elo', () => {
+    const { getByText } = render(
+      <SessionHeader {...defaultProps} studentElo={650} />,
+    );
+    expect(getByText('1')).toBeTruthy();
   });
 });

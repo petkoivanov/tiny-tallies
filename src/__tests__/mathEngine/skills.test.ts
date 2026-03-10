@@ -6,8 +6,8 @@ import {
 } from '../../services/mathEngine/skills';
 
 describe('Skills registry', () => {
-  it('has 114 skills total', () => {
-    expect(SKILLS).toHaveLength(114);
+  it('has 132 skills total', () => {
+    expect(SKILLS).toHaveLength(132);
   });
 
   it('all skill IDs are unique', () => {
@@ -15,7 +15,7 @@ describe('Skills registry', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('covers all 13 operations', () => {
+  it('covers all 16 operations', () => {
     const ops = new Set(SKILLS.map((s) => s.operation));
     expect(ops).toEqual(
       new Set([
@@ -32,29 +32,35 @@ describe('Skills registry', () => {
         'ratios',
         'exponents',
         'expressions',
+        'geometry',
+        'probability',
+        'number_theory',
       ]),
     );
   });
 
-  it('covers grades 1-7', () => {
+  it('covers grades 1-8', () => {
     const grades = new Set(SKILLS.map((s) => s.grade));
-    expect(grades).toEqual(new Set([1, 2, 3, 4, 5, 6, 7]));
+    expect(grades).toEqual(new Set([1, 2, 3, 4, 5, 6, 7, 8]));
   });
 
   it('skill count by domain matches plan', () => {
     expect(getSkillsByOperation('addition')).toHaveLength(12);
     expect(getSkillsByOperation('subtraction')).toHaveLength(11);
-    expect(getSkillsByOperation('multiplication')).toHaveLength(13);
-    expect(getSkillsByOperation('division')).toHaveLength(11);
+    expect(getSkillsByOperation('multiplication')).toHaveLength(14);
+    expect(getSkillsByOperation('division')).toHaveLength(12);
     expect(getSkillsByOperation('fractions')).toHaveLength(14);
     expect(getSkillsByOperation('place_value')).toHaveLength(12);
     expect(getSkillsByOperation('time')).toHaveLength(7);
     expect(getSkillsByOperation('money')).toHaveLength(7);
     expect(getSkillsByOperation('patterns')).toHaveLength(5);
     expect(getSkillsByOperation('measurement')).toHaveLength(5);
-    expect(getSkillsByOperation('ratios')).toHaveLength(7);
-    expect(getSkillsByOperation('exponents')).toHaveLength(5);
-    expect(getSkillsByOperation('expressions')).toHaveLength(5);
+    expect(getSkillsByOperation('ratios')).toHaveLength(9);
+    expect(getSkillsByOperation('exponents')).toHaveLength(6);
+    expect(getSkillsByOperation('expressions')).toHaveLength(7);
+    expect(getSkillsByOperation('geometry')).toHaveLength(6);
+    expect(getSkillsByOperation('probability')).toHaveLength(2);
+    expect(getSkillsByOperation('number_theory')).toHaveLength(3);
   });
 
   it('all prerequisites reference existing skill IDs', () => {

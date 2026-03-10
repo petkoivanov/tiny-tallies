@@ -171,9 +171,11 @@ export function useChatOrchestration(
       // Track wrong answers and resolve bug descriptions for tutor context
       if (correctAnswer !== null && selectedValue !== correctAnswer) {
         incrementWrongAnswerCount();
-        const selectedOption = currentProblem?.presentation.options.find(
-          (o) => o.value === selectedValue,
-        );
+        const selectedOption = currentProblem?.presentation.format === 'multiple_choice'
+          ? currentProblem.presentation.options.find(
+              (o: { value: number; bugId?: string }) => o.value === selectedValue,
+            )
+          : undefined;
         const bugDesc = getBugDescription(selectedOption?.bugId);
         setLastWrongContext({
           wrongAnswer: selectedValue,

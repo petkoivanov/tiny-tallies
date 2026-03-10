@@ -17,8 +17,8 @@ function makeSnapshot(
 }
 
 describe('challenge badges', () => {
-  it('BADGES has 31 entries (27 existing + 4 challenge)', () => {
-    expect(BADGES).toHaveLength(31);
+  it('BADGES has 35 entries (27 existing + 4 challenge + 4 early-win)', () => {
+    expect(BADGES).toHaveLength(35);
   });
 
   it('awards behavior.challenge.first when challengesCompleted >= 1', () => {

@@ -11,7 +11,10 @@ export type Operation =
   | 'measurement'
   | 'ratios'
   | 'exponents'
-  | 'expressions';
+  | 'expressions'
+  | 'geometry'
+  | 'probability'
+  | 'number_theory';
 
 export type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
@@ -164,6 +167,8 @@ export interface Problem {
 export interface GenerationParams {
   templateId: string;
   seed: number;
+  /** Student Elo for word problem probability. Omit to skip word problems. */
+  elo?: number;
 }
 
 export interface BatchGenerationParams {

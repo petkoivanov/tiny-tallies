@@ -223,22 +223,25 @@ describe('sessionOrchestrator', () => {
       for (const item of queue) {
         expect(item.problem).toBeDefined();
         expect(item.presentation).toBeDefined();
-        expect(item.presentation.options.length).toBe(4);
+        expect(['multiple_choice', 'free_text']).toContain(item.presentation.format);
         expect(item.problem.correctAnswer.type).toBe('numeric');
         expect(typeof item.skillId).toBe('string');
         expect(typeof item.templateBaseElo).toBe('number');
       }
     });
 
-    it('each problem has a valid multiple choice presentation', () => {
+    it('each problem has a valid presentation with correct answer', () => {
       const queue = generateSessionQueue({}, DEFAULT_SESSION_CONFIG, 42);
 
       for (const item of queue) {
-        expect(item.presentation.format).toBe('multiple_choice');
-        expect(item.presentation.options).toHaveLength(4);
-        // Correct answer should be among the options
-        const values = item.presentation.options.map((o) => o.value);
-        expect(values).toContain(answerNumericValue(item.problem.correctAnswer));
+        expect(['multiple_choice', 'free_text']).toContain(item.presentation.format);
+        if (item.presentation.format === 'multiple_choice') {
+          expect(item.presentation.options.length).toBeGreaterThanOrEqual(4);
+          const values = item.presentation.options.map((o: { value: number }) => o.value);
+          expect(values).toContain(answerNumericValue(item.problem.correctAnswer));
+        } else {
+          expect(item.presentation.maxDigits).toBeGreaterThanOrEqual(2);
+        }
       }
     });
   });
@@ -501,14 +504,14 @@ describe('sessionOrchestrator', () => {
       expect(midRangeCount).toBeGreaterThan(0);
     });
 
-    it('empty skillStates (new user) still produces 15 valid problems', () => {
+    it('empty skillStates (new user) still produces 12 valid problems', () => {
       const queue = generateSessionQueue({}, DEFAULT_SESSION_CONFIG, 99);
 
       expect(queue).toHaveLength(12);
       for (const item of queue) {
         expect(item.problem).toBeDefined();
         expect(item.presentation).toBeDefined();
-        expect(item.presentation.options.length).toBe(4);
+        expect(['multiple_choice', 'free_text']).toContain(item.presentation.format);
         expect(item.problem.correctAnswer.type).toBe('numeric');
         expect(typeof item.skillId).toBe('string');
         expect(typeof item.templateBaseElo).toBe('number');

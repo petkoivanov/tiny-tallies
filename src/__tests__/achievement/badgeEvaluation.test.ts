@@ -120,7 +120,82 @@ describe('badgeEvaluation', () => {
       expect(result).toContain('mastery.addition.single-digit.no-carry');
       expect(result).toContain('behavior.streak.bronze');
       expect(result).toContain('behavior.sessions.bronze');
-      expect(result.length).toBeGreaterThanOrEqual(3);
+      expect(result).toContain('behavior.first-session');
+      expect(result.length).toBeGreaterThanOrEqual(4);
+    });
+
+    // ── Early-Win Badges ──────────────────────────────────────────────────
+
+    it('returns first-session badge after completing 1 session', () => {
+      const snapshot = createEmptySnapshot();
+      snapshot.sessionsCompleted = 1;
+      const result = evaluateBadges(snapshot, {});
+      expect(result).toContain('behavior.first-session');
+    });
+
+    it('does NOT return first-session badge with 0 sessions', () => {
+      const snapshot = createEmptySnapshot();
+      const result = evaluateBadges(snapshot, {});
+      expect(result).not.toContain('behavior.first-session');
+    });
+
+    it('returns high-five badge when session has 5+ correct', () => {
+      const snapshot = createEmptySnapshot();
+      snapshot.sessionsCompleted = 1;
+      snapshot.lastSessionScore = { correct: 6, total: 8, skillsPracticed: 3 };
+      const result = evaluateBadges(snapshot, {});
+      expect(result).toContain('behavior.high-five');
+    });
+
+    it('does NOT return high-five badge when session has < 5 correct', () => {
+      const snapshot = createEmptySnapshot();
+      snapshot.sessionsCompleted = 1;
+      snapshot.lastSessionScore = { correct: 4, total: 8, skillsPracticed: 3 };
+      const result = evaluateBadges(snapshot, {});
+      expect(result).not.toContain('behavior.high-five');
+    });
+
+    it('returns perfect-session badge when all answers are correct', () => {
+      const snapshot = createEmptySnapshot();
+      snapshot.sessionsCompleted = 1;
+      snapshot.lastSessionScore = { correct: 10, total: 10, skillsPracticed: 4 };
+      const result = evaluateBadges(snapshot, {});
+      expect(result).toContain('behavior.perfect-session');
+    });
+
+    it('does NOT return perfect-session badge when any answer is wrong', () => {
+      const snapshot = createEmptySnapshot();
+      snapshot.sessionsCompleted = 1;
+      snapshot.lastSessionScore = { correct: 9, total: 10, skillsPracticed: 4 };
+      const result = evaluateBadges(snapshot, {});
+      expect(result).not.toContain('behavior.perfect-session');
+    });
+
+    it('returns explorer badge when 3+ skills practiced in session', () => {
+      const snapshot = createEmptySnapshot();
+      snapshot.sessionsCompleted = 1;
+      snapshot.lastSessionScore = { correct: 5, total: 8, skillsPracticed: 3 };
+      const result = evaluateBadges(snapshot, {});
+      expect(result).toContain('behavior.explorer');
+    });
+
+    it('does NOT return explorer badge when < 3 skills practiced', () => {
+      const snapshot = createEmptySnapshot();
+      snapshot.sessionsCompleted = 1;
+      snapshot.lastSessionScore = { correct: 5, total: 8, skillsPracticed: 2 };
+      const result = evaluateBadges(snapshot, {});
+      expect(result).not.toContain('behavior.explorer');
+    });
+
+    it('awards multiple early-win badges in first session', () => {
+      const snapshot = createEmptySnapshot();
+      snapshot.sessionsCompleted = 1;
+      snapshot.lastSessionScore = { correct: 8, total: 8, skillsPracticed: 4 };
+      const result = evaluateBadges(snapshot, {});
+      expect(result).toContain('behavior.first-session');
+      expect(result).toContain('behavior.high-five');
+      expect(result).toContain('behavior.perfect-session');
+      expect(result).toContain('behavior.explorer');
     });
 
     it('is a pure function (same input produces same output, inputs not mutated)', () => {

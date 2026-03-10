@@ -73,6 +73,21 @@ export const skillMapColors = {
     light: '#f59e0b',
     lighter: '#fcd34d',
   },
+  geometry: {
+    primary: '#0e7490',
+    light: '#06b6d4',
+    lighter: '#67e8f9',
+  },
+  probability: {
+    primary: '#7e22ce',
+    light: '#a855f7',
+    lighter: '#c084fc',
+  },
+  number_theory: {
+    primary: '#15803d',
+    light: '#22c55e',
+    lighter: '#86efac',
+  },
   state: {
     lockedFill: '#374151',
     lockedRing: '#6b7280',

@@ -1,8 +1,7 @@
 /**
  * SkillDomainSummary — shows mastery breakdown by skill domain (operation).
  *
- * Displays per-domain counts of mastered / in-progress / not-started skills
- * with simple View-based progress bars.
+ * Displays per-domain counts with expandable per-skill drill-down.
  */
 
 import React, { useMemo } from 'react';
@@ -12,6 +11,7 @@ import { useTheme, spacing, typography, layout } from '@/theme';
 import type { Operation } from '@/services/mathEngine/types';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
 import { SKILLS } from '@/services/mathEngine/skills';
+import { ExpandableSkillDomain } from './ExpandableSkillDomain';
 
 /** Human-friendly labels for each operation/domain */
 const DOMAIN_LABELS: Record<Operation, string> = {
@@ -28,6 +28,9 @@ const DOMAIN_LABELS: Record<Operation, string> = {
   ratios: 'Ratios',
   exponents: 'Exponents',
   expressions: 'Expressions',
+  geometry: 'Geometry',
+  probability: 'Probability',
+  number_theory: 'Number Theory',
 };
 
 const DOMAIN_ORDER: Operation[] = [
@@ -40,19 +43,26 @@ const DOMAIN_ORDER: Operation[] = [
   'time',
   'money',
   'patterns',
+  'measurement',
+  'ratios',
+  'exponents',
+  'expressions',
+  'geometry',
+  'probability',
+  'number_theory',
 ];
 
-interface DomainStats {
-  total: number;
+interface DomainData {
   mastered: number;
   inProgress: number;
   notStarted: number;
+  total: number;
 }
 
-function computeDomainStats(
+function computeDomainData(
   skillStates: Record<string, SkillState>,
-): Record<Operation, DomainStats> {
-  const stats: Record<string, DomainStats> = {};
+): Record<Operation, DomainData> {
+  const stats: Record<string, DomainData> = {};
   for (const op of DOMAIN_ORDER) {
     stats[op] = { total: 0, mastered: 0, inProgress: 0, notStarted: 0 };
   }
@@ -71,8 +81,21 @@ function computeDomainStats(
     }
   }
 
-  return stats as Record<Operation, DomainStats>;
+  return stats as Record<Operation, DomainData>;
 }
+
+/** Group skills by operation for drill-down */
+function getSkillsByDomain() {
+  const map = new Map<Operation, typeof SKILLS[number][]>();
+  for (const skill of SKILLS) {
+    const list = map.get(skill.operation) ?? [];
+    list.push(skill);
+    map.set(skill.operation, list);
+  }
+  return map;
+}
+
+const SKILLS_BY_DOMAIN = getSkillsByDomain();
 
 interface SkillDomainSummaryProps {
   skillStates: Record<string, SkillState>;
@@ -80,7 +103,7 @@ interface SkillDomainSummaryProps {
 
 export function SkillDomainSummary({ skillStates }: SkillDomainSummaryProps) {
   const { colors } = useTheme();
-  const domainStats = useMemo(() => computeDomainStats(skillStates), [skillStates]);
+  const domainData = useMemo(() => computeDomainData(skillStates), [skillStates]);
 
   const styles = useMemo(
     () =>
@@ -100,39 +123,6 @@ export function SkillDomainSummary({ skillStates }: SkillDomainSummaryProps) {
           fontFamily: typography.fontFamily.semiBold,
           fontSize: typography.fontSize.lg,
           color: colors.textPrimary,
-        },
-        domainRow: {
-          gap: spacing.xs,
-        },
-        domainLabelRow: {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        },
-        domainName: {
-          fontFamily: typography.fontFamily.medium,
-          fontSize: typography.fontSize.md,
-          color: colors.textPrimary,
-        },
-        domainCount: {
-          fontFamily: typography.fontFamily.regular,
-          fontSize: typography.fontSize.sm,
-          color: colors.textMuted,
-        },
-        progressBarBackground: {
-          height: 8,
-          backgroundColor: colors.backgroundLight,
-          borderRadius: layout.borderRadius.round,
-          overflow: 'hidden',
-          flexDirection: 'row',
-        },
-        masteredFill: {
-          height: '100%',
-          backgroundColor: colors.correct,
-        },
-        inProgressFill: {
-          height: '100%',
-          backgroundColor: colors.primary,
         },
         legend: {
           flexDirection: 'row',
@@ -184,32 +174,20 @@ export function SkillDomainSummary({ skillStates }: SkillDomainSummaryProps) {
       </View>
 
       {DOMAIN_ORDER.map((op) => {
-        const stats = domainStats[op];
-        if (stats.total === 0) return null;
-        const masteredPct = (stats.mastered / stats.total) * 100;
-        const inProgressPct = (stats.inProgress / stats.total) * 100;
+        const data = domainData[op];
+        const domainSkills = SKILLS_BY_DOMAIN.get(op) ?? [];
+        if (data.total === 0) return null;
 
         return (
-          <View key={op} style={styles.domainRow} testID={`domain-${op}`}>
-            <View style={styles.domainLabelRow}>
-              <Text style={styles.domainName}>{DOMAIN_LABELS[op]}</Text>
-              <Text style={styles.domainCount}>
-                {stats.mastered}/{stats.total}
-              </Text>
-            </View>
-            <View style={styles.progressBarBackground}>
-              {masteredPct > 0 && (
-                <View
-                  style={[styles.masteredFill, { width: `${masteredPct}%` }]}
-                />
-              )}
-              {inProgressPct > 0 && (
-                <View
-                  style={[styles.inProgressFill, { width: `${inProgressPct}%` }]}
-                />
-              )}
-            </View>
-          </View>
+          <ExpandableSkillDomain
+            key={op}
+            domainLabel={DOMAIN_LABELS[op]}
+            skills={domainSkills}
+            skillStates={skillStates}
+            masteredCount={data.mastered}
+            totalCount={data.total}
+            inProgressCount={data.inProgress}
+          />
         );
       })}
     </View>

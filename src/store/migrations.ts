@@ -141,8 +141,13 @@ export function migrateStore(
     state.isSignedIn ??= false;
   }
 
+  if (version < 15) {
+    // v14 -> v15: Add session history for parent reports
+    state.sessionHistory ??= [];
+  }
+
   // Future migrations chain here:
-  // if (version < 15) { ... }
+  // if (version < 16) { ... }
 
   return state;
 }

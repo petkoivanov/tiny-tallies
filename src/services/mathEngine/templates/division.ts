@@ -113,4 +113,19 @@ export const DIVISION_TEMPLATES: readonly ProblemTemplate[] = [
     baseElo: 1200,
     digitCount: 2,
   },
+  {
+    id: 'div_four_by_two',
+    operation: 'division',
+    skillId: 'division.four-by-two',
+    standards: ['5.NBT.B.6'],
+    grades: [6],
+    operandRanges: [
+      { min: 1000, max: 9999 },
+      { min: 10, max: 50 },
+    ],
+    resultRange: { min: 20, max: 200 },
+    requiresBorrow: false,
+    baseElo: 1150,
+    digitCount: 4,
+  },
 ];

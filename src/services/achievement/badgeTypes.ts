@@ -12,7 +12,11 @@ export type UnlockCondition =
   | { type: 'sessions-milestone'; sessionsRequired: number }
   | { type: 'remediation-victory'; resolvedCountRequired: number }
   | { type: 'challenges-completed'; challengesRequired: number }
-  | { type: 'perfect-challenge' };
+  | { type: 'perfect-challenge' }
+  | { type: 'first-session' }
+  | { type: 'session-score'; correctRequired: number }
+  | { type: 'perfect-session' }
+  | { type: 'skills-practiced'; skillCount: number };
 
 export interface BadgeDefinition {
   readonly id: string;
@@ -32,4 +36,6 @@ export interface BadgeEvaluationSnapshot {
   lastChallengeScore?: { score: number; total: number };
   /** Child's grade level — skills below this grade are pre-mastered and ineligible for badges */
   childGrade: number;
+  /** Score from the session that just completed (for early-win badges) */
+  lastSessionScore?: { correct: number; total: number; skillsPracticed: number };
 }

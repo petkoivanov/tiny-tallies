@@ -9,6 +9,7 @@ import { AVATARS, DEFAULT_AVATAR_ID, SPECIAL_AVATARS, FRAMES, resolveAvatar } fr
 import { AvatarCircle } from '@/components/avatars';
 import { ProfileSwitcherSheet } from '@/components/profile';
 import { calculateLevelFromXp } from '@/services/gamification/levelProgression';
+import { eloToLevel } from '@/services/adaptive/levelMapping';
 import { isSameISOWeek } from '@/services/gamification/weeklyStreak';
 import { BADGES } from '@/services/achievement';
 import { getConfirmedMisconceptions } from '@/store/slices/misconceptionSlice';
@@ -24,7 +25,15 @@ export default function HomeScreen() {
   const avatarId = useAppStore((state) => state.avatarId);
   const isSessionActive = useAppStore((state) => state.isSessionActive);
   const xp = useAppStore((state) => state.xp);
-  const level = useAppStore((state) => state.level);
+  const skillStates = useAppStore((state) => state.skillStates);
+
+  // Level derived from average Elo (matches ParentReportsScreen)
+  const level = useMemo(() => {
+    const practiced = Object.values(skillStates).filter((s) => s.attempts > 0);
+    if (practiced.length === 0) return 1;
+    const avgElo = practiced.reduce((acc, s) => acc + s.eloRating, 0) / practiced.length;
+    return eloToLevel(avgElo);
+  }, [skillStates]);
   const weeklyStreak = useAppStore((state) => state.weeklyStreak);
   const lastSessionDate = useAppStore((state) => state.lastSessionDate);
   const misconceptions = useAppStore((state) => state.misconceptions);

@@ -8,7 +8,7 @@ import {
 } from '../../store/helpers/childDataHelpers';
 import type { AppState } from '../../store/appStore';
 
-// The 18 fields that partialize persists — single source of truth check
+// The 19 fields that partialize persists — single source of truth check
 const EXPECTED_PARTIALIZE_KEYS = [
   'childName',
   'childAge',
@@ -28,6 +28,7 @@ const EXPECTED_PARTIALIZE_KEYS = [
   'sessionsCompleted',
   'challengeCompletions',
   'challengesCompleted',
+  'sessionHistory',
 ] as const;
 
 /** Minimal mock AppState with per-child data filled in */
@@ -117,6 +118,10 @@ function createMockAppState(): AppState {
     challengesCompleted: 3,
     completeChallenge: jest.fn(),
 
+    // Session history
+    sessionHistory: [],
+    addSessionHistory: jest.fn(),
+
     // Session state (ephemeral, not in ChildData)
     sessionActive: false,
     currentSkillId: null,
@@ -141,8 +146,8 @@ function createMockAppState(): AppState {
 }
 
 describe('CHILD_DATA_KEYS', () => {
-  it('contains exactly 18 keys', () => {
-    expect(CHILD_DATA_KEYS).toHaveLength(18);
+  it('contains exactly 19 keys', () => {
+    expect(CHILD_DATA_KEYS).toHaveLength(19);
   });
 
   it('matches the partialize fields from appStore', () => {
@@ -157,7 +162,7 @@ describe('dehydrateChild', () => {
     const state = createMockAppState();
     const snapshot = dehydrateChild(state);
 
-    // Should have exactly the 18 keys
+    // Should have exactly the 19 keys
     expect(Object.keys(snapshot).sort()).toEqual(
       [...EXPECTED_PARTIALIZE_KEYS].sort(),
     );

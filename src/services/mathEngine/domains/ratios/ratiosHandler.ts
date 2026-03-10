@@ -8,6 +8,8 @@ import {
   generateFractionToPercent,
   generatePercentChange,
   generateProportion,
+  generatePercentFindWhole,
+  generateScaleDrawing,
 } from './generators';
 
 type RatiosType =
@@ -17,7 +19,9 @@ type RatiosType =
   | 'percent_of'
   | 'fraction_to_percent'
   | 'percent_change'
-  | 'proportion';
+  | 'proportion'
+  | 'percent_find_whole'
+  | 'scale_drawing';
 
 export const ratiosHandler: DomainHandler = {
   generate(template: ProblemTemplate, rng: SeededRng): DomainProblemData {
@@ -37,6 +41,10 @@ export const ratiosHandler: DomainHandler = {
         return generatePercentChange(template, rng);
       case 'proportion':
         return generateProportion(template, rng);
+      case 'percent_find_whole':
+        return generatePercentFindWhole(template, rng);
+      case 'scale_drawing':
+        return generateScaleDrawing(template, rng);
       default:
         throw new Error(`Unknown ratios type: ${config.type}`);
     }

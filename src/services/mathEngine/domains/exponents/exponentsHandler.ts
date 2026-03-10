@@ -6,6 +6,7 @@ import {
   generateCube,
   generatePowerOf10,
   generateSquareRoot,
+  generateNegative,
 } from './generators';
 
 type ExponentsType =
@@ -13,7 +14,8 @@ type ExponentsType =
   | 'square'
   | 'cube'
   | 'power_of_10'
-  | 'square_root';
+  | 'square_root'
+  | 'negative';
 
 export const exponentsHandler: DomainHandler = {
   generate(template: ProblemTemplate, rng: SeededRng): DomainProblemData {
@@ -29,6 +31,8 @@ export const exponentsHandler: DomainHandler = {
         return generatePowerOf10(template, rng);
       case 'square_root':
         return generateSquareRoot(template, rng);
+      case 'negative':
+        return generateNegative(template, rng);
       default:
         throw new Error(`Unknown exponents type: ${config.type}`);
     }

@@ -120,6 +120,7 @@ function makeProblem(): SessionProblem {
     phase: 'practice',
     skillId: 'add.single',
     templateBaseElo: 800,
+    studentElo: 1000,
   };
 }
 

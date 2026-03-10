@@ -1,5 +1,5 @@
 import type { Problem } from '../mathEngine/types';
-import type { MultipleChoicePresentation } from '../mathEngine/answerFormats/types';
+import type { FormattedProblem } from '../mathEngine/answerFormats/types';
 import type { CpaStage } from '../cpa/cpaTypes';
 
 /** Phase of a session, derived from problem index */
@@ -68,10 +68,12 @@ export const CHALLENGE_SESSION_CONFIG: Readonly<SessionConfig> = {
 /** A single problem in the session queue with phase and presentation metadata */
 export interface SessionProblem {
   readonly problem: Problem;
-  readonly presentation: MultipleChoicePresentation;
+  readonly presentation: FormattedProblem;
   readonly phase: SessionPhase;
   readonly skillId: string;
   readonly templateBaseElo: number;
+  /** Student's Elo rating for this skill at problem generation time */
+  readonly studentElo: number;
 }
 
 /** Accumulated Elo update for a single skill during a session */

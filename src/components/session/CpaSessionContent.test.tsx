@@ -132,17 +132,24 @@ const baseProblem: Problem = {
   metadata: { digitCount: 1, requiresCarry: false, requiresBorrow: false },
 };
 
-const baseOptions = [
-  { value: 8 },
-  { value: 7, bugId: 'off_by_one' },
-  { value: 9 },
-  { value: 6 },
-];
+import type { MultipleChoicePresentation } from '@/services/mathEngine/answerFormats/types';
+
+const basePresentation: MultipleChoicePresentation = {
+  problem: baseProblem,
+  format: 'multiple_choice',
+  options: [
+    { value: 8 },
+    { value: 7, bugId: 'off_by_one' },
+    { value: 9 },
+    { value: 6 },
+  ],
+  correctIndex: 0,
+};
 
 const baseProps = {
   problem: baseProblem,
   skillId: 'addition.single-digit.no-carry',
-  options: baseOptions,
+  presentation: basePresentation,
   currentIndex: 0,
   onAnswer: jest.fn(),
   feedbackActive: false,

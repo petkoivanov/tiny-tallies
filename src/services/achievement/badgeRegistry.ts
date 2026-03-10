@@ -1,14 +1,15 @@
 import type { BadgeCategory, BadgeDefinition } from './badgeTypes';
 
 /**
- * Static badge registry: 31 badge definitions organized by category.
+ * Static badge registry: 35 badge definitions organized by category.
  *
  * Mastery badges (19):
  *   - 14 skill-mastery (one per skill)
  *   - 2 category-mastery (addition, subtraction)
  *   - 3 grade-mastery (grades 1-3)
  *
- * Behavior badges (12):
+ * Behavior badges (16):
+ *   - 4 early-win (first session, high five, perfect session, explorer)
  *   - 3 streak-milestone (bronze/silver/gold)
  *   - 3 sessions-milestone (bronze/silver/gold)
  *   - 2 remediation-victory (bronze/silver)
@@ -171,6 +172,40 @@ export const BADGES: readonly BadgeDefinition[] = [
     category: 'mastery',
     tier: 'gold',
     condition: { type: 'grade-mastery', grade: 3 },
+  },
+
+  // ── Early-Win Badges (4) ──────────────────────────────────────────────
+  {
+    id: 'behavior.first-session',
+    name: 'First Steps',
+    description: 'Complete your very first practice session',
+    category: 'behavior',
+    tier: 'bronze',
+    condition: { type: 'first-session' },
+  },
+  {
+    id: 'behavior.high-five',
+    name: 'High Five',
+    description: 'Get 5 correct answers in a single session',
+    category: 'behavior',
+    tier: 'bronze',
+    condition: { type: 'session-score', correctRequired: 5 },
+  },
+  {
+    id: 'behavior.perfect-session',
+    name: 'Perfect Session',
+    description: 'Get every answer right in a session',
+    category: 'behavior',
+    tier: 'silver',
+    condition: { type: 'perfect-session' },
+  },
+  {
+    id: 'behavior.explorer',
+    name: 'Explorer',
+    description: 'Practice 3 different skills in one session',
+    category: 'behavior',
+    tier: 'bronze',
+    condition: { type: 'skills-practiced', skillCount: 3 },
   },
 
   // ── Streak-Milestone Badges (3) ────────────────────────────────────────

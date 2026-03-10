@@ -14,6 +14,9 @@ import { EXPONENTS_TEMPLATES } from './exponents';
 import { EXPRESSIONS_TEMPLATES } from './expressions';
 import { DECIMAL_TEMPLATES } from './decimals';
 import { INTEGER_TEMPLATES } from './integers';
+import { GEOMETRY_TEMPLATES } from './geometry';
+import { PROBABILITY_TEMPLATES } from './probability';
+import { NUMBER_THEORY_TEMPLATES } from './numberTheory';
 
 export const ALL_TEMPLATES: readonly ProblemTemplate[] = [
   ...ADDITION_TEMPLATES,
@@ -31,6 +34,9 @@ export const ALL_TEMPLATES: readonly ProblemTemplate[] = [
   ...EXPRESSIONS_TEMPLATES,
   ...DECIMAL_TEMPLATES,
   ...INTEGER_TEMPLATES,
+  ...GEOMETRY_TEMPLATES,
+  ...PROBABILITY_TEMPLATES,
+  ...NUMBER_THEORY_TEMPLATES,
 ];
 
 export function findTemplate(templateId: string): ProblemTemplate {
@@ -68,3 +74,6 @@ export { EXPONENTS_TEMPLATES } from './exponents';
 export { EXPRESSIONS_TEMPLATES } from './expressions';
 export { DECIMAL_TEMPLATES } from './decimals';
 export { INTEGER_TEMPLATES } from './integers';
+export { GEOMETRY_TEMPLATES } from './geometry';
+export { PROBABILITY_TEMPLATES } from './probability';
+export { NUMBER_THEORY_TEMPLATES } from './numberTheory';
