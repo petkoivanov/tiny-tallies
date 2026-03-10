@@ -157,7 +157,7 @@ describe('SkillDetailOverlay', () => {
     );
 
     expect(getByText('Add within 10')).toBeTruthy();
-    // Operation emoji for addition
+    // MathDomain emoji for addition
     expect(getByText('+')).toBeTruthy();
   });
 

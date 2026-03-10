@@ -8,13 +8,13 @@ import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { BookOpen } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
-import type { Operation } from '@/services/mathEngine/types';
+import type { MathDomain } from '@/services/mathEngine/types';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
 import { SKILLS } from '@/services/mathEngine/skills';
 import { ExpandableSkillDomain } from './ExpandableSkillDomain';
 
 /** Human-friendly labels for each operation/domain */
-const DOMAIN_LABELS: Record<Operation, string> = {
+const DOMAIN_LABELS: Record<MathDomain, string> = {
   addition: 'Addition',
   subtraction: 'Subtraction',
   multiplication: 'Multiplication',
@@ -33,7 +33,7 @@ const DOMAIN_LABELS: Record<Operation, string> = {
   number_theory: 'Number Theory',
 };
 
-const DOMAIN_ORDER: Operation[] = [
+const DOMAIN_ORDER: MathDomain[] = [
   'addition',
   'subtraction',
   'multiplication',
@@ -61,7 +61,7 @@ interface DomainData {
 
 function computeDomainData(
   skillStates: Record<string, SkillState>,
-): Record<Operation, DomainData> {
+): Record<MathDomain, DomainData> {
   const stats: Record<string, DomainData> = {};
   for (const op of DOMAIN_ORDER) {
     stats[op] = { total: 0, mastered: 0, inProgress: 0, notStarted: 0 };
@@ -81,12 +81,12 @@ function computeDomainData(
     }
   }
 
-  return stats as Record<Operation, DomainData>;
+  return stats as Record<MathDomain, DomainData>;
 }
 
 /** Group skills by operation for drill-down */
 function getSkillsByDomain() {
-  const map = new Map<Operation, typeof SKILLS[number][]>();
+  const map = new Map<MathDomain, typeof SKILLS[number][]>();
   for (const skill of SKILLS) {
     const list = map.get(skill.operation) ?? [];
     list.push(skill);

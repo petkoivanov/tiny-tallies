@@ -1,4 +1,4 @@
-import type { Operation, ProblemTemplate } from '../types';
+import type { MathDomain, ProblemTemplate } from '../types';
 import { ADDITION_TEMPLATES } from './addition';
 import { DIVISION_TEMPLATES } from './division';
 import { FRACTIONS_TEMPLATES } from './fractions';
@@ -54,7 +54,7 @@ export function getTemplatesBySkill(skillId: string): ProblemTemplate[] {
 }
 
 export function getTemplatesByOperation(
-  operation: Operation,
+  operation: MathDomain,
 ): ProblemTemplate[] {
   return ALL_TEMPLATES.filter((t) => t.operation === operation);
 }

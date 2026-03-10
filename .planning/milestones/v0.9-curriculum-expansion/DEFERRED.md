@@ -41,7 +41,7 @@ Items explicitly deferred from the curriculum expansion milestone.
 
 ## Pickup Priority (suggested order for next milestone)
 
-1. Word Problem System (Phase 54 — remaining v0.9 item)
+1. ~~Word Problem System (Phase 54)~~ — DONE in v0.9
 2. Interactive manipulatives (clock, coins)
 3. Data & Statistics (lower priority — less computational)
 4. Parental Time Controls

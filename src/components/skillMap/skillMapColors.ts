@@ -1,4 +1,4 @@
-import type { Operation } from '@/services/mathEngine/types';
+import type { MathDomain } from '@/services/mathEngine/types';
 import type { NodeState } from './skillMapTypes';
 
 /**
@@ -101,7 +101,7 @@ export const skillMapColors = {
 
 /** Returns fill and ring colors for a skill node based on operation and state. */
 export function getNodeColor(
-  operation: Operation,
+  operation: MathDomain,
   state: NodeState,
 ): { fill: string; ring: string } {
   if (state === 'locked') {

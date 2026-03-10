@@ -20,14 +20,14 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import type { Operation } from '@/services/mathEngine/types';
+import type { MathDomain } from '@/services/mathEngine/types';
 import type { NodeState } from './skillMapTypes';
 import { getNodeColor, skillMapColors } from './skillMapColors';
 
 export interface SkillMapNodeProps {
   skillId: string;
   name: string;
-  operation: Operation;
+  operation: MathDomain;
   cx: number;
   cy: number;
   state: NodeState;
@@ -180,7 +180,7 @@ export function SkillMapNode({
             </SvgText>
           )}
 
-          {/* Operation emoji */}
+          {/* MathDomain emoji */}
           <SvgText
             x={localCx}
             y={localCy + 5}

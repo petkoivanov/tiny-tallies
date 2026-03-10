@@ -4,7 +4,7 @@
 
 **Depends on**: v0.8 (Phases 38-40 complete; Phases 41-44 deferred)
 
-**Status**: NEARLY COMPLETE — 132 skills across 16 operations, 2139 tests passing, grades 1-8. Phases 45-53, 55-58 complete. Phase 54 (Word Problem System) remaining.
+**Status**: COMPLETE — 132 skills across 16 domains, 2156 tests passing, grades 1-8. All phases (45-58) complete including word problems and Operation→MathDomain rename.
 
 ## Scope
 

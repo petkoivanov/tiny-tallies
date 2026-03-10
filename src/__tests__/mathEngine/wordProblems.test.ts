@@ -5,9 +5,9 @@ import {
   WORD_PROBLEM_TEMPLATES,
   NAMES,
 } from '../../services/mathEngine/wordProblems';
-import type { Operation } from '../../services/mathEngine/types';
+import type { MathDomain } from '../../services/mathEngine/types';
 
-const ALL_OPERATIONS: Operation[] = [
+const ALL_OPERATIONS: MathDomain[] = [
   'addition', 'subtraction', 'multiplication', 'division',
   'fractions', 'place_value', 'time', 'money', 'patterns',
   'measurement', 'ratios', 'exponents', 'expressions',
@@ -251,7 +251,7 @@ describe('Word Problem System', () => {
     });
 
     it('every operation generates a word problem at appropriate grade', () => {
-      const gradeMap: Record<Operation, number> = {
+      const gradeMap: Record<MathDomain, number> = {
         addition: 2,
         subtraction: 2,
         multiplication: 3,

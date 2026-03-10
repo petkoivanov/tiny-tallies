@@ -1,8 +1,8 @@
-import type { Operation } from '../types';
+import type { MathDomain } from '../types';
 
 export interface WordProblemTemplate {
   id: string;
-  operations: Operation[];
+  operations: MathDomain[];
   /** Template string with placeholders: {name}, {object}, {a}, {b}, {verb}, etc. */
   template: string;
   /** Question appended after the story (unused in prefix mode) */

@@ -1,4 +1,4 @@
-import type { Operation } from '../types';
+import type { MathDomain } from '../types';
 
 /** Source of a generated distractor */
 export type DistractorSource = 'bug_library' | 'adjacent' | 'random';
@@ -11,13 +11,13 @@ export interface BugPattern {
   /** Unique identifier, e.g. 'add_no_carry' */
   readonly id: string;
   /** Operations this pattern applies to */
-  readonly operations: readonly Operation[];
+  readonly operations: readonly MathDomain[];
   /** Human-readable description of the misconception */
   readonly description: string;
   /** Minimum digit count for operands where this pattern is meaningful */
   readonly minDigits: number;
   /** Compute the misconception-based wrong answer, or null if not applicable */
-  readonly compute: (a: number, b: number, operation: Operation) => number | null;
+  readonly compute: (a: number, b: number, operation: MathDomain) => number | null;
 }
 
 /** Result of distractor generation, tracking provenance */

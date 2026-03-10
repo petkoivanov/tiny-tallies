@@ -1,4 +1,4 @@
-import type { Grade, Operation } from '../mathEngine/types';
+import type { Grade, MathDomain } from '../mathEngine/types';
 
 export interface ChallengeTheme {
   readonly id: string;
@@ -6,7 +6,7 @@ export interface ChallengeTheme {
   readonly emoji: string;
   readonly description: string;
   readonly skillFilter: {
-    readonly operations?: readonly Operation[];
+    readonly operations?: readonly MathDomain[];
     readonly grades?: readonly Grade[];
   };
   readonly goals: {

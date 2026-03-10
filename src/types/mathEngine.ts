@@ -5,7 +5,7 @@ export type {
   GenerationParams,
   BatchGenerationParams,
   SkillDefinition,
-  Operation,
+  MathDomain,
   Grade,
   OperandRange,
 } from '../services/mathEngine/types';

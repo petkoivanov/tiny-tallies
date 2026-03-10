@@ -4,7 +4,7 @@ import { calculateEloUpdate } from '@/services/adaptive';
 import { getSkillById } from '@/services/mathEngine/skills';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
 import type { PendingSkillUpdate } from '@/services/session/sessionTypes';
-import type { Operation } from '@/services/mathEngine/types';
+import type { MathDomain } from '@/services/mathEngine/types';
 
 /** Create a mastered skill state */
 function masteredState(overrides: Partial<SkillState> = {}): SkillState {

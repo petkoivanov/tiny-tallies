@@ -6,7 +6,7 @@ export type {
   GenerationParams,
   BatchGenerationParams,
   SkillDefinition,
-  Operation,
+  MathDomain,
   Grade,
   OperandRange,
   Answer,

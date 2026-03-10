@@ -5,7 +5,7 @@
  * highlighting the next suggested action on a manipulative.
  */
 
-import type { Operation } from '../mathEngine/types';
+import type { MathDomain } from '../mathEngine/types';
 import type { ManipulativeType } from './cpaTypes';
 
 /** A single guided step targeting an interactive element. */
@@ -18,7 +18,7 @@ export interface GuidedStep {
 
 /** A resolver that computes the next guided step for a specific operation+manipulative pair. */
 export interface GuidedStepResolver {
-  operation: Operation;
+  operation: MathDomain;
   manipulativeType: ManipulativeType;
   getNextStep: (operands: [number, number], currentCount: number) => GuidedStep | null;
 }

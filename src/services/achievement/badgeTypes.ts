@@ -1,4 +1,4 @@
-import type { Grade, Operation } from '../mathEngine/types';
+import type { Grade, MathDomain } from '../mathEngine/types';
 
 export type BadgeCategory = 'mastery' | 'behavior';
 
@@ -6,7 +6,7 @@ export type BadgeTier = 'bronze' | 'silver' | 'gold';
 
 export type UnlockCondition =
   | { type: 'skill-mastery'; skillId: string }
-  | { type: 'category-mastery'; operation: Operation }
+  | { type: 'category-mastery'; operation: MathDomain }
   | { type: 'grade-mastery'; grade: Grade }
   | { type: 'streak-milestone'; weeklyStreakRequired: number }
   | { type: 'sessions-milestone'; sessionsRequired: number }

@@ -1,10 +1,10 @@
 /**
- * Domain handler registry — maps Operation to DomainHandler.
+ * Domain handler registry — maps MathDomain to DomainHandler.
  *
  * When adding a new domain, register its handler here.
  */
 
-import type { DomainHandler, Operation } from '../types';
+import type { DomainHandler, MathDomain } from '../types';
 import { arithmeticHandler } from './arithmeticHandler';
 import { fractionsHandler } from './fractions';
 import { placeValueHandler } from './placeValue';
@@ -19,7 +19,7 @@ import { geometryHandler } from './geometry';
 import { probabilityHandler } from './probability';
 import { numberTheoryHandler } from './numberTheory';
 
-const HANDLERS: Record<Operation, DomainHandler> = {
+const HANDLERS: Record<MathDomain, DomainHandler> = {
   addition: arithmeticHandler,
   subtraction: arithmeticHandler,
   multiplication: arithmeticHandler,
@@ -39,6 +39,6 @@ const HANDLERS: Record<Operation, DomainHandler> = {
 };
 
 /** Get the domain handler for a given operation */
-export function getHandler(operation: Operation): DomainHandler {
+export function getHandler(operation: MathDomain): DomainHandler {
   return HANDLERS[operation];
 }

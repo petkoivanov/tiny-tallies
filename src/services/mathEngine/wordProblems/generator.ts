@@ -1,5 +1,5 @@
 import type { SeededRng } from '../seededRng';
-import type { Operation } from '../types';
+import type { MathDomain } from '../types';
 import { NAMES, OBJECTS, PLACES, ACTIVITIES, GIVE_AWAY_VERBS } from './namePools';
 import { WORD_PROBLEM_TEMPLATES } from './templates';
 import type { GeneratedWordProblem } from './types';
@@ -31,7 +31,7 @@ export function shouldGenerateWordProblem(elo: number, rng: SeededRng): boolean 
  * @param originalQuestionText - The bare equation text, used for prefix-mode templates.
  */
 export function generateWordProblem(
-  operation: Operation,
+  operation: MathDomain,
   a: number,
   b: number,
   grade: number,

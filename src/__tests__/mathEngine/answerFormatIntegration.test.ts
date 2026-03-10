@@ -6,9 +6,9 @@ import {
   freeTextProbability,
   mcOptionCount,
 } from '@/services/mathEngine/answerFormats';
-import { answerNumericValue, type Operation } from '@/services/mathEngine/types';
+import { answerNumericValue, type MathDomain } from '@/services/mathEngine/types';
 
-const ALL_OPERATIONS: Operation[] = [
+const ALL_OPERATIONS: MathDomain[] = [
   'addition', 'subtraction', 'multiplication', 'division',
   'fractions', 'place_value', 'time', 'money', 'patterns',
   'measurement', 'ratios', 'exponents', 'expressions',
@@ -100,7 +100,7 @@ describe('Answer format integration', () => {
 
   it('answer types are preserved in formatted output', () => {
     // Test that non-numeric answer types still format correctly
-    const nonArithOps: Operation[] = [
+    const nonArithOps: MathDomain[] = [
       'fractions', 'geometry', 'expressions', 'probability',
     ];
 

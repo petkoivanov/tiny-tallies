@@ -6,7 +6,7 @@
  * with a pulsing glow during guided practice.
  */
 
-import type { Operation } from '../mathEngine/types';
+import type { MathDomain } from '../mathEngine/types';
 import type { ManipulativeType } from './cpaTypes';
 import type { GuidedStep, GuidedStepResolver } from './guidedStepsTypes';
 
@@ -148,7 +148,7 @@ const resolvers: GuidedStepResolver[] = [
  *          or the combination is unmapped.
  */
 export function getNextGuidedStep(
-  operation: Operation,
+  operation: MathDomain,
   manipulativeType: ManipulativeType,
   operands: [number, number],
   currentCount: number,

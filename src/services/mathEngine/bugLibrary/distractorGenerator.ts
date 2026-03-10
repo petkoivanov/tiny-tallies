@@ -1,5 +1,5 @@
 import { answerNumericValue } from '../types';
-import type { Operation, Problem } from '../types';
+import type { MathDomain, Problem } from '../types';
 import type { SeededRng } from '../seededRng';
 import type { BugPattern, DistractorResult } from './types';
 import { ADDITION_BUGS } from './additionBugs';
@@ -25,7 +25,7 @@ const OFF_BY_ONE_IDS = new Set([
   'sub_off_by_one_minus',
 ]);
 
-const BUGS_BY_OPERATION: Record<Operation, readonly BugPattern[]> = {
+const BUGS_BY_OPERATION: Record<MathDomain, readonly BugPattern[]> = {
   addition: ADDITION_BUGS,
   subtraction: SUBTRACTION_BUGS,
   multiplication: MULTIPLICATION_BUGS,

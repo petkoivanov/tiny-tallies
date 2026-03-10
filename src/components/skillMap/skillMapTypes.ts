@@ -1,4 +1,4 @@
-import type { Grade, Operation } from '@/services/mathEngine/types';
+import type { Grade, MathDomain } from '@/services/mathEngine/types';
 
 /** Visual state of a skill node on the map. */
 export type NodeState = 'locked' | 'unlocked' | 'in-progress' | 'mastered';
@@ -27,7 +27,7 @@ export interface EdgeData {
 export interface SkillNodeData {
   skillId: string;
   name: string;
-  operation: Operation;
+  operation: MathDomain;
   grade: Grade;
   position: NodePosition;
   state: NodeState;

@@ -2,9 +2,9 @@ import { getHandler } from '@/services/mathEngine/domains/registry';
 import { SKILLS, getSkillsByOperation } from '@/services/mathEngine/skills';
 import { getTemplatesBySkill } from '@/services/mathEngine/templates';
 import { createRng } from '@/services/mathEngine/seededRng';
-import type { Operation } from '@/services/mathEngine/types';
+import type { MathDomain } from '@/services/mathEngine/types';
 
-const ALL_OPERATIONS: Operation[] = [
+const ALL_OPERATIONS: MathDomain[] = [
   'addition',
   'subtraction',
   'multiplication',
@@ -74,7 +74,7 @@ describe('Domain Handler Registry', () => {
   });
 
   it('handler generates valid answer types per domain', () => {
-    const expectedTypes: Partial<Record<Operation, string[]>> = {
+    const expectedTypes: Partial<Record<MathDomain, string[]>> = {
       addition: ['numeric'],
       subtraction: ['numeric'],
       multiplication: ['numeric'],

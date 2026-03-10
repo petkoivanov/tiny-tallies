@@ -164,7 +164,7 @@ export function buildSystemInstruction(params: PromptParams): string {
 export function buildHintPrompt(params: PromptParams): string {
   const lines: string[] = [
     `The child is working on: ${params.problemText}`,
-    `Operation: ${params.operation}`,
+    `MathDomain: ${params.operation}`,
   ];
 
   if (params.wrongAnswer !== undefined) {
@@ -196,7 +196,7 @@ export function buildHintPrompt(params: PromptParams): string {
 export function buildTeachPrompt(params: PromptParams): string {
   const lines: string[] = [
     `The child is working on: ${params.problemText}`,
-    `Operation: ${params.operation}`,
+    `MathDomain: ${params.operation}`,
   ];
 
   if (params.wrongAnswer !== undefined) {
@@ -232,7 +232,7 @@ export function buildTeachPrompt(params: PromptParams): string {
 export function buildBoostPrompt(params: BoostPromptParams): string {
   const lines: string[] = [
     `The child is working on: ${params.problemText}`,
-    `Operation: ${params.operation}`,
+    `MathDomain: ${params.operation}`,
     `The correct answer is: ${params.correctAnswer}`,
   ];
 

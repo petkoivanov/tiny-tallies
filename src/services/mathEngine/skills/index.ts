@@ -1,4 +1,4 @@
-import type { Grade, Operation, SkillDefinition } from '../types';
+import type { Grade, MathDomain, SkillDefinition } from '../types';
 
 import { ADDITION_SKILLS } from './addition';
 import { DIVISION_SKILLS } from './division';
@@ -45,7 +45,7 @@ export function getSkillById(id: string): SkillDefinition | undefined {
 }
 
 export function getSkillsByOperation(
-  operation: Operation,
+  operation: MathDomain,
 ): SkillDefinition[] {
   return SKILLS.filter((skill) => skill.operation === operation);
 }

@@ -23,7 +23,7 @@ export interface SkillDetailOverlayProps {
   onClose: () => void;
 }
 
-/** Operation emoji mapping. */
+/** MathDomain emoji mapping. */
 const OPERATION_EMOJI: Record<string, string> = {
   addition: '+',
   subtraction: '-',
@@ -204,7 +204,7 @@ export function SkillDetailOverlay({
             <Text style={styles.closeBtnText}>X</Text>
           </Pressable>
 
-          {/* Operation emoji circle */}
+          {/* MathDomain emoji circle */}
           <View
             style={[styles.emojiCircle, { backgroundColor: opColors.primary }]}
           >

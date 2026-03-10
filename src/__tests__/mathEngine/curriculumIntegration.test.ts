@@ -13,7 +13,7 @@ import {
   shouldGenerateWordProblem,
   generateWordProblem,
 } from '../../services/mathEngine/wordProblems';
-import { answerNumericValue, type Operation } from '../../services/mathEngine/types';
+import { answerNumericValue, type MathDomain } from '../../services/mathEngine/types';
 
 describe('Curriculum Integration', () => {
   it('every skill has at least one template', () => {
@@ -72,7 +72,7 @@ describe('Curriculum Integration', () => {
   });
 
   it('word problems generate for applicable domains', () => {
-    const applicable: Operation[] = [
+    const applicable: MathDomain[] = [
       'addition', 'subtraction', 'multiplication', 'division', 'money',
     ];
     const rng = createRng(42);

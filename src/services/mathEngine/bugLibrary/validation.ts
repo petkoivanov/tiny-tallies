@@ -1,4 +1,4 @@
-import type { Operation } from '../types';
+import type { MathDomain } from '../types';
 import type { SeededRng } from '../seededRng';
 
 /**
@@ -7,14 +7,14 @@ import type { SeededRng } from '../seededRng';
  * the correct answer, absurdly distant, or too large for small answers.
  */
 /** Operations where negative distractors are plausible */
-const ALLOWS_NEGATIVES = new Set<Operation>([
+const ALLOWS_NEGATIVES = new Set<MathDomain>([
   'expressions',
 ]);
 
 export function isValidDistractor(
   distractor: number,
   correctAnswer: number,
-  operation: Operation,
+  operation: MathDomain,
 ): boolean {
   // Reject negative values unless the operation allows them
   if (distractor < 0 && !ALLOWS_NEGATIVES.has(operation) && correctAnswer >= 0) {

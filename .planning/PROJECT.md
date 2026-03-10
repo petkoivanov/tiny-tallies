@@ -71,7 +71,8 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - ✓ Patterns domain handler: 5 skills (G1-4), 5 templates, 5 bug patterns — sequences, missing values, I/O tables — pre-v0.9
 - ✓ All placeholder handlers replaced with domain-specific generators — pre-v0.9
 
-- ✓ Type system expansion: Operation type with all 16 values, answer format selection with Elo-based sigmoid probability, dynamic MC option count 4/5/6 — v0.9 Phase 45
+- ✓ Word problem system: 36 templates across all 16 domains, prefix/replace modes, reading level calibration via maxGrade — v0.9 Phase 54
+- ✓ Type system expansion: MathDomain type with all 16 values, answer format selection with Elo-based sigmoid probability, dynamic MC option count 4/5/6 — v0.9 Phase 45
 - ✓ Multiplication domain: 11 skills (G2-4), 8 bug patterns, domain handler — v0.9 Phase 46
 - ✓ Division domain: 9 skills (G3-4), 6 bug patterns, domain handler — v0.9 Phase 47
 - ✓ Grade 4 Addition & Subtraction: 3 skills (4-digit add/sub) — v0.9 Phase 53
@@ -91,31 +92,29 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ### Active
 
-## Current Milestone: v0.9 Full Curriculum Expansion
+## Previous Milestone: v0.9 Full Curriculum Expansion (COMPLETE — Phases 45-58)
 
 **Goal:** Expand from 14 addition/subtraction skills to full curriculum coverage across 16 math domains for grades 1-8, add parent reports with AI summaries, and improve answer input UX.
 
-**Status:** NEARLY COMPLETE — 132 skills across 16 operations, 2139 tests passing, grades 1-8. Parent reports and integration testing done.
+**Status:** COMPLETE — 132 skills across 16 domains, 2156 tests passing, grades 1-8.
 
 **Completed:**
-- ✓ Phase 45: Type System & Engine Expansion (all 16 operation values, Answer union, answer format selection, dynamic MC count)
+- ✓ Phase 45: Type System & Engine Expansion (MathDomain type, Answer union, answer format selection, dynamic MC count)
 - ✓ Phase 46: Multiplication Domain (11 skills, 8 bug patterns)
 - ✓ Phase 47: Division Domain (9 skills, 6 bug patterns)
 - ✓ Phase 48: Fractions Domain (14 skills, 9 bug patterns)
 - ✓ Phase 49: Place Value Domain (8 skills, 9 bug patterns)
-- ✓ Phase 50: Time Domain (7 skills, 6 bug patterns; AnalogClock SVG pending)
-- ✓ Phase 51: Money Domain (7 skills, 7 bug patterns; CoinDisplay SVG pending)
+- ✓ Phase 50: Time Domain (7 skills, 6 bug patterns, AnalogClock SVG)
+- ✓ Phase 51: Money Domain (7 skills, 7 bug patterns, CoinDisplay SVG)
 - ✓ Phase 52: Patterns Domain (5 skills, 5 bug patterns)
 - ✓ Phase 53: Grade 4 Add/Sub (3 skills)
+- ✓ Phase 54: Word Problem System (36 templates, 16 domains, prefix/replace modes, reading level calibration)
 - ✓ Phase 55: NumberPad + Answer Format System
 - ✓ Phase 56: Level Indicator (eloToLevel mapping, HomeScreen + SessionScreen LevelBadge)
 - ✓ Phase 57: Parent Reports (SessionHistory slice, SVG charts, AI summary, reports screen)
 - ✓ Phase 58: Integration Testing (29 new tests: domain registry, cross-domain sessions, answer formats, migration chain)
 - ✓ Additional domains: Measurement, Ratios, Exponents, Expressions, Decimals, Integers, Geometry, Probability, Number Theory
-
-**Remaining:**
-- Phase 54: Word Problem System — NOT STARTED
-- Operation → MathDomain rename — deferred, low priority
+- ✓ Operation → MathDomain rename (type system cleanup)
 
 ## Previous Milestone: v0.8 Social & Subscription (COMPLETE — Phases 38-40)
 
@@ -140,7 +139,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ## Context
 
-**Current state:** v0.9 nearly complete with 132 skills across 16 domains (grades 1-8). 2,139 tests passing. v0.8 complete (multi-child profiles, profile management UI, privacy/auth/backend/cloud sync). Full adaptive learning pipeline + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor + deep gamification + multi-child profiles + cloud sync backend + NumberPad component + Elo-based answer format selection + parent reports with AI summaries.
+**Current state:** v0.9 complete with 132 skills across 16 domains (grades 1-8). 2,156 tests passing. Full adaptive learning pipeline + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor + deep gamification + multi-child profiles + cloud sync backend + NumberPad component + Elo-based answer format selection + parent reports with AI summaries + word problems across all 16 domains.
 
 **Architecture (implemented through v0.4):**
 - Programmatic math engine: 132 skills across 16 domains (Common Core grades 1-8)
@@ -236,8 +235,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tutoring engine design, virtual manipulatives specs, misconception detection patterns, spaced repetition algorithms, gamification design, onboarding/placement testing, child UX design, sound/audio design, math anxiety mitigation, COPPA privacy compliance, problem generation engine.
 
 **Future milestones:**
-- v0.9 remaining: Word Problem System (Phase 54)
-- v1.0: TBD (onboarding/placement testing, sound/audio, parental time controls, freemium subscription, interactive manipulative animations)
+- v1.0: TBD (onboarding/placement testing, sound/audio, parental time controls, freemium subscription, interactive manipulative animations, data & statistics domain)
 
 ## Constraints
 
@@ -316,6 +314,9 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | Sentry with PII scrubbing | Default-on error tracking, opt-out in ParentalControls | ✓ Good — COPPA-compliant, child data never sent |
 | Module-level Sentry.init (synchronous) | Must run before Sentry.wrap(App); opt-out applied async | ✓ Good — eliminates "init before wrap" warning |
 | Privacy disclosure in ProfileSetupScreen | PIN → Disclosure → Wizard flow; minimal nav restructuring | ✓ Good — clean integration |
+| Word problem prefix mode | Complex domains prepend scene-setting to existing questionText | ✓ Good — works for all 16 domains without domain-specific generators |
+| maxGrade reading level calibration | Simple templates capped at low grades; older students get age-appropriate text | ✓ Good — implicit reading level via grade bands |
+| Operation → MathDomain rename | Better semantic clarity; "operation" implies arithmetic only | ✓ Good — 28 files updated, zero runtime changes |
 
 ---
-*Last updated: 2026-03-10 after v0.9 Phases 56-58 (level badge, parent reports, integration testing — 2139 tests)*
+*Last updated: 2026-03-10 after v0.9 COMPLETE (132 skills, 16 domains, 36 word problem templates, 2156 tests)*

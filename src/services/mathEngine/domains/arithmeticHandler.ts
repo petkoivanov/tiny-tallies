@@ -13,7 +13,7 @@ import { numericAnswer } from '../types';
 import type {
   DomainHandler,
   DomainProblemData,
-  Operation,
+  MathDomain,
   ProblemTemplate,
 } from '../types';
 import type { SeededRng } from '../seededRng';
@@ -100,7 +100,7 @@ function generateOperands(
   );
 }
 
-function formatQuestion(operation: Operation, a: number, b: number): string {
+function formatQuestion(operation: MathDomain, a: number, b: number): string {
   switch (operation) {
     case 'addition':
       return `${a} + ${b} = ?`;
@@ -115,7 +115,7 @@ function formatQuestion(operation: Operation, a: number, b: number): string {
   }
 }
 
-function computeAnswer(operation: Operation, a: number, b: number): number {
+function computeAnswer(operation: MathDomain, a: number, b: number): number {
   switch (operation) {
     case 'addition':
       return a + b;
@@ -250,7 +250,7 @@ function generateIntegerOperands(
   return [-3, 5]; // fallback
 }
 
-function formatIntegerQuestion(operation: Operation, a: number, b: number): string {
+function formatIntegerQuestion(operation: MathDomain, a: number, b: number): string {
   const aStr = a < 0 ? `(${a})` : String(a);
   const bStr = b < 0 ? `(${b})` : String(b);
   switch (operation) {
@@ -325,7 +325,7 @@ export const arithmeticHandler: DomainHandler = {
   },
 };
 
-function opSymbol(operation: Operation): string {
+function opSymbol(operation: MathDomain): string {
   switch (operation) {
     case 'addition': return '+';
     case 'subtraction': return '\u2212';

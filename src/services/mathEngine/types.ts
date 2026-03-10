@@ -1,4 +1,4 @@
-export type Operation =
+export type MathDomain =
   | 'addition'
   | 'subtraction'
   | 'multiplication'
@@ -134,7 +134,7 @@ export interface ProblemMetadata {
 
 export interface ProblemTemplate {
   id: string;
-  operation: Operation;
+  operation: MathDomain;
   skillId: string;
   standards: string[];
   grades: Grade[];
@@ -153,7 +153,7 @@ export interface ProblemTemplate {
 export interface Problem {
   id: string;
   templateId: string;
-  operation: Operation;
+  operation: MathDomain;
   operands: number[];
   correctAnswer: Answer;
   questionText: string;
@@ -180,7 +180,7 @@ export interface BatchGenerationParams {
 export interface SkillDefinition {
   id: string;
   name: string;
-  operation: Operation;
+  operation: MathDomain;
   grade: Grade;
   standards: string[];
   prerequisites: string[];
