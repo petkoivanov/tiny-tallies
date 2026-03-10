@@ -90,25 +90,51 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - ✓ Probability domain: 2 skills (G7) — v0.9
 - ✓ Number Theory domain: 3 skills (G6) — v0.9
 
+- ✓ Basic Graphs domain: 8 skills (G1-4) — picture graphs, bar graphs, tally charts — v1.0
+- ✓ Data Analysis domain: 11 skills (G4-8) — dot plots, histograms, box plots, scatter plots, central tendency — v1.0
+- ✓ SVG graph component library: 7 graph types with themed rendering — v1.0
+- ✓ CAT engine: IRT 2PL model, EAP estimation, Fisher information item selection, stopping rules — v1.0
+- ✓ Placement test: PlacementTestScreen with adaptive flow, item bank from skill registry — v1.0
+- ✓ Onboarding: CharacterSelectScreen, PlacementTestScreen, onboardingSlice (STORE_VERSION 16) — v1.0
+- ✓ Absence decay: Ebbinghaus forgetting curve with Leitner box resistance, re-assessment triggers — v1.0
+
 ### Active
 
-## Current Milestone: v1.0 Onboarding + Data & Statistics (Phases 60-69)
+## Current Milestone: v1.1 Monetization & Polish (Phases 70-79)
 
-**Goal:** Add Data & Statistics domains (basic_graphs G1-4, data_analysis G4-8) with SVG graph rendering, full CAT-based onboarding with IRT placement testing, character system, and absence-based re-assessment.
+**Goal:** Add freemium subscription with IAP, parental time controls, sound/audio feedback, and polish for App Store submission.
 
 **Status:** In progress
 
 **Planned:**
-- Phase 60: SVG graph component library (axes, bars, pictographs, dots, histograms, box plots, scatter plots)
-- Phase 61: `basic_graphs` domain — picture graphs, bar graphs, tally charts (G1-4)
-- Phase 62: `data_analysis` domain — line plots, dot plots, histograms, box plots, scatter plots, mean/median/mode/range (G4-8)
-- Phase 63: Graph display integration in session UI
-- Phase 64: CAT engine — IRT 2PL, EAP estimation, Fisher information item selection
-- Phase 65: Diagnostic item bank — calibrated items across all domains
-- Phase 66: Character system — selection, animated reactions
-- Phase 67: Onboarding flow — first-run wrapper, parent setup, child screens, diagnostic
-- Phase 68: Placement mapping — theta to Elo/BKT/Leitner/skill states
-- Phase 69: Absence decay & re-assessment triggers
+- Phase 70: Sound service — audio manager, correct/incorrect/celebration/UI sounds, mute toggle
+- Phase 71: Parental time controls — daily session cap, bedtime lockout, break reminders
+- Phase 72: Subscription service — entitlement model, free vs premium feature gating
+- Phase 73: IAP integration — RevenueCat/expo-in-app-purchases, subscription management UI
+- Phase 74: Paywall screen — premium upsell, restore purchases, subscription status
+- Phase 75: Free tier enforcement — session limit (3/day), AI tutor gate, theme restrictions
+- Phase 76: Subscription backend — receipt validation, entitlement sync, webhook handling
+- Phase 77: App Store preparation — screenshots, metadata, privacy nutrition labels, review compliance
+- Phase 78: Performance optimization — bundle size, startup time, memory profiling
+- Phase 79: Final polish — accessibility audit, edge case fixes, integration testing
+
+## Previous Milestone: v1.0 Onboarding + Data & Statistics (COMPLETE — Phases 60-69)
+
+**Goal:** Add Data & Statistics domains (basic_graphs G1-4, data_analysis G4-8) with SVG graph rendering, full CAT-based onboarding with IRT placement testing, character system, and absence-based re-assessment.
+
+**Status:** COMPLETE — 18 domains, 151 skills, 2365 tests passing. CAT placement, onboarding screens, absence decay.
+
+**Completed:**
+- ✓ Phase 60: SVG graph component library (7 graph types: picture, bar, tally, dot, histogram, box plot, scatter)
+- ✓ Phase 61: `basic_graphs` domain — picture graphs, bar graphs, tally charts (G1-4, 8 skills)
+- ✓ Phase 62: `data_analysis` domain — dot plots, histograms, box plots, scatter plots, central tendency (G4-8, 11 skills)
+- ✓ Phase 63: Graph display integration in session UI (GraphDisplay component in CpaSessionContent)
+- ✓ Phase 64: CAT engine — IRT 2PL, EAP estimation, Fisher information item selection, stopping rules
+- ✓ Phase 65: Placement mapping — item bank from skill registry, theta-to-Elo conversion, grade-based Elo seeding
+- ✓ Phase 66: Character system — CharacterReaction with 4 animated states (correct/incorrect/streak/idle)
+- ✓ Phase 67: Onboarding flow — PlacementTestScreen, CharacterSelectScreen, store integration (STORE_VERSION 16)
+- ✓ Phase 68: Absence decay — Ebbinghaus forgetting curve with Leitner box resistance, 3-day grace period
+- ✓ Phase 69: Re-assessment triggers — useAbsenceCheck hook, HomeScreen placement/reassessment cards
 
 ## Previous Milestone: v0.9 Full Curriculum Expansion (COMPLETE — Phases 45-58)
 
@@ -140,9 +166,9 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - ~~Multi-child profile switcher (add/edit/delete children, independent progress per child)~~ ✓ Done (Phases 38-39)
 - ~~Privacy, auth, backend, cloud sync~~ ✓ Done (Phase 40)
 - ~~Parent dashboard~~ ✓ Done (v0.9 Phase 57 — Parent Reports)
-- Parental controls (daily session time cap, bedtime lockout, break reminders) — deferred
-- Freemium subscription (free: 3 sessions/day no AI tutor; premium: unlimited + AI tutor + all themes) — deferred
-- IAP integration (subscription management, restore purchases, subscription state) — deferred
+- Parental controls (daily session time cap, bedtime lockout, break reminders) — moved to v1.1 Phase 71
+- Freemium subscription (free: 3 sessions/day no AI tutor; premium: unlimited + AI tutor + all themes) — moved to v1.1 Phases 72-75
+- IAP integration (subscription management, restore purchases, subscription state) — moved to v1.1 Phases 73-76
 
 ### Out of Scope
 
@@ -157,7 +183,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ## Context
 
-**Current state:** v0.9 complete with 132 skills across 16 domains (grades 1-8). 2,156 tests passing. Full adaptive learning pipeline + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor + deep gamification + multi-child profiles + cloud sync backend + NumberPad component + Elo-based answer format selection + parent reports with AI summaries + word problems across all 16 domains.
+**Current state:** v1.0 complete with 151 skills across 18 domains (grades 1-8). 2,365 tests passing. Full adaptive learning pipeline + CAT placement testing + onboarding flow + absence decay + 7 SVG graph types + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor + deep gamification + multi-child profiles + cloud sync backend + NumberPad component + Elo-based answer format selection + parent reports with AI summaries + word problems across all 18 domains.
 
 **Architecture (implemented through v0.4):**
 - Programmatic math engine: 132 skills across 16 domains (Common Core grades 1-8)
@@ -166,7 +192,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - Gaussian-weighted problem selection targeting 85% success rate
 - Frustration guard (3 consecutive wrong → easier problem)
 - Session orchestrator: 12-problem queue (2 warmup + 8 practice + 2 cooldown) with 60/30/10 review/new/challenge mix
-- Zustand persist with versioned migrations (STORE_VERSION=15) and AsyncStorage
+- Zustand persist with versioned migrations (STORE_VERSION=16) and AsyncStorage
 - 6 virtual manipulatives (Counters, TenFrame, NumberLine, BaseTenBlocks, FractionStrips, BarModel) with 60fps drag primitives
 - CPA progression: BKT-driven concrete/pictorial/abstract stage tracking with one-way advancement
 - ManipulativePanel animated drawer for session-embedded concrete mode; PictorialDiagram SVG renderers for pictorial mode
@@ -253,8 +279,8 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tutoring engine design, virtual manipulatives specs, misconception detection patterns, spaced repetition algorithms, gamification design, onboarding/placement testing, child UX design, sound/audio design, math anxiety mitigation, COPPA privacy compliance, problem generation engine.
 
 **Future milestones:**
-- v1.0: Onboarding + Data & Statistics (Phases 60-69) — IN PROGRESS
-- v1.1: TBD (sound/audio, parental time controls, freemium subscription, interactive manipulative animations)
+- v1.1: Monetization & Polish (Phases 70-79) — IN PROGRESS
+- v1.2: TBD (interactive manipulative animations, streaming Gemini, additional curricula)
 
 ## Constraints
 
@@ -338,4 +364,4 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | Operation → MathDomain rename | Better semantic clarity; "operation" implies arithmetic only | ✓ Good — 28 files updated, zero runtime changes |
 
 ---
-*Last updated: 2026-03-10 after v0.9 COMPLETE (132 skills, 16 domains, 36 word problem templates, 2156 tests)*
+*Last updated: 2026-03-10 after v1.0 COMPLETE (151 skills, 18 domains, CAT placement, onboarding, absence decay, 2365 tests)*

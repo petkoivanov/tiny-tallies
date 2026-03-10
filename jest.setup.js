@@ -142,6 +142,23 @@ jest.mock('expo-file-system', () => ({
   },
 }));
 
+// Mock expo-av
+jest.mock('expo-av', () => {
+  const mockSound = {
+    playAsync: jest.fn().mockResolvedValue(undefined),
+    setPositionAsync: jest.fn().mockResolvedValue(undefined),
+    unloadAsync: jest.fn().mockResolvedValue(undefined),
+  };
+  return {
+    Audio: {
+      Sound: {
+        createAsync: jest.fn().mockResolvedValue({ sound: mockSound }),
+      },
+      setAudioModeAsync: jest.fn().mockResolvedValue(undefined),
+    },
+  };
+});
+
 // Mock expo-haptics
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),

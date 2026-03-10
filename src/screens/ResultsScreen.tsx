@@ -17,6 +17,7 @@ import { Flame, Check } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import type { ThemeColors } from '@/theme';
 import { useAppStore } from '@/store/appStore';
+import { playLevelUp, playCelebration } from '@/services/sound';
 import { calculateLevelFromXp } from '@/services/gamification/levelProgression';
 import { ConfettiCelebration } from '@/components/animations/ConfettiCelebration';
 import { BadgeUnlockPopup } from '@/components/animations/BadgeUnlockPopup';
@@ -108,8 +109,16 @@ export default function ResultsScreen() {
         300,
         withSpring(1, { damping: 6, stiffness: 150 }),
       );
+      playLevelUp();
     }
   }, [leveledUp, levelUpScale]);
+
+  // Play celebration sound for new badges
+  useEffect(() => {
+    if (newBadges.length > 0) {
+      playCelebration();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const levelUpAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: levelUpScale.value }],

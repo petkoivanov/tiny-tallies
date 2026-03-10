@@ -17,6 +17,7 @@ const EXPECTED_PARTIALIZE_KEYS = [
   'frameId',
   'themeId',
   'tutorConsentGranted',
+  'soundEnabled',
   'skillStates',
   'xp',
   'level',
@@ -47,8 +48,10 @@ function createMockAppState(): AppState {
     frameId: 'circle',
     themeId: 'ocean',
     tutorConsentGranted: true,
+    soundEnabled: true,
     setChildProfile: jest.fn(),
     setTutorConsentGranted: jest.fn(),
+    setSoundEnabled: jest.fn(),
 
     // SkillStates fields
     skillStates: {
@@ -151,8 +154,8 @@ function createMockAppState(): AppState {
 }
 
 describe('CHILD_DATA_KEYS', () => {
-  it('contains exactly 24 keys', () => {
-    expect(CHILD_DATA_KEYS).toHaveLength(24);
+  it('contains exactly 25 keys', () => {
+    expect(CHILD_DATA_KEYS).toHaveLength(25);
   });
 
   it('matches the partialize fields from appStore', () => {

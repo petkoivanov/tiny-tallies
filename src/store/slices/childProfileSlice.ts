@@ -11,12 +11,14 @@ export interface ChildProfileSlice {
   frameId: FrameId | null;
   themeId: ThemeId;
   tutorConsentGranted: boolean;
+  soundEnabled: boolean;
   setChildProfile: (
     profile: Partial<
       Pick<ChildProfileSlice, 'childName' | 'childAge' | 'childGrade' | 'avatarId' | 'frameId' | 'themeId'>
     >,
   ) => void;
   setTutorConsentGranted: (granted: boolean) => void;
+  setSoundEnabled: (enabled: boolean) => void;
 }
 
 export const createChildProfileSlice: StateCreator<
@@ -32,10 +34,12 @@ export const createChildProfileSlice: StateCreator<
   frameId: null,
   themeId: 'dark',
   tutorConsentGranted: true,
+  soundEnabled: true,
   setChildProfile: (profile) =>
     set((state) => ({
       ...state,
       ...profile,
     })),
   setTutorConsentGranted: (granted) => set({ tutorConsentGranted: granted }),
+  setSoundEnabled: (enabled) => set({ soundEnabled: enabled }),
 });

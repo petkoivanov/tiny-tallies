@@ -10,6 +10,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import { useTheme, spacing, typography } from '@/theme';
 import { useSession } from '@/hooks/useSession';
+import { useSoundSync, useSessionSounds } from '@/hooks/useSoundEffects';
 import { useCpaMode } from '@/hooks/useCpaMode';
 import { useTutor } from '@/hooks/useTutor';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
@@ -44,6 +45,10 @@ export default function SessionScreen() {
     handleQuit,
     sessionResult,
   } = useSession({ mode, remediationSkillIds, challengeThemeId });
+
+  // Sound: sync store preference + play feedback sounds
+  useSoundSync();
+  useSessionSounds(feedbackState, isComplete);
 
   const cpaInfo = useCpaMode(currentProblem?.skillId ?? null);
   const { stage } = cpaInfo;

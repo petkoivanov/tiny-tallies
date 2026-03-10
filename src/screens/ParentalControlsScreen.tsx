@@ -6,6 +6,7 @@
  * - Privacy & Data: Sentry toggle, view privacy info, delete local data
  * - Account: Sign-in status, sign in/out, delete account
  * - AI Helper: Tutor consent toggle
+ * - Sound: Sound effects on/off toggle
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -29,6 +30,7 @@ import {
   LogOut,
   BarChart3,
   ChevronRight,
+  Volume2,
 } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
@@ -60,6 +62,8 @@ export default function ParentalControlsScreen() {
   const authProvider = useAppStore((s) => s.authProvider);
   const tutorConsentGranted = useAppStore((s) => s.tutorConsentGranted);
   const setTutorConsentGranted = useAppStore((s) => s.setTutorConsentGranted);
+  const soundEnabled = useAppStore((s) => s.soundEnabled);
+  const setSoundEnabled = useAppStore((s) => s.setSoundEnabled);
   const setAuth = useAppStore((s) => s.setAuth);
   const clearAuth = useAppStore((s) => s.clearAuth);
 
@@ -436,6 +440,29 @@ export default function ParentalControlsScreen() {
                 {tutorConsentGranted
                   ? 'Your child receives gentle math hints from the AI helper.'
                   : 'AI tutoring is turned off. Turn on to let your child receive math guidance.'}
+              </Text>
+            </View>
+          </View>
+
+          {/* Sound Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Volume2 size={20} color={colors.primary} />
+              <Text style={styles.sectionTitle}>Sound</Text>
+            </View>
+            <View style={styles.card}>
+              <View style={styles.row}>
+                <Text style={styles.rowLabel}>Sound effects</Text>
+                <Switch
+                  value={soundEnabled}
+                  onValueChange={setSoundEnabled}
+                  testID="sound-toggle"
+                />
+              </View>
+              <Text style={styles.rowSublabel}>
+                {soundEnabled
+                  ? 'Plays sounds for correct answers, celebrations, and feedback.'
+                  : 'Sound effects are turned off.'}
               </Text>
             </View>
           </View>

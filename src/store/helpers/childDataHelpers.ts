@@ -22,6 +22,7 @@ export interface ChildData {
   frameId: FrameId | null;
   themeId: ThemeId;
   tutorConsentGranted: boolean;
+  soundEnabled: boolean;
   skillStates: Record<string, SkillState>;
   xp: number;
   level: number;
@@ -63,6 +64,7 @@ export const CHILD_DATA_KEYS: readonly (keyof ChildData)[] = [
   'frameId',
   'themeId',
   'tutorConsentGranted',
+  'soundEnabled',
   'skillStates',
   'xp',
   'level',
@@ -91,6 +93,7 @@ export const DEFAULT_CHILD_DATA: ChildData = {
   frameId: null,
   themeId: 'dark',
   tutorConsentGranted: true,
+  soundEnabled: true,
   skillStates: {},
   xp: 0,
   level: 1,

@@ -155,8 +155,13 @@ export function migrateStore(
     state.lastPracticeDate ??= null;
   }
 
+  if (version < 17) {
+    // v16 -> v17: Add sound preference to child profile
+    state.soundEnabled ??= true;
+  }
+
   // Future migrations chain here:
-  // if (version < 17) { ... }
+  // if (version < 18) { ... }
 
   return state;
 }
