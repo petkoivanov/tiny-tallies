@@ -125,6 +125,34 @@ function selectChallengeTemplate(
 }
 
 /**
+ * Selects up to `count` distinct skills, weighted toward strongest (highest Elo).
+ * Falls back to cycling through available skills if fewer than `count` are available.
+ */
+function selectDistinctSkills(
+  unlockedSkillIds: readonly string[],
+  skillStates: Record<string, SkillState>,
+  rng: SeededRng,
+  count: number,
+): string[] {
+  const selected: string[] = [];
+  const remaining = [...unlockedSkillIds];
+
+  while (selected.length < count && remaining.length > 0) {
+    const pick = selectStrongestSkill(remaining, skillStates, rng);
+    selected.push(pick);
+    const idx = remaining.indexOf(pick);
+    if (idx !== -1) remaining.splice(idx, 1);
+  }
+
+  // If we need more than available skills, cycle through what we have
+  while (selected.length < count && unlockedSkillIds.length > 0) {
+    selected.push(unlockedSkillIds[selected.length % unlockedSkillIds.length]);
+  }
+
+  return selected;
+}
+
+/**
  * Generates the full 15-problem session queue.
  *
  * - Warmup (3 problems): strongest skill + easiest template
@@ -188,6 +216,12 @@ export function generateSessionQueue(
     orderedMix = constrainedShuffle(practiceMix, rng);
   }
 
+  // Pre-select distinct bookend skills to ensure variety across warmup/cooldown
+  const bookendSkills = selectDistinctSkills(
+    unlockedSkillIds, skillStates, rng, warmupCount + cooldownCount,
+  );
+  let bookendIdx = 0;
+
   let practiceIdx = 0;
   const seenQuestions = new Set<string>();
 
@@ -197,8 +231,8 @@ export function generateSessionQueue(
     let template;
 
     if (phase === 'warmup' || phase === 'cooldown') {
-      // Confidence-building: strongest skill + easiest template
-      skillId = selectStrongestSkill(unlockedSkillIds, skillStates, rng);
+      // Confidence-building: rotate through distinct skills + easiest template
+      skillId = bookendSkills[bookendIdx++ % bookendSkills.length];
       template = selectEasiestTemplate(skillId);
     } else {
       // Practice: sourced from practice mix with category-appropriate template selection

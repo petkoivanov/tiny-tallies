@@ -427,26 +427,32 @@ export function generatePracticeMix(
     }
   }
 
-  // d. Ultimate fallback: fill remaining slots from unlocked skills
+  // d. Ultimate fallback: fill remaining slots from unlocked skills,
+  //    spreading across distinct skills before repeating any.
   if (result.length < practiceCount) {
     const unlockedIds = getUnlockedSkills(skillStates);
+    const fallbackPool = unlockedIds.length > 0
+      ? unlockedIds
+      : SKILLS.filter((s) => s.prerequisites.length === 0).map((s) => s.id);
 
-    if (unlockedIds.length > 0) {
-      while (result.length < practiceCount) {
-        const skillId = selectSkill(unlockedIds, skillStates, rng);
-        result.push({ skillId, category: 'new' });
-        usedSkillIds.add(skillId);
-      }
-    } else {
-      // e. Safety fallback: root skills (should always exist)
-      const rootSkills = SKILLS.filter(
-        (s) => s.prerequisites.length === 0,
-      ).map((s) => s.id);
+    // Build a shuffled pool of unused skills first, then all skills
+    const unused = fallbackPool.filter((id) => !usedSkillIds.has(id));
+    const ordered = [...unused];
+    // Shuffle unused skills for variety
+    for (let j = ordered.length - 1; j > 0; j--) {
+      const k = rng.intRange(0, j);
+      [ordered[j], ordered[k]] = [ordered[k], ordered[j]];
+    }
 
-      while (result.length < practiceCount) {
-        const idx = rng.intRange(0, rootSkills.length - 1);
-        result.push({ skillId: rootSkills[idx], category: 'new' });
-      }
+    let fallbackIdx = 0;
+    while (result.length < practiceCount) {
+      // Cycle through unused first, then all unlocked
+      const skillId = fallbackIdx < ordered.length
+        ? ordered[fallbackIdx]
+        : fallbackPool[fallbackIdx % fallbackPool.length];
+      result.push({ skillId, category: 'new' });
+      usedSkillIds.add(skillId);
+      fallbackIdx++;
     }
   }
 
