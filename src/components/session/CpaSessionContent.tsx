@@ -70,18 +70,6 @@ interface CpaSessionContentProps {
   boostHighlightAnswer?: number | null;
 }
 
-/** Format operator symbol from operation type */
-function formatOperator(operation: string): string {
-  switch (operation) {
-    case 'addition':
-      return '+';
-    case 'subtraction':
-      return '\u2212';
-    default:
-      return operation;
-  }
-}
-
 /**
  * CPA-branching renderer for session problems.
  *
@@ -388,8 +376,7 @@ export function CpaSessionContent({
 
       {/* Problem Text */}
       <Text style={styles.problemText}>
-        {problem.operands[0]} {formatOperator(problem.operation)}{' '}
-        {problem.operands[1]} = ?
+        {problem.questionText}
       </Text>
 
       {/* Pictorial Mode: inline diagram */}

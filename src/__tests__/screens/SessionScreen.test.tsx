@@ -647,6 +647,7 @@ describe('SessionScreen', () => {
           ...defaultUseSessionReturn.currentProblem!.problem,
           operation: 'subtraction',
           operands: [50, 23],
+          questionText: '50 \u2212 23 = ?',
           correctAnswer: { type: 'numeric', value: 27 },
         },
         presentation: {

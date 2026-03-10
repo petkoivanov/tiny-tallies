@@ -189,6 +189,7 @@ export function generateSessionQueue(
   }
 
   let practiceIdx = 0;
+  const seenQuestions = new Set<string>();
 
   for (let i = 0; i < total; i++) {
     const phase = getSessionPhase(i, config);
@@ -214,9 +215,17 @@ export function generateSessionQueue(
       }
     }
 
-    // Generate the problem using a derived seed to avoid RNG state leaking
-    const problemSeed = seed + i * 31;
-    const problem = generateProblem({ templateId: template.id, seed: problemSeed });
+    // Generate the problem using a derived seed to avoid RNG state leaking.
+    // Retry with offset seeds if the question text duplicates an earlier problem.
+    let problemSeed = seed + i * 31;
+    let problem = generateProblem({ templateId: template.id, seed: problemSeed });
+
+    for (let retry = 1; retry <= 5 && seenQuestions.has(problem.questionText); retry++) {
+      problemSeed = seed + i * 31 + retry * 997;
+      problem = generateProblem({ templateId: template.id, seed: problemSeed });
+    }
+    seenQuestions.add(problem.questionText);
+
     const presentation = formatAsMultipleChoice(problem, problemSeed + 7);
 
     queue.push({
