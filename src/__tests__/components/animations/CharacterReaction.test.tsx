@@ -31,6 +31,12 @@ jest.mock('@/theme', () => ({
     fontFamily: { semiBold: 'Lexend_600SemiBold' },
     fontSize: { sm: 14, md: 16 },
   },
+  springConfigs: {
+    bounce: { damping: 4, stiffness: 300 },
+    medium: { damping: 6, stiffness: 200 },
+    settle: { damping: 8 },
+    heavy: { damping: 18, stiffness: 180, mass: 0.8, overshootClamping: true },
+  },
 }));
 
 jest.mock('@/store/constants/avatars', () => ({

@@ -14,6 +14,7 @@ import ProfileSetupScreen from '@/screens/ProfileSetupScreen';
 import ProfileManagementScreen from '@/screens/ProfileManagementScreen';
 import ParentalControlsScreen from '@/screens/ParentalControlsScreen';
 import ParentReportsScreen from '@/screens/ParentReportsScreen';
+import PeerBenchmarkScreen from '@/screens/PeerBenchmarkScreen';
 import PlacementTestScreen from '@/screens/PlacementTestScreen';
 import CharacterSelectScreen from '@/screens/CharacterSelectScreen';
 import { useTheme } from '@/theme';
@@ -58,6 +59,7 @@ export default function AppNavigator() {
       <Stack.Screen name="ProfileManagement" component={ProfileManagementScreen} />
       <Stack.Screen name="ParentalControls" component={ParentalControlsScreen} />
       <Stack.Screen name="ParentReports" component={ParentReportsScreen} />
+      <Stack.Screen name="PeerBenchmarks" component={PeerBenchmarkScreen} />
       <Stack.Screen
         name="PlacementTest"
         component={PlacementTestScreen}

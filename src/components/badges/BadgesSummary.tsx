@@ -82,7 +82,13 @@ export function BadgesSummary({ badgeIds, totalEarned = 0, onViewAll }: BadgesSu
           +{totalEarned - badgeIds.length} more in your collection!
         </Text>
       )}
-      <Pressable onPress={onViewAll} style={styles.viewAllButton}>
+      <Pressable
+        onPress={onViewAll}
+        style={styles.viewAllButton}
+        accessibilityRole="button"
+        accessibilityLabel="View all badges"
+        testID="view-all-badges"
+      >
         <Text style={styles.viewAllText}>View All Badges</Text>
       </Pressable>
     </View>

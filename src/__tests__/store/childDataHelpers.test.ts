@@ -8,7 +8,6 @@ import {
 } from '../../store/helpers/childDataHelpers';
 import type { AppState } from '../../store/appStore';
 
-// The 19 fields that partialize persists — single source of truth check
 const EXPECTED_PARTIALIZE_KEYS = [
   'childName',
   'childAge',
@@ -18,6 +17,12 @@ const EXPECTED_PARTIALIZE_KEYS = [
   'themeId',
   'tutorConsentGranted',
   'soundEnabled',
+  'dailyLimitMinutes',
+  'bedtimeWindow',
+  'breakReminderMinutes',
+  'ageRange',
+  'stateCode',
+  'benchmarkOptIn',
   'skillStates',
   'xp',
   'level',
@@ -49,9 +54,21 @@ function createMockAppState(): AppState {
     themeId: 'ocean',
     tutorConsentGranted: true,
     soundEnabled: true,
+    dailyLimitMinutes: 0,
+    bedtimeWindow: null,
+    breakReminderMinutes: 0,
+    ageRange: null,
+    stateCode: null,
+    benchmarkOptIn: false,
     setChildProfile: jest.fn(),
     setTutorConsentGranted: jest.fn(),
     setSoundEnabled: jest.fn(),
+    setDailyLimitMinutes: jest.fn(),
+    setBedtimeWindow: jest.fn(),
+    setBreakReminderMinutes: jest.fn(),
+    setAgeRange: jest.fn(),
+    setStateCode: jest.fn(),
+    setBenchmarkOptIn: jest.fn(),
 
     // SkillStates fields
     skillStates: {
@@ -154,8 +171,8 @@ function createMockAppState(): AppState {
 }
 
 describe('CHILD_DATA_KEYS', () => {
-  it('contains exactly 25 keys', () => {
-    expect(CHILD_DATA_KEYS).toHaveLength(25);
+  it('contains exactly 31 keys', () => {
+    expect(CHILD_DATA_KEYS).toHaveLength(31);
   });
 
   it('matches the partialize fields from appStore', () => {

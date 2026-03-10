@@ -7,6 +7,7 @@ import type { ThemeId } from '@/theme/colors';
 import type { ManipulativeType } from '@/services/cpa/cpaTypes';
 import type { ChallengeCompletion } from '@/services/challenge/challengeTypes';
 import type { SessionHistoryEntry } from '../slices/sessionHistorySlice';
+import type { AgeRange, BedtimeWindow, StateCode } from '../slices/childProfileSlice';
 
 /**
  * Per-child data snapshot — all fields that belong to a single child profile.
@@ -23,6 +24,12 @@ export interface ChildData {
   themeId: ThemeId;
   tutorConsentGranted: boolean;
   soundEnabled: boolean;
+  dailyLimitMinutes: number;
+  bedtimeWindow: BedtimeWindow | null;
+  breakReminderMinutes: number;
+  ageRange: AgeRange;
+  stateCode: StateCode;
+  benchmarkOptIn: boolean;
   skillStates: Record<string, SkillState>;
   xp: number;
   level: number;
@@ -65,6 +72,12 @@ export const CHILD_DATA_KEYS: readonly (keyof ChildData)[] = [
   'themeId',
   'tutorConsentGranted',
   'soundEnabled',
+  'dailyLimitMinutes',
+  'bedtimeWindow',
+  'breakReminderMinutes',
+  'ageRange',
+  'stateCode',
+  'benchmarkOptIn',
   'skillStates',
   'xp',
   'level',
@@ -94,6 +107,12 @@ export const DEFAULT_CHILD_DATA: ChildData = {
   themeId: 'dark',
   tutorConsentGranted: true,
   soundEnabled: true,
+  dailyLimitMinutes: 0,
+  bedtimeWindow: null,
+  breakReminderMinutes: 0,
+  ageRange: null,
+  stateCode: null,
+  benchmarkOptIn: false,
   skillStates: {},
   xp: 0,
   level: 1,

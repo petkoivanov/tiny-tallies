@@ -15,6 +15,7 @@ import { useCpaMode } from '@/hooks/useCpaMode';
 import { useTutor } from '@/hooks/useTutor';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useChatOrchestration } from '@/hooks/useChatOrchestration';
+import { useAppStore } from '@/store/appStore';
 import { CpaSessionContent, SessionHeader, SessionWrapper } from '@/components/session';
 import { HelpButton, ChatPanel, ChatBanner } from '@/components/chat';
 import { AppDialog } from '@/components/AppDialog';
@@ -92,6 +93,21 @@ export default function SessionScreen() {
   });
 
   const isFeedbackActive = feedbackState !== null;
+
+  // Break reminder
+  const breakReminderMinutes = useAppStore((s) => s.breakReminderMinutes);
+  const [breakDialogVisible, setBreakDialogVisible] = useState(false);
+  const breakFiredRef = useRef(0); // tracks how many break reminders have fired
+
+  useEffect(() => {
+    if (breakReminderMinutes <= 0 || isComplete) return;
+    const intervalMs = breakReminderMinutes * 60_000;
+    const timer = setInterval(() => {
+      breakFiredRef.current += 1;
+      setBreakDialogVisible(true);
+    }, intervalMs);
+    return () => clearInterval(timer);
+  }, [breakReminderMinutes, isComplete]);
 
   // Quit confirmation dialog state
   const [quitDialogVisible, setQuitDialogVisible] = useState(false);
@@ -250,6 +266,14 @@ export default function SessionScreen() {
           { text: 'Quit', style: 'destructive', onPress: handleQuitConfirm },
         ]}
         onDismiss={handleQuitCancel}
+      />
+      {/* Break reminder dialog */}
+      <AppDialog
+        visible={breakDialogVisible}
+        title="Time for a Break!"
+        message="You've been practicing for a while. Take a quick stretch!"
+        buttons={[{ text: 'OK', onPress: () => setBreakDialogVisible(false) }]}
+        onDismiss={() => setBreakDialogVisible(false)}
       />
     </View>
     </SessionWrapper>

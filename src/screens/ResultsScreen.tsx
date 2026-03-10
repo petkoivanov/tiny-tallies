@@ -14,7 +14,7 @@ import {
 } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { Flame, Check } from 'lucide-react-native';
-import { useTheme, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout, springConfigs, durations } from '@/theme';
 import type { ThemeColors } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { playLevelUp, playCelebration } from '@/services/sound';
@@ -106,8 +106,8 @@ export default function ResultsScreen() {
   useEffect(() => {
     if (leveledUp) {
       levelUpScale.value = withDelay(
-        300,
-        withSpring(1, { damping: 6, stiffness: 150 }),
+        durations.entranceDelay,
+        withSpring(1, springConfigs.medium),
       );
       playLevelUp();
     }
@@ -128,8 +128,8 @@ export default function ResultsScreen() {
   useEffect(() => {
     if (cpaAdvances.length > 0) {
       cpaScale.value = withDelay(
-        400,
-        withSpring(1, { damping: 6, stiffness: 150 }),
+        durations.secondaryDelay,
+        withSpring(1, springConfigs.medium),
       );
     }
   }, [cpaAdvances, cpaScale]);

@@ -21,7 +21,7 @@ import Animated, {
   withRepeat,
   Easing,
 } from 'react-native-reanimated';
-import { useTheme, spacing, typography } from '@/theme';
+import { useTheme, spacing, typography, springConfigs } from '@/theme';
 import { resolveAvatar } from '@/store/constants/avatars';
 
 export type ReactionType = 'correct' | 'incorrect' | 'streak' | 'idle' | null;
@@ -90,12 +90,12 @@ export function CharacterReaction({
 
     if (reaction === 'correct') {
       scale.value = withSequence(
-        withSpring(1.3, { damping: 4, stiffness: 300 }),
-        withSpring(1.0, { damping: 8, stiffness: 200 }),
+        withSpring(1.3, springConfigs.bounce),
+        withSpring(1.0, springConfigs.settle),
       );
       translateY.value = withSequence(
         withTiming(-12, { duration: 150 }),
-        withSpring(0, { damping: 8 }),
+        withSpring(0, springConfigs.settle),
       );
       messageOpacity.value = withSequence(
         withTiming(1, { duration: 200 }),
@@ -117,13 +117,13 @@ export function CharacterReaction({
       );
     } else if (reaction === 'streak') {
       scale.value = withSequence(
-        withSpring(1.4, { damping: 3, stiffness: 400 }),
-        withSpring(1.1, { damping: 6 }),
-        withSpring(1.0, { damping: 10 }),
+        withSpring(1.4, springConfigs.bounce),
+        withSpring(1.1, springConfigs.medium),
+        withSpring(1.0, springConfigs.settle),
       );
       translateY.value = withSequence(
         withTiming(-20, { duration: 200 }),
-        withSpring(0, { damping: 6 }),
+        withSpring(0, springConfigs.medium),
       );
       messageOpacity.value = withSequence(
         withTiming(1, { duration: 150 }),

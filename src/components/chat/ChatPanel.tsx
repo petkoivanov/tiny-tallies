@@ -8,19 +8,14 @@ import Animated, {
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import { X } from 'lucide-react-native';
-import { useTheme, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout, springConfigs } from '@/theme';
 import type { TutorMessage } from '@/services/tutor/types';
 import { ChatMessageList } from './ChatMessageList';
 import { ResponseButtons } from './ResponseButtons';
 
 const PANEL_HEIGHT = Dimensions.get('window').height * 0.6;
 
-const PANEL_SPRING_CONFIG = {
-  damping: 20,
-  stiffness: 200,
-  mass: 0.8,
-  overshootClamping: true,
-} as const;
+const PANEL_SPRING_CONFIG = springConfigs.heavy;
 
 interface ChatPanelProps {
   isOpen: boolean;

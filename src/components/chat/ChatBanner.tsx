@@ -5,20 +5,13 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import { useTheme, spacing, typography, layout } from '@/theme';
+import { useTheme, spacing, typography, layout, springConfigs } from '@/theme';
 
 interface ChatBannerProps {
   message: string;
   onTap: () => void;
   visible: boolean;
 }
-
-const BANNER_SPRING_CONFIG = {
-  damping: 18,
-  stiffness: 180,
-  mass: 0.8,
-  overshootClamping: true,
-} as const;
 
 /**
  * Floating banner showing the latest tutor message when chat is minimized
@@ -33,8 +26,8 @@ export function ChatBanner({ message, onTap, visible }: ChatBannerProps) {
   const translateY = useSharedValue(-60);
 
   useEffect(() => {
-    opacity.value = withSpring(visible ? 1 : 0, BANNER_SPRING_CONFIG);
-    translateY.value = withSpring(visible ? 0 : -60, BANNER_SPRING_CONFIG);
+    opacity.value = withSpring(visible ? 1 : 0, springConfigs.heavy);
+    translateY.value = withSpring(visible ? 0 : -60, springConfigs.heavy);
   }, [visible, opacity, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({

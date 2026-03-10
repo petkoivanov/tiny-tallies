@@ -137,6 +137,9 @@ export interface SyncPushPayload {
     avatarId: string | null;
     frameId: string | null;
     themeId: string;
+    ageRange: string | null;
+    stateCode: string | null;
+    benchmarkOptIn: boolean;
   };
   scoreDeltas: Array<{
     skillId: string;
@@ -201,6 +204,37 @@ export interface SyncPullResponse {
 
 export async function syncPull(userId: string): Promise<SyncPullResponse> {
   return apiRequest<SyncPullResponse>('/api/sync/pull', { userId });
+}
+
+// --- Benchmarks ---
+
+export interface BenchmarkDomain {
+  skillDomain: string;
+  childElo: number;
+  percentile: number;
+  percentile25: number;
+  percentile50: number;
+  percentile75: number;
+  percentile90: number;
+  sampleSize: number;
+}
+
+export interface BenchmarkResponse {
+  national: BenchmarkDomain[];
+  state: BenchmarkDomain[] | null;
+  ageRange: string;
+  stateCode: string | null;
+}
+
+export async function getBenchmarks(
+  userId: string,
+  childId: string,
+  signal?: AbortSignal,
+): Promise<BenchmarkResponse> {
+  return apiRequest<BenchmarkResponse>(`/api/benchmarks/${childId}`, {
+    userId,
+    signal,
+  });
 }
 
 // --- User Data Deletion ---

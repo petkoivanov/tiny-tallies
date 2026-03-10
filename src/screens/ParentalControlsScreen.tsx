@@ -1,13 +1,4 @@
-/**
- * ParentalControlsScreen — PIN-gated parental settings.
- *
- * Sections:
- * - Progress Reports: Link to ParentReportsScreen
- * - Privacy & Data: Sentry toggle, view privacy info, delete local data
- * - Account: Sign-in status, sign in/out, delete account
- * - AI Helper: Tutor consent toggle
- * - Sound: Sound effects on/off toggle
- */
+/** ParentalControlsScreen — PIN-gated parental settings. */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -36,6 +27,8 @@ import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { PinGate } from '@/components/profile/PinGate';
 import { AppDialog } from '@/components/AppDialog';
+import { BenchmarkSection } from '@/components/parental/BenchmarkSection';
+import { TimeLimitsSection } from '@/components/parental/TimeLimitsSection';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import {
@@ -74,7 +67,6 @@ export default function ParentalControlsScreen() {
   // Dialog state for error messages and confirmations
   const [errorDialog, setErrorDialog] = useState<{ title: string; message: string } | null>(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-
   useEffect(() => {
     getSentryOptOut().then(setSentryOptedOut);
     isAppleSignInAvailable().then(setAppleAvailable);
@@ -164,7 +156,6 @@ export default function ParentalControlsScreen() {
       routes: [{ name: 'ProfileSetup' as never }],
     });
   }, [userId, clearAuth, navigation]);
-
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -230,7 +221,7 @@ export default function ParentalControlsScreen() {
           fontSize: typography.fontSize.sm,
           color: colors.textMuted,
         },
-        destructiveButton: {
+        actionRow: {
           flexDirection: 'row',
           alignItems: 'center',
           gap: spacing.sm,
@@ -257,14 +248,7 @@ export default function ParentalControlsScreen() {
           fontSize: typography.fontSize.md,
           color: '#fff',
         },
-        signOutButton: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingVertical: spacing.sm,
-          minHeight: layout.minTouchTarget,
-        },
-        signOutText: {
+        secondaryText: {
           fontFamily: typography.fontFamily.semiBold,
           fontSize: typography.fontSize.md,
           color: colors.textSecondary,
@@ -284,7 +268,6 @@ export default function ParentalControlsScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Header */}
       <View style={styles.header}>
         <Pressable
           style={styles.backButton}
@@ -307,26 +290,34 @@ export default function ParentalControlsScreen() {
           ]}
           testID="parental-controls-content"
         >
-          {/* Progress Reports Section */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <BarChart3 size={20} color={colors.primary} />
               <Text style={styles.sectionTitle}>Progress Reports</Text>
             </View>
-            <Pressable
-              style={styles.card}
-              onPress={() => navigation.navigate('ParentReports' as never)}
-              accessibilityRole="button"
-              testID="view-reports-button"
-            >
-              <View style={styles.row}>
+            <View style={styles.card}>
+              <Pressable
+                style={styles.row}
+                onPress={() => navigation.navigate('ParentReports' as never)}
+                accessibilityRole="button"
+                testID="view-reports-button"
+              >
                 <Text style={styles.rowLabel}>View learning progress</Text>
                 <ChevronRight size={20} color={colors.textMuted} />
-              </View>
-            </Pressable>
+              </Pressable>
+              <View style={styles.divider} />
+              <Pressable
+                style={styles.row}
+                onPress={() => navigation.navigate('PeerBenchmarks' as never)}
+                accessibilityRole="button"
+                testID="view-benchmarks-button"
+              >
+                <Text style={styles.rowLabel}>View peer benchmarks</Text>
+                <ChevronRight size={20} color={colors.textMuted} />
+              </Pressable>
+            </View>
           </View>
 
-          {/* Privacy & Data Section */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Shield size={20} color={colors.primary} />
@@ -349,7 +340,6 @@ export default function ParentalControlsScreen() {
             </View>
           </View>
 
-          {/* Account Section */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <User size={20} color={colors.primary} />
@@ -364,17 +354,17 @@ export default function ParentalControlsScreen() {
                   </Text>
                   <View style={styles.divider} />
                   <Pressable
-                    style={styles.signOutButton}
+                    style={styles.actionRow}
                     onPress={handleSignOut}
                     accessibilityRole="button"
                     testID="sign-out-button"
                   >
                     <LogOut size={18} color={colors.textSecondary} />
-                    <Text style={styles.signOutText}>Sign Out</Text>
+                    <Text style={styles.secondaryText}>Sign Out</Text>
                   </Pressable>
                   <View style={styles.divider} />
                   <Pressable
-                    style={styles.destructiveButton}
+                    style={styles.actionRow}
                     onPress={handleDeleteAccount}
                     accessibilityRole="button"
                     testID="delete-account-button"
@@ -421,7 +411,6 @@ export default function ParentalControlsScreen() {
             </View>
           </View>
 
-          {/* AI Helper Section */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Brain size={20} color={colors.primary} />
@@ -444,7 +433,28 @@ export default function ParentalControlsScreen() {
             </View>
           </View>
 
-          {/* Sound Section */}
+          <TimeLimitsSection
+            sectionStyle={styles.section}
+            sectionHeaderStyle={styles.sectionHeader}
+            sectionTitleStyle={styles.sectionTitle}
+            cardStyle={styles.card}
+            rowStyle={styles.row}
+            rowLabelStyle={styles.rowLabel}
+            rowSublabelStyle={styles.rowSublabel}
+            dividerStyle={styles.divider}
+          />
+
+          <BenchmarkSection
+            sectionStyle={styles.section}
+            sectionHeaderStyle={styles.sectionHeader}
+            sectionTitleStyle={styles.sectionTitle}
+            cardStyle={styles.card}
+            rowStyle={styles.row}
+            rowLabelStyle={styles.rowLabel}
+            rowSublabelStyle={styles.rowSublabel}
+            dividerStyle={styles.divider}
+          />
+
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Volume2 size={20} color={colors.primary} />
@@ -468,8 +478,6 @@ export default function ParentalControlsScreen() {
           </View>
         </ScrollView>
       </PinGate>
-
-      {/* Error dialog (sign-in failures) */}
       <AppDialog
         visible={errorDialog !== null}
         title={errorDialog?.title ?? ''}
@@ -477,8 +485,6 @@ export default function ParentalControlsScreen() {
         buttons={[{ text: 'OK' }]}
         onDismiss={() => setErrorDialog(null)}
       />
-
-      {/* Delete account confirmation */}
       <AppDialog
         visible={deleteDialogVisible}
         title="Delete Account"

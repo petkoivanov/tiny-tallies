@@ -6,6 +6,7 @@ import { Env } from './types';
 import { CORS_HEADERS, jsonResponse, errorResponse, validateApiKey, getUserId } from './middleware';
 import {
   handleAuthVerify,
+  handleGetBenchmarks,
   handleConsentAcknowledge,
   handleConsentStatus,
   handleSyncPush,
@@ -60,6 +61,11 @@ export async function router(request: Request, env: Env): Promise<Response> {
   // Sync — pull merged state
   if (path === '/api/sync/pull' && method === 'GET') {
     return handleSyncPull(request, env);
+  }
+
+  // Benchmarks — get peer percentile data for a child
+  if (path.startsWith('/api/benchmarks/') && method === 'GET') {
+    return handleGetBenchmarks(request, env);
   }
 
   // User — delete all data

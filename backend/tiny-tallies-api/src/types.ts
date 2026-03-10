@@ -64,6 +64,9 @@ export interface SyncPushRequest {
     avatarId: string | null;
     frameId: string | null;
     themeId: string | null;
+    ageRange: string | null;
+    stateCode: string | null;
+    benchmarkOptIn: boolean;
   };
   scoreDeltas: ScoreDelta[];
   badges: BadgeRecord[];
@@ -116,4 +119,24 @@ export interface SyncedChild {
   sessionsCompleted: number;
   eloRating: number;
   updatedAt: number;
+}
+
+// Benchmark types
+
+export interface BenchmarkDomain {
+  skillDomain: string;
+  childElo: number;
+  percentile: number;
+  percentile25: number;
+  percentile50: number;
+  percentile75: number;
+  percentile90: number;
+  sampleSize: number;
+}
+
+export interface BenchmarkResponse {
+  national: BenchmarkDomain[];
+  state: BenchmarkDomain[] | null;
+  ageRange: string;
+  stateCode: string | null;
 }

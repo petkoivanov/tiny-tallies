@@ -121,12 +121,16 @@ export function CosmeticDetailOverlay({
         testID="cosmetic-overlay-backdrop"
         style={styles.backdrop}
         onPress={onClose}
+        accessibilityRole="button"
+        accessibilityLabel="Close details"
       >
-        <Pressable style={styles.card} onPress={() => {}}>
+        <View style={styles.card}>
           <Pressable
             testID="cosmetic-overlay-close"
             style={styles.closeBtn}
             onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
           >
             <Text style={styles.closeBtnText}>X</Text>
           </Pressable>
@@ -148,7 +152,7 @@ export function CosmeticDetailOverlay({
           <Text style={styles.progressHint}>
             Keep playing to earn this badge!
           </Text>
-        </Pressable>
+        </View>
       </Pressable>
     </Modal>
   );

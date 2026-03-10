@@ -109,6 +109,10 @@ function setMockState(overrides: Record<string, unknown> = {}) {
     children: {},
     activeChildId: null,
     switchChild: jest.fn(),
+    sessionHistory: [],
+    dailyLimitMinutes: 0,
+    bedtimeWindow: null,
+    breakReminderMinutes: 0,
     ...overrides,
   };
 }

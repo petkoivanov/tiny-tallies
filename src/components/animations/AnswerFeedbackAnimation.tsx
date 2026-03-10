@@ -7,6 +7,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import { springConfigs, durations } from '@/theme';
 
 interface AnswerFeedbackAnimationProps {
   feedbackType: 'correct' | 'incorrect' | null;
@@ -28,16 +29,16 @@ export function AnswerFeedbackAnimation({
   useEffect(() => {
     if (feedbackType === 'correct') {
       scale.value = withSequence(
-        withSpring(1.1, { damping: 4, stiffness: 300 }),
-        withSpring(1.0, { damping: 8 }),
+        withSpring(1.1, springConfigs.bounce),
+        withSpring(1.0, springConfigs.settle),
       );
     } else if (feedbackType === 'incorrect') {
       translateX.value = withSequence(
-        withTiming(-6, { duration: 50 }),
-        withTiming(6, { duration: 50 }),
-        withTiming(-4, { duration: 50 }),
-        withTiming(4, { duration: 50 }),
-        withTiming(0, { duration: 50 }),
+        withTiming(-6, { duration: durations.quick }),
+        withTiming(6, { duration: durations.quick }),
+        withTiming(-4, { duration: durations.quick }),
+        withTiming(4, { duration: durations.quick }),
+        withTiming(0, { duration: durations.quick }),
       );
     } else {
       // Reset when feedback clears

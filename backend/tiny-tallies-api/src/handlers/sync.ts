@@ -26,10 +26,10 @@ export async function handleSyncPush(request: Request, env: Env): Promise<Respon
 
   const now = Math.floor(Date.now() / 1000);
 
-  // Upsert child profile
+  // Upsert child profile (including benchmark demographics)
   await env.DB.prepare(`
-    INSERT INTO child_profiles (id, user_id, child_name, child_age, child_grade, avatar_id, frame_id, theme_id, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO child_profiles (id, user_id, child_name, child_age, child_grade, avatar_id, frame_id, theme_id, age_range, state_code, benchmark_opt_in, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
       child_name = excluded.child_name,
       child_age = excluded.child_age,
@@ -37,11 +37,16 @@ export async function handleSyncPush(request: Request, env: Env): Promise<Respon
       avatar_id = excluded.avatar_id,
       frame_id = excluded.frame_id,
       theme_id = excluded.theme_id,
+      age_range = excluded.age_range,
+      state_code = excluded.state_code,
+      benchmark_opt_in = excluded.benchmark_opt_in,
       updated_at = excluded.updated_at
   `).bind(
     childId, userId,
     profile.childName, profile.childAge, profile.childGrade,
-    profile.avatarId, profile.frameId, profile.themeId, now
+    profile.avatarId, profile.frameId, profile.themeId,
+    profile.ageRange ?? null, profile.stateCode ?? null,
+    profile.benchmarkOptIn ? 1 : 0, now
   ).run();
 
   // Insert score deltas (dedup by device_id + timestamp)
@@ -111,7 +116,86 @@ export async function handleSyncPush(request: Request, env: Env): Promise<Respon
     'UPDATE child_profiles SET xp = ?, level = ?, sessions_completed = ?, elo_rating = ?, updated_at = ? WHERE id = ?'
   ).bind(totalXp, level, sessions, eloResult?.avg_elo ?? 1000, now, childId).run();
 
+  // Recompute benchmark aggregates if this child opted in
+  if (profile.benchmarkOptIn && profile.ageRange) {
+    await recomputeBenchmarks(env, profile.ageRange, profile.stateCode, now);
+  }
+
   return jsonResponse({ success: true, syncedAt: now });
+}
+
+/**
+ * Recompute benchmark percentiles for a given age range and scope.
+ * Uses all opted-in children's average Elo as the metric.
+ */
+async function recomputeBenchmarks(
+  env: Env,
+  ageRange: string,
+  stateCode: string | null,
+  now: number,
+): Promise<void> {
+  // Compute skill domain percentiles for national scope
+  await computePercentiles(env, ageRange, 'national', null, now);
+
+  // Compute state-level if state code provided
+  if (stateCode) {
+    await computePercentiles(env, ageRange, stateCode, stateCode, now);
+  }
+}
+
+async function computePercentiles(
+  env: Env,
+  ageRange: string,
+  scope: string,
+  stateFilter: string | null,
+  now: number,
+): Promise<void> {
+  // Get all opted-in children's skill Elo data in this cohort
+  const baseQuery = stateFilter
+    ? `SELECT ss.skill_id, ss.elo
+       FROM skill_states ss
+       JOIN child_profiles cp ON ss.child_id = cp.id
+       WHERE cp.benchmark_opt_in = 1 AND cp.age_range = ? AND cp.state_code = ?`
+    : `SELECT ss.skill_id, ss.elo
+       FROM skill_states ss
+       JOIN child_profiles cp ON ss.child_id = cp.id
+       WHERE cp.benchmark_opt_in = 1 AND cp.age_range = ?`;
+
+  const rows = stateFilter
+    ? await env.DB.prepare(baseQuery).bind(ageRange, stateFilter).all<{ skill_id: string; elo: number }>()
+    : await env.DB.prepare(baseQuery).bind(ageRange).all<{ skill_id: string; elo: number }>();
+
+  // Group by skill domain (prefix before first dot, e.g. "addition" from "addition.singleDigit")
+  const domainElos: Record<string, number[]> = { overall: [] };
+  for (const row of rows.results) {
+    const domain = row.skill_id.split('.')[0];
+    if (!domainElos[domain]) domainElos[domain] = [];
+    domainElos[domain].push(row.elo);
+    domainElos['overall'].push(row.elo);
+  }
+
+  // Compute and upsert percentiles per domain
+  for (const [domain, elos] of Object.entries(domainElos)) {
+    if (elos.length === 0) continue;
+    elos.sort((a, b) => a - b);
+    const n = elos.length;
+    const p25 = elos[Math.floor(n * 0.25)] ?? 0;
+    const p50 = elos[Math.floor(n * 0.50)] ?? 0;
+    const p75 = elos[Math.floor(n * 0.75)] ?? 0;
+    const p90 = elos[Math.floor(n * 0.90)] ?? 0;
+
+    await env.DB.prepare(`
+      INSERT INTO benchmark_aggregates (age_range, scope, skill_domain, percentile_25, percentile_50, percentile_75, percentile_90, sample_size, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(age_range, scope, skill_domain) DO UPDATE SET
+        percentile_25 = excluded.percentile_25,
+        percentile_50 = excluded.percentile_50,
+        percentile_75 = excluded.percentile_75,
+        percentile_90 = excluded.percentile_90,
+        sample_size = excluded.sample_size,
+        updated_at = excluded.updated_at
+    `).bind(ageRange, scope, domain, p25, p50, p75, p90, n, now).run();
+  }
 }
 
 export async function handleSyncPull(request: Request, env: Env): Promise<Response> {

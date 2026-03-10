@@ -13,6 +13,7 @@ import type { ThemeColors, ThemeId } from './colors';
 
 export { THEMES } from './colors';
 export type { ThemeColors, ThemeId } from './colors';
+export { springConfigs, durations } from './animations';
 
 const ThemeContext = createContext<ThemeColors>(THEMES.dark);
 

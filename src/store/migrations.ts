@@ -17,7 +17,7 @@ export function migrateStore(
   const state = (persistedState ?? {}) as Record<string, unknown>;
 
   // Fast path: skip all checks when store is already current
-  if (version >= 17) return state;
+  if (version >= 19) return state;
 
   if (version < 2) {
     // v1 -> v2: First persistence enablement.
@@ -163,8 +163,22 @@ export function migrateStore(
     state.soundEnabled ??= true;
   }
 
+  if (version < 18) {
+    // v17 -> v18: Add parental time controls
+    state.dailyLimitMinutes ??= 0;
+    state.bedtimeWindow ??= null;
+    state.breakReminderMinutes ??= 0;
+  }
+
+  if (version < 19) {
+    // v18 -> v19: Add peer benchmarking demographics
+    state.ageRange ??= null;
+    state.stateCode ??= null;
+    state.benchmarkOptIn ??= false;
+  }
+
   // Future migrations chain here:
-  // if (version < 18) { ... }
+  // if (version < 20) { ... }
 
   return state;
 }

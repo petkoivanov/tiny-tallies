@@ -120,9 +120,17 @@ export function BadgeDetailOverlay({
         testID="overlay-backdrop"
         style={styles.backdrop}
         onPress={onClose}
+        accessibilityRole="button"
+        accessibilityLabel="Close badge details"
       >
-        <Pressable style={styles.card} onPress={() => {}}>
-          <Pressable testID="overlay-close" style={styles.closeBtn} onPress={onClose}>
+        <View style={styles.card}>
+          <Pressable
+            testID="overlay-close"
+            style={styles.closeBtn}
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+          >
             <Text style={styles.closeBtnText}>X</Text>
           </Pressable>
 
@@ -142,7 +150,7 @@ export function BadgeDetailOverlay({
           <Text style={styles.earnedDate}>
             {earnedAt ? `Earned: ${formatDate(earnedAt)}` : 'Not yet earned'}
           </Text>
-        </Pressable>
+        </View>
       </Pressable>
     </Modal>
   );

@@ -39,10 +39,14 @@ CREATE TABLE IF NOT EXISTS child_profiles (
   xp INTEGER NOT NULL DEFAULT 0,
   level INTEGER NOT NULL DEFAULT 1,
   sessions_completed INTEGER NOT NULL DEFAULT 0,
-  updated_at INTEGER NOT NULL
+  updated_at INTEGER NOT NULL,
+  age_range TEXT,
+  state_code TEXT,
+  benchmark_opt_in INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_child_profiles_user ON child_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_child_profiles_benchmark ON child_profiles(benchmark_opt_in, age_range, state_code);
 
 -- Score deltas (append-only log for incremental sync)
 CREATE TABLE IF NOT EXISTS score_deltas (
@@ -66,6 +70,23 @@ CREATE TABLE IF NOT EXISTS badges (
   earned_at INTEGER NOT NULL,
   PRIMARY KEY (child_id, badge_id)
 );
+
+-- Benchmark aggregates (precomputed percentiles by cohort)
+-- Recomputed on sync push for opted-in children
+CREATE TABLE IF NOT EXISTS benchmark_aggregates (
+  age_range TEXT NOT NULL,          -- '6-7', '7-8', '8-9'
+  scope TEXT NOT NULL,              -- 'national' or US state code (e.g. 'NY')
+  skill_domain TEXT NOT NULL,       -- 'addition', 'subtraction', 'overall', etc.
+  percentile_25 REAL NOT NULL DEFAULT 0,
+  percentile_50 REAL NOT NULL DEFAULT 0,
+  percentile_75 REAL NOT NULL DEFAULT 0,
+  percentile_90 REAL NOT NULL DEFAULT 0,
+  sample_size INTEGER NOT NULL DEFAULT 0,
+  updated_at INTEGER NOT NULL,
+  PRIMARY KEY (age_range, scope, skill_domain)
+);
+
+CREATE INDEX IF NOT EXISTS idx_benchmark_age_scope ON benchmark_aggregates(age_range, scope);
 
 -- Skill states (latest snapshot per child per skill)
 CREATE TABLE IF NOT EXISTS skill_states (

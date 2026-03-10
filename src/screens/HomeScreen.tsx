@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -14,7 +14,9 @@ import { isSameISOWeek } from '@/services/gamification/weeklyStreak';
 import { BADGES } from '@/services/achievement';
 import { getConfirmedMisconceptions } from '@/store/slices/misconceptionSlice';
 import { ExploreGrid, DailyChallengeCard } from '@/components/home';
+import { AppDialog } from '@/components/AppDialog';
 import { useAbsenceCheck } from '@/hooks/useAbsenceCheck';
+import { useTimeControls } from '@/hooks/useTimeControls';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -46,6 +48,19 @@ export default function HomeScreen() {
   );
 
   const { suggestReassessment, decayedSkillCount } = useAbsenceCheck();
+  const { canStartSession, blockMessage } = useTimeControls();
+  const [timeLimitDialogVisible, setTimeLimitDialogVisible] = useState(false);
+
+  const handleStartSession = useCallback(
+    (params: { sessionId: string; mode?: string; remediationSkillIds?: string[] }) => {
+      if (!canStartSession) {
+        setTimeLimitDialogVisible(true);
+        return;
+      }
+      navigation.navigate('Session', params as never);
+    },
+    [canStartSession, navigation],
+  );
 
   const showRemediation = confirmedMisconceptions.length >= 2;
   const remediationSkillIds = [
@@ -400,23 +415,23 @@ export default function HomeScreen() {
       <View style={styles.buttonSection}>
         <Pressable
           onPress={() =>
-            navigation.navigate('Session', {
-              sessionId: String(Date.now()),
-            })
+            handleStartSession({ sessionId: String(Date.now()) })
           }
           style={({ pressed }) => [
             styles.button,
             pressed && styles.buttonPressed,
+            !canStartSession && { opacity: 0.5 },
           ]}
           accessibilityRole="button"
           accessibilityLabel="Start Practice"
+          testID="start-practice-button"
         >
           <Text style={styles.buttonText}>Start Practice</Text>
         </Pressable>
         {showRemediation && (
           <Pressable
             onPress={() =>
-              navigation.navigate('Session', {
+              handleStartSession({
                 sessionId: String(Date.now()),
                 mode: 'remediation',
                 remediationSkillIds,
@@ -461,6 +476,14 @@ export default function HomeScreen() {
           setSwitcherVisible(false);
           navigation.navigate('ProfileManagement' as never);
         }}
+      />
+
+      <AppDialog
+        visible={timeLimitDialogVisible}
+        title="Time Limit Reached"
+        message={blockMessage ?? undefined}
+        buttons={[{ text: 'OK' }]}
+        onDismiss={() => setTimeLimitDialogVisible(false)}
       />
     </>
   );
