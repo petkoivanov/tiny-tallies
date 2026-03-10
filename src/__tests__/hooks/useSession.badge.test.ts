@@ -9,6 +9,7 @@ jest.mock('@/services/achievement', () => ({
 
 import { useAppStore } from '@/store/appStore';
 import { useSession, FEEDBACK_DURATION_MS } from '@/hooks/useSession';
+import { answerNumericValue } from '@/services/mathEngine/types';
 
 jest.useFakeTimers();
 
@@ -23,7 +24,7 @@ function completeSession(result: { current: ReturnType<typeof useSession> }) {
     if (!problem) break;
 
     act(() => {
-      result.current.handleAnswer(problem.problem.correctAnswer);
+      result.current.handleAnswer(answerNumericValue(problem.problem.correctAnswer));
     });
     act(() => {
       jest.advanceTimersByTime(FEEDBACK_DURATION_MS);

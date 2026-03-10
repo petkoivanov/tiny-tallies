@@ -30,6 +30,7 @@ import {
   computeEdgePaths,
   NODE_RADIUS,
 } from '@/components/skillMap/skillMapLayout';
+import { SKILLS } from '@/services/mathEngine/skills';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
 
 // Helper to create a minimal SkillState
@@ -47,6 +48,24 @@ function makeSkillState(overrides: Partial<SkillState> = {}): SkillState {
     cpaLevel: 'concrete' as const,
     ...overrides,
   };
+}
+
+// Count total prerequisite edges (cross-column and same-column)
+function countPrerequisiteEdges() {
+  let sameColumn = 0;
+  let crossColumn = 0;
+  for (const skill of SKILLS) {
+    for (const prereqId of skill.prerequisites) {
+      const prereq = SKILLS.find((s) => s.id === prereqId);
+      if (!prereq) continue;
+      if (prereq.operation === skill.operation) {
+        sameColumn++;
+      } else {
+        crossColumn++;
+      }
+    }
+  }
+  return { sameColumn, crossColumn, total: sameColumn + crossColumn };
 }
 
 describe('skillMapLayout', () => {
@@ -103,54 +122,51 @@ describe('skillMapLayout', () => {
     const HEIGHT = 800;
     const HEADER_HEIGHT = 80;
 
-    it('returns 14 NodePosition objects', () => {
+    it('returns one NodePosition per skill', () => {
       const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
-      expect(nodes).toHaveLength(14);
+      expect(nodes).toHaveLength(SKILLS.length);
     });
 
-    it('places addition nodes at ~30% width', () => {
+    it('places addition nodes in a column', () => {
       const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
+      const additionSkillCount = SKILLS.filter((s) => s.operation === 'addition').length;
       const additionNodes = nodes.filter((n) => n.column === 'addition');
-      expect(additionNodes).toHaveLength(7);
-      additionNodes.forEach((node) => {
-        expect(node.x).toBeCloseTo(WIDTH * 0.3, 0);
-      });
+      expect(additionNodes).toHaveLength(additionSkillCount);
+      // All addition nodes should share the same X coordinate
+      const xValues = new Set(additionNodes.map((n) => n.x));
+      expect(xValues.size).toBe(1);
     });
 
-    it('places subtraction nodes at ~70% width', () => {
+    it('places subtraction nodes in a column', () => {
       const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
+      const subSkillCount = SKILLS.filter((s) => s.operation === 'subtraction').length;
       const subtractionNodes = nodes.filter(
         (n) => n.column === 'subtraction',
       );
-      expect(subtractionNodes).toHaveLength(7);
-      subtractionNodes.forEach((node) => {
-        expect(node.x).toBeCloseTo(WIDTH * 0.7, 0);
-      });
+      expect(subtractionNodes).toHaveLength(subSkillCount);
+      // All subtraction nodes should share the same X coordinate
+      const xValues = new Set(subtractionNodes.map((n) => n.x));
+      expect(xValues.size).toBe(1);
     });
 
-    it('assigns correct column, row, and grade to each node', () => {
+    it('assigns correct row indices to each column', () => {
       const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
 
-      // Addition nodes should have rows 0-6
+      // Addition nodes should have sequential rows
       const additionNodes = nodes
         .filter((n) => n.column === 'addition')
         .sort((a, b) => a.row - b.row);
-      expect(additionNodes.map((n) => n.row)).toEqual([0, 1, 2, 3, 4, 5, 6]);
-      // Grade 1: rows 0-2, Grade 2: rows 3-4, Grade 3: rows 5-6
-      expect(additionNodes[0].grade).toBe(1);
-      expect(additionNodes[1].grade).toBe(1);
-      expect(additionNodes[2].grade).toBe(1);
-      expect(additionNodes[3].grade).toBe(2);
-      expect(additionNodes[4].grade).toBe(2);
-      expect(additionNodes[5].grade).toBe(3);
-      expect(additionNodes[6].grade).toBe(3);
+      const additionRows = additionNodes.map((n) => n.row);
+      expect(additionRows).toEqual(additionRows.map((_, i) => i));
     });
 
-    it('spaces nodes evenly vertically with 7 rows', () => {
+    it('spaces nodes evenly vertically within each column', () => {
       const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
       const additionNodes = nodes
         .filter((n) => n.column === 'addition')
         .sort((a, b) => a.row - b.row);
+
+      if (additionNodes.length < 3) return;
 
       // Check that vertical spacing is consistent
       const spacing = additionNodes[1].y - additionNodes[0].y;
@@ -168,19 +184,21 @@ describe('skillMapLayout', () => {
     const HEIGHT = 800;
     const HEADER_HEIGHT = 80;
 
-    it('returns 18 EdgeData objects', () => {
+    it('returns correct total number of edges', () => {
       const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
       const edges = computeEdgePaths(nodes, NODE_RADIUS);
-      expect(edges).toHaveLength(18);
+      const expected = countPrerequisiteEdges();
+      expect(edges).toHaveLength(expected.total);
     });
 
-    it('has 12 same-column edges and 6 cross-column edges', () => {
+    it('has correct same-column and cross-column edge counts', () => {
       const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
       const edges = computeEdgePaths(nodes, NODE_RADIUS);
       const sameColumn = edges.filter((e) => !e.isCrossColumn);
       const crossColumn = edges.filter((e) => e.isCrossColumn);
-      expect(sameColumn).toHaveLength(12);
-      expect(crossColumn).toHaveLength(6);
+      const expected = countPrerequisiteEdges();
+      expect(sameColumn).toHaveLength(expected.sameColumn);
+      expect(crossColumn).toHaveLength(expected.crossColumn);
     });
 
     it('each edge has valid fromPos/toPos and SVG path string', () => {

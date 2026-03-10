@@ -43,6 +43,7 @@ export type RootStackParamList = {
   ProfileSetup: undefined;
   ProfileManagement: undefined;
   ParentalControls: undefined;
+  ParentReports: undefined;
 };
 
 declare global {

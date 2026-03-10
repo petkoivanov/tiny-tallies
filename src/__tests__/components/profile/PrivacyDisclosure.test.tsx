@@ -53,7 +53,7 @@ describe('PrivacyDisclosure', () => {
     );
     expect(getByText('What we store locally')).toBeTruthy();
     expect(getByText('Cloud sync (when signed in)')).toBeTruthy();
-    expect(getByText('AI Helper (optional)')).toBeTruthy();
+    expect(getByText('AI Helper (enabled by default)')).toBeTruthy();
     expect(getByText('Error tracking')).toBeTruthy();
   });
 
@@ -62,7 +62,7 @@ describe('PrivacyDisclosure', () => {
       <PrivacyDisclosure onAccept={mockOnAccept} />,
     );
     expect(
-      getByText('No personal information is sent to the AI'),
+      getByText('No personal information is sent to the AI — only math problem context'),
     ).toBeTruthy();
     expect(
       getByText('You can opt out anytime from Parental Controls'),

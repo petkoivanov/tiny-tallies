@@ -1,6 +1,7 @@
 import { requiresBorrow } from '../../services/mathEngine/constraints';
 import { generateProblem } from '../../services/mathEngine/generator';
 import { SUBTRACTION_TEMPLATES } from '../../services/mathEngine/templates/subtraction';
+import { answerNumericValue } from '../../services/mathEngine/types';
 
 describe.each(SUBTRACTION_TEMPLATES)(
   'Subtraction template: $id',
@@ -23,17 +24,17 @@ describe.each(SUBTRACTION_TEMPLATES)(
         });
 
         expect(problem.operands[0]).toBeGreaterThanOrEqual(
-          template.operandRanges[0].min,
+          template.operandRanges![0].min,
         );
         expect(problem.operands[0]).toBeLessThanOrEqual(
-          template.operandRanges[0].max,
+          template.operandRanges![0].max,
         );
         // Note: operand[1] may be further constrained by generator to ensure non-negative result
         expect(problem.operands[1]).toBeGreaterThanOrEqual(
-          template.operandRanges[1].min,
+          template.operandRanges![1].min,
         );
         expect(problem.operands[1]).toBeLessThanOrEqual(
-          template.operandRanges[1].max,
+          template.operandRanges![1].max,
         );
       }
     });
@@ -45,7 +46,7 @@ describe.each(SUBTRACTION_TEMPLATES)(
           seed: baseSeed + i,
         });
 
-        expect(problem.correctAnswer).toBeGreaterThanOrEqual(0);
+        expect(answerNumericValue(problem.correctAnswer)).toBeGreaterThanOrEqual(0);
       }
     });
 
@@ -76,7 +77,7 @@ describe.each(SUBTRACTION_TEMPLATES)(
           seed: baseSeed + i,
         });
 
-        expect(problem.correctAnswer).toBe(
+        expect(answerNumericValue(problem.correctAnswer)).toBe(
           problem.operands[0] - problem.operands[1],
         );
       }

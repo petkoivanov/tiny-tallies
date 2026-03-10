@@ -1,0 +1,60 @@
+import type { SkillDefinition } from '../types';
+
+export const TIME_SKILLS: readonly SkillDefinition[] = [
+  {
+    id: 'time.read.hours',
+    name: 'Tell time (hours)',
+    operation: 'time',
+    grade: 1,
+    standards: ['1.MD.3'],
+    prerequisites: [],
+  },
+  {
+    id: 'time.read.half-hours',
+    name: 'Tell time (half hours)',
+    operation: 'time',
+    grade: 1,
+    standards: ['1.MD.3'],
+    prerequisites: ['time.read.hours'],
+  },
+  {
+    id: 'time.read.quarter-hours',
+    name: 'Tell time (quarter hours)',
+    operation: 'time',
+    grade: 2,
+    standards: ['2.MD.7'],
+    prerequisites: ['time.read.half-hours'],
+  },
+  {
+    id: 'time.read.five-minutes',
+    name: 'Tell time (5-minute intervals)',
+    operation: 'time',
+    grade: 2,
+    standards: ['2.MD.7'],
+    prerequisites: ['time.read.quarter-hours'],
+  },
+  {
+    id: 'time.am-pm',
+    name: 'Understand a.m./p.m.',
+    operation: 'time',
+    grade: 2,
+    standards: ['2.MD.7'],
+    prerequisites: ['time.read.five-minutes'],
+  },
+  {
+    id: 'time.read.one-minute',
+    name: 'Tell time (1-minute precision)',
+    operation: 'time',
+    grade: 3,
+    standards: ['3.MD.1'],
+    prerequisites: ['time.read.five-minutes'],
+  },
+  {
+    id: 'time.elapsed',
+    name: 'Elapsed time',
+    operation: 'time',
+    grade: 3,
+    standards: ['3.MD.1'],
+    prerequisites: ['time.read.one-minute'],
+  },
+];

@@ -1,7 +1,7 @@
 import { generateDistractors } from '../../services/mathEngine/bugLibrary/distractorGenerator';
 import { createRng } from '../../services/mathEngine/seededRng';
 import { generateProblem } from '../../services/mathEngine/generator';
-import type { Problem } from '../../services/mathEngine/types';
+import { answerNumericValue, numericAnswer, type Problem } from '../../services/mathEngine/types';
 
 // Helper to create a minimal Problem for testing
 function makeProblem(overrides: Partial<Problem>): Problem {
@@ -9,8 +9,8 @@ function makeProblem(overrides: Partial<Problem>): Problem {
     id: 'test_1',
     templateId: 'test',
     operation: 'addition',
-    operands: [5, 3] as [number, number],
-    correctAnswer: 8,
+    operands: [5, 3],
+    correctAnswer: numericAnswer(8),
     questionText: '5 + 3 = ?',
     skillId: 'addition.single-digit.no-carry',
     standards: ['1.OA.C.6'],
@@ -51,7 +51,7 @@ describe('generateDistractors', () => {
 
     it('always returns exactly 3 distractors', () => {
       for (const problem of problems) {
-        const rng = createRng(problem.correctAnswer);
+        const rng = createRng(answerNumericValue(problem.correctAnswer));
         const distractors = generateDistractors(problem, rng);
         expect(distractors).toHaveLength(3);
       }
@@ -59,17 +59,17 @@ describe('generateDistractors', () => {
 
     it('no distractor equals correctAnswer', () => {
       for (const problem of problems) {
-        const rng = createRng(problem.correctAnswer + 7);
+        const rng = createRng(answerNumericValue(problem.correctAnswer) + 7);
         const distractors = generateDistractors(problem, rng);
         for (const d of distractors) {
-          expect(d.value).not.toBe(problem.correctAnswer);
+          expect(d.value).not.toBe(answerNumericValue(problem.correctAnswer));
         }
       }
     });
 
     it('all distractors are unique', () => {
       for (const problem of problems) {
-        const rng = createRng(problem.correctAnswer + 13);
+        const rng = createRng(answerNumericValue(problem.correctAnswer) + 13);
         const distractors = generateDistractors(problem, rng);
         const values = distractors.map((d) => d.value);
         expect(new Set(values).size).toBe(3);
@@ -78,7 +78,7 @@ describe('generateDistractors', () => {
 
     it('all distractors are positive integers', () => {
       for (const problem of problems) {
-        const rng = createRng(problem.correctAnswer + 19);
+        const rng = createRng(answerNumericValue(problem.correctAnswer) + 19);
         const distractors = generateDistractors(problem, rng);
         for (const d of distractors) {
           expect(d.value).toBeGreaterThan(0);
@@ -104,7 +104,7 @@ describe('generateDistractors', () => {
       const problem = makeProblem({
         operation: 'addition',
         operands: [27, 18],
-        correctAnswer: 45,
+        correctAnswer: numericAnswer(45),
         metadata: { digitCount: 2, requiresCarry: true, requiresBorrow: false },
       });
       const rng = createRng(42);
@@ -118,7 +118,7 @@ describe('generateDistractors', () => {
       const problem = makeProblem({
         operation: 'subtraction',
         operands: [42, 17],
-        correctAnswer: 25,
+        correctAnswer: numericAnswer(25),
         metadata: { digitCount: 2, requiresCarry: false, requiresBorrow: true },
       });
       const rng = createRng(42);
@@ -133,7 +133,7 @@ describe('generateDistractors', () => {
       const problem = makeProblem({
         operation: 'addition',
         operands: [1, 1],
-        correctAnswer: 2,
+        correctAnswer: numericAnswer(2),
         metadata: { digitCount: 1, requiresCarry: false, requiresBorrow: false },
       });
       const rng = createRng(42);
@@ -149,7 +149,7 @@ describe('generateDistractors', () => {
       const problem = makeProblem({
         operation: 'addition',
         operands: [100, 200],
-        correctAnswer: 300,
+        correctAnswer: numericAnswer(300),
         metadata: { digitCount: 3, requiresCarry: false, requiresBorrow: false },
       });
       const rng = createRng(42);
@@ -165,7 +165,7 @@ describe('generateDistractors', () => {
       const problem = makeProblem({
         operation: 'subtraction',
         operands: [10, 9],
-        correctAnswer: 1,
+        correctAnswer: numericAnswer(1),
         metadata: { digitCount: 2, requiresCarry: false, requiresBorrow: true },
       });
       const rng = createRng(42);

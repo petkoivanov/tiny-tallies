@@ -172,8 +172,8 @@ describe('isValidDistractor', () => {
     expect(isValidDistractor(0, 5, 'addition')).toBe(false);
   });
 
-  it('allows zero for subtraction', () => {
-    expect(isValidDistractor(0, 5, 'subtraction')).toBe(true);
+  it('rejects zero for subtraction', () => {
+    expect(isValidDistractor(0, 5, 'subtraction')).toBe(false);
   });
 
   it('rejects distractor equal to correct answer', () => {

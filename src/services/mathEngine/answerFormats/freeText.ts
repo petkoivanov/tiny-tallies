@@ -1,3 +1,4 @@
+import { answerNumericValue } from '../types';
 import type { Problem } from '../types';
 import type { FreeTextPresentation } from './types';
 
@@ -55,7 +56,8 @@ export function validateFreeTextAnswer(
  * with a minimum of 2.
  */
 export function formatAsFreeText(problem: Problem): FreeTextPresentation {
-  const maxDigits = Math.max(2, String(problem.correctAnswer).length + 1);
+  const correctValue = answerNumericValue(problem.correctAnswer);
+  const maxDigits = Math.max(2, String(correctValue).length + 1);
 
   return {
     problem,

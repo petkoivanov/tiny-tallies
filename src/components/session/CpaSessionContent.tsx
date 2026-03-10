@@ -143,7 +143,7 @@ export function CpaSessionContent({
       const step = getNextGuidedStep(
         problem.operation,
         scaffoldManipulative,
-        problem.operands,
+        problem.operands as [number, number],
         0, // Initial count -- manipulative starts fresh each problem
       );
       setGuidedTargetId(step?.targetId ?? null);
@@ -249,7 +249,7 @@ export function CpaSessionContent({
       paddingVertical: spacing.sm,
       marginTop: spacing.lg,
       backgroundColor: colors.surface,
-      borderRadius: layout.borderRadius.full,
+      borderRadius: layout.borderRadius.round,
       borderWidth: 1,
       borderColor: colors.primaryLight + '40',
     },

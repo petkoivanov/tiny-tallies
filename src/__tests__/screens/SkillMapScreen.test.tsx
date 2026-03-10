@@ -104,6 +104,7 @@ jest.mock('@/store/appStore', () => ({
 }));
 
 import SkillMapScreen from '@/screens/SkillMapScreen';
+import { SKILLS } from '@/services/mathEngine/skills';
 
 function setMockState(overrides: Record<string, unknown> = {}) {
   mockStoreState = {
@@ -160,9 +161,9 @@ describe('SkillMapScreen', () => {
     // Loading text should be gone
     expect(queryByText('Loading skill map...')).toBeNull();
 
-    // Tap targets for 14 skill nodes should exist
+    // Tap targets for all skill nodes should exist
     const tapTargets = getAllByTestId(/^node-tap-/);
-    expect(tapTargets).toHaveLength(14);
+    expect(tapTargets).toHaveLength(SKILLS.length);
   });
 
   it('opens detail overlay when node is tapped', () => {

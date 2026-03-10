@@ -21,6 +21,7 @@ import type {
 import { getMisconceptionsBySkill } from '@/store/slices/misconceptionSlice';
 import type { SessionProblem } from '@/services/session/sessionTypes';
 import type { CpaStage, ManipulativeType } from '@/services/cpa/cpaTypes';
+import { answerNumericValue } from '@/services/mathEngine/types';
 
 /**
  * Derives the age bracket from child age for prompt templates.
@@ -190,7 +191,7 @@ export function useTutor(
       case 'boost':
         userPrompt = buildBoostPrompt({
           ...promptParams,
-          correctAnswer: currentProblem.problem.correctAnswer,
+          correctAnswer: answerNumericValue(currentProblem.problem.correctAnswer),
         });
         break;
       case 'hint':
@@ -233,7 +234,7 @@ export function useTutor(
       // Pass mode so BOOST bypasses answer-leak check
       const safetyResult = runSafetyPipeline(
         responseText,
-        currentProblem.problem.correctAnswer,
+        answerNumericValue(currentProblem.problem.correctAnswer),
         ageBracket,
         currentMode,
       );

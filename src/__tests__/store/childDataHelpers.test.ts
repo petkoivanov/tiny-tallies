@@ -227,7 +227,7 @@ describe('DEFAULT_CHILD_DATA', () => {
     expect(DEFAULT_CHILD_DATA.earnedBadges).toEqual({});
     expect(DEFAULT_CHILD_DATA.challengeCompletions).toEqual({});
     expect(DEFAULT_CHILD_DATA.exploredManipulatives).toEqual([]);
-    expect(DEFAULT_CHILD_DATA.tutorConsentGranted).toBe(false);
+    expect(DEFAULT_CHILD_DATA.tutorConsentGranted).toBe(true);
   });
 });
 

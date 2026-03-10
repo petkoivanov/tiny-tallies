@@ -106,4 +106,19 @@ export const SUBTRACTION_TEMPLATES: readonly ProblemTemplate[] = [
     baseElo: 1250,
     digitCount: 3,
   },
+  {
+    id: 'sub_four_digit_with_borrow',
+    operation: 'subtraction',
+    skillId: 'subtraction.four-digit.with-borrow',
+    standards: ['4.NBT.B.4'],
+    grades: [4],
+    operandRanges: [
+      { min: 2000, max: 9999 },
+      { min: 1000, max: 8999 },
+    ],
+    resultRange: { min: 1, max: 8999 },
+    requiresBorrow: true,
+    baseElo: 1350,
+    digitCount: 4,
+  },
 ];

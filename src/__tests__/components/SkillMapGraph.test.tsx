@@ -73,6 +73,7 @@ jest.mock('@/store/helpers/skillStateHelpers', () => ({
 }));
 
 import { SkillMapGraph } from '@/components/skillMap/SkillMapGraph';
+import { SKILLS } from '@/services/mathEngine/skills';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
 
 function makeSkillState(overrides: Partial<SkillState> = {}): SkillState {
@@ -111,10 +112,10 @@ describe('SkillMapGraph', () => {
     });
   });
 
-  it('renders 14 skill node tap targets', () => {
+  it('renders one tap target per skill', () => {
     const { getAllByTestId } = render(<SkillMapGraph {...defaultProps} />);
     const tapTargets = getAllByTestId(/^node-tap-/);
-    expect(tapTargets).toHaveLength(14);
+    expect(tapTargets).toHaveLength(SKILLS.length);
   });
 
   it('renders mastered node when skillStates indicate mastery', () => {

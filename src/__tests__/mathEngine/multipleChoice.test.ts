@@ -1,6 +1,6 @@
 import { formatAsMultipleChoice } from '../../services/mathEngine/answerFormats/multipleChoice';
 import { generateProblem } from '../../services/mathEngine/generator';
-import type { Problem } from '../../services/mathEngine/types';
+import { answerNumericValue, numericAnswer, type Problem } from '../../services/mathEngine/types';
 
 // Helper to create a minimal Problem for testing
 function makeProblem(overrides: Partial<Problem>): Problem {
@@ -8,8 +8,8 @@ function makeProblem(overrides: Partial<Problem>): Problem {
     id: 'test_1',
     templateId: 'test',
     operation: 'addition',
-    operands: [5, 3] as [number, number],
-    correctAnswer: 8,
+    operands: [5, 3],
+    correctAnswer: numericAnswer(8),
     questionText: '5 + 3 = ?',
     skillId: 'addition.single-digit.no-carry',
     standards: ['1.OA.C.6'],
@@ -39,13 +39,13 @@ describe('formatAsMultipleChoice', () => {
   it('correct answer appears in options', () => {
     const result = formatAsMultipleChoice(additionProblem, 123);
     const values = result.options.map((o) => o.value);
-    expect(values).toContain(additionProblem.correctAnswer);
+    expect(values).toContain(answerNumericValue(additionProblem.correctAnswer));
   });
 
   it('correctIndex points to the correct answer', () => {
     const result = formatAsMultipleChoice(additionProblem, 123);
     expect(result.options[result.correctIndex].value).toBe(
-      additionProblem.correctAnswer,
+      answerNumericValue(additionProblem.correctAnswer),
     );
   });
 
@@ -87,7 +87,7 @@ describe('formatAsMultipleChoice', () => {
     expect(result.problem).toBe(additionProblem);
     expect(result.options).toHaveLength(4);
     expect(result.options[result.correctIndex].value).toBe(
-      additionProblem.correctAnswer,
+      answerNumericValue(additionProblem.correctAnswer),
     );
   });
 
@@ -97,7 +97,7 @@ describe('formatAsMultipleChoice', () => {
     expect(result.problem).toBe(subtractionProblem);
     expect(result.options).toHaveLength(4);
     expect(result.options[result.correctIndex].value).toBe(
-      subtractionProblem.correctAnswer,
+      answerNumericValue(subtractionProblem.correctAnswer),
     );
   });
 
@@ -106,7 +106,7 @@ describe('formatAsMultipleChoice', () => {
     const carryProblem = makeProblem({
       operation: 'addition',
       operands: [27, 18],
-      correctAnswer: 45,
+      correctAnswer: numericAnswer(45),
       metadata: { digitCount: 2, requiresCarry: true, requiresBorrow: false },
     });
     const result = formatAsMultipleChoice(carryProblem, 42);

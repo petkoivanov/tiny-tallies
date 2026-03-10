@@ -6,26 +6,39 @@ import type { SeededRng } from '../seededRng';
  * Rejects values that are negative, zero for addition, equal to
  * the correct answer, absurdly distant, or too large for small answers.
  */
+/** Operations where negative distractors are plausible */
+const ALLOWS_NEGATIVES = new Set<Operation>([
+  'expressions',
+]);
+
 export function isValidDistractor(
   distractor: number,
   correctAnswer: number,
   operation: Operation,
 ): boolean {
-  // Reject negative values
-  if (distractor < 0) return false;
+  // Reject negative values unless the operation allows them
+  if (distractor < 0 && !ALLOWS_NEGATIVES.has(operation) && correctAnswer >= 0) {
+    return false;
+  }
 
-  // Reject zero for addition (0 is never a plausible sum)
-  if (distractor === 0 && operation === 'addition') return false;
+  // Reject zero for basic arithmetic (not a plausible answer)
+  if (distractor === 0 && !ALLOWS_NEGATIVES.has(operation)) return false;
 
   // Reject if equal to correct answer
   if (distractor === correctAnswer) return false;
 
   // Reject absurdly distant values
-  const maxDistance = Math.max(correctAnswer * 0.5, 10);
+  const maxDistance = Math.max(Math.abs(correctAnswer) * 0.5, 10);
   if (Math.abs(distractor - correctAnswer) > maxDistance) return false;
 
   // Reject large distractors when correct answer is small
-  if (correctAnswer <= 5 && distractor > 10) return false;
+  if (
+    Math.abs(correctAnswer) <= 5 &&
+    Math.abs(distractor) > 10 &&
+    !ALLOWS_NEGATIVES.has(operation)
+  ) {
+    return false;
+  }
 
   return true;
 }

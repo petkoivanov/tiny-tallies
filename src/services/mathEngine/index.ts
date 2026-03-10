@@ -9,7 +9,20 @@ export type {
   Operation,
   Grade,
   OperandRange,
+  Answer,
+  NumericAnswer,
+  FractionAnswer,
+  ComparisonAnswer,
+  CoordinateAnswer,
+  ExpressionAnswer,
+  DomainHandler,
+  DomainProblemData,
 } from './types';
+
+export { numericAnswer, answerNumericValue } from './types';
+
+// Domain handlers
+export { getHandler } from './domains';
 
 // Generator
 export {
@@ -36,7 +49,7 @@ export {
 } from './skills';
 
 // Standards
-export { ADDITION_SUBTRACTION_STANDARDS } from './standards';
+export { STANDARDS, ADDITION_SUBTRACTION_STANDARDS } from './standards';
 export type { StandardCode } from './standards';
 
 // Utilities (exported for Phase 3 Bug Library use)

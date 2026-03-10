@@ -8,7 +8,7 @@ export interface NodePosition {
   skillId: string;
   x: number;
   y: number;
-  column: 'addition' | 'subtraction';
+  column: string;
   row: number;
   grade: Grade;
 }

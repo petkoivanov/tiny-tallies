@@ -12,6 +12,7 @@ import {
   BASE_XP,
 } from '@/services/adaptive';
 import { generateProblem } from '@/services/mathEngine';
+import { answerNumericValue } from '@/services/mathEngine/types';
 import { createRng } from '@/services/mathEngine/seededRng';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
 
@@ -54,7 +55,7 @@ describe('adaptive difficulty integration', () => {
     const problem = generateProblem({ templateId: template.id, seed: 123 });
     expect(problem).toBeDefined();
     expect(problem.templateId).toBe(template.id);
-    expect(typeof problem.correctAnswer).toBe('number');
+    expect(problem.correctAnswer.type).toBe('numeric');
 
     // Step 5: Simulate correct answer and update Elo
     const result = calculateEloUpdate(1000, template.baseElo, true, 0);
@@ -197,5 +198,8 @@ describe('adaptive difficulty integration', () => {
     // (subtraction.single-digit.no-borrow + addition.within-20.no-carry)
     // addition.within-20.no-carry is NOT mastered -> NOT in fringe
     expect(fringe).not.toContain('subtraction.within-20.no-borrow');
+    // Other root skills without prerequisites are also in the fringe
+    // (fractions.equal-parts, place-value.ones-tens, time.read.hours, etc.)
+    expect(fringe.length).toBeGreaterThan(2);
   });
 });

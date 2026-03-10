@@ -16,3 +16,10 @@ export {
   parseIntegerInput,
   validateFreeTextAnswer,
 } from './freeText';
+
+// Answer format selection (Elo-based)
+export {
+  selectAndFormatAnswer,
+  freeTextProbability,
+  mcOptionCount,
+} from './answerFormatSelector';

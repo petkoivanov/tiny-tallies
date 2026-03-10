@@ -1,79 +1,86 @@
+import { SKILLS } from '../mathEngine/skills';
 import type { ManipulativeType, SkillManipulativeMapping } from './cpaTypes';
 
 /**
- * Static mapping of all 14 skills to their ranked manipulative preferences.
+ * Default manipulative mappings by operation and skill complexity.
  *
  * Mapping pattern (locked per user decisions and Common Core pedagogy):
  * - single-digit: counters, bar_model
  * - within-20: number_line, bar_model
  * - two-digit: base_ten_blocks, number_line, bar_model
- * - three-digit: base_ten_blocks, bar_model
+ * - three-digit+: base_ten_blocks, bar_model
+ *
+ * New domains use pedagogically appropriate defaults:
+ * - multiplication: counters (equal groups/arrays), bar_model
+ * - division: counters, bar_model
+ * - fractions: fraction_strips, bar_model
+ * - place_value: base_ten_blocks, bar_model
+ * - time: number_line, bar_model
+ * - money: counters, bar_model
+ * - patterns: number_line, bar_model
  *
  * Subtraction mirrors addition (same manipulatives for equivalent complexity).
- * Bar model included as last entry for every skill (prepares for AI tutor word-problem wrapping).
- * Fraction strips are NOT mapped (sandbox-only per user decision).
+ * Bar model included as last entry for every skill.
+ * Fraction strips are mapped for fraction skills (not sandbox-only for fractions domain).
  */
-export const SKILL_MANIPULATIVE_MAP: readonly SkillManipulativeMapping[] = [
-  // Addition skills
-  {
-    skillId: 'addition.single-digit.no-carry',
-    manipulatives: ['counters', 'bar_model'],
-  },
-  {
-    skillId: 'addition.within-20.no-carry',
-    manipulatives: ['number_line', 'bar_model'],
-  },
-  {
-    skillId: 'addition.within-20.with-carry',
-    manipulatives: ['number_line', 'bar_model'],
-  },
-  {
-    skillId: 'addition.two-digit.no-carry',
-    manipulatives: ['base_ten_blocks', 'number_line', 'bar_model'],
-  },
-  {
-    skillId: 'addition.two-digit.with-carry',
-    manipulatives: ['base_ten_blocks', 'number_line', 'bar_model'],
-  },
-  {
-    skillId: 'addition.three-digit.no-carry',
-    manipulatives: ['base_ten_blocks', 'bar_model'],
-  },
-  {
-    skillId: 'addition.three-digit.with-carry',
-    manipulatives: ['base_ten_blocks', 'bar_model'],
-  },
 
-  // Subtraction skills (mirrors addition)
-  {
-    skillId: 'subtraction.single-digit.no-borrow',
-    manipulatives: ['counters', 'bar_model'],
-  },
-  {
-    skillId: 'subtraction.within-20.no-borrow',
-    manipulatives: ['number_line', 'bar_model'],
-  },
-  {
-    skillId: 'subtraction.within-20.with-borrow',
-    manipulatives: ['number_line', 'bar_model'],
-  },
-  {
-    skillId: 'subtraction.two-digit.no-borrow',
-    manipulatives: ['base_ten_blocks', 'number_line', 'bar_model'],
-  },
-  {
-    skillId: 'subtraction.two-digit.with-borrow',
-    manipulatives: ['base_ten_blocks', 'number_line', 'bar_model'],
-  },
-  {
-    skillId: 'subtraction.three-digit.no-borrow',
-    manipulatives: ['base_ten_blocks', 'bar_model'],
-  },
-  {
-    skillId: 'subtraction.three-digit.with-borrow',
-    manipulatives: ['base_ten_blocks', 'bar_model'],
-  },
-];
+/** Maps addition/subtraction skill IDs to manipulatives by complexity tier */
+function getArithmeticManipulatives(skillId: string): ManipulativeType[] {
+  if (skillId.includes('single-digit')) return ['counters', 'bar_model'];
+  if (skillId.includes('within-20')) return ['number_line', 'bar_model'];
+  if (skillId.includes('two-digit'))
+    return ['base_ten_blocks', 'number_line', 'bar_model'];
+  // three-digit, four-digit
+  return ['base_ten_blocks', 'bar_model'];
+}
+
+/** Maps a skill to manipulatives based on its operation and complexity */
+function getDefaultManipulatives(
+  skillId: string,
+  operation: string,
+): ManipulativeType[] {
+  switch (operation) {
+    case 'addition':
+    case 'subtraction':
+      return getArithmeticManipulatives(skillId);
+    case 'multiplication':
+      if (
+        skillId.includes('two-by') ||
+        skillId.includes('four-by') ||
+        skillId.includes('by-10')
+      ) {
+        return ['base_ten_blocks', 'bar_model'];
+      }
+      return ['counters', 'bar_model'];
+    case 'division':
+      if (skillId.includes('two-by') || skillId.includes('three-by')) {
+        return ['base_ten_blocks', 'bar_model'];
+      }
+      return ['counters', 'bar_model'];
+    case 'fractions':
+      return ['fraction_strips', 'bar_model'];
+    case 'place_value':
+      return ['base_ten_blocks', 'bar_model'];
+    case 'time':
+      return ['number_line', 'bar_model'];
+    case 'money':
+      return ['counters', 'bar_model'];
+    case 'patterns':
+      return ['number_line', 'bar_model'];
+    default:
+      return ['bar_model'];
+  }
+}
+
+/**
+ * Static mapping of all skills to their ranked manipulative preferences.
+ * Dynamically generated from the SKILLS array to stay in sync.
+ */
+export const SKILL_MANIPULATIVE_MAP: readonly SkillManipulativeMapping[] =
+  SKILLS.map((skill) => ({
+    skillId: skill.id,
+    manipulatives: getDefaultManipulatives(skill.id, skill.operation),
+  }));
 
 /**
  * Returns the ranked list of manipulatives for a given skill ID.

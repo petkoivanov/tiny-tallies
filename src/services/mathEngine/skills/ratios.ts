@@ -1,0 +1,60 @@
+import type { SkillDefinition } from '../types';
+
+export const RATIOS_SKILLS: readonly SkillDefinition[] = [
+  {
+    id: 'ratios.simplify',
+    name: 'Simplify ratios',
+    operation: 'ratios',
+    grade: 6,
+    standards: ['6.RP.A.1'],
+    prerequisites: ['division.facts-within-100'],
+  },
+  {
+    id: 'ratios.equivalent',
+    name: 'Equivalent ratios',
+    operation: 'ratios',
+    grade: 6,
+    standards: ['6.RP.A.3'],
+    prerequisites: ['ratios.simplify'],
+  },
+  {
+    id: 'ratios.unit-rate',
+    name: 'Unit rate',
+    operation: 'ratios',
+    grade: 6,
+    standards: ['6.RP.A.2'],
+    prerequisites: ['ratios.simplify'],
+  },
+  {
+    id: 'ratios.percent-of',
+    name: 'Percent of a number',
+    operation: 'ratios',
+    grade: 6,
+    standards: ['6.RP.A.3c'],
+    prerequisites: ['ratios.equivalent', 'fractions.multiply-by-whole'],
+  },
+  {
+    id: 'ratios.fraction-to-percent',
+    name: 'Fraction to percent',
+    operation: 'ratios',
+    grade: 6,
+    standards: ['6.RP.A.3c'],
+    prerequisites: ['ratios.percent-of', 'fractions.equivalent'],
+  },
+  {
+    id: 'ratios.percent-change',
+    name: 'Percent increase/decrease',
+    operation: 'ratios',
+    grade: 7,
+    standards: ['7.RP.A.3'],
+    prerequisites: ['ratios.percent-of'],
+  },
+  {
+    id: 'ratios.proportion',
+    name: 'Proportional reasoning',
+    operation: 'ratios',
+    grade: 7,
+    standards: ['7.RP.A.2'],
+    prerequisites: ['ratios.equivalent', 'ratios.unit-rate'],
+  },
+];

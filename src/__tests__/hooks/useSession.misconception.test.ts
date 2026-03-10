@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react-native';
 import { useAppStore } from '@/store/appStore';
 import { useSession, FEEDBACK_DURATION_MS } from '@/hooks/useSession';
+import { answerNumericValue } from '@/services/mathEngine/types';
 
 jest.useFakeTimers();
 
@@ -24,7 +25,7 @@ function advanceToMatchingProblem(
 
     // Answer correctly and advance past this problem
     act(() => {
-      result.current.handleAnswer(problem.problem.correctAnswer);
+      result.current.handleAnswer(answerNumericValue(problem.problem.correctAnswer));
     });
     act(() => {
       jest.advanceTimersByTime(FEEDBACK_DURATION_MS);
@@ -49,7 +50,7 @@ describe('useSession misconception recording', () => {
     // Search all 15 problems for one with a bugId distractor
     const idx = advanceToMatchingProblem(result, (p) =>
       p.presentation.options.some(
-        (o) => o.value !== p.problem.correctAnswer && o.bugId,
+        (o) => o.value !== answerNumericValue(p.problem.correctAnswer) && o.bugId,
       ),
     );
 
@@ -60,7 +61,7 @@ describe('useSession misconception recording', () => {
     }
 
     const problem = result.current.currentProblem!;
-    const correctAnswer = problem.problem.correctAnswer;
+    const correctAnswer = answerNumericValue(problem.problem.correctAnswer);
     const wrongOptionWithBug = problem.presentation.options.find(
       (o) => o.value !== correctAnswer && o.bugId,
     )!;
@@ -81,7 +82,7 @@ describe('useSession misconception recording', () => {
   it('does NOT record misconception on correct answer', () => {
     const { result } = renderHook(() => useSession());
 
-    const correctAnswer = result.current.currentProblem!.problem.correctAnswer;
+    const correctAnswer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
 
     act(() => {
       result.current.handleAnswer(correctAnswer);
@@ -98,7 +99,7 @@ describe('useSession misconception recording', () => {
     // Search for a problem with a wrong option that has no bugId
     const idx = advanceToMatchingProblem(result, (p) =>
       p.presentation.options.some(
-        (o) => o.value !== p.problem.correctAnswer && !o.bugId,
+        (o) => o.value !== answerNumericValue(p.problem.correctAnswer) && !o.bugId,
       ),
     );
 
@@ -108,7 +109,7 @@ describe('useSession misconception recording', () => {
     }
 
     const problem = result.current.currentProblem!;
-    const correctAnswer = problem.problem.correctAnswer;
+    const correctAnswer = answerNumericValue(problem.problem.correctAnswer);
     const wrongOptionNoBug = problem.presentation.options.find(
       (o) => o.value !== correctAnswer && !o.bugId,
     )!;

@@ -2,7 +2,7 @@
 
 ## What This Is
 
-An AI-powered math learning mobile app for children ages 6-9 (grades 1-3). Features adaptive daily practice sessions with programmatic problem generation, misconception-based distractors via Bug Library pattern, Elo-based adaptive difficulty, deep gamification (XP/levels/streaks, 31 achievement badges, daily challenges, visual skill map), polished UI with animated feedback and 5 unlockable color themes, a full adaptive learning engine (BKT, Leitner spaced repetition, prerequisite graph, smart session orchestration), six interactive virtual manipulatives with CPA progression (Concrete -> Pictorial -> Abstract), an on-demand AI tutor powered by Gemini that provides Socratic hints, CPA-aware teaching with manipulative integration, and deep scaffolding — auto-escalating support based on struggle level with full COPPA-compliant safety pipeline, cross-session misconception detection with 2-then-3 confirmation, adaptive session mix, tutor context enrichment, and dedicated remediation mini-sessions, plus avatar/frame customization with achievement-unlockable cosmetics. Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
+An AI-powered math learning mobile app for children ages 6-9 (grades 1-6). Features adaptive daily practice sessions with programmatic problem generation across 9 math domains (addition, subtraction, multiplication, division, fractions, place value, time, money, patterns) with 76 skills, misconception-based distractors via Bug Library pattern (45+ bug patterns), Elo-based adaptive difficulty, deep gamification (XP/levels/streaks, 31 achievement badges, daily challenges, visual skill map), polished UI with animated feedback and 5 unlockable color themes, a full adaptive learning engine (BKT, Leitner spaced repetition, prerequisite graph, smart session orchestration), six interactive virtual manipulatives with CPA progression (Concrete -> Pictorial -> Abstract), an on-demand AI tutor powered by Gemini that provides Socratic hints, CPA-aware teaching with manipulative integration, and deep scaffolding — auto-escalating support based on struggle level with full COPPA-compliant safety pipeline, cross-session misconception detection with 2-then-3 confirmation, adaptive session mix, tutor context enrichment, and dedicated remediation mini-sessions, plus avatar/frame customization with achievement-unlockable cosmetics. Domain-specific problem generators produce real curriculum-aligned questions (not placeholder arithmetic). Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
 
 ## Core Value
 
@@ -12,7 +12,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ### Validated
 
-- ✓ Programmatic math engine with curriculum-tagged problems (Common Core grades 1-3) — v0.1
+- ✓ Programmatic math engine with curriculum-tagged problems (Common Core grades 1-6, 76 skills across 9 domains) — v0.1 + pre-v0.9
 - ✓ Distractor generation from Bug Library (pre-computed wrong answers for known misconception patterns) — v0.1
 - ✓ Elo rating system for adaptive difficulty targeting 85% success rate — v0.1
 - ✓ Basic session flow (warmup → practice → cooldown) — v0.1
@@ -61,6 +61,15 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - ✓ Cloudflare Workers backend with D1 (auth, consent, sync, data deletion) — v0.8
 - ✓ Cloud sync with incremental deltas, offline queue, additive badge merge — v0.8
 - ✓ ParentalControlsScreen with privacy, account, and AI helper sections — v0.8
+
+- ✓ Domain handler architecture: DomainHandler interface, Answer discriminated union, answerNumericValue() bridge — pre-v0.9
+- ✓ Grade type expanded from 1-4 to 1-8 for curriculum expansion — pre-v0.9
+- ✓ Fractions domain handler: 14 skills (G1-6), 14 templates, 9 bug patterns — full CCSS coverage including grade 5-6 — pre-v0.9
+- ✓ Place value domain handler: 8 skills (G1-4), 8 templates, 9 bug patterns — decompose through expanded form — pre-v0.9
+- ✓ Time domain handler: 7 skills (G1-3), 7 templates, 6 bug patterns — clock reading, AM/PM, elapsed time — pre-v0.9
+- ✓ Money domain handler: 7 skills (G1-4), 7 templates, 7 bug patterns — coins through unit pricing — pre-v0.9
+- ✓ Patterns domain handler: 5 skills (G1-4), 5 templates, 5 bug patterns — sequences, missing values, I/O tables — pre-v0.9
+- ✓ All placeholder handlers replaced with domain-specific generators — pre-v0.9
 
 ### Active
 

@@ -1,0 +1,67 @@
+import type { Grade, Operation, SkillDefinition } from '../types';
+
+import { ADDITION_SKILLS } from './addition';
+import { DIVISION_SKILLS } from './division';
+import { FRACTIONS_SKILLS } from './fractions';
+import { MONEY_SKILLS } from './money';
+import { MULTIPLICATION_SKILLS } from './multiplication';
+import { PATTERNS_SKILLS } from './patterns';
+import { PLACE_VALUE_SKILLS } from './placeValue';
+import { SUBTRACTION_SKILLS } from './subtraction';
+import { TIME_SKILLS } from './time';
+import { MEASUREMENT_SKILLS } from './measurement';
+import { RATIOS_SKILLS } from './ratios';
+import { EXPONENTS_SKILLS } from './exponents';
+import { EXPRESSIONS_SKILLS } from './expressions';
+import { DECIMAL_SKILLS } from './decimals';
+import { INTEGER_SKILLS } from './integers';
+
+export const SKILLS: readonly SkillDefinition[] = [
+  ...ADDITION_SKILLS,
+  ...SUBTRACTION_SKILLS,
+  ...MULTIPLICATION_SKILLS,
+  ...DIVISION_SKILLS,
+  ...FRACTIONS_SKILLS,
+  ...PLACE_VALUE_SKILLS,
+  ...TIME_SKILLS,
+  ...MONEY_SKILLS,
+  ...PATTERNS_SKILLS,
+  ...MEASUREMENT_SKILLS,
+  ...RATIOS_SKILLS,
+  ...EXPONENTS_SKILLS,
+  ...EXPRESSIONS_SKILLS,
+  ...DECIMAL_SKILLS,
+  ...INTEGER_SKILLS,
+];
+
+export function getSkillById(id: string): SkillDefinition | undefined {
+  return SKILLS.find((skill) => skill.id === id);
+}
+
+export function getSkillsByOperation(
+  operation: Operation,
+): SkillDefinition[] {
+  return SKILLS.filter((skill) => skill.operation === operation);
+}
+
+export function getSkillsByGrade(grade: Grade): SkillDefinition[] {
+  return SKILLS.filter((skill) => skill.grade === grade);
+}
+
+export {
+  ADDITION_SKILLS,
+  SUBTRACTION_SKILLS,
+  MULTIPLICATION_SKILLS,
+  DIVISION_SKILLS,
+  FRACTIONS_SKILLS,
+  PLACE_VALUE_SKILLS,
+  TIME_SKILLS,
+  MONEY_SKILLS,
+  PATTERNS_SKILLS,
+  MEASUREMENT_SKILLS,
+  RATIOS_SKILLS,
+  EXPONENTS_SKILLS,
+  EXPRESSIONS_SKILLS,
+  DECIMAL_SKILLS,
+  INTEGER_SKILLS,
+};

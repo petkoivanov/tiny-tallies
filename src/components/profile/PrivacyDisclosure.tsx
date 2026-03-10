@@ -33,11 +33,11 @@ const DATA_POINTS = [
     ],
   },
   {
-    title: 'AI Helper (optional)',
+    title: 'AI Helper (enabled by default)',
     items: [
-      'Uses Google Gemini to provide math explanations',
-      'No personal information is sent to the AI',
-      'Only math problem context is shared — never names or ages',
+      'Uses Google Gemini to provide gentle math hints and explanations',
+      'No personal information is sent to the AI — only math problem context',
+      'You can turn this off anytime from Parental Controls',
     ],
   },
   {

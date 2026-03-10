@@ -263,10 +263,10 @@ describe('store migrations', () => {
     expect(skills['incomplete-skill'].cpaLevel).toBe('concrete');
   });
 
-  it('migrateStore from version 5 adds tutorConsentGranted default false', () => {
+  it('migrateStore from version 5 adds tutorConsentGranted default true', () => {
     const input = { childName: 'Luna', xp: 200 };
     const result = migrateStore(input, 5);
-    expect(result.tutorConsentGranted).toBe(false);
+    expect(result.tutorConsentGranted).toBe(true);
   });
 
   it('migrateStore from version 5 preserves existing tutorConsentGranted if present', () => {
@@ -304,7 +304,7 @@ describe('store migrations', () => {
     expect(skills['add-double'].cpaLevel).toBe('concrete');
 
     // v5->v6 consent flag
-    expect(result.tutorConsentGranted).toBe(false);
+    expect(result.tutorConsentGranted).toBe(true);
   });
 
   // v6->v7 migration tests (misconceptions)
@@ -381,7 +381,7 @@ describe('store migrations', () => {
     expect(skills['add-double'].cpaLevel).toBe('concrete');
 
     // v5->v6 consent flag
-    expect(result.tutorConsentGranted).toBe(false);
+    expect(result.tutorConsentGranted).toBe(true);
 
     // v6->v7 misconceptions
     expect(result.misconceptions).toEqual({});
@@ -490,7 +490,7 @@ describe('store migrations', () => {
     expect(skills['add-double'].cpaLevel).toBe('concrete');
 
     // v5->v6 consent flag
-    expect(result.tutorConsentGranted).toBe(false);
+    expect(result.tutorConsentGranted).toBe(true);
 
     // v6->v7 misconceptions
     expect(result.misconceptions).toEqual({});
@@ -555,7 +555,7 @@ describe('store migrations', () => {
     expect(skills['add-double'].cpaLevel).toBe('concrete');
 
     // v5->v6 consent flag
-    expect(result.tutorConsentGranted).toBe(false);
+    expect(result.tutorConsentGranted).toBe(true);
 
     // v6->v7 misconceptions
     expect(result.misconceptions).toEqual({});

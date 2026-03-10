@@ -7,6 +7,19 @@ import type { NodePosition, NodeState, EdgeData } from './skillMapTypes';
 /** Radius of each skill node circle in the SVG. */
 export const NODE_RADIUS = 24;
 
+/** All unique operations present in the SKILLS array, in display order. */
+const OPERATIONS = (() => {
+  const seen = new Set<string>();
+  const ops: string[] = [];
+  for (const skill of SKILLS) {
+    if (!seen.has(skill.operation)) {
+      seen.add(skill.operation);
+      ops.push(skill.operation);
+    }
+  }
+  return ops;
+})();
+
 /**
  * Derives the visual state of a skill node from BKT mastery data.
  *
@@ -25,51 +38,39 @@ export function getNodeState(
 }
 
 /**
- * Computes x/y positions for all 14 skill nodes in a 2-column layout.
+ * Computes x/y positions for all skill nodes in a multi-column layout.
  *
- * Addition skills at x = 30% width, subtraction at x = 70% width.
- * 7 rows evenly spaced vertically below the header.
+ * Each operation gets its own column, evenly distributed across the width.
+ * Within each column, skills are arranged vertically by their order in the
+ * SKILLS array.
  */
 export function computeNodePositions(
   width: number,
   height: number,
   headerHeight: number,
 ): NodePosition[] {
-  const additionSkills = SKILLS.filter((s) => s.operation === 'addition');
-  const subtractionSkills = SKILLS.filter(
-    (s) => s.operation === 'subtraction',
-  );
-
-  const availableHeight = height - headerHeight;
-  const rowSpacing = availableHeight / 8;
-  const startY = headerHeight + rowSpacing;
-
-  const additionX = width * 0.3;
-  const subtractionX = width * 0.7;
-
   const positions: NodePosition[] = [];
+  const numColumns = OPERATIONS.length;
 
-  additionSkills.forEach((skill, index) => {
-    positions.push({
-      skillId: skill.id,
-      x: additionX,
-      y: startY + index * rowSpacing,
-      column: 'addition',
-      row: index,
-      grade: skill.grade,
-    });
-  });
+  for (let colIdx = 0; colIdx < numColumns; colIdx++) {
+    const operation = OPERATIONS[colIdx];
+    const columnSkills = SKILLS.filter((s) => s.operation === operation);
+    const colX = (width * (colIdx + 1)) / (numColumns + 1);
+    const availableHeight = height - headerHeight;
+    const rowSpacing = availableHeight / (columnSkills.length + 1);
+    const startY = headerHeight + rowSpacing;
 
-  subtractionSkills.forEach((skill, index) => {
-    positions.push({
-      skillId: skill.id,
-      x: subtractionX,
-      y: startY + index * rowSpacing,
-      column: 'subtraction',
-      row: index,
-      grade: skill.grade,
+    columnSkills.forEach((skill, rowIdx) => {
+      positions.push({
+        skillId: skill.id,
+        x: colX,
+        y: startY + rowIdx * rowSpacing,
+        column: operation,
+        row: rowIdx,
+        grade: skill.grade,
+      });
     });
-  });
+  }
 
   return positions;
 }

@@ -1,0 +1,1 @@
+export { patternsHandler } from './patternsHandler';

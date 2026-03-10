@@ -35,7 +35,7 @@ const makeProblem = (
   templateId: 'tpl-1',
   operation,
   operands,
-  correctAnswer: operation === 'addition' ? operands[0] + operands[1] : operands[0] - operands[1],
+  correctAnswer: { type: 'numeric', value: operation === 'addition' ? operands[0] + operands[1] : operands[0] - operands[1] },
   questionText: `${operands[0]} ${operation === 'addition' ? '+' : '-'} ${operands[1]}`,
   skillId: 'add-single',
   standards: ['1.OA.1'],

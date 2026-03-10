@@ -95,7 +95,7 @@ function makeProblem(): SessionProblem {
     templateId: 't-1',
     operation: 'addition',
     operands: [3, 4],
-    correctAnswer: 7,
+    correctAnswer: { type: 'numeric', value: 7 },
     questionText: '3 + 4 = ?',
     skillId: 'add.single',
     standards: ['1.OA.1'],

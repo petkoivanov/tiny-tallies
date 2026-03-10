@@ -129,7 +129,7 @@ describe('migrateStore v12 -> v13', () => {
     expect(result.activeChildId).toBeDefined();
     expect(result._needsMigrationPrompt).toBe(true);
     // Earlier migration fields are present on the flat state
-    expect(result.tutorConsentGranted).toBe(false);
+    expect(result.tutorConsentGranted).toBe(true);
     expect(result.misconceptions).toEqual({});
     expect(result.earnedBadges).toEqual({});
     expect(result.challengeCompletions).toEqual({});

@@ -1,6 +1,7 @@
 import { requiresCarry } from '../../services/mathEngine/constraints';
 import { generateProblem } from '../../services/mathEngine/generator';
 import { ADDITION_TEMPLATES } from '../../services/mathEngine/templates/addition';
+import { answerNumericValue } from '../../services/mathEngine/types';
 
 describe.each(ADDITION_TEMPLATES)('Addition template: $id', (template) => {
   const baseSeed = ADDITION_TEMPLATES.indexOf(template) * 1000;
@@ -21,16 +22,16 @@ describe.each(ADDITION_TEMPLATES)('Addition template: $id', (template) => {
       });
 
       expect(problem.operands[0]).toBeGreaterThanOrEqual(
-        template.operandRanges[0].min,
+        template.operandRanges![0].min,
       );
       expect(problem.operands[0]).toBeLessThanOrEqual(
-        template.operandRanges[0].max,
+        template.operandRanges![0].max,
       );
       expect(problem.operands[1]).toBeGreaterThanOrEqual(
-        template.operandRanges[1].min,
+        template.operandRanges![1].min,
       );
       expect(problem.operands[1]).toBeLessThanOrEqual(
-        template.operandRanges[1].max,
+        template.operandRanges![1].max,
       );
     }
   });
@@ -42,11 +43,11 @@ describe.each(ADDITION_TEMPLATES)('Addition template: $id', (template) => {
         seed: baseSeed + i,
       });
 
-      expect(problem.correctAnswer).toBeGreaterThanOrEqual(
-        template.resultRange.min,
+      expect(answerNumericValue(problem.correctAnswer)).toBeGreaterThanOrEqual(
+        template.resultRange!.min,
       );
-      expect(problem.correctAnswer).toBeLessThanOrEqual(
-        template.resultRange.max,
+      expect(answerNumericValue(problem.correctAnswer)).toBeLessThanOrEqual(
+        template.resultRange!.max,
       );
     }
   });
@@ -75,7 +76,7 @@ describe.each(ADDITION_TEMPLATES)('Addition template: $id', (template) => {
         seed: baseSeed + i,
       });
 
-      expect(problem.correctAnswer).toBe(
+      expect(answerNumericValue(problem.correctAnswer)).toBe(
         problem.operands[0] + problem.operands[1],
       );
     }

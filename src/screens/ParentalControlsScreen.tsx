@@ -2,6 +2,7 @@
  * ParentalControlsScreen — PIN-gated parental settings.
  *
  * Sections:
+ * - Progress Reports: Link to ParentReportsScreen
  * - Privacy & Data: Sentry toggle, view privacy info, delete local data
  * - Account: Sign-in status, sign in/out, delete account
  * - AI Helper: Tutor consent toggle
@@ -26,6 +27,8 @@ import {
   Trash2,
   LogIn,
   LogOut,
+  BarChart3,
+  ChevronRight,
 } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
@@ -300,6 +303,25 @@ export default function ParentalControlsScreen() {
           ]}
           testID="parental-controls-content"
         >
+          {/* Progress Reports Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <BarChart3 size={20} color={colors.primary} />
+              <Text style={styles.sectionTitle}>Progress Reports</Text>
+            </View>
+            <Pressable
+              style={styles.card}
+              onPress={() => navigation.navigate('ParentReports' as never)}
+              accessibilityRole="button"
+              testID="view-reports-button"
+            >
+              <View style={styles.row}>
+                <Text style={styles.rowLabel}>View learning progress</Text>
+                <ChevronRight size={20} color={colors.textMuted} />
+              </View>
+            </Pressable>
+          </View>
+
           {/* Privacy & Data Section */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -412,8 +434,8 @@ export default function ParentalControlsScreen() {
               </View>
               <Text style={styles.rowSublabel}>
                 {tutorConsentGranted
-                  ? 'Your child can get gentle math hints from the AI helper.'
-                  : 'Turn on to let your child receive AI-powered math guidance.'}
+                  ? 'Your child receives gentle math hints from the AI helper.'
+                  : 'AI tutoring is turned off. Turn on to let your child receive math guidance.'}
               </Text>
             </View>
           </View>

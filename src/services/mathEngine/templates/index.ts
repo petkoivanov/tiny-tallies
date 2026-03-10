@@ -1,10 +1,36 @@
 import type { Operation, ProblemTemplate } from '../types';
 import { ADDITION_TEMPLATES } from './addition';
+import { DIVISION_TEMPLATES } from './division';
+import { FRACTIONS_TEMPLATES } from './fractions';
+import { MONEY_TEMPLATES } from './money';
+import { MULTIPLICATION_TEMPLATES } from './multiplication';
+import { PATTERNS_TEMPLATES } from './patterns';
+import { PLACE_VALUE_TEMPLATES } from './placeValue';
 import { SUBTRACTION_TEMPLATES } from './subtraction';
+import { TIME_TEMPLATES } from './time';
+import { MEASUREMENT_TEMPLATES } from './measurement';
+import { RATIOS_TEMPLATES } from './ratios';
+import { EXPONENTS_TEMPLATES } from './exponents';
+import { EXPRESSIONS_TEMPLATES } from './expressions';
+import { DECIMAL_TEMPLATES } from './decimals';
+import { INTEGER_TEMPLATES } from './integers';
 
 export const ALL_TEMPLATES: readonly ProblemTemplate[] = [
   ...ADDITION_TEMPLATES,
   ...SUBTRACTION_TEMPLATES,
+  ...MULTIPLICATION_TEMPLATES,
+  ...DIVISION_TEMPLATES,
+  ...FRACTIONS_TEMPLATES,
+  ...PLACE_VALUE_TEMPLATES,
+  ...TIME_TEMPLATES,
+  ...MONEY_TEMPLATES,
+  ...PATTERNS_TEMPLATES,
+  ...MEASUREMENT_TEMPLATES,
+  ...RATIOS_TEMPLATES,
+  ...EXPONENTS_TEMPLATES,
+  ...EXPRESSIONS_TEMPLATES,
+  ...DECIMAL_TEMPLATES,
+  ...INTEGER_TEMPLATES,
 ];
 
 export function findTemplate(templateId: string): ProblemTemplate {
@@ -29,3 +55,16 @@ export function getTemplatesByOperation(
 
 export { ADDITION_TEMPLATES } from './addition';
 export { SUBTRACTION_TEMPLATES } from './subtraction';
+export { MULTIPLICATION_TEMPLATES } from './multiplication';
+export { DIVISION_TEMPLATES } from './division';
+export { FRACTIONS_TEMPLATES } from './fractions';
+export { PLACE_VALUE_TEMPLATES } from './placeValue';
+export { TIME_TEMPLATES } from './time';
+export { MONEY_TEMPLATES } from './money';
+export { PATTERNS_TEMPLATES } from './patterns';
+export { MEASUREMENT_TEMPLATES } from './measurement';
+export { RATIOS_TEMPLATES } from './ratios';
+export { EXPONENTS_TEMPLATES } from './exponents';
+export { EXPRESSIONS_TEMPLATES } from './expressions';
+export { DECIMAL_TEMPLATES } from './decimals';
+export { INTEGER_TEMPLATES } from './integers';

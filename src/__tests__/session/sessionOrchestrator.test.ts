@@ -9,6 +9,7 @@ import {
   STRENGTH_BASELINE,
 } from '@/services/session';
 import type { PendingSkillUpdate } from '@/services/session';
+import { answerNumericValue } from '@/services/mathEngine/types';
 import { createRng } from '@/services/mathEngine/seededRng';
 import { getTemplatesBySkill } from '@/services/mathEngine/templates';
 import { getUnlockedSkills } from '@/services/adaptive/prerequisiteGating';
@@ -180,20 +181,29 @@ describe('sessionOrchestrator', () => {
         },
       };
 
-      // Run many sessions and count practice skill selections
+      // Run many sessions and count review-category practice skill selections.
+      // Only count review problems since "new" slots draw from the larger outer fringe.
       const counts: Record<string, number> = {};
-      for (let trial = 0; trial < 20; trial++) {
-        const queue = generateSessionQueue(skillStates, DEFAULT_SESSION_CONFIG, trial * 71);
+      for (let trial = 0; trial < 200; trial++) {
+        const queue = generateSessionQueue(skillStates, DEFAULT_SESSION_CONFIG, trial * 37);
         const practice = queue.filter((p) => p.phase === 'practice');
         for (const p of practice) {
-          counts[p.skillId] = (counts[p.skillId] ?? 0) + 1;
+          // Only count the two review-due skills to isolate BKT weighting effect
+          if (
+            p.skillId === 'addition.single-digit.no-carry' ||
+            p.skillId === 'subtraction.single-digit.no-borrow'
+          ) {
+            counts[p.skillId] = (counts[p.skillId] ?? 0) + 1;
+          }
         }
       }
 
       // The lower P(L) skill (0.15) should appear more often via BKT inverse weighting
-      expect(counts['addition.single-digit.no-carry']).toBeGreaterThan(
-        counts['subtraction.single-digit.no-borrow'] ?? 0,
-      );
+      // With 2 review-due skills and 100 trials, BKT weighting (~2:1) should clearly show
+      const addCount = counts['addition.single-digit.no-carry'] ?? 0;
+      const subCount = counts['subtraction.single-digit.no-borrow'] ?? 0;
+      expect(addCount + subCount).toBeGreaterThan(0);
+      expect(addCount).toBeGreaterThan(subCount);
     });
 
     it('is deterministic given the same seed', () => {
@@ -216,7 +226,7 @@ describe('sessionOrchestrator', () => {
         expect(item.problem).toBeDefined();
         expect(item.presentation).toBeDefined();
         expect(item.presentation.options.length).toBe(4);
-        expect(typeof item.problem.correctAnswer).toBe('number');
+        expect(item.problem.correctAnswer.type).toBe('numeric');
         expect(typeof item.skillId).toBe('string');
         expect(typeof item.templateBaseElo).toBe('number');
       }
@@ -230,7 +240,7 @@ describe('sessionOrchestrator', () => {
         expect(item.presentation.options).toHaveLength(4);
         // Correct answer should be among the options
         const values = item.presentation.options.map((o) => o.value);
-        expect(values).toContain(item.problem.correctAnswer);
+        expect(values).toContain(answerNumericValue(item.problem.correctAnswer));
       }
     });
   });
@@ -501,7 +511,7 @@ describe('sessionOrchestrator', () => {
         expect(item.problem).toBeDefined();
         expect(item.presentation).toBeDefined();
         expect(item.presentation.options.length).toBe(4);
-        expect(typeof item.problem.correctAnswer).toBe('number');
+        expect(item.problem.correctAnswer.type).toBe('numeric');
         expect(typeof item.skillId).toBe('string');
         expect(typeof item.templateBaseElo).toBe('number');
       }

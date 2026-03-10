@@ -77,7 +77,7 @@ export function migrateStore(
 
   if (version < 6) {
     // v5 -> v6: Add parental consent flag for AI tutor
-    state.tutorConsentGranted ??= false;
+    state.tutorConsentGranted ??= true;
   }
 
   if (version < 7) {

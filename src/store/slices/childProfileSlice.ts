@@ -31,7 +31,7 @@ export const createChildProfileSlice: StateCreator<
   avatarId: null,
   frameId: null,
   themeId: 'dark',
-  tutorConsentGranted: false,
+  tutorConsentGranted: true,
   setChildProfile: (profile) =>
     set((state) => ({
       ...state,

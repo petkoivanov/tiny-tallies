@@ -41,7 +41,7 @@ const defaultUseSessionReturn: UseSessionReturn = {
       templateId: 'add-1d-1d',
       operation: 'addition',
       operands: [23, 45],
-      correctAnswer: 68,
+      correctAnswer: { type: 'numeric', value: 68 },
       questionText: '23 + 45 = ?',
       skillId: 'addition.single',
       standards: ['1.OA.1'],
@@ -647,7 +647,7 @@ describe('SessionScreen', () => {
           ...defaultUseSessionReturn.currentProblem!.problem,
           operation: 'subtraction',
           operands: [50, 23],
-          correctAnswer: 27,
+          correctAnswer: { type: 'numeric', value: 27 },
         },
         presentation: {
           ...defaultUseSessionReturn.currentProblem!.presentation,

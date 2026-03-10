@@ -1,7 +1,7 @@
 # Curriculum Standards Research
 
-**Research Date:** 2026-02-28
-**Focus:** Math curricula for grades 1-3 (ages 6-9)
+**Research Date:** 2026-02-28 (updated 2026-03-09 — Grade 4 added)
+**Focus:** Math curricula for grades 1-4 (ages 6-10)
 
 ## Supported Curricula
 
@@ -28,6 +28,15 @@
 - **Measurement & Data (3.MD):** Time to nearest minute, liquid volume/mass, area, perimeter
 - **Geometry (3.G):** Categorize shapes by attributes, partition shapes into equal parts
 
+#### Grade 4 (Age 9-10)
+- **Operations & Algebraic Thinking (4.OA):** Multiplicative comparison, multi-step word problems, factors/multiples, patterns
+- **Number & Operations in Base Ten (4.NBT):** Place value to 1,000,000, multi-digit addition/subtraction, multiply up to 4-digit by 1-digit and 2-digit by 2-digit, long division
+- **Number & Operations — Fractions (4.NF):** Equivalent fractions, compare fractions, add/subtract fractions (like denominators), multiply fraction by whole number, decimal notation (tenths/hundredths)
+- **Measurement & Data (4.MD):** Unit conversion (time, money, length, mass, capacity), area/perimeter, angle measurement, line plots
+- **Geometry (4.G):** Points/lines/rays/angles, classify shapes by properties, line symmetry
+
+See `.planning/research/grade4-curriculum.md` for detailed standard-by-standard breakdown.
+
 ### 2. New York State Standards (NYSLS)
 
 Closely follows Common Core with minor additions:
@@ -53,6 +62,7 @@ Closely follows Common Core with minor additions:
 | 1 | Add/sub to 20, unknowns (□ + 3 = 7), patterns | Grade 1-2 US |
 | 2 | Add/sub to 100, multiplication intro, measurement | Grade 2-3 US |
 | 3 | Multiplication tables, division, fractions intro, multi-step problems | Grade 3-4 US |
+| 4 | Multi-digit multiplication, long division, decimal fractions, algebraic reasoning | Grade 4-5 US |
 
 ### 4. Singapore Math
 
@@ -79,6 +89,13 @@ Closely follows Common Core with minor additions:
 - Multiplication tables (2, 3, 4, 5, 8, 10)
 - Fractions: unit fractions, non-unit fractions, ordering
 - Time to nearest minute, perimeter, angles
+
+**Key Stage 2 (Year 4-5, Age 8-10):**
+- All times tables to 12×12 by end of Year 4
+- Formal written methods for all four operations
+- Equivalent fractions, adding fractions, decimal equivalents
+- Area and perimeter formulas
+- Introduction to negative numbers and coordinates (Year 5 — ahead of US)
 
 ## Topic Taxonomy (Cross-Curriculum)
 

@@ -123,7 +123,7 @@ const baseProblem: Problem = {
   templateId: 'add-1d-1d',
   operation: 'addition',
   operands: [3, 5],
-  correctAnswer: 8,
+  correctAnswer: { type: 'numeric', value: 8 },
   questionText: '3 + 5 = ?',
   skillId: 'addition.single-digit.no-carry',
   standards: ['1.OA.1'],

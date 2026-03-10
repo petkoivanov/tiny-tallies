@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react-native';
 import { useAppStore } from '@/store/appStore';
 import { useSession, FEEDBACK_DURATION_MS } from '@/hooks/useSession';
+import { answerNumericValue } from '@/services/mathEngine/types';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
 
 // Use fake timers for feedback timeout control
@@ -37,7 +38,7 @@ describe('useSession', () => {
 
   it('handleAnswer sets feedbackState for correct answer', () => {
     const { result } = renderHook(() => useSession());
-    const correctAnswer = result.current.currentProblem!.problem.correctAnswer;
+    const correctAnswer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
 
     act(() => {
       result.current.handleAnswer(correctAnswer);
@@ -51,7 +52,7 @@ describe('useSession', () => {
 
   it('handleAnswer sets feedbackState for incorrect answer', () => {
     const { result } = renderHook(() => useSession());
-    const correctAnswer = result.current.currentProblem!.problem.correctAnswer;
+    const correctAnswer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
     // Pick a wrong answer from the options
     const wrongOption = result.current.currentProblem!.presentation.options.find(
       (o) => o.value !== correctAnswer,
@@ -69,7 +70,7 @@ describe('useSession', () => {
 
   it('score increments on correct answer', () => {
     const { result } = renderHook(() => useSession());
-    const correctAnswer = result.current.currentProblem!.problem.correctAnswer;
+    const correctAnswer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
 
     expect(result.current.score).toBe(0);
 
@@ -82,7 +83,7 @@ describe('useSession', () => {
 
   it('score does not increment on incorrect answer', () => {
     const { result } = renderHook(() => useSession());
-    const correctAnswer = result.current.currentProblem!.problem.correctAnswer;
+    const correctAnswer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
     const wrongOption = result.current.currentProblem!.presentation.options.find(
       (o) => o.value !== correctAnswer,
     );
@@ -96,7 +97,7 @@ describe('useSession', () => {
 
   it('after feedback timeout, advances to next problem', () => {
     const { result } = renderHook(() => useSession());
-    const correctAnswer = result.current.currentProblem!.problem.correctAnswer;
+    const correctAnswer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
 
     act(() => {
       result.current.handleAnswer(correctAnswer);
@@ -117,7 +118,7 @@ describe('useSession', () => {
 
   it('records answer in store via recordAnswer', () => {
     const { result } = renderHook(() => useSession());
-    const correctAnswer = result.current.currentProblem!.problem.correctAnswer;
+    const correctAnswer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
 
     act(() => {
       result.current.handleAnswer(correctAnswer);
@@ -137,7 +138,7 @@ describe('useSession', () => {
 
     // Answer first 3 (warmup) problems
     for (let i = 0; i < 3; i++) {
-      const answer = result.current.currentProblem!.problem.correctAnswer;
+      const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
       });
@@ -152,7 +153,7 @@ describe('useSession', () => {
 
     // Answer next 9 (practice) problems
     for (let i = 0; i < 9; i++) {
-      const answer = result.current.currentProblem!.problem.correctAnswer;
+      const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
       });
@@ -171,7 +172,7 @@ describe('useSession', () => {
 
     // Answer all 15 problems correctly
     for (let i = 0; i < 15; i++) {
-      const answer = result.current.currentProblem!.problem.correctAnswer;
+      const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
       });
@@ -194,7 +195,7 @@ describe('useSession', () => {
 
     // Answer all 15 problems correctly
     for (let i = 0; i < 15; i++) {
-      const answer = result.current.currentProblem!.problem.correctAnswer;
+      const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
       });
@@ -222,7 +223,7 @@ describe('useSession', () => {
 
     // Answer all 15 correctly
     for (let i = 0; i < 15; i++) {
-      const answer = result.current.currentProblem!.problem.correctAnswer;
+      const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
       });
@@ -240,7 +241,7 @@ describe('useSession', () => {
 
     // Answer a few problems
     for (let i = 0; i < 3; i++) {
-      const answer = result.current.currentProblem!.problem.correctAnswer;
+      const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
       });
@@ -273,7 +274,7 @@ describe('useSession', () => {
     const { result } = renderHook(() => useSession());
 
     // Answer a problem (starts feedback timer)
-    const answer = result.current.currentProblem!.problem.correctAnswer;
+    const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
     act(() => {
       result.current.handleAnswer(answer);
     });
@@ -300,7 +301,7 @@ describe('useSession', () => {
     const { result, unmount } = renderHook(() => useSession());
 
     // Answer a problem (starts feedback timer)
-    const answer = result.current.currentProblem!.problem.correctAnswer;
+    const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
     act(() => {
       result.current.handleAnswer(answer);
     });
@@ -316,7 +317,7 @@ describe('useSession', () => {
 
   it('ignores answer during active feedback', () => {
     const { result } = renderHook(() => useSession());
-    const answer = result.current.currentProblem!.problem.correctAnswer;
+    const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
 
     act(() => {
       result.current.handleAnswer(answer);
@@ -340,7 +341,7 @@ describe('useSession', () => {
 
     // Answer all 15 problems correctly
     for (let i = 0; i < 15; i++) {
-      const answer = result.current.currentProblem!.problem.correctAnswer;
+      const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
       });
@@ -384,7 +385,7 @@ describe('useSession', () => {
     // Answer all problems -- deliberately answer some wrong
     for (let i = 0; i < 15; i++) {
       const problem = result.current.currentProblem!;
-      const correctAnswer = problem.problem.correctAnswer;
+      const correctAnswer = answerNumericValue(problem.problem.correctAnswer);
 
       // For the first problem, if it's the skill we set up at Box 3, answer wrong
       if (i === 0 && problem.skillId === 'addition.single-digit.no-carry') {
@@ -422,7 +423,7 @@ describe('useSession', () => {
 
     // Answer all 15 problems correctly
     for (let i = 0; i < 15; i++) {
-      const answer = result.current.currentProblem!.problem.correctAnswer;
+      const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
       });
@@ -469,7 +470,7 @@ describe('useSession', () => {
 
     // Answer all 15 problems correctly
     for (let i = 0; i < 15; i++) {
-      const answer = result.current.currentProblem!.problem.correctAnswer;
+      const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
       });
@@ -494,7 +495,7 @@ describe('useSession', () => {
 
     // Answer all 15 problems correctly
     for (let i = 0; i < 15; i++) {
-      const answer = result.current.currentProblem!.problem.correctAnswer;
+      const answer = answerNumericValue(result.current.currentProblem!.problem.correctAnswer);
       act(() => {
         result.current.handleAnswer(answer);
       });

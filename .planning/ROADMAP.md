@@ -9,7 +9,8 @@
 - ✅ **v0.5 AI Tutor** — Phases 21-25 (shipped 2026-03-04)
 - ✅ **v0.6 Misconception Detection** — Phases 26-30 (shipped 2026-03-05)
 - ✅ **v0.7 Gamification** — Phases 31-37 (shipped 2026-03-06)
-- **v0.8 Social & Subscription** — Phases 38-43
+- **v0.8 Social & Subscription** — Phases 38-44
+- **v0.9 Full Curriculum Expansion** — Phases 45-58 (domain handlers complete 2026-03-09, UI/integration phases remaining)
 
 ## Phases
 
@@ -247,3 +248,17 @@ Plans:
 | 42. Parent Dashboard | v0.8 | 0/? | Not started | - |
 | 43. Parental Time Controls | v0.8 | 0/? | Not started | - |
 | 44. Freemium Subscription & IAP | v0.8 | 0/? | Not started | - |
+| 45. Type System & Engine Expansion | v0.9 | -/? | Partial (domain handlers done) | 2026-03-09 |
+| 46. Multiplication Domain | v0.9 | 0/? | Handler exists (arithmeticHandler) | - |
+| 47. Division Domain | v0.9 | 0/? | Handler exists (arithmeticHandler) | - |
+| 48. Fractions Domain | v0.9 | -/? | Handler complete (G1-6, 14 skills) | 2026-03-09 |
+| 49. Place Value Domain | v0.9 | -/? | Handler complete (G1-4, 8 skills) | 2026-03-09 |
+| 50. Time Domain + AnalogClock | v0.9 | -/? | Handler complete, AnalogClock pending | 2026-03-09 |
+| 51. Money Domain + CoinDisplay | v0.9 | -/? | Handler complete, CoinDisplay pending | 2026-03-09 |
+| 52. Patterns & Missing Number | v0.9 | -/? | Handler complete (G1-4, 5 skills) | 2026-03-09 |
+| 53. Grade 4 Addition/Subtraction | v0.9 | 0/? | Not started | - |
+| 54. Word Problem System | v0.9 | 0/? | Not started | - |
+| 55. NumberPad + Answer Format | v0.9 | 0/? | Not started | - |
+| 56. Level Indicator + Elo Transparency | v0.9 | 0/? | Not started | - |
+| 57. Parent Reports Screen | v0.9 | 0/? | Not started | - |
+| 58. Integration Testing | v0.9 | 0/? | Not started | - |

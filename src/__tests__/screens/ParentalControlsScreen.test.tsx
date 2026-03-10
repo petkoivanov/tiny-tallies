@@ -101,7 +101,7 @@ function setMockState(overrides: Record<string, unknown> = {}) {
     userId: null,
     userEmail: null,
     authProvider: null,
-    tutorConsentGranted: false,
+    tutorConsentGranted: true,
     setTutorConsentGranted: mockSetTutorConsentGranted,
     setAuth: mockSetAuth,
     clearAuth: mockClearAuth,

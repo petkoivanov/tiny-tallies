@@ -6,6 +6,11 @@ import {
 import { SKILLS } from '@/services/mathEngine/skills';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
 
+/** Skills that have zero prerequisites (unlocked from the start). */
+const ROOT_SKILL_IDS = SKILLS.filter((s) => s.prerequisites.length === 0).map(
+  (s) => s.id,
+);
+
 function makeSkillState(overrides?: Partial<SkillState>): SkillState {
   return {
     eloRating: 1000,
@@ -33,8 +38,8 @@ function mastered(overrides?: Partial<SkillState>): SkillState {
 }
 
 describe('DAG validation', () => {
-  it('has exactly 14 skills', () => {
-    expect(SKILLS).toHaveLength(14);
+  it('has the expected number of skills', () => {
+    expect(SKILLS.length).toBe(114);
   });
 
   it('has no cycles in the prerequisite graph', () => {
@@ -156,11 +161,12 @@ describe('isSkillUnlocked (BKT mastery)', () => {
 });
 
 describe('getUnlockedSkills (BKT mastery)', () => {
-  it('returns root skills with empty state', () => {
+  it('returns all root skills with empty state', () => {
     const unlocked = getUnlockedSkills({});
-    expect(unlocked).toContain('addition.single-digit.no-carry');
-    expect(unlocked).toContain('subtraction.single-digit.no-borrow');
-    expect(unlocked).toHaveLength(2);
+    for (const rootId of ROOT_SKILL_IDS) {
+      expect(unlocked).toContain(rootId);
+    }
+    expect(unlocked).toHaveLength(ROOT_SKILL_IDS.length);
   });
 
   it('returns chain of unlocked skills when prereqs mastered', () => {
@@ -178,14 +184,15 @@ describe('getUnlockedSkills (BKT mastery)', () => {
 });
 
 describe('getOuterFringe', () => {
-  it('empty skillStates: returns two root skills', () => {
+  it('empty skillStates: returns all root skills', () => {
     const fringe = getOuterFringe({});
-    expect(fringe).toContain('addition.single-digit.no-carry');
-    expect(fringe).toContain('subtraction.single-digit.no-borrow');
-    expect(fringe).toHaveLength(2);
+    for (const rootId of ROOT_SKILL_IDS) {
+      expect(fringe).toContain(rootId);
+    }
+    expect(fringe).toHaveLength(ROOT_SKILL_IDS.length);
   });
 
-  it('one root mastered: fringe includes second root + first next-in-chain skill', () => {
+  it('one root mastered: fringe includes other roots + first next-in-chain skill', () => {
     const skillStates: Record<string, SkillState> = {
       'addition.single-digit.no-carry': mastered(),
     };

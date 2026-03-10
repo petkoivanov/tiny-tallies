@@ -24,8 +24,8 @@ import type { SkillNodeData, EdgeData } from './skillMapTypes';
 /** Height reserved for column headers and grade labels above the graph. */
 const HEADER_HEIGHT = 65;
 
-/** Base entrance delay for edges (after all node rows have revealed). */
-const EDGE_BASE_DELAY = 7 * 50 + 100; // 450ms
+/** Base entrance delay for edges (after node rows have revealed). */
+const EDGE_BASE_DELAY = 10 * 50 + 100; // 600ms
 
 /** Stagger per node row. */
 const ROW_STAGGER_MS = 50;
@@ -92,20 +92,28 @@ export function SkillMapGraph({
       }));
     }, [edgePaths, outerFringeSet]);
 
-  // Column header X positions
-  const addX = width * 0.3;
-  const subX = width * 0.7;
+  // Compute unique columns and their X positions from node positions
+  const columnInfo = useMemo(() => {
+    const cols = new Map<string, number>();
+    nodePositions.forEach((pos) => {
+      if (!cols.has(pos.column)) {
+        cols.set(pos.column, pos.x);
+      }
+    });
+    return cols;
+  }, [nodePositions]);
 
   // Compute grade label Y positions from node positions
   const gradeYPositions = useMemo(() => {
-    const gradeNodes: Record<number, number[]> = { 1: [], 2: [], 3: [] };
+    const gradeNodes: Record<number, number[]> = { 1: [], 2: [], 3: [], 4: [] };
     nodePositions.forEach((pos) => {
       gradeNodes[pos.grade]?.push(pos.y);
     });
     return {
       1: gradeNodes[1].length > 0 ? Math.min(...gradeNodes[1]) : HEADER_HEIGHT,
-      2: gradeNodes[2].length > 0 ? Math.min(...gradeNodes[2]) : height * 0.4,
-      3: gradeNodes[3].length > 0 ? Math.min(...gradeNodes[3]) : height * 0.7,
+      2: gradeNodes[2].length > 0 ? Math.min(...gradeNodes[2]) : height * 0.3,
+      3: gradeNodes[3].length > 0 ? Math.min(...gradeNodes[3]) : height * 0.6,
+      4: gradeNodes[4].length > 0 ? Math.min(...gradeNodes[4]) : height * 0.85,
     };
   }, [nodePositions, height]);
 
@@ -117,26 +125,23 @@ export function SkillMapGraph({
       {/* Background SVG for column headers and grade labels */}
       <Svg width={width} height={height} style={styles.svgBackground}>
         {/* Column headers */}
-        <SvgText
-          x={addX}
-          y={20}
-          fontSize={12}
-          fontWeight="600"
-          textAnchor="middle"
-          fill={skillMapColors.addition.light}
-        >
-          Addition
-        </SvgText>
-        <SvgText
-          x={subX}
-          y={20}
-          fontSize={12}
-          fontWeight="600"
-          textAnchor="middle"
-          fill={skillMapColors.subtraction.light}
-        >
-          Subtraction
-        </SvgText>
+        {Array.from(columnInfo.entries()).map(([col, colX]) => {
+          const colColors = (skillMapColors as unknown as Record<string, { light: string }>)[col];
+          const label = col.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+          return (
+            <SvgText
+              key={`header-${col}`}
+              x={colX}
+              y={20}
+              fontSize={10}
+              fontWeight="600"
+              textAnchor="middle"
+              fill={colColors?.light ?? '#64748b'}
+            >
+              {label}
+            </SvgText>
+          );
+        })}
 
         {/* Grade labels along left edge */}
         <SvgText
@@ -165,6 +170,15 @@ export function SkillMapGraph({
           textAnchor="start"
         >
           Grade 3
+        </SvgText>
+        <SvgText
+          x={12}
+          y={gradeYPositions[4]}
+          fontSize={9}
+          fill="#64748b"
+          textAnchor="start"
+        >
+          Grade 4
         </SvgText>
       </Svg>
 

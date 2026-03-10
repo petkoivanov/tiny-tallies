@@ -77,7 +77,7 @@ export const DEFAULT_CHILD_DATA: ChildData = {
   avatarId: null,
   frameId: null,
   themeId: 'dark',
-  tutorConsentGranted: false,
+  tutorConsentGranted: true,
   skillStates: {},
   xp: 0,
   level: 1,

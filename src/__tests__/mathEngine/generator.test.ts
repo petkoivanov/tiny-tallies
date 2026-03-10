@@ -30,7 +30,7 @@ describe('generateProblem', () => {
     expect(problem.operands).toHaveLength(2);
     expect(typeof problem.operands[0]).toBe('number');
     expect(typeof problem.operands[1]).toBe('number');
-    expect(typeof problem.correctAnswer).toBe('number');
+    expect(problem.correctAnswer.type).toBe('numeric');
     expect(typeof problem.questionText).toBe('string');
     expect(typeof problem.skillId).toBe('string');
     expect(Array.isArray(problem.standards)).toBe(true);

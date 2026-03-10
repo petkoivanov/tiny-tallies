@@ -1,5 +1,25 @@
 # Milestones
 
+## Pre-v0.9 Math Engine Expansion (Completed: 2026-03-09)
+
+**Scope:** Domain handler architecture + all placeholder handler replacements
+**Timeline:** 2 days (2026-03-08 → 2026-03-09)
+**LOC:** ~55,500 TypeScript | 388 source files
+**Tests:** 1,932 passing across 127 test suites
+
+**Key accomplishments:**
+- Domain handler architecture: `DomainHandler` interface, `DomainProblemData`, dispatch-by-domainConfig pattern
+- Answer type discriminated union (`NumericAnswer | FractionAnswer | ComparisonAnswer | CoordinateAnswer | ExpressionAnswer`) replacing raw `number`
+- Grade type expanded `1-4` → `1-8`
+- **Fractions** (G1-6): 14 skills/templates, 9 bugs — full CCSS including grade 5-6 extensions
+- **Place value** (G1-4): 8 skills/templates, 9 bugs — decompose, identify, read/write, compare, skip count, rounding, expanded form
+- **Time** (G1-3): 7 skills/templates, 6 bugs — clock reading (5 precision levels), AM/PM, elapsed time
+- **Money** (G1-4): 7 skills/templates, 7 bugs — coin ID, counting, notation, change, multi-step, unit pricing
+- **Patterns** (G1-4): 5 skills/templates, 5 bugs — sequences, missing addend/factor, I/O tables
+- Placeholder handler fully deprecated — all 9 domains generate real problems
+
+---
+
 ## v0.8 Social & Subscription (In Progress)
 
 **Phases completed so far:** 3 of 7 phases (38-40), 10 plans

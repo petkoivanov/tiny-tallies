@@ -18,6 +18,7 @@ jest.mock('@/services/challenge', () => ({
 
 import { useAppStore } from '@/store/appStore';
 import { useSession, FEEDBACK_DURATION_MS } from '@/hooks/useSession';
+import { answerNumericValue } from '@/services/mathEngine/types';
 import type { SessionMode } from '@/services/session/sessionTypes';
 import { CHALLENGE_SESSION_CONFIG } from '@/services/session/sessionTypes';
 
@@ -33,7 +34,7 @@ function completeSessionCorrectly(result: { current: ReturnType<typeof useSessio
     if (!problem) break;
 
     act(() => {
-      result.current.handleAnswer(problem.problem.correctAnswer);
+      result.current.handleAnswer(answerNumericValue(problem.problem.correctAnswer));
     });
     act(() => {
       jest.advanceTimersByTime(FEEDBACK_DURATION_MS);
@@ -54,9 +55,9 @@ function completeSessionWithPattern(
     if (!problem) break;
 
     const answer = pattern[i]
-      ? problem.problem.correctAnswer
+      ? answerNumericValue(problem.problem.correctAnswer)
       : problem.presentation.options.find(
-          (o) => o.value !== problem.problem.correctAnswer,
+          (o) => o.value !== answerNumericValue(problem.problem.correctAnswer),
         )!.value;
 
     act(() => {

@@ -9,6 +9,7 @@ import { StyleSheet, View } from 'react-native';
 import Svg, { Line, Text as SvgText, Path } from 'react-native-svg';
 
 import { useTheme } from '@/theme';
+import { answerNumericValue } from '@/services/mathEngine/types';
 import type { Problem } from '@/services/mathEngine/types';
 
 const SVG_WIDTH = 260;
@@ -33,7 +34,7 @@ export function NumberLineDiagram({ problem }: NumberLineDiagramProps) {
   const arcColor = colors.correct;
 
   const [a, b] = problem.operands;
-  const answer = problem.correctAnswer;
+  const answer = answerNumericValue(problem.correctAnswer);
   const rangeMax = Math.ceil(Math.max(a, b, answer) / 10) * 10 || 10;
 
   // Determine tick interval: every 1 for small ranges, every 5 or 10 for larger

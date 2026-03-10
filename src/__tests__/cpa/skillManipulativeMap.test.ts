@@ -8,8 +8,8 @@ import type { ManipulativeType } from '@/services/cpa/cpaTypes';
 
 describe('Skill Manipulative Map', () => {
   describe('SKILL_MANIPULATIVE_MAP coverage', () => {
-    it('has exactly 14 entries', () => {
-      expect(SKILL_MANIPULATIVE_MAP).toHaveLength(14);
+    it('has one entry per skill', () => {
+      expect(SKILL_MANIPULATIVE_MAP).toHaveLength(SKILLS.length);
     });
 
     it('covers every skill ID in SKILLS array', () => {
@@ -62,6 +62,24 @@ describe('Skill Manipulative Map', () => {
       expect(getManipulativesForSkill('addition.three-digit.with-carry')).toEqual(expected);
       expect(getManipulativesForSkill('subtraction.three-digit.no-borrow')).toEqual(expected);
       expect(getManipulativesForSkill('subtraction.three-digit.with-borrow')).toEqual(expected);
+    });
+
+    it('fraction skills map to fraction_strips, bar_model', () => {
+      const expected: ManipulativeType[] = ['fraction_strips', 'bar_model'];
+      expect(getManipulativesForSkill('fractions.equal-parts')).toEqual(expected);
+      expect(getManipulativesForSkill('fractions.unit-fractions')).toEqual(expected);
+    });
+
+    it('place value skills map to base_ten_blocks, bar_model', () => {
+      const expected: ManipulativeType[] = ['base_ten_blocks', 'bar_model'];
+      expect(getManipulativesForSkill('place-value.ones-tens')).toEqual(expected);
+      expect(getManipulativesForSkill('place-value.hundreds')).toEqual(expected);
+    });
+
+    it('simple multiplication skills map to counters, bar_model', () => {
+      const expected: ManipulativeType[] = ['counters', 'bar_model'];
+      expect(getManipulativesForSkill('multiplication.equal-groups')).toEqual(expected);
+      expect(getManipulativesForSkill('multiplication.arrays')).toEqual(expected);
     });
   });
 

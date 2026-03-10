@@ -18,6 +18,61 @@ export const skillMapColors = {
     light: '#2dd4bf',
     lighter: '#5eead4',
   },
+  multiplication: {
+    primary: '#d97706',
+    light: '#fbbf24',
+    lighter: '#fde68a',
+  },
+  division: {
+    primary: '#dc2626',
+    light: '#f87171',
+    lighter: '#fca5a5',
+  },
+  fractions: {
+    primary: '#2563eb',
+    light: '#60a5fa',
+    lighter: '#93c5fd',
+  },
+  place_value: {
+    primary: '#059669',
+    light: '#34d399',
+    lighter: '#6ee7b7',
+  },
+  time: {
+    primary: '#7c3aed',
+    light: '#a78bfa',
+    lighter: '#c4b5fd',
+  },
+  money: {
+    primary: '#16a34a',
+    light: '#4ade80',
+    lighter: '#86efac',
+  },
+  patterns: {
+    primary: '#9333ea',
+    light: '#c084fc',
+    lighter: '#d8b4fe',
+  },
+  measurement: {
+    primary: '#0891b2',
+    light: '#22d3ee',
+    lighter: '#67e8f9',
+  },
+  ratios: {
+    primary: '#be185d',
+    light: '#f472b6',
+    lighter: '#f9a8d4',
+  },
+  exponents: {
+    primary: '#4f46e5',
+    light: '#818cf8',
+    lighter: '#a5b4fc',
+  },
+  expressions: {
+    primary: '#b45309',
+    light: '#f59e0b',
+    lighter: '#fcd34d',
+  },
   state: {
     lockedFill: '#374151',
     lockedRing: '#6b7280',

@@ -1,0 +1,68 @@
+import type { SkillDefinition } from '../types';
+
+export const DIVISION_SKILLS: readonly SkillDefinition[] = [
+  {
+    id: 'division.sharing-equally',
+    name: 'Fair sharing',
+    operation: 'division',
+    grade: 3,
+    standards: ['3.OA.A.2'],
+    prerequisites: ['multiplication.facts-2-5-10'],
+  },
+  {
+    id: 'division.grouping',
+    name: 'How many groups',
+    operation: 'division',
+    grade: 3,
+    standards: ['3.OA.A.2'],
+    prerequisites: ['division.sharing-equally'],
+  },
+  {
+    id: 'division.facts-within-100',
+    name: 'Division facts',
+    operation: 'division',
+    grade: 3,
+    standards: ['3.OA.C.7'],
+    prerequisites: ['division.grouping', 'multiplication.facts-7-8-9'],
+  },
+  {
+    id: 'division.relationship-multiplication',
+    name: 'Multiplication ↔ Division relationship',
+    operation: 'division',
+    grade: 3,
+    standards: ['3.OA.B.6'],
+    prerequisites: ['division.facts-within-100'],
+  },
+  {
+    id: 'division.with-remainders',
+    name: 'Division with remainders',
+    operation: 'division',
+    grade: 4,
+    standards: ['4.OA.A.3'],
+    prerequisites: ['division.facts-within-100'],
+  },
+  {
+    id: 'division.two-by-one',
+    name: '2-digit ÷ 1-digit',
+    operation: 'division',
+    grade: 4,
+    standards: ['4.NBT.B.6'],
+    prerequisites: ['division.with-remainders'],
+  },
+  {
+    id: 'division.three-by-one',
+    name: '3-digit ÷ 1-digit',
+    operation: 'division',
+    grade: 4,
+    standards: ['4.NBT.B.6'],
+    prerequisites: ['division.two-by-one'],
+  },
+  {
+    id: 'division.multi-step',
+    name: 'Multi-step word problems',
+    operation: 'division',
+    grade: 4,
+    standards: ['4.OA.A.3'],
+    prerequisites: ['division.two-by-one'],
+  },
+];

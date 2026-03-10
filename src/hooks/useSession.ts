@@ -36,6 +36,7 @@ import { getOrCreateSkillState } from '../store/helpers/skillStateHelpers';
 import type { MisconceptionRecord } from '../store/slices/misconceptionSlice';
 import { getConfirmedMisconceptions } from '../store/slices/misconceptionSlice';
 import { evaluateBadges, getBadgeById } from '../services/achievement';
+import { answerNumericValue } from '../services/mathEngine/types';
 import type { BadgeEvaluationSnapshot, BadgeTier } from '../services/achievement';
 import {
   getChallengeSkillIds,
@@ -223,14 +224,16 @@ export function useSession(options?: {
 
   const currentProblem = isComplete ? null : (sessionQueueRef.current[currentIndex] ?? null);
   const sessionPhase = getSessionPhase(currentIndex, sessionConfig);
-  const correctAnswer = currentProblem?.problem.correctAnswer ?? null;
+  const correctAnswer = currentProblem
+    ? answerNumericValue(currentProblem.problem.correctAnswer)
+    : null;
 
   const handleAnswer = useCallback(
     (selectedValue: number) => {
       const problem = sessionQueueRef.current[currentIndex];
       if (!problem || feedbackState !== null) return;
 
-      const isCorrect = selectedValue === problem.problem.correctAnswer;
+      const isCorrect = selectedValue === answerNumericValue(problem.problem.correctAnswer);
 
       // Track selected answer for button coloring
       setSelectedAnswer(selectedValue);
