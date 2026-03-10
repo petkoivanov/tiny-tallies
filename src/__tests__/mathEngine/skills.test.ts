@@ -6,8 +6,8 @@ import {
 } from '../../services/mathEngine/skills';
 
 describe('Skills registry', () => {
-  it('has 132 skills total', () => {
-    expect(SKILLS).toHaveLength(132);
+  it('has 151 skills total', () => {
+    expect(SKILLS).toHaveLength(151);
   });
 
   it('all skill IDs are unique', () => {
@@ -15,7 +15,7 @@ describe('Skills registry', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('covers all 16 operations', () => {
+  it('covers all 18 operations', () => {
     const ops = new Set(SKILLS.map((s) => s.operation));
     expect(ops).toEqual(
       new Set([
@@ -35,6 +35,8 @@ describe('Skills registry', () => {
         'geometry',
         'probability',
         'number_theory',
+        'basic_graphs',
+        'data_analysis',
       ]),
     );
   });
@@ -61,6 +63,8 @@ describe('Skills registry', () => {
     expect(getSkillsByOperation('geometry')).toHaveLength(6);
     expect(getSkillsByOperation('probability')).toHaveLength(2);
     expect(getSkillsByOperation('number_theory')).toHaveLength(3);
+    expect(getSkillsByOperation('basic_graphs')).toHaveLength(8);
+    expect(getSkillsByOperation('data_analysis')).toHaveLength(11);
   });
 
   it('all prerequisites reference existing skill IDs', () => {
@@ -124,7 +128,7 @@ describe('Skills registry', () => {
     const g3 = getSkillsByGrade(3);
     const g4 = getSkillsByGrade(4);
 
-    expect(g1.length + g2.length + g3.length + g4.length).toBe(75);
+    expect(g1.length + g2.length + g3.length + g4.length).toBe(84);
     expect(g1.length).toBeGreaterThanOrEqual(10);
     expect(g4.length).toBeGreaterThanOrEqual(10);
   });

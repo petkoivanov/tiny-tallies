@@ -14,7 +14,9 @@ export type MathDomain =
   | 'expressions'
   | 'geometry'
   | 'probability'
-  | 'number_theory';
+  | 'number_theory'
+  | 'basic_graphs'
+  | 'data_analysis';
 
 export type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
@@ -130,6 +132,8 @@ export interface ProblemMetadata {
   wordProblem?: boolean;
   /** Display string for non-numeric answers (e.g. "3:45", "$1.25") */
   answerDisplay?: string;
+  /** Graph data for Data & Statistics domain problems */
+  graphData?: import('@/components/session/graphs').GraphData;
 }
 
 export interface ProblemTemplate {

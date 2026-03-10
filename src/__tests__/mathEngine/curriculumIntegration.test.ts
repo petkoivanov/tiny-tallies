@@ -122,6 +122,8 @@ describe('Curriculum Integration', () => {
     expect(getSkillsByOperation('geometry')).toHaveLength(6);
     expect(getSkillsByOperation('probability')).toHaveLength(2);
     expect(getSkillsByOperation('number_theory')).toHaveLength(3);
+    expect(getSkillsByOperation('basic_graphs')).toHaveLength(8);
+    expect(getSkillsByOperation('data_analysis')).toHaveLength(11);
   });
 
   it('total template count matches skill coverage', () => {

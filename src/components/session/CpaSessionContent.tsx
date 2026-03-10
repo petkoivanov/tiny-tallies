@@ -26,6 +26,7 @@ import { PictorialDiagram } from './pictorial/PictorialDiagram';
 import { AnalogClock, clockDetailForSkill } from './AnalogClock';
 import { CoinDisplay, shouldShowCoins } from './CoinDisplay';
 import { NarrateButton } from './NarrateButton';
+import { GraphDisplay } from './graphs';
 import { getNextGuidedStep } from '@/services/cpa';
 import { getPrimaryManipulative } from '@/services/cpa/skillManipulativeMap';
 import type { ManipulativeType } from '@/services/cpa/cpaTypes';
@@ -494,6 +495,14 @@ export function CpaSessionContent({
         {showCoins && (
           <View style={styles.inlineVisual}>
             <CoinDisplay coinSet={problem.metadata.coinSet!} />
+          </View>
+        )}
+        {problem.metadata.graphData && (
+          <View style={styles.inlineVisual}>
+            <GraphDisplay
+              data={problem.metadata.graphData}
+              testID="session-graph"
+            />
           </View>
         )}
 

@@ -88,6 +88,16 @@ export const skillMapColors = {
     light: '#22c55e',
     lighter: '#86efac',
   },
+  basic_graphs: {
+    primary: '#ea580c',
+    light: '#fb923c',
+    lighter: '#fdba74',
+  },
+  data_analysis: {
+    primary: '#0f766e',
+    light: '#14b8a6',
+    lighter: '#5eead4',
+  },
   state: {
     lockedFill: '#374151',
     lockedRing: '#6b7280',

@@ -34,6 +34,11 @@ export interface ChildData {
   challengeCompletions: Record<string, ChallengeCompletion>;
   challengesCompleted: number;
   sessionHistory: SessionHistoryEntry[];
+  placementComplete: boolean;
+  placementGrade: number | null;
+  placementTheta: number | null;
+  lastPlacementDate: string | null;
+  lastPracticeDate: string | null;
 }
 
 /**
@@ -70,6 +75,11 @@ export const CHILD_DATA_KEYS: readonly (keyof ChildData)[] = [
   'challengeCompletions',
   'challengesCompleted',
   'sessionHistory',
+  'placementComplete',
+  'placementGrade',
+  'placementTheta',
+  'lastPlacementDate',
+  'lastPracticeDate',
 ] as const;
 
 /** Default values for a brand-new child profile (before grade initialization). */
@@ -93,6 +103,11 @@ export const DEFAULT_CHILD_DATA: ChildData = {
   challengeCompletions: {},
   challengesCompleted: 0,
   sessionHistory: [],
+  placementComplete: false,
+  placementGrade: null,
+  placementTheta: null,
+  lastPlacementDate: null,
+  lastPracticeDate: null,
 };
 
 /**

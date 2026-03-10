@@ -29,6 +29,11 @@ const EXPECTED_PARTIALIZE_KEYS = [
   'challengeCompletions',
   'challengesCompleted',
   'sessionHistory',
+  'placementComplete',
+  'placementGrade',
+  'placementTheta',
+  'lastPlacementDate',
+  'lastPracticeDate',
 ] as const;
 
 /** Minimal mock AppState with per-child data filled in */
@@ -146,8 +151,8 @@ function createMockAppState(): AppState {
 }
 
 describe('CHILD_DATA_KEYS', () => {
-  it('contains exactly 19 keys', () => {
-    expect(CHILD_DATA_KEYS).toHaveLength(19);
+  it('contains exactly 24 keys', () => {
+    expect(CHILD_DATA_KEYS).toHaveLength(24);
   });
 
   it('matches the partialize fields from appStore', () => {

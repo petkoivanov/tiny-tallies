@@ -19,6 +19,8 @@ export { MEASUREMENT_BUGS } from './measurementBugs';
 export { RATIOS_BUGS } from './ratiosBugs';
 export { EXPONENTS_BUGS } from './exponentsBugs';
 export { EXPRESSIONS_BUGS } from './expressionsBugs';
+export { BASIC_GRAPHS_BUGS } from './basicGraphsBugs';
+export { DATA_ANALYSIS_BUGS } from './dataAnalysisBugs';
 
 // Validation utilities
 export { isValidDistractor, shuffleArray } from './validation';

@@ -10,3 +10,5 @@ export { ratiosHandler } from './ratios';
 export { exponentsHandler } from './exponents';
 export { expressionsHandler } from './expressions';
 export { placeholderHandler } from './placeholderHandler';
+export { basicGraphsHandler } from './basicGraphs';
+export { dataAnalysisHandler } from './dataAnalysis';

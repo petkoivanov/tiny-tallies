@@ -44,6 +44,8 @@ export type RootStackParamList = {
   ProfileManagement: undefined;
   ParentalControls: undefined;
   ParentReports: undefined;
+  PlacementTest: undefined;
+  CharacterSelect: { fromOnboarding?: boolean } | undefined;
 };
 
 declare global {

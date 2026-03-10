@@ -13,6 +13,8 @@ const ALL_OPERATIONS: MathDomain[] = [
   'fractions', 'place_value', 'time', 'money', 'patterns',
   'measurement', 'ratios', 'exponents', 'expressions',
   'geometry', 'probability', 'number_theory',
+  'basic_graphs',
+  'data_analysis',
 ];
 
 describe('Answer format integration', () => {

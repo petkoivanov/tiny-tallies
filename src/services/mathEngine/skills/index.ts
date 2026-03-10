@@ -18,6 +18,8 @@ import { INTEGER_SKILLS } from './integers';
 import { GEOMETRY_SKILLS } from './geometry';
 import { PROBABILITY_SKILLS } from './probability';
 import { NUMBER_THEORY_SKILLS } from './numberTheory';
+import { BASIC_GRAPHS_SKILLS } from './basicGraphs';
+import { DATA_ANALYSIS_SKILLS } from './dataAnalysis';
 
 export const SKILLS: readonly SkillDefinition[] = [
   ...ADDITION_SKILLS,
@@ -38,6 +40,8 @@ export const SKILLS: readonly SkillDefinition[] = [
   ...GEOMETRY_SKILLS,
   ...PROBABILITY_SKILLS,
   ...NUMBER_THEORY_SKILLS,
+  ...BASIC_GRAPHS_SKILLS,
+  ...DATA_ANALYSIS_SKILLS,
 ];
 
 export function getSkillById(id: string): SkillDefinition | undefined {
@@ -73,4 +77,6 @@ export {
   GEOMETRY_SKILLS,
   PROBABILITY_SKILLS,
   NUMBER_THEORY_SKILLS,
+  BASIC_GRAPHS_SKILLS,
+  DATA_ANALYSIS_SKILLS,
 };

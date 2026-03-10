@@ -12,6 +12,8 @@ const ALL_OPERATIONS: MathDomain[] = [
   'fractions', 'place_value', 'time', 'money', 'patterns',
   'measurement', 'ratios', 'exponents', 'expressions',
   'geometry', 'probability', 'number_theory',
+  'basic_graphs',
+  'data_analysis',
 ];
 
 describe('Word Problem System', () => {
@@ -268,6 +270,8 @@ describe('Word Problem System', () => {
         geometry: 7,
         probability: 7,
         number_theory: 6,
+        basic_graphs: 2,
+        data_analysis: 4,
       };
 
       for (const op of ALL_OPERATIONS) {
@@ -280,7 +284,7 @@ describe('Word Problem System', () => {
   });
 
   describe('WORD_PROBLEM_TEMPLATES', () => {
-    it('has templates for all 16 domains', () => {
+    it('has templates for all 18 domains', () => {
       const ops = new Set(WORD_PROBLEM_TEMPLATES.flatMap((t) => t.operations));
       for (const op of ALL_OPERATIONS) {
         expect(ops.has(op)).toBe(true);

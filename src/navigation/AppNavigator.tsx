@@ -14,6 +14,8 @@ import ProfileSetupScreen from '@/screens/ProfileSetupScreen';
 import ProfileManagementScreen from '@/screens/ProfileManagementScreen';
 import ParentalControlsScreen from '@/screens/ParentalControlsScreen';
 import ParentReportsScreen from '@/screens/ParentReportsScreen';
+import PlacementTestScreen from '@/screens/PlacementTestScreen';
+import CharacterSelectScreen from '@/screens/CharacterSelectScreen';
 import { useTheme } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 
@@ -56,6 +58,12 @@ export default function AppNavigator() {
       <Stack.Screen name="ProfileManagement" component={ProfileManagementScreen} />
       <Stack.Screen name="ParentalControls" component={ParentalControlsScreen} />
       <Stack.Screen name="ParentReports" component={ParentReportsScreen} />
+      <Stack.Screen
+        name="PlacementTest"
+        component={PlacementTestScreen}
+        options={{ gestureEnabled: false }}
+      />
+      <Stack.Screen name="CharacterSelect" component={CharacterSelectScreen} />
     </Stack.Navigator>
   );
 }

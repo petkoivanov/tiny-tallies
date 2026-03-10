@@ -50,6 +50,10 @@ import {
   type SessionHistorySlice,
   createSessionHistorySlice,
 } from './slices/sessionHistorySlice';
+import {
+  type OnboardingSlice,
+  createOnboardingSlice,
+} from './slices/onboardingSlice';
 import { migrateStore } from './migrations';
 import { dehydrateChild, hydrateChild } from './helpers/childDataHelpers';
 
@@ -64,13 +68,14 @@ export type AppState = ChildProfileSlice &
   ChallengeSlice &
   ProfilesSlice &
   AuthSlice &
-  SessionHistorySlice;
+  SessionHistorySlice &
+  OnboardingSlice;
 
 /**
  * Increment + add migration function when changing schema shape.
  * See CLAUDE.md guardrail: never bump version without a corresponding migration.
  */
-export const STORE_VERSION = 15;
+export const STORE_VERSION = 16;
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -87,6 +92,7 @@ export const useAppStore = create<AppState>()(
       ...createProfilesSlice(...a),
       ...createAuthSlice(...a),
       ...createSessionHistorySlice(...a),
+      ...createOnboardingSlice(...a),
     }),
     {
       name: 'tiny-tallies-store',

@@ -146,8 +146,17 @@ export function migrateStore(
     state.sessionHistory ??= [];
   }
 
+  if (version < 16) {
+    // v15 -> v16: Add onboarding/placement state
+    state.placementComplete ??= false;
+    state.placementGrade ??= null;
+    state.placementTheta ??= null;
+    state.lastPlacementDate ??= null;
+    state.lastPracticeDate ??= null;
+  }
+
   // Future migrations chain here:
-  // if (version < 16) { ... }
+  // if (version < 17) { ... }
 
   return state;
 }

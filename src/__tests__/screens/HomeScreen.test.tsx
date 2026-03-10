@@ -46,6 +46,8 @@ jest.mock('lucide-react-native', () => {
     Palette: (props: any) => <View testID="palette-icon" {...props} />,
     Settings: (props: any) => <View testID="settings-icon" {...props} />,
     Award: (props: any) => <View testID="award-icon" {...props} />,
+    Target: (props: any) => <View testID="target-icon" {...props} />,
+    RefreshCw: (props: any) => <View testID="refresh-icon" {...props} />,
   };
 });
 
@@ -71,6 +73,15 @@ jest.mock('@/components/profile', () => {
   };
 });
 
+// Mock absence check hook
+jest.mock('@/hooks/useAbsenceCheck', () => ({
+  useAbsenceCheck: () => ({
+    suggestReassessment: false,
+    decayedSkillCount: 0,
+    daysSinceLastPractice: 0,
+  }),
+}));
+
 // Mock store state
 let mockStoreState: Record<string, unknown> = {};
 jest.mock('@/store/appStore', () => ({
@@ -94,6 +105,7 @@ function setMockState(overrides: Record<string, unknown> = {}) {
     earnedBadges: {},
     frameId: null,
     isSessionActive: false,
+    placementComplete: false,
     children: {},
     activeChildId: null,
     switchChild: jest.fn(),

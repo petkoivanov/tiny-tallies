@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Flame, Check, Focus, GitBranch, Palette, Settings, Award } from 'lucide-react-native';
+import { Flame, Check, Focus, GitBranch, Palette, Settings, Award, Target, RefreshCw } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { AVATARS, DEFAULT_AVATAR_ID, SPECIAL_AVATARS, FRAMES, resolveAvatar } from '@/store/constants/avatars';
@@ -14,6 +14,7 @@ import { isSameISOWeek } from '@/services/gamification/weeklyStreak';
 import { BADGES } from '@/services/achievement';
 import { getConfirmedMisconceptions } from '@/store/slices/misconceptionSlice';
 import { ExploreGrid, DailyChallengeCard } from '@/components/home';
+import { useAbsenceCheck } from '@/hooks/useAbsenceCheck';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -39,6 +40,9 @@ export default function HomeScreen() {
   const misconceptions = useAppStore((state) => state.misconceptions);
   const earnedBadges = useAppStore((state) => state.earnedBadges);
   const frameId = useAppStore((state) => state.frameId);
+  const placementComplete = useAppStore((state) => state.placementComplete);
+
+  const { suggestReassessment, decayedSkillCount } = useAbsenceCheck();
 
   const earnedBadgeCount = Object.keys(earnedBadges).length;
 
@@ -218,6 +222,32 @@ export default function HomeScreen() {
       color: colors.textSecondary,
       marginTop: spacing.xs,
     },
+    placementCard: {
+      backgroundColor: colors.surface,
+      borderRadius: layout.borderRadius.lg,
+      padding: spacing.md,
+      marginHorizontal: spacing.lg,
+      marginTop: spacing.md,
+    },
+    placementRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    placementText: {
+      flex: 1,
+    },
+    placementTitle: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.md,
+      color: colors.textPrimary,
+    },
+    placementSubtitle: {
+      fontFamily: typography.fontFamily.regular,
+      fontSize: typography.fontSize.sm,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
   }), [colors]);
 
   return (
@@ -323,6 +353,48 @@ export default function HomeScreen() {
           )}
         </View>
       </View>
+
+      {/* Placement Test Card — shown when not yet completed */}
+      {!placementComplete && (
+        <Pressable
+          style={styles.placementCard}
+          onPress={() => navigation.navigate('PlacementTest')}
+          accessibilityRole="button"
+          accessibilityLabel="Take placement test"
+          testID="placement-card"
+        >
+          <View style={styles.placementRow}>
+            <Target size={24} color={colors.primary} />
+            <View style={styles.placementText}>
+              <Text style={styles.placementTitle}>Find Your Level</Text>
+              <Text style={styles.placementSubtitle}>
+                Take a quick quiz to personalize your practice
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+      )}
+
+      {/* Re-assessment Card — shown when absence decay is significant */}
+      {suggestReassessment && (
+        <Pressable
+          style={styles.placementCard}
+          onPress={() => navigation.navigate('PlacementTest')}
+          accessibilityRole="button"
+          accessibilityLabel="Retake placement test"
+          testID="reassessment-card"
+        >
+          <View style={styles.placementRow}>
+            <RefreshCw size={24} color={colors.primaryLight} />
+            <View style={styles.placementText}>
+              <Text style={styles.placementTitle}>Welcome Back!</Text>
+              <Text style={styles.placementSubtitle}>
+                {decayedSkillCount} skills may need a refresher — retake the quiz?
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+      )}
 
       {/* Start Practice Button */}
       <View style={styles.buttonSection}>

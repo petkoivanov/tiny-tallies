@@ -376,4 +376,47 @@ export const WORD_PROBLEM_TEMPLATES: readonly WordProblemTemplate[] = [
     question: '',
     minGrade: 6,
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BASIC GRAPHS — grades 1-4 (prefix mode)
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'wp_bg_survey',
+    operations: ['basic_graphs'],
+    mode: 'prefix',
+    template: '{name} took a survey of classmates at {place}.',
+    question: '',
+    minGrade: 1,
+    maxGrade: 2,
+  },
+  {
+    id: 'wp_bg_project',
+    operations: ['basic_graphs'],
+    mode: 'prefix',
+    template:
+      'For a class project, {name} collected data and made a graph.',
+    question: '',
+    minGrade: 2,
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Data Analysis
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'wp_da_science',
+    operations: ['data_analysis'],
+    mode: 'prefix',
+    template:
+      'In science class, {name} recorded data from an experiment.',
+    question: '',
+    minGrade: 4,
+  },
+  {
+    id: 'wp_da_survey',
+    operations: ['data_analysis'],
+    mode: 'prefix',
+    template:
+      '{name} collected survey results from students at {place}.',
+    question: '',
+    minGrade: 5,
+  },
 ];
