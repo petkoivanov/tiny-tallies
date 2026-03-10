@@ -92,6 +92,24 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ### Active
 
+## Current Milestone: v1.0 Onboarding + Data & Statistics (Phases 60-69)
+
+**Goal:** Add Data & Statistics domains (basic_graphs G1-4, data_analysis G4-8) with SVG graph rendering, full CAT-based onboarding with IRT placement testing, character system, and absence-based re-assessment.
+
+**Status:** In progress
+
+**Planned:**
+- Phase 60: SVG graph component library (axes, bars, pictographs, dots, histograms, box plots, scatter plots)
+- Phase 61: `basic_graphs` domain — picture graphs, bar graphs, tally charts (G1-4)
+- Phase 62: `data_analysis` domain — line plots, dot plots, histograms, box plots, scatter plots, mean/median/mode/range (G4-8)
+- Phase 63: Graph display integration in session UI
+- Phase 64: CAT engine — IRT 2PL, EAP estimation, Fisher information item selection
+- Phase 65: Diagnostic item bank — calibrated items across all domains
+- Phase 66: Character system — selection, animated reactions
+- Phase 67: Onboarding flow — first-run wrapper, parent setup, child screens, diagnostic
+- Phase 68: Placement mapping — theta to Elo/BKT/Leitner/skill states
+- Phase 69: Absence decay & re-assessment triggers
+
 ## Previous Milestone: v0.9 Full Curriculum Expansion (COMPLETE — Phases 45-58)
 
 **Goal:** Expand from 14 addition/subtraction skills to full curriculum coverage across 16 math domains for grades 1-8, add parent reports with AI summaries, and improve answer input UX.
@@ -235,7 +253,8 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tutoring engine design, virtual manipulatives specs, misconception detection patterns, spaced repetition algorithms, gamification design, onboarding/placement testing, child UX design, sound/audio design, math anxiety mitigation, COPPA privacy compliance, problem generation engine.
 
 **Future milestones:**
-- v1.0: TBD (onboarding/placement testing, sound/audio, parental time controls, freemium subscription, interactive manipulative animations, data & statistics domain)
+- v1.0: Onboarding + Data & Statistics (Phases 60-69) — IN PROGRESS
+- v1.1: TBD (sound/audio, parental time controls, freemium subscription, interactive manipulative animations)
 
 ## Constraints
 
