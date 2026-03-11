@@ -32,7 +32,7 @@ import { getPrimaryManipulative } from '@/services/cpa/skillManipulativeMap';
 import type { ManipulativeType } from '@/services/cpa/cpaTypes';
 import type { Problem } from '@/services/mathEngine/types';
 import type { FormattedProblem } from '@/services/mathEngine/answerFormats/types';
-import { parseIntegerInput } from '@/services/mathEngine/answerFormats';
+import { parseIntegerInput, parseDecimalInput } from '@/services/mathEngine/answerFormats';
 
 /** Session-supported manipulative types (ten_frame excluded — sandbox only) */
 type SessionManipulative = Exclude<ManipulativeType, 'ten_frame'>;
@@ -365,8 +365,10 @@ export function CpaSessionContent({
     return undefined;
   }
 
+  const allowDecimal = presentation.format === 'free_text' && presentation.allowDecimal;
+
   const handleFreeTextSubmit = (value: string) => {
-    const parsed = parseIntegerInput(value);
+    const parsed = allowDecimal ? parseDecimalInput(value) : parseIntegerInput(value);
     if (parsed !== null) {
       onAnswer(parsed);
     }
@@ -379,7 +381,7 @@ export function CpaSessionContent({
         <NumberPad
           onSubmit={handleFreeTextSubmit}
           maxDigits={presentation.format === 'free_text' ? presentation.maxDigits : 5}
-          showDecimal={false}
+          showDecimal={presentation.format === 'free_text' && presentation.allowDecimal}
         />
       );
     }

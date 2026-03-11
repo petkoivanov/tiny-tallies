@@ -10,11 +10,13 @@ import {
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react-native';
 import { useTheme } from '@/theme';
 import { AvatarCircle } from '@/components/avatars';
+import { StateSelector } from '@/components/shared/StateSelector';
 import { AVATARS } from '@/store/constants/avatars';
 import type { AllAvatarId } from '@/store/constants/avatars';
 import type { NewChildProfile } from '@/store/helpers/childDataHelpers';
+import type { StateCode } from '@/store/slices/childProfileSlice';
 
-type WizardStep = 'name' | 'age-grade' | 'avatar';
+type WizardStep = 'name' | 'age-grade' | 'location' | 'avatar';
 
 export interface ProfileCreationWizardProps {
   onComplete: (profile: NewChildProfile) => void;
@@ -50,6 +52,9 @@ export function ProfileCreationWizard({
   const [avatarId, setAvatarId] = useState<AllAvatarId | null>(
     initialValues?.avatarId ?? null,
   );
+  const [stateCode, setStateCode] = useState<StateCode>(
+    initialValues?.stateCode ?? null,
+  );
 
   const trimmedName = name.trim();
   const isNameValid =
@@ -58,29 +63,24 @@ export function ProfileCreationWizard({
 
   function handleAgeSelect(selectedAge: number) {
     setAge(selectedAge);
-    // Auto-link grade: grade = age - 5, clamped to [0, 6]
     const autoGrade = Math.max(0, Math.min(6, selectedAge - 5));
     setGrade(autoGrade);
-  }
-
-  function handleGradeSelect(selectedGrade: number) {
-    setGrade(selectedGrade);
   }
 
   function handleNext() {
     if (step === 'name' && isNameValid) {
       setStep('age-grade');
     } else if (step === 'age-grade' && isAgeGradeValid) {
+      setStep('location');
+    } else if (step === 'location') {
       setStep('avatar');
     }
   }
 
   function handleBack() {
-    if (step === 'age-grade') {
-      setStep('name');
-    } else if (step === 'avatar') {
-      setStep('age-grade');
-    }
+    if (step === 'age-grade') setStep('name');
+    else if (step === 'location') setStep('age-grade');
+    else if (step === 'avatar') setStep('location');
   }
 
   function handleDone() {
@@ -89,6 +89,7 @@ export function ProfileCreationWizard({
       childAge: age!,
       childGrade: grade!,
       avatarId,
+      stateCode,
     });
   }
 
@@ -98,7 +99,6 @@ export function ProfileCreationWizard({
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Cancel button */}
       {onCancel && step === 'name' && (
         <Pressable style={styles.cancelButton} onPress={onCancel}>
           <Text style={[styles.cancelText, { color: colors.textSecondary }]}>
@@ -112,7 +112,6 @@ export function ProfileCreationWizard({
           <Text style={[styles.heading, { color: colors.textPrimary }]}>
             {"What's your learner's name?"}
           </Text>
-
           <TextInput
             style={[
               styles.nameInput,
@@ -129,7 +128,6 @@ export function ProfileCreationWizard({
             maxLength={NAME_MAX_LENGTH + 5}
             autoFocus
           />
-
           <Text
             style={[
               styles.charCount,
@@ -143,17 +141,12 @@ export function ProfileCreationWizard({
           >
             {name.length}/{NAME_MAX_LENGTH}
           </Text>
-
           <View style={styles.buttonRow}>
             <View style={styles.buttonSpacer} />
             <Pressable
               style={[
                 styles.navButton,
-                {
-                  backgroundColor: isNameValid
-                    ? colors.primary
-                    : colors.surface,
-                },
+                { backgroundColor: isNameValid ? colors.primary : colors.surface },
               ]}
               onPress={handleNext}
               disabled={!isNameValid}
@@ -164,7 +157,6 @@ export function ProfileCreationWizard({
                   styles.navButtonText,
                   { color: isNameValid ? '#fff' : colors.textSecondary },
                 ]}
-                accessibilityState={{ disabled: !isNameValid }}
               >
                 Next
               </Text>
@@ -182,7 +174,6 @@ export function ProfileCreationWizard({
           <Text style={[styles.heading, { color: colors.textPrimary }]}>
             How old is {trimmedName}?
           </Text>
-
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -194,10 +185,8 @@ export function ProfileCreationWizard({
                 style={[
                   styles.selectorChip,
                   {
-                    backgroundColor:
-                      age === a ? colors.primary : colors.surface,
-                    borderColor:
-                      age === a ? colors.primary : colors.surfaceLight,
+                    backgroundColor: age === a ? colors.primary : colors.surface,
+                    borderColor: age === a ? colors.primary : colors.surfaceLight,
                   },
                 ]}
                 onPress={() => handleAgeSelect(a)}
@@ -219,7 +208,6 @@ export function ProfileCreationWizard({
           >
             What grade?
           </Text>
-
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -231,20 +219,16 @@ export function ProfileCreationWizard({
                 style={[
                   styles.selectorChip,
                   {
-                    backgroundColor:
-                      grade === g.value ? colors.primary : colors.surface,
-                    borderColor:
-                      grade === g.value ? colors.primary : colors.surfaceLight,
+                    backgroundColor: grade === g.value ? colors.primary : colors.surface,
+                    borderColor: grade === g.value ? colors.primary : colors.surfaceLight,
                   },
                 ]}
-                onPress={() => handleGradeSelect(g.value)}
+                onPress={() => setGrade(g.value)}
               >
                 <Text
                   style={[
                     styles.selectorChipText,
-                    {
-                      color: grade === g.value ? '#fff' : colors.textPrimary,
-                    },
+                    { color: grade === g.value ? '#fff' : colors.textPrimary },
                   ]}
                 >
                   {g.label}
@@ -263,15 +247,10 @@ export function ProfileCreationWizard({
                 Back
               </Text>
             </Pressable>
-
             <Pressable
               style={[
                 styles.navButton,
-                {
-                  backgroundColor: isAgeGradeValid
-                    ? colors.primary
-                    : colors.surface,
-                },
+                { backgroundColor: isAgeGradeValid ? colors.primary : colors.surface },
               ]}
               onPress={handleNext}
               disabled={!isAgeGradeValid}
@@ -280,11 +259,8 @@ export function ProfileCreationWizard({
               <Text
                 style={[
                   styles.navButtonText,
-                  {
-                    color: isAgeGradeValid ? '#fff' : colors.textSecondary,
-                  },
+                  { color: isAgeGradeValid ? '#fff' : colors.textSecondary },
                 ]}
-                accessibilityState={{ disabled: !isAgeGradeValid }}
               >
                 Next
               </Text>
@@ -297,12 +273,54 @@ export function ProfileCreationWizard({
         </View>
       )}
 
+      {step === 'location' && (
+        <View style={styles.stepContainer}>
+          <Text style={[styles.heading, { color: colors.textPrimary }]}>
+            Where does {trimmedName} go to school?
+          </Text>
+          <Text
+            style={[styles.locationSubtext, { color: colors.textSecondary }]}
+          >
+            Optional — helps compare with kids in your state.
+          </Text>
+          <StateSelector
+            value={stateCode}
+            onChange={setStateCode}
+            activeColor={colors.primary}
+            inactiveColor={colors.surface}
+            activeBorderColor={colors.primary}
+            inactiveBorderColor={colors.surfaceLight}
+            activeTextColor="#fff"
+            inactiveTextColor={colors.textPrimary}
+          />
+          <View style={styles.buttonRow}>
+            <Pressable
+              style={[styles.navButton, { backgroundColor: colors.surface }]}
+              onPress={handleBack}
+            >
+              <ChevronLeft size={18} color={colors.textPrimary} />
+              <Text style={[styles.navButtonText, { color: colors.textPrimary }]}>
+                Back
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[styles.navButton, { backgroundColor: colors.primary }]}
+              onPress={handleNext}
+            >
+              <Text style={[styles.navButtonText, { color: '#fff' }]}>
+                {stateCode ? 'Next' : 'Skip'}
+              </Text>
+              <ChevronRight size={18} color="#fff" />
+            </Pressable>
+          </View>
+        </View>
+      )}
+
       {step === 'avatar' && (
         <View style={styles.stepContainer}>
           <Text style={[styles.heading, { color: colors.textPrimary }]}>
             Choose an avatar for {trimmedName}!
           </Text>
-
           <View style={styles.avatarGrid}>
             {AVATARS.map((avatar) => (
               <View
@@ -324,7 +342,6 @@ export function ProfileCreationWizard({
               </View>
             ))}
           </View>
-
           <View style={styles.buttonRow}>
             <Pressable
               style={[styles.navButton, { backgroundColor: colors.surface }]}
@@ -335,12 +352,8 @@ export function ProfileCreationWizard({
                 Back
               </Text>
             </Pressable>
-
             <Pressable
-              style={[
-                styles.navButton,
-                { backgroundColor: colors.primary },
-              ]}
+              style={[styles.navButton, { backgroundColor: colors.primary }]}
               onPress={handleDone}
             >
               <Check size={18} color="#fff" />
@@ -356,99 +369,37 @@ export function ProfileCreationWizard({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'center',
-  },
-  stepContainer: {
-    alignItems: 'center',
-  },
-  cancelButton: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    zIndex: 10,
-    padding: 8,
-  },
-  cancelText: {
-    fontSize: 16,
-  },
-  heading: {
-    fontSize: 24,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  subHeading: {
-    fontSize: 20,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
+  container: { flex: 1, padding: 24, justifyContent: 'center' },
+  stepContainer: { alignItems: 'center' },
+  cancelButton: { position: 'absolute', top: 16, left: 16, zIndex: 10, padding: 8 },
+  cancelText: { fontSize: 16 },
+  heading: { fontSize: 24, fontWeight: '700', textAlign: 'center', marginBottom: 24 },
+  subHeading: { fontSize: 20, fontWeight: '600', textAlign: 'center', marginBottom: 16 },
   nameInput: {
-    width: '100%',
-    fontSize: 20,
-    padding: 16,
-    borderWidth: 1,
-    borderRadius: 12,
-    textAlign: 'center',
+    width: '100%', fontSize: 20, padding: 16,
+    borderWidth: 1, borderRadius: 12, textAlign: 'center',
   },
-  charCount: {
-    fontSize: 12,
-    marginTop: 8,
-    marginBottom: 16,
-  },
-  selectorRow: {
-    flexDirection: 'row',
-    gap: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-  },
+  charCount: { fontSize: 12, marginTop: 8, marginBottom: 16 },
+  selectorRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 8, paddingVertical: 8 },
   selectorChip: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 48, height: 48, borderRadius: 24,
+    borderWidth: 1, alignItems: 'center', justifyContent: 'center',
   },
-  selectorChipText: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
+  selectorChipText: { fontSize: 18, fontWeight: '600' },
+  locationSubtext: { fontSize: 14, textAlign: 'center', marginBottom: 20 },
   avatarGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 12,
-    marginBottom: 24,
+    flexDirection: 'row', flexWrap: 'wrap',
+    justifyContent: 'center', gap: 12, marginBottom: 24,
   },
-  avatarCell: {
-    padding: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  avatarCell: { padding: 4, alignItems: 'center', justifyContent: 'center' },
   buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginTop: 24,
-    gap: 16,
+    flexDirection: 'row', justifyContent: 'space-between',
+    width: '100%', marginTop: 24, gap: 16,
   },
-  buttonSpacer: {
-    flex: 1,
-  },
+  buttonSpacer: { flex: 1 },
   navButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    gap: 8,
+    flexDirection: 'row', alignItems: 'center',
+    paddingVertical: 14, paddingHorizontal: 24, borderRadius: 12, gap: 8,
   },
-  navButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  navButtonText: { fontSize: 16, fontWeight: '600' },
 });

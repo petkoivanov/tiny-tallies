@@ -55,6 +55,14 @@ jest.mock('@/components/animations/CharacterReaction', () => {
   };
 });
 
+// Mock GraphDisplay
+jest.mock('@/components/session/graphs', () => {
+  const { View } = require('react-native');
+  return {
+    GraphDisplay: (props: any) => <View testID={props.testID} />,
+  };
+});
+
 // Mock AppDialog
 jest.mock('@/components/AppDialog', () => {
   const { View } = require('react-native');
@@ -63,22 +71,6 @@ jest.mock('@/components/AppDialog', () => {
       props.visible ? <View testID="quit-dialog" /> : null,
   };
 });
-
-// Mock CAT engine
-const mockBuildItemBank = jest.fn();
-const mockCreateCatSession = jest.fn();
-const mockGetNextItem = jest.fn();
-const mockRecordResponse = jest.fn();
-const mockGetCatResults = jest.fn();
-const mockComputePlacementElos = jest.fn();
-jest.mock('@/services/cat', () => ({
-  buildItemBank: () => mockBuildItemBank(),
-  createCatSession: () => mockCreateCatSession(),
-  getNextItem: (...args: unknown[]) => mockGetNextItem(...args),
-  recordResponse: (...args: unknown[]) => mockRecordResponse(...args),
-  getCatResults: (...args: unknown[]) => mockGetCatResults(...args),
-  computePlacementElos: (...args: unknown[]) => mockComputePlacementElos(...args),
-}));
 
 // Mock math engine
 const mockGenerateProblem = jest.fn();
@@ -91,16 +83,14 @@ jest.mock('@/services/mathEngine/templates', () => ({
   getTemplatesBySkill: (...args: unknown[]) => mockGetTemplatesBySkill(...args),
 }));
 
+const mockGetSkillsByGrade = jest.fn();
+jest.mock('@/services/mathEngine/skills', () => ({
+  getSkillsByGrade: (...args: unknown[]) => mockGetSkillsByGrade(...args),
+}));
+
 jest.mock('@/services/mathEngine/types', () => ({
   answerNumericValue: (answer: any) =>
     answer?.type === 'numeric' ? answer.value : 0,
-}));
-
-jest.mock('@/services/mathEngine/skills', () => ({
-  SKILLS: [
-    { id: 'add.single', grade: 1, operation: 'addition' },
-    { id: 'sub.single', grade: 1, operation: 'subtraction' },
-  ],
 }));
 
 // Mock store state
@@ -115,24 +105,13 @@ import PlacementTestScreen from '@/screens/PlacementTestScreen';
 function setMockState(overrides: Record<string, unknown> = {}) {
   mockStoreState = {
     avatarId: 'fox',
+    childGrade: 3,
     completePlacement: jest.fn(),
-    updateSkillState: jest.fn(),
     ...overrides,
   };
 }
 
-function createMockItem(id = 'cat_add.single') {
-  return {
-    id,
-    discrimination: 1.0,
-    difficulty: 0,
-    grade: 1,
-    skillId: 'add.single',
-    operation: 'addition',
-  };
-}
-
-function createMockProblem() {
+function createMockProblem(overrides: Record<string, unknown> = {}) {
   return {
     id: 'test_1',
     templateId: 'tpl_add_single',
@@ -145,6 +124,7 @@ function createMockProblem() {
     grade: 1,
     baseElo: 1000,
     metadata: {},
+    ...overrides,
   };
 }
 
@@ -154,18 +134,12 @@ describe('PlacementTestScreen', () => {
     jest.useFakeTimers();
     setMockState();
 
-    mockBuildItemBank.mockReturnValue([createMockItem()]);
-    mockCreateCatSession.mockReturnValue({
-      theta: 0,
-      standardError: 1.0,
-      responses: [],
-      administeredIds: new Set(),
-      terminated: false,
-    });
+    mockGetSkillsByGrade.mockReturnValue([
+      { id: 'add.single', grade: 1, operation: 'addition' },
+      { id: 'sub.single', grade: 1, operation: 'subtraction' },
+    ]);
     mockGetTemplatesBySkill.mockReturnValue([{ id: 'tpl_add_single' }]);
     mockGenerateProblem.mockReturnValue(createMockProblem());
-    mockRecordResponse.mockImplementation((state: any) => state);
-    mockComputePlacementElos.mockReturnValue(new Map());
   });
 
   afterEach(() => {
@@ -189,11 +163,6 @@ describe('PlacementTestScreen', () => {
   });
 
   it('start button transitions to testing phase', () => {
-    mockGetNextItem.mockReturnValue({
-      item: createMockItem(),
-      information: 0.25,
-    });
-
     const { getByTestId, getByText } = render(<PlacementTestScreen />);
 
     fireEvent.press(getByTestId('start-button'));
@@ -203,46 +172,28 @@ describe('PlacementTestScreen', () => {
   });
 
   it('shows answer options including correct answer', () => {
-    mockGetNextItem.mockReturnValue({
-      item: createMockItem(),
-      information: 0.25,
-    });
-
     const { getByTestId, getByText } = render(<PlacementTestScreen />);
     fireEvent.press(getByTestId('start-button'));
 
-    // Correct answer is 7, distractors should include values near 7
     expect(getByText('7')).toBeTruthy();
   });
 
-  it('records response when answer is selected', () => {
-    mockGetNextItem.mockReturnValue({
-      item: createMockItem(),
-      information: 0.25,
-    });
-
+  it('shows feedback when answer is selected', () => {
     const { getByTestId } = render(<PlacementTestScreen />);
     fireEvent.press(getByTestId('start-button'));
 
-    // Press correct answer
     fireEvent.press(getByTestId('option-7'));
 
-    expect(mockRecordResponse).toHaveBeenCalledTimes(1);
+    // Should show feedback (button should be disabled after press)
+    expect(getByTestId('option-7').props.accessibilityState?.disabled ||
+      getByTestId('option-7').props.disabled).toBeTruthy();
   });
 
   it('advances to next question after feedback delay', () => {
-    const item1 = createMockItem('cat_add.single');
-    const item2 = createMockItem('cat_sub.single');
-
-    mockGetNextItem
-      .mockReturnValueOnce({ item: item1, information: 0.25 })
-      .mockReturnValueOnce({ item: item2, information: 0.20 });
-
-    const problem2 = {
-      ...createMockProblem(),
+    const problem2 = createMockProblem({
       questionText: '5 - 2',
       correctAnswer: { type: 'numeric', value: 3 },
-    };
+    });
     mockGenerateProblem
       .mockReturnValueOnce(createMockProblem())
       .mockReturnValueOnce(problem2);
@@ -250,10 +201,8 @@ describe('PlacementTestScreen', () => {
     const { getByTestId, getByText } = render(<PlacementTestScreen />);
     fireEvent.press(getByTestId('start-button'));
 
-    // Answer first question
     fireEvent.press(getByTestId('option-7'));
 
-    // Advance past feedback delay
     act(() => {
       jest.advanceTimersByTime(1200);
     });
@@ -261,85 +210,59 @@ describe('PlacementTestScreen', () => {
     expect(getByText('5 - 2')).toBeTruthy();
   });
 
-  it('shows completion screen when test terminates', () => {
-    // First getNextItem returns an item, second returns null (terminated)
-    mockGetNextItem
-      .mockReturnValueOnce({ item: createMockItem(), information: 0.25 })
-      .mockReturnValueOnce(null);
-
-    mockGetCatResults.mockReturnValue({
-      theta: 0.5,
-      standardError: 0.28,
-      totalItems: 5,
-      correctCount: 4,
-      accuracy: 0.8,
-      estimatedGrade: 2,
-      domainAccuracy: {},
+  it('settles at grade after 5 questions without promotion', () => {
+    // Grade 3 child, starts at grade 1. One correct → promote to grade 2.
+    // Then 5 wrong at grade 2 → settles at grade 2.
+    let callCount = 0;
+    mockGenerateProblem.mockImplementation(() => {
+      callCount++;
+      return createMockProblem({
+        id: `test_${callCount}`,
+        questionText: `Q${callCount}`,
+        correctAnswer: { type: 'numeric', value: 7 },
+      });
     });
 
     const { getByTestId, getByText } = render(<PlacementTestScreen />);
     fireEvent.press(getByTestId('start-button'));
 
-    // Answer question
+    // Q1 at grade 1: answer correct → promote to grade 2 (need 1 streak below grade-1)
     fireEvent.press(getByTestId('option-7'));
+    act(() => { jest.advanceTimersByTime(1200); });
 
-    act(() => {
-      jest.advanceTimersByTime(1200);
-    });
+    // Q2-Q6 at grade 2: answer wrong (press wrong option) — 5 questions → settle
+    for (let i = 0; i < 5; i++) {
+      fireEvent.press(getByTestId('option-5')); // wrong answer
+      act(() => { jest.advanceTimersByTime(1200); });
+    }
 
     expect(getByText('All Done!')).toBeTruthy();
     expect(getByText('Grade 2')).toBeTruthy();
-    expect(getByText(/80% accuracy/)).toBeTruthy();
-  });
-
-  it('calls completePlacement on test completion', () => {
-    mockGetNextItem
-      .mockReturnValueOnce({ item: createMockItem(), information: 0.25 })
-      .mockReturnValueOnce(null);
-
-    mockGetCatResults.mockReturnValue({
-      theta: 0.5,
-      standardError: 0.28,
-      totalItems: 5,
-      correctCount: 4,
-      accuracy: 0.8,
-      estimatedGrade: 2,
-      domainAccuracy: {},
-    });
-
-    const { getByTestId } = render(<PlacementTestScreen />);
-    fireEvent.press(getByTestId('start-button'));
-    fireEvent.press(getByTestId('option-7'));
-
-    act(() => {
-      jest.advanceTimersByTime(1200);
-    });
-
-    expect(mockStoreState.completePlacement).toHaveBeenCalledWith(2, 0.5);
+    expect(mockStoreState.completePlacement).toHaveBeenCalledWith(2, 0);
   });
 
   it('finish button resets navigation to Home', () => {
-    mockGetNextItem
-      .mockReturnValueOnce({ item: createMockItem(), information: 0.25 })
-      .mockReturnValueOnce(null);
+    // Quick settle: grade 1 child, 5 wrong → settle at grade 1
+    setMockState({ childGrade: 1 });
 
-    mockGetCatResults.mockReturnValue({
-      theta: 0.5,
-      standardError: 0.28,
-      totalItems: 5,
-      correctCount: 4,
-      accuracy: 0.8,
-      estimatedGrade: 2,
-      domainAccuracy: {},
+    let callCount = 0;
+    mockGenerateProblem.mockImplementation(() => {
+      callCount++;
+      return createMockProblem({
+        id: `test_${callCount}`,
+        questionText: `Q${callCount}`,
+        correctAnswer: { type: 'numeric', value: 7 },
+      });
     });
 
     const { getByTestId } = render(<PlacementTestScreen />);
     fireEvent.press(getByTestId('start-button'));
-    fireEvent.press(getByTestId('option-7'));
 
-    act(() => {
-      jest.advanceTimersByTime(1200);
-    });
+    // 5 wrong answers to settle
+    for (let i = 0; i < 5; i++) {
+      fireEvent.press(getByTestId('option-5'));
+      act(() => { jest.advanceTimersByTime(1200); });
+    }
 
     fireEvent.press(getByTestId('finish-button'));
 
@@ -350,20 +273,83 @@ describe('PlacementTestScreen', () => {
   });
 
   it('shows quit dialog when close button is pressed during testing', () => {
-    mockGetNextItem.mockReturnValue({
-      item: createMockItem(),
-      information: 0.25,
-    });
-
     const { getByTestId, queryByTestId } = render(<PlacementTestScreen />);
     fireEvent.press(getByTestId('start-button'));
 
-    // Dialog should not be visible initially
     expect(queryByTestId('quit-dialog')).toBeNull();
 
-    // Press quit button
     fireEvent.press(getByTestId('quit-button'));
 
     expect(getByTestId('quit-dialog')).toBeTruthy();
+  });
+
+  it('"Don\'t know" counts as wrong and advances', () => {
+    const problem2 = createMockProblem({
+      questionText: 'Q2',
+      correctAnswer: { type: 'numeric', value: 3 },
+    });
+    mockGenerateProblem
+      .mockReturnValueOnce(createMockProblem())
+      .mockReturnValueOnce(problem2);
+
+    const { getByTestId, getByText } = render(<PlacementTestScreen />);
+    fireEvent.press(getByTestId('start-button'));
+
+    fireEvent.press(getByTestId('skip-question-button'));
+
+    act(() => {
+      jest.advanceTimersByTime(600);
+    });
+
+    expect(getByText('Q2')).toBeTruthy();
+  });
+
+  it('promotes through grades with correct answers', () => {
+    // Grade 4 child, starts at grade 2.
+    // Grade 2 (below grade-1=3): need 1 correct → promote
+    // Grade 3 (grade-1): need 2 correct → promote
+    // Grade 4 (at grade): need 3 correct → promote
+    // Grade 5 (above): need 3 correct but let's settle after 5
+    setMockState({ childGrade: 4 });
+
+    let callCount = 0;
+    mockGenerateProblem.mockImplementation(() => {
+      callCount++;
+      return createMockProblem({
+        id: `test_${callCount}`,
+        questionText: `Q${callCount}`,
+        correctAnswer: { type: 'numeric', value: 7 },
+      });
+    });
+
+    const { getByTestId, getByText } = render(<PlacementTestScreen />);
+    fireEvent.press(getByTestId('start-button'));
+
+    // Grade 2: 1 correct → promote to 3
+    fireEvent.press(getByTestId('option-7'));
+    act(() => { jest.advanceTimersByTime(1200); });
+
+    // Grade 3: need 2 correct
+    fireEvent.press(getByTestId('option-7'));
+    act(() => { jest.advanceTimersByTime(1200); });
+    fireEvent.press(getByTestId('option-7'));
+    act(() => { jest.advanceTimersByTime(1200); });
+
+    // Grade 4: need 3 correct
+    fireEvent.press(getByTestId('option-7'));
+    act(() => { jest.advanceTimersByTime(1200); });
+    fireEvent.press(getByTestId('option-7'));
+    act(() => { jest.advanceTimersByTime(1200); });
+    fireEvent.press(getByTestId('option-7'));
+    act(() => { jest.advanceTimersByTime(1200); });
+
+    // Now at grade 5, answer 5 wrong → settle
+    for (let i = 0; i < 5; i++) {
+      fireEvent.press(getByTestId('option-5'));
+      act(() => { jest.advanceTimersByTime(1200); });
+    }
+
+    expect(getByText('All Done!')).toBeTruthy();
+    expect(getByText('Grade 5')).toBeTruthy();
   });
 });

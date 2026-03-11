@@ -24,6 +24,7 @@ export interface FreeTextPresentation {
   readonly problem: Problem;
   readonly format: 'free_text';
   readonly maxDigits: number;
+  readonly allowDecimal: boolean;
 }
 
 /** Union of all answer format presentations */

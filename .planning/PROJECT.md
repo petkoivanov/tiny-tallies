@@ -93,8 +93,8 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 - ✓ Basic Graphs domain: 8 skills (G1-4) — picture graphs, bar graphs, tally charts — v1.0
 - ✓ Data Analysis domain: 11 skills (G4-8) — dot plots, histograms, box plots, scatter plots, central tendency — v1.0
 - ✓ SVG graph component library: 7 graph types with themed rendering — v1.0
-- ✓ CAT engine: IRT 2PL model, EAP estimation, Fisher information item selection, stopping rules — v1.0
-- ✓ Placement test: PlacementTestScreen with adaptive flow, item bank from skill registry — v1.0
+- ✓ CAT engine: IRT 2PL model, EAP estimation, Fisher information item selection, stopping rules — v1.0 (code exists in src/services/cat/ but not used by placement)
+- ✓ Placement test: PlacementTestScreen with staircase algorithm (start at grade-2, promote on consecutive correct, settle after 5 without promotion), "Don't know" button, shuffled options, decimal NumberPad — v1.0
 - ✓ Onboarding: CharacterSelectScreen, PlacementTestScreen, onboardingSlice (STORE_VERSION 16) — v1.0
 - ✓ Absence decay: Ebbinghaus forgetting curve with Leitner box resistance, re-assessment triggers — v1.0
 
@@ -120,17 +120,17 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ## Previous Milestone: v1.0 Onboarding + Data & Statistics (COMPLETE — Phases 60-69)
 
-**Goal:** Add Data & Statistics domains (basic_graphs G1-4, data_analysis G4-8) with SVG graph rendering, full CAT-based onboarding with IRT placement testing, character system, and absence-based re-assessment.
+**Goal:** Add Data & Statistics domains (basic_graphs G1-4, data_analysis G4-8) with SVG graph rendering, onboarding with staircase placement testing (originally planned as CAT/IRT, simplified to staircase algorithm), character system, and absence-based re-assessment.
 
-**Status:** COMPLETE — 18 domains, 151 skills, 2365 tests passing. CAT placement, onboarding screens, absence decay.
+**Status:** COMPLETE — 18 domains, 151 skills, 2365 tests passing. Staircase placement, onboarding screens, absence decay.
 
 **Completed:**
 - ✓ Phase 60: SVG graph component library (7 graph types: picture, bar, tally, dot, histogram, box plot, scatter)
 - ✓ Phase 61: `basic_graphs` domain — picture graphs, bar graphs, tally charts (G1-4, 8 skills)
 - ✓ Phase 62: `data_analysis` domain — dot plots, histograms, box plots, scatter plots, central tendency (G4-8, 11 skills)
 - ✓ Phase 63: Graph display integration in session UI (GraphDisplay component in CpaSessionContent)
-- ✓ Phase 64: CAT engine — IRT 2PL, EAP estimation, Fisher information item selection, stopping rules
-- ✓ Phase 65: Placement mapping — item bank from skill registry, theta-to-Elo conversion, grade-based Elo seeding
+- ✓ Phase 64: CAT engine — IRT 2PL, EAP estimation, Fisher information item selection, stopping rules (code retained in src/services/cat/ for future use)
+- ✓ Phase 65: Placement mapping — staircase algorithm (start grade-2, promote on consecutive correct, settle after 5), grade-based Elo seeding
 - ✓ Phase 66: Character system — CharacterReaction with 4 animated states (correct/incorrect/streak/idle)
 - ✓ Phase 67: Onboarding flow — PlacementTestScreen, CharacterSelectScreen, store integration (STORE_VERSION 16)
 - ✓ Phase 68: Absence decay — Ebbinghaus forgetting curve with Leitner box resistance, 3-day grace period
@@ -183,7 +183,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ## Context
 
-**Current state:** v1.0 complete with 151 skills across 18 domains (grades 1-8). 2,365 tests passing. Full adaptive learning pipeline + CAT placement testing + onboarding flow + absence decay + 7 SVG graph types + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor + deep gamification + multi-child profiles + cloud sync backend + NumberPad component + Elo-based answer format selection + parent reports with AI summaries + word problems across all 18 domains.
+**Current state:** v1.0 complete with 151 skills across 18 domains (grades 1-8). 2,365 tests passing. Full adaptive learning pipeline + staircase placement testing + onboarding flow + absence decay + 7 SVG graph types + 6 interactive virtual manipulatives with CPA progression + on-demand AI tutor + deep gamification + multi-child profiles + cloud sync backend + NumberPad component + Elo-based answer format selection + parent reports with AI summaries + word problems across all 18 domains.
 
 **Architecture (implemented through v0.4):**
 - Programmatic math engine: 132 skills across 16 domains (Common Core grades 1-8)
@@ -364,4 +364,4 @@ Market research, curriculum standards (Common Core/Singapore/Russian/UK), AI tut
 | Operation → MathDomain rename | Better semantic clarity; "operation" implies arithmetic only | ✓ Good — 28 files updated, zero runtime changes |
 
 ---
-*Last updated: 2026-03-10 after v1.0 COMPLETE (151 skills, 18 domains, CAT placement, onboarding, absence decay, 2365 tests)*
+*Last updated: 2026-03-10 after v1.0 COMPLETE (151 skills, 18 domains, staircase placement, onboarding, absence decay, 2365 tests)*

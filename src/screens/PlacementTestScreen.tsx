@@ -1,43 +1,92 @@
 /**
- * PlacementTestScreen — CAT-driven adaptive placement test.
+ * PlacementTestScreen — staircase adaptive placement test.
  *
- * Generates math problems using the IRT 2PL model, estimates student ability
- * via EAP, and selects items using Fisher information. The test adapts in
- * real-time and terminates when the ability estimate converges (SE < 0.30)
- * or after 20 items maximum.
- *
- * On completion, stores placement results and optionally seeds skill Elo ratings.
+ * Simple grade-climbing algorithm:
+ * - Start at child's grade - 2 (minimum grade 1)
+ * - Below child's grade: 1 correct in a row → move up
+ * - One below child's grade: 2 correct in a row → move up
+ * - At or above child's grade: 3 correct in a row → move up
+ * - 5 total questions at any grade without promoting → that's the placement grade
+ * - Wrong / "Don't know" resets the consecutive correct streak
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { X } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
-import {
-  buildItemBank,
-  createCatSession,
-  getNextItem,
-  recordResponse,
-  getCatResults,
-  computePlacementElos,
-} from '@/services/cat';
-import type { CatState, IrtItem } from '@/services/cat';
 import { generateProblem } from '@/services/mathEngine/generator';
 import { getTemplatesBySkill } from '@/services/mathEngine/templates';
+import { getSkillsByGrade } from '@/services/mathEngine/skills';
 import type { Problem } from '@/services/mathEngine/types';
 import { answerNumericValue } from '@/services/mathEngine/types';
+import type { Grade } from '@/services/mathEngine/types';
 import { CharacterReaction } from '@/components/animations/CharacterReaction';
+import { GraphDisplay } from '@/components/session/graphs';
 import { AppDialog } from '@/components/AppDialog';
-import { SKILLS } from '@/services/mathEngine/skills';
 
 type PlacementPhase = 'intro' | 'testing' | 'complete';
 
-interface PlacementProblem {
-  problem: Problem;
-  item: IrtItem;
+/** Max questions at a single grade before settling */
+const GRADE_SETTLE_COUNT = 5;
+
+/** Max grade we support */
+const MAX_GRADE = 8;
+
+/** Staircase state — tracks progress through the grade-climbing algorithm */
+interface StaircaseState {
+  currentGrade: number;
+  consecutiveCorrect: number;
+  questionsAtGrade: number;
+  totalQuestions: number;
+  totalCorrect: number;
+  usedSkillIds: Set<string>;
+}
+
+function createStaircaseState(startGrade: number): StaircaseState {
+  return {
+    currentGrade: Math.max(1, startGrade),
+    consecutiveCorrect: 0,
+    questionsAtGrade: 0,
+    totalQuestions: 0,
+    totalCorrect: 0,
+    usedSkillIds: new Set(),
+  };
+}
+
+/** How many consecutive correct answers needed to promote from this grade */
+function requiredStreak(testGrade: number, childGrade: number): number {
+  if (testGrade < childGrade - 1) return 1;
+  if (testGrade === childGrade - 1) return 2;
+  return 3; // at or above child's grade
+}
+
+/** Generate a random problem for a given grade level */
+function generateForGrade(
+  grade: number,
+  usedSkillIds: Set<string>,
+): Problem | null {
+  const skills = getSkillsByGrade(grade as Grade);
+  if (skills.length === 0) return null;
+
+  // Prefer unused skills, fall back to any skill at this grade
+  const unused = skills.filter((s) => !usedSkillIds.has(s.id));
+  const pool = unused.length > 0 ? unused : skills;
+  const skill = pool[Math.floor(Math.random() * pool.length)];
+
+  const templates = getTemplatesBySkill(skill.id);
+  if (templates.length === 0) return null;
+
+  const template = templates[Math.floor(Math.random() * templates.length)];
+  const seed = Date.now() + Math.floor(Math.random() * 10000);
+
+  try {
+    return generateProblem({ templateId: template.id, seed });
+  } catch {
+    return null;
+  }
 }
 
 export default function PlacementTestScreen() {
@@ -46,107 +95,132 @@ export default function PlacementTestScreen() {
   const { colors } = useTheme();
 
   const avatarId = useAppStore((s) => s.avatarId);
+  const childGrade = useAppStore((s) => s.childGrade);
   const completePlacement = useAppStore((s) => s.completePlacement);
-  const updateSkillState = useAppStore((s) => s.updateSkillState);
 
   const [phase, setPhase] = useState<PlacementPhase>('intro');
   const [quitDialogVisible, setQuitDialogVisible] = useState(false);
 
-  // CAT state
-  const itemPool = useRef(buildItemBank());
-  const catState = useRef<CatState>(createCatSession());
-  const [currentProblem, setCurrentProblem] = useState<PlacementProblem | null>(null);
+  const grade = childGrade ?? 1;
+  const startGrade = Math.max(1, grade - 2);
+  const staircase = useRef<StaircaseState>(createStaircaseState(startGrade));
+
+  const [currentProblem, setCurrentProblem] = useState<Problem | null>(null);
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [feedbackReaction, setFeedbackReaction] = useState<'correct' | 'incorrect' | 'idle' | null>('idle');
+  const [feedbackReaction, setFeedbackReaction] = useState<
+    'correct' | 'incorrect' | 'idle' | null
+  >('idle');
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
 
-  // Results
   const [results, setResults] = useState<{
     grade: number;
-    accuracy: number;
     totalItems: number;
+    accuracy: number;
   } | null>(null);
 
-  /** Generate a math problem for the given IRT item */
-  const generateForItem = useCallback((item: IrtItem): PlacementProblem | null => {
-    const templates = getTemplatesBySkill(item.skillId);
-    if (templates.length === 0) return null;
-    const seed = Date.now() + Math.floor(Math.random() * 10000);
-    const problem = generateProblem({ templateId: templates[0].id, seed });
-    return { problem, item };
-  }, []);
+  /** Generate next problem at current staircase grade */
+  const advanceToNext = useCallback(() => {
+    const s = staircase.current;
+    const problem = generateForGrade(s.currentGrade, s.usedSkillIds);
 
-  /** Select next item and generate problem */
-  const advanceToNextItem = useCallback(() => {
-    const selection = getNextItem(catState.current, itemPool.current);
-    if (!selection) {
-      // Test complete
-      const catResults = getCatResults(catState.current);
-      setResults({
-        grade: catResults.estimatedGrade,
-        accuracy: catResults.accuracy,
-        totalItems: catResults.totalItems,
-      });
-
-      // Compute and apply placement Elos
-      const skillList = SKILLS.map((s) => ({
-        id: s.id,
-        grade: s.grade,
-        operation: s.operation,
-      }));
-      const eloMap = computePlacementElos(catState.current, skillList);
-      for (const [skillId, elo] of eloMap) {
-        updateSkillState(skillId, { eloRating: elo });
-      }
-
-      completePlacement(catResults.estimatedGrade, catResults.theta);
-      setPhase('complete');
+    if (!problem) {
+      // No skills at this grade — settle here
+      finishTest(s);
       return;
     }
 
-    const placementProblem = generateForItem(selection.item);
-    if (!placementProblem) {
-      // Skip this item if we can't generate a problem
-      catState.current.administeredIds.add(selection.item.id);
-      advanceToNextItem();
-      return;
-    }
-
-    setCurrentProblem(placementProblem);
+    s.usedSkillIds.add(problem.skillId);
+    setCurrentProblem(problem);
     setSelectedAnswer(null);
     setShowFeedback(false);
     setFeedbackReaction('idle');
-  }, [generateForItem, completePlacement, updateSkillState]);
+  }, []);
 
-  /** Handle answer selection */
-  const handleAnswer = useCallback((answer: number) => {
+  /** Complete the test and store results */
+  const finishTest = useCallback(
+    (s: StaircaseState) => {
+      const accuracy =
+        s.totalQuestions > 0 ? s.totalCorrect / s.totalQuestions : 0;
+      setResults({
+        grade: s.currentGrade,
+        totalItems: s.totalQuestions,
+        accuracy,
+      });
+      completePlacement(s.currentGrade, 0);
+      setPhase('complete');
+    },
+    [completePlacement],
+  );
+
+  /** Process answer result and advance staircase */
+  const processAnswer = useCallback(
+    (correct: boolean) => {
+      const s = staircase.current;
+      s.totalQuestions++;
+      s.questionsAtGrade++;
+      if (correct) {
+        s.totalCorrect++;
+        s.consecutiveCorrect++;
+      } else {
+        s.consecutiveCorrect = 0;
+      }
+
+      const needed = requiredStreak(s.currentGrade, grade);
+
+      // Check promotion
+      if (s.consecutiveCorrect >= needed) {
+        if (s.currentGrade >= MAX_GRADE) {
+          // Can't go higher — settle at max grade
+          finishTest(s);
+          return;
+        }
+        // Move up one grade
+        s.currentGrade++;
+        s.consecutiveCorrect = 0;
+        s.questionsAtGrade = 0;
+      } else if (s.questionsAtGrade >= GRADE_SETTLE_COUNT) {
+        // Spent 5 questions here without promoting — this is their level
+        finishTest(s);
+        return;
+      }
+
+      setQuestionIndex((i) => i + 1);
+      advanceToNext();
+    },
+    [grade, finishTest, advanceToNext],
+  );
+
+  const handleAnswer = useCallback(
+    (answer: number) => {
+      if (showFeedback || !currentProblem) return;
+
+      setSelectedAnswer(answer);
+      setShowFeedback(true);
+
+      const correctValue = answerNumericValue(currentProblem.correctAnswer);
+      const correct = answer === correctValue;
+      setFeedbackReaction(correct ? 'correct' : 'incorrect');
+
+      setTimeout(() => processAnswer(correct), 1200);
+    },
+    [showFeedback, currentProblem, processAnswer],
+  );
+
+  const handleSkipQuestion = useCallback(() => {
     if (showFeedback || !currentProblem) return;
 
-    setSelectedAnswer(answer);
     setShowFeedback(true);
+    setFeedbackReaction('idle');
 
-    const correctValue = answerNumericValue(currentProblem.problem.correctAnswer);
-    const correct = answer === correctValue;
-    setFeedbackReaction(correct ? 'correct' : 'incorrect');
+    setTimeout(() => processAnswer(false), 600);
+  }, [showFeedback, currentProblem, processAnswer]);
 
-    // Record response in CAT engine
-    recordResponse(catState.current, currentProblem.item, correct);
-
-    // Advance after brief feedback delay
-    setTimeout(() => {
-      setQuestionIndex((i) => i + 1);
-      advanceToNextItem();
-    }, 1200);
-  }, [showFeedback, currentProblem, advanceToNextItem]);
-
-  /** Start the test */
   const handleStart = useCallback(() => {
     setPhase('testing');
-    advanceToNextItem();
-  }, [advanceToNextItem]);
+    advanceToNext();
+  }, [advanceToNext]);
 
-  /** Handle skip / quit */
   const handleSkip = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
@@ -156,206 +230,220 @@ export default function PlacementTestScreen() {
     navigation.goBack();
   }, [navigation]);
 
-  /** Navigate home after completion */
   const handleFinish = useCallback(() => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Home' }],
-    });
+    navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
   }, [navigation]);
 
-  /** Generate answer options (correct + 3 distractors) */
+  /** Generate shuffled answer options (correct + 3 distractors) */
   const answerOptions = useMemo(() => {
     if (!currentProblem) return [];
-    const correct = answerNumericValue(currentProblem.problem.correctAnswer);
+    const correct = answerNumericValue(currentProblem.correctAnswer);
     const options = new Set<number>([correct]);
 
-    // Generate distractors close to correct answer
-    const offsets = [-2, -1, 1, 2, 3, -3];
+    const hasGraph = !!currentProblem.metadata.graphData;
+    const offsets = hasGraph
+      ? [
+          -Math.round(correct * 0.15) - 3,
+          -Math.round(correct * 0.08) - 1,
+          Math.round(correct * 0.08) + 1,
+          Math.round(correct * 0.15) + 3,
+        ]
+      : [-2, -1, 1, 2, 3, -3];
     for (const offset of offsets) {
       if (options.size >= 4) break;
       const val = correct + offset;
       if (val >= 0) options.add(val);
     }
 
-    // Ensure we have 4 options
-    let fallback = correct + 4;
+    let fallback = correct + (hasGraph ? 8 : 4);
     while (options.size < 4) {
       options.add(fallback++);
     }
 
-    return [...options].sort((a, b) => a - b);
+    // Shuffle (Fisher-Yates)
+    const arr = [...options];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
   }, [currentProblem]);
 
-  const totalAnswered = catState.current.responses.length;
+  const totalAnswered = staircase.current.totalQuestions;
   const progressText = `Question ${totalAnswered + 1}`;
+  // Estimate progress: typically 3-15 questions
+  const progressPercent = Math.min(1, totalAnswered / 10);
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
-    },
-    headerTitle: {
-      fontFamily: typography.fontFamily.semiBold,
-      fontSize: typography.fontSize.md,
-      color: colors.textSecondary,
-    },
-    closeButton: {
-      padding: spacing.sm,
-      minWidth: layout.minTouchTarget,
-      minHeight: layout.minTouchTarget,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    progressBar: {
-      height: 4,
-      backgroundColor: colors.surface,
-      marginHorizontal: spacing.md,
-      borderRadius: 2,
-      overflow: 'hidden',
-    },
-    progressFill: {
-      height: '100%',
-      backgroundColor: colors.primary,
-      borderRadius: 2,
-    },
-    content: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: spacing.lg,
-    },
-    introTitle: {
-      fontFamily: typography.fontFamily.bold,
-      fontSize: typography.fontSize.display,
-      color: colors.textPrimary,
-      textAlign: 'center',
-      marginBottom: spacing.md,
-    },
-    introSubtitle: {
-      fontFamily: typography.fontFamily.regular,
-      fontSize: typography.fontSize.md,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      lineHeight: 24,
-      marginBottom: spacing.xl,
-      paddingHorizontal: spacing.md,
-    },
-    startButton: {
-      backgroundColor: colors.primary,
-      minHeight: 56,
-      borderRadius: layout.borderRadius.lg,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: spacing.xxl,
-      minWidth: 200,
-    },
-    startButtonText: {
-      fontFamily: typography.fontFamily.semiBold,
-      fontSize: typography.fontSize.lg,
-      color: colors.textPrimary,
-    },
-    skipButton: {
-      marginTop: spacing.md,
-      padding: spacing.md,
-    },
-    skipButtonText: {
-      fontFamily: typography.fontFamily.medium,
-      fontSize: typography.fontSize.sm,
-      color: colors.textMuted,
-    },
-    questionText: {
-      fontFamily: typography.fontFamily.bold,
-      fontSize: typography.fontSize.xxl,
-      color: colors.textPrimary,
-      textAlign: 'center',
-      marginTop: spacing.lg,
-      marginBottom: spacing.xl,
-    },
-    optionsGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      gap: spacing.md,
-      width: '100%',
-      maxWidth: 320,
-    },
-    optionButton: {
-      width: 140,
-      height: 56,
-      borderRadius: layout.borderRadius.md,
-      backgroundColor: colors.surface,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: 'transparent',
-    },
-    optionCorrect: {
-      borderColor: colors.correct,
-      backgroundColor: colors.surface,
-    },
-    optionIncorrect: {
-      borderColor: colors.incorrect,
-      backgroundColor: colors.surface,
-    },
-    optionSelected: {
-      borderColor: colors.primary,
-    },
-    optionText: {
-      fontFamily: typography.fontFamily.semiBold,
-      fontSize: typography.fontSize.xl,
-      color: colors.textPrimary,
-    },
-    resultTitle: {
-      fontFamily: typography.fontFamily.bold,
-      fontSize: typography.fontSize.display,
-      color: colors.textPrimary,
-      textAlign: 'center',
-      marginBottom: spacing.sm,
-    },
-    resultGrade: {
-      fontFamily: typography.fontFamily.bold,
-      fontSize: 48,
-      color: colors.primary,
-      textAlign: 'center',
-      marginBottom: spacing.sm,
-    },
-    resultDetail: {
-      fontFamily: typography.fontFamily.regular,
-      fontSize: typography.fontSize.md,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      marginBottom: spacing.xs,
-    },
-    finishButton: {
-      backgroundColor: colors.primary,
-      minHeight: 56,
-      borderRadius: layout.borderRadius.lg,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: spacing.xxl,
-      minWidth: 200,
-      marginTop: spacing.xl,
-    },
-    finishButtonText: {
-      fontFamily: typography.fontFamily.semiBold,
-      fontSize: typography.fontSize.lg,
-      color: colors.textPrimary,
-    },
-  }), [colors]);
-
-  // Progress percentage for bar (estimate based on min 5, max 20 items)
-  const progressPercent = Math.min(1, totalAnswered / 15);
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: { flex: 1, backgroundColor: colors.background },
+        header: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: spacing.md,
+          paddingVertical: spacing.sm,
+        },
+        headerTitle: {
+          fontFamily: typography.fontFamily.semiBold,
+          fontSize: typography.fontSize.md,
+          color: colors.textSecondary,
+        },
+        closeButton: {
+          padding: spacing.sm,
+          minWidth: layout.minTouchTarget,
+          minHeight: layout.minTouchTarget,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        progressBar: {
+          height: 4,
+          backgroundColor: colors.surface,
+          marginHorizontal: spacing.md,
+          borderRadius: 2,
+          overflow: 'hidden',
+        },
+        progressFill: {
+          height: '100%',
+          backgroundColor: colors.primary,
+          borderRadius: 2,
+        },
+        content: {
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingHorizontal: spacing.lg,
+        },
+        introTitle: {
+          fontFamily: typography.fontFamily.bold,
+          fontSize: typography.fontSize.display,
+          color: colors.textPrimary,
+          textAlign: 'center',
+          marginBottom: spacing.md,
+        },
+        introSubtitle: {
+          fontFamily: typography.fontFamily.regular,
+          fontSize: typography.fontSize.md,
+          color: colors.textSecondary,
+          textAlign: 'center',
+          lineHeight: 24,
+          marginBottom: spacing.xl,
+          paddingHorizontal: spacing.md,
+        },
+        startButton: {
+          backgroundColor: colors.primary,
+          minHeight: 56,
+          borderRadius: layout.borderRadius.lg,
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingHorizontal: spacing.xxl,
+          minWidth: 200,
+        },
+        startButtonText: {
+          fontFamily: typography.fontFamily.semiBold,
+          fontSize: typography.fontSize.lg,
+          color: colors.textPrimary,
+        },
+        skipButton: { marginTop: spacing.md, padding: spacing.md },
+        skipButtonText: {
+          fontFamily: typography.fontFamily.medium,
+          fontSize: typography.fontSize.sm,
+          color: colors.textMuted,
+        },
+        questionText: {
+          fontFamily: typography.fontFamily.bold,
+          fontSize: typography.fontSize.xxl,
+          color: colors.textPrimary,
+          textAlign: 'center',
+          marginTop: spacing.lg,
+          marginBottom: spacing.xl,
+        },
+        optionsGrid: {
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          gap: spacing.md,
+          width: '100%',
+          maxWidth: 320,
+        },
+        optionButton: {
+          width: 140,
+          height: 56,
+          borderRadius: layout.borderRadius.md,
+          backgroundColor: colors.surface,
+          justifyContent: 'center',
+          alignItems: 'center',
+          borderWidth: 2,
+          borderColor: 'transparent',
+        },
+        optionCorrect: {
+          borderColor: colors.correct,
+          backgroundColor: colors.surface,
+        },
+        optionIncorrect: {
+          borderColor: colors.incorrect,
+          backgroundColor: colors.surface,
+        },
+        optionSelected: { borderColor: colors.primary },
+        optionText: {
+          fontFamily: typography.fontFamily.semiBold,
+          fontSize: typography.fontSize.xl,
+          color: colors.textPrimary,
+        },
+        resultTitle: {
+          fontFamily: typography.fontFamily.bold,
+          fontSize: typography.fontSize.display,
+          color: colors.textPrimary,
+          textAlign: 'center',
+          marginBottom: spacing.sm,
+        },
+        resultGrade: {
+          fontFamily: typography.fontFamily.bold,
+          fontSize: 48,
+          color: colors.primary,
+          textAlign: 'center',
+          marginBottom: spacing.sm,
+        },
+        resultDetail: {
+          fontFamily: typography.fontFamily.regular,
+          fontSize: typography.fontSize.md,
+          color: colors.textSecondary,
+          textAlign: 'center',
+          marginBottom: spacing.xs,
+        },
+        finishButton: {
+          backgroundColor: colors.primary,
+          minHeight: 56,
+          borderRadius: layout.borderRadius.lg,
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingHorizontal: spacing.xxl,
+          minWidth: 200,
+          marginTop: spacing.xl,
+        },
+        finishButtonText: {
+          fontFamily: typography.fontFamily.semiBold,
+          fontSize: typography.fontSize.lg,
+          color: colors.textPrimary,
+        },
+        skipQuestionButton: { marginTop: spacing.md, padding: spacing.md },
+        skipQuestionText: {
+          fontFamily: typography.fontFamily.medium,
+          fontSize: typography.fontSize.sm,
+          color: colors.textMuted,
+        },
+      }),
+    [colors],
+  );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top, paddingBottom: insets.bottom },
+      ]}
+    >
       {/* Header */}
       {phase === 'testing' && (
         <>
@@ -372,7 +460,12 @@ export default function PlacementTestScreen() {
             </Pressable>
           </View>
           <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${progressPercent * 100}%` }]} />
+            <View
+              style={[
+                styles.progressFill,
+                { width: `${progressPercent * 100}%` },
+              ]}
+            />
           </View>
         </>
       )}
@@ -381,10 +474,16 @@ export default function PlacementTestScreen() {
         {/* Intro Phase */}
         {phase === 'intro' && (
           <>
-            <CharacterReaction avatarId={avatarId} reaction="idle" testID="intro-character" />
+            <CharacterReaction
+              avatarId={avatarId}
+              reaction="idle"
+              testID="intro-character"
+            />
             <Text style={styles.introTitle}>Quick Math Check</Text>
             <Text style={styles.introSubtitle}>
-              {"Answer a few questions so we can find the right level for you. Don't worry — there's no score!"}
+              {
+                "Answer a few questions so we can find the right level for you. Don't worry — there's no score!"
+              }
             </Text>
             <Pressable
               style={styles.startButton}
@@ -414,14 +513,22 @@ export default function PlacementTestScreen() {
               resetKey={questionIndex}
               testID="test-character"
             />
+            {currentProblem.metadata.graphData && (
+              <GraphDisplay
+                data={currentProblem.metadata.graphData}
+                testID="placement-graph"
+              />
+            )}
             <Text style={styles.questionText}>
-              {currentProblem.problem.questionText}
+              {currentProblem.questionText}
             </Text>
             <View style={styles.optionsGrid}>
               {answerOptions.map((option) => {
                 const isSelected = selectedAnswer === option;
-                const isCorrect = option === answerNumericValue(currentProblem.problem.correctAnswer);
-                const showResult = showFeedback && (isSelected || isCorrect);
+                const isCorrect =
+                  option === answerNumericValue(currentProblem.correctAnswer);
+                const showResult =
+                  showFeedback && (isSelected || isCorrect);
 
                 return (
                   <Pressable
@@ -429,7 +536,10 @@ export default function PlacementTestScreen() {
                     style={[
                       styles.optionButton,
                       showResult && isCorrect && styles.optionCorrect,
-                      showResult && isSelected && !isCorrect && styles.optionIncorrect,
+                      showResult &&
+                        isSelected &&
+                        !isCorrect &&
+                        styles.optionIncorrect,
                       !showFeedback && isSelected && styles.optionSelected,
                     ]}
                     onPress={() => handleAnswer(option)}
@@ -443,17 +553,32 @@ export default function PlacementTestScreen() {
                 );
               })}
             </View>
+            {!showFeedback && (
+              <Pressable
+                style={styles.skipQuestionButton}
+                onPress={handleSkipQuestion}
+                accessibilityRole="button"
+                testID="skip-question-button"
+              >
+                <Text style={styles.skipQuestionText}>{"Don't know"}</Text>
+              </Pressable>
+            )}
           </>
         )}
 
         {/* Complete Phase */}
         {phase === 'complete' && results && (
           <>
-            <CharacterReaction avatarId={avatarId} reaction="streak" testID="result-character" />
+            <CharacterReaction
+              avatarId={avatarId}
+              reaction="streak"
+              testID="result-character"
+            />
             <Text style={styles.resultTitle}>All Done!</Text>
             <Text style={styles.resultGrade}>Grade {results.grade}</Text>
             <Text style={styles.resultDetail}>
-              {Math.round(results.accuracy * 100)}% accuracy across {results.totalItems} questions
+              {Math.round(results.accuracy * 100)}% accuracy across{' '}
+              {results.totalItems} questions
             </Text>
             <Text style={styles.resultDetail}>
               {"We've set up your practice level. Let's start learning!"}
@@ -476,7 +601,11 @@ export default function PlacementTestScreen() {
         title="Quit Placement Test?"
         message="You can always take it later from the home screen."
         buttons={[
-          { text: 'Keep Going', style: 'cancel', onPress: () => setQuitDialogVisible(false) },
+          {
+            text: 'Keep Going',
+            style: 'cancel',
+            onPress: () => setQuitDialogVisible(false),
+          },
           { text: 'Quit', style: 'destructive', onPress: handleQuitConfirm },
         ]}
         onDismiss={() => setQuitDialogVisible(false)}

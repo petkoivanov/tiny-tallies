@@ -19,6 +19,7 @@ import {
 import { Users } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
+import { StateSelector } from '@/components/shared/StateSelector';
 import type { AgeRange } from '@/store/slices/childProfileSlice';
 
 const AGE_RANGE_OPTIONS: { label: string; value: AgeRange }[] = [
@@ -26,15 +27,6 @@ const AGE_RANGE_OPTIONS: { label: string; value: AgeRange }[] = [
   { label: '7–8', value: '7-8' },
   { label: '8–9', value: '8-9' },
 ];
-
-const US_STATES = [
-  'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA',
-  'HI','ID','IL','IN','IA','KS','KY','LA','ME','MD',
-  'MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
-  'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC',
-  'SD','TN','TX','UT','VT','VA','WA','WV','WI','WY',
-  'DC',
-] as const;
 
 interface BenchmarkSectionProps {
   sectionStyle: ViewStyle;
@@ -93,32 +85,6 @@ export function BenchmarkSection({
         chipTextActive: {
           color: '#fff',
         },
-        stateGrid: {
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          gap: spacing.xs,
-        },
-        stateChip: {
-          paddingHorizontal: spacing.sm,
-          paddingVertical: spacing.xs,
-          borderRadius: layout.borderRadius.sm,
-          backgroundColor: colors.backgroundLight,
-          minWidth: 44,
-          minHeight: 36,
-          justifyContent: 'center',
-          alignItems: 'center',
-        },
-        stateChipActive: {
-          backgroundColor: colors.primary,
-        },
-        stateChipText: {
-          fontFamily: typography.fontFamily.medium,
-          fontSize: typography.fontSize.xs,
-          color: colors.textSecondary,
-        },
-        stateChipTextActive: {
-          color: '#fff',
-        },
         fieldLabel: {
           fontFamily: typography.fontFamily.medium,
           fontSize: typography.fontSize.sm,
@@ -136,7 +102,6 @@ export function BenchmarkSection({
         <Text style={sectionTitleStyle}>Peer Benchmarking</Text>
       </View>
       <View style={cardStyle}>
-        {/* Opt-in toggle */}
         <View style={rowStyle}>
           <Text style={rowLabelStyle}>Compare with peers</Text>
           <Switch
@@ -148,14 +113,12 @@ export function BenchmarkSection({
         <Text style={rowSublabelStyle}>
           {benchmarkOptIn
             ? 'Anonymous comparison shows how your child ranks by age group and state.'
-            : 'Opt in to see how your child compares with peers. No personal data is shared.'}
+            : 'Turn off to hide peer comparison. No personal data is shared.'}
         </Text>
 
         {benchmarkOptIn && (
           <>
             <View style={dividerStyle} />
-
-            {/* Age range */}
             <View>
               <Text style={styles.fieldLabel}>Age range</Text>
               <View style={styles.chipRow}>
@@ -186,35 +149,18 @@ export function BenchmarkSection({
               </View>
             </View>
 
-            {/* State */}
             <View>
               <Text style={styles.fieldLabel}>State (optional)</Text>
-              <View style={styles.stateGrid}>
-                {US_STATES.map((st) => (
-                  <Pressable
-                    key={st}
-                    style={[
-                      styles.stateChip,
-                      stateCode === st && styles.stateChipActive,
-                    ]}
-                    onPress={() =>
-                      setStateCode(stateCode === st ? null : st)
-                    }
-                    accessibilityRole="button"
-                    accessibilityLabel={st}
-                    testID={`state-${st}`}
-                  >
-                    <Text
-                      style={[
-                        styles.stateChipText,
-                        stateCode === st && styles.stateChipTextActive,
-                      ]}
-                    >
-                      {st}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
+              <StateSelector
+                value={stateCode}
+                onChange={setStateCode}
+                activeColor={colors.primary}
+                inactiveColor={colors.backgroundLight}
+                activeBorderColor={colors.primary}
+                inactiveBorderColor={colors.backgroundLight}
+                activeTextColor="#fff"
+                inactiveTextColor={colors.textSecondary}
+              />
             </View>
           </>
         )}

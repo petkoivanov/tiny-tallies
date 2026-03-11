@@ -42,9 +42,12 @@ export default function HomeScreen() {
   const placementComplete = useAppStore((state) => state.placementComplete);
   const earnedBadgeCount = useAppStore((state) => Object.keys(state.earnedBadges).length);
 
-  // Derived selectors for misconception-based remediation
-  const confirmedMisconceptions = useAppStore((state) =>
-    getConfirmedMisconceptions(state.misconceptions),
+  // Select the stable record ref, then derive in useMemo to avoid
+  // returning a new array from the Zustand selector (causes infinite loop).
+  const misconceptions = useAppStore((state) => state.misconceptions);
+  const confirmedMisconceptions = useMemo(
+    () => getConfirmedMisconceptions(misconceptions),
+    [misconceptions],
   );
 
   const { suggestReassessment, decayedSkillCount } = useAbsenceCheck();

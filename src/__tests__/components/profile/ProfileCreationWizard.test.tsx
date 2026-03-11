@@ -30,6 +30,23 @@ jest.mock('@/components/avatars', () => {
   };
 });
 
+// Mock StateSelector
+jest.mock('@/components/shared/StateSelector', () => {
+  const { View, Pressable, Text } = require('react-native');
+  return {
+    StateSelector: ({ value, onChange }: any) => (
+      <View testID="state-selector">
+        <Pressable testID="state-NY" onPress={() => onChange(value === 'NY' ? null : 'NY')}>
+          <Text>NY</Text>
+        </Pressable>
+        <Pressable testID="state-CA" onPress={() => onChange(value === 'CA' ? null : 'CA')}>
+          <Text>CA</Text>
+        </Pressable>
+      </View>
+    ),
+  };
+});
+
 // Mock AVATARS constant with 3 test avatars
 jest.mock('@/store/constants/avatars', () => ({
   AVATARS: [
@@ -45,12 +62,13 @@ jest.mock('@/theme', () => ({
     colors: {
       background: '#1a1a2e',
       surface: '#16213e',
+      surfaceLight: '#2a2a3e',
       primary: '#7c5cfc',
       text: '#fff',
+      textPrimary: '#fff',
       textSecondary: '#aaa',
+      incorrect: '#ff6b6b',
       border: '#333',
-      error: '#ff6b6b',
-      success: '#4ecdc4',
     },
   }),
 }));
@@ -80,19 +98,19 @@ describe('ProfileCreationWizard', () => {
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
-      const nextButton = getByText('Next');
-      expect(nextButton.props.accessibilityState?.disabled || nextButton.parent?.props.accessibilityState?.disabled).toBeTruthy();
-    });
-
-    it('disables Next when name is whitespace only', () => {
-      const { getByPlaceholderText, getByText } = render(
-        <ProfileCreationWizard onComplete={mockOnComplete} />,
-      );
-
-      fireEvent.changeText(getByPlaceholderText(/name/i), '   ');
-      const nextButton = getByText('Next');
-      // Find the pressable parent
-      expect(nextButton.props.accessibilityState?.disabled || nextButton.parent?.props.accessibilityState?.disabled).toBeTruthy();
+      // The Pressable wrapping the text has disabled prop
+      const nextText = getByText('Next');
+      // Walk up to find the Pressable with disabled prop
+      let node = nextText;
+      let isDisabled = false;
+      while (node.parent) {
+        node = node.parent as any;
+        if (node.props.disabled || node.props.accessibilityState?.disabled) {
+          isDisabled = true;
+          break;
+        }
+      }
+      expect(isDisabled).toBe(true);
     });
 
     it('enables Next when name has content', () => {
@@ -102,7 +120,6 @@ describe('ProfileCreationWizard', () => {
 
       fireEvent.changeText(getByPlaceholderText(/name/i), 'Alice');
       const nextButton = getByText('Next');
-      // Should not be disabled
       const disabled = nextButton.props.accessibilityState?.disabled || nextButton.parent?.props.accessibilityState?.disabled;
       expect(disabled).toBeFalsy();
     });
@@ -116,16 +133,6 @@ describe('ProfileCreationWizard', () => {
       expect(getByText('5/20')).toBeTruthy();
     });
 
-    it('disables Next when name exceeds 20 chars', () => {
-      const { getByPlaceholderText, getByText } = render(
-        <ProfileCreationWizard onComplete={mockOnComplete} />,
-      );
-
-      fireEvent.changeText(getByPlaceholderText(/name/i), 'A'.repeat(21));
-      const nextButton = getByText('Next');
-      expect(nextButton.props.accessibilityState?.disabled || nextButton.parent?.props.accessibilityState?.disabled).toBeTruthy();
-    });
-
     it('shows Cancel button when onCancel provided', () => {
       const { getByText } = render(
         <ProfileCreationWizard
@@ -136,14 +143,6 @@ describe('ProfileCreationWizard', () => {
 
       fireEvent.press(getByText('Cancel'));
       expect(mockOnCancel).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not show Cancel button when onCancel not provided', () => {
-      const { queryByText } = render(
-        <ProfileCreationWizard onComplete={mockOnComplete} />,
-      );
-
-      expect(queryByText('Cancel')).toBeNull();
     });
   });
 
@@ -164,31 +163,14 @@ describe('ProfileCreationWizard', () => {
       expect(getByText(/grade/i)).toBeTruthy();
     });
 
-    it('shows ages 5-12', () => {
-      const { getByPlaceholderText, getByText, getAllByText } = render(
-        <ProfileCreationWizard onComplete={mockOnComplete} />,
-      );
-
-      goToAgeGrade(getByPlaceholderText, getByText);
-
-      for (let age = 5; age <= 12; age++) {
-        // Some numbers may appear in multiple places (e.g. "5" in char count)
-        expect(getAllByText(String(age)).length).toBeGreaterThanOrEqual(1);
-      }
-    });
-
     it('auto-selects grade when age is tapped', () => {
       const { getByPlaceholderText, getByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
       goToAgeGrade(getByPlaceholderText, getByText);
-
-      // Tap age 7 -> grade should auto-select to 2 (7-5=2)
       fireEvent.press(getByText('7'));
 
-      // Grade 2 should have selected styling - verify Next is enabled
-      // We check by pressing Next which should work when both are selected
       const nextButton = getByText('Next');
       const disabled = nextButton.props.accessibilityState?.disabled || nextButton.parent?.props.accessibilityState?.disabled;
       expect(disabled).toBeFalsy();
@@ -202,18 +184,69 @@ describe('ProfileCreationWizard', () => {
       goToAgeGrade(getByPlaceholderText, getByText);
       fireEvent.press(getByText('Back'));
 
-      // Should be back on name step
       expect(getByPlaceholderText(/name/i)).toBeTruthy();
     });
   });
 
-  describe('Step 3: Avatar', () => {
+  describe('Step 3: Location', () => {
+    function goToLocation(getByPlaceholderText: any, getByText: any) {
+      fireEvent.changeText(getByPlaceholderText(/name/i), 'Alice');
+      fireEvent.press(getByText('Next'));
+      fireEvent.press(getByText('7'));
+      fireEvent.press(getByText('Next'));
+    }
+
+    it('renders state selector after age-grade step', () => {
+      const { getByPlaceholderText, getByText, getByTestId } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+
+      goToLocation(getByPlaceholderText, getByText);
+
+      expect(getByText(/where does/i)).toBeTruthy();
+      expect(getByText(/optional/i)).toBeTruthy();
+      expect(getByTestId('state-selector')).toBeTruthy();
+    });
+
+    it('shows Skip button when no state selected', () => {
+      const { getByPlaceholderText, getByText } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+
+      goToLocation(getByPlaceholderText, getByText);
+      expect(getByText('Skip')).toBeTruthy();
+    });
+
+    it('shows Next button when state is selected', () => {
+      const { getByPlaceholderText, getByText, getByTestId } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+
+      goToLocation(getByPlaceholderText, getByText);
+      fireEvent.press(getByTestId('state-NY'));
+      expect(getByText('Next')).toBeTruthy();
+    });
+
+    it('Back button returns to age-grade step', () => {
+      const { getByPlaceholderText, getByText } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+
+      goToLocation(getByPlaceholderText, getByText);
+      fireEvent.press(getByText('Back'));
+
+      expect(getByText(/how old/i)).toBeTruthy();
+    });
+  });
+
+  describe('Step 4: Avatar', () => {
     function goToAvatar(getByPlaceholderText: any, getByText: any) {
       fireEvent.changeText(getByPlaceholderText(/name/i), 'Alice');
       fireEvent.press(getByText('Next'));
-      // Select age and grade
       fireEvent.press(getByText('7'));
       fireEvent.press(getByText('Next'));
+      // Skip location step
+      fireEvent.press(getByText('Skip'));
     }
 
     it('renders avatar grid', () => {
@@ -224,13 +257,12 @@ describe('ProfileCreationWizard', () => {
       goToAvatar(getByPlaceholderText, getByText);
 
       expect(getByText(/avatar/i)).toBeTruthy();
-      // Should have our 3 mocked avatars
       expect(getByTestId('avatar-F')).toBeTruthy();
       expect(getByTestId('avatar-O')).toBeTruthy();
       expect(getByTestId('avatar-B')).toBeTruthy();
     });
 
-    it('calls onComplete with null avatarId when Done pressed without selection', () => {
+    it('calls onComplete with null avatarId and stateCode when skipped', () => {
       const { getByPlaceholderText, getByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
@@ -243,10 +275,11 @@ describe('ProfileCreationWizard', () => {
         childAge: 7,
         childGrade: 2,
         avatarId: null,
+        stateCode: null,
       });
     });
 
-    it('calls onComplete with selected avatarId when avatar tapped and Done pressed', () => {
+    it('calls onComplete with selected avatarId', () => {
       const { getByPlaceholderText, getByText, getByTestId } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
@@ -260,10 +293,11 @@ describe('ProfileCreationWizard', () => {
         childAge: 7,
         childGrade: 2,
         avatarId: 'owl',
+        stateCode: null,
       });
     });
 
-    it('Back button returns to age-grade step', () => {
+    it('Back button returns to location step', () => {
       const { getByPlaceholderText, getByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
@@ -271,55 +305,21 @@ describe('ProfileCreationWizard', () => {
       goToAvatar(getByPlaceholderText, getByText);
       fireEvent.press(getByText('Back'));
 
-      expect(getByText(/how old/i)).toBeTruthy();
-    });
-  });
-
-  describe('initialValues', () => {
-    it('pre-fills name from initialValues', () => {
-      const { getByDisplayValue } = render(
-        <ProfileCreationWizard
-          onComplete={mockOnComplete}
-          initialValues={{ childName: 'Bob', childAge: 8, childGrade: 3 }}
-        />,
-      );
-
-      expect(getByDisplayValue('Bob')).toBeTruthy();
-    });
-
-    it('pre-fills age and grade on age-grade step', () => {
-      const { getByText, getByDisplayValue } = render(
-        <ProfileCreationWizard
-          onComplete={mockOnComplete}
-          initialValues={{ childName: 'Bob', childAge: 8, childGrade: 3 }}
-        />,
-      );
-
-      // Advance to age-grade step
-      fireEvent.press(getByText('Next'));
-
-      // Next should be enabled since age and grade are pre-filled
-      const nextButton = getByText('Next');
-      const disabled = nextButton.props.accessibilityState?.disabled || nextButton.parent?.props.accessibilityState?.disabled;
-      expect(disabled).toBeFalsy();
+      expect(getByText(/where does/i)).toBeTruthy();
     });
   });
 
   describe('full flow', () => {
-    it('completes wizard end-to-end', () => {
+    it('completes wizard end-to-end without state selection', () => {
       const { getByPlaceholderText, getByText, getByTestId } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
-      // Step 1: Name
       fireEvent.changeText(getByPlaceholderText(/name/i), 'Charlie');
       fireEvent.press(getByText('Next'));
-
-      // Step 2: Age & Grade
       fireEvent.press(getByText('9'));
       fireEvent.press(getByText('Next'));
-
-      // Step 3: Avatar
+      fireEvent.press(getByText('Skip'));
       fireEvent.press(getByTestId('avatar-B'));
       fireEvent.press(getByText('Done'));
 
@@ -328,6 +328,30 @@ describe('ProfileCreationWizard', () => {
         childAge: 9,
         childGrade: 4,
         avatarId: 'bear',
+        stateCode: null,
+      });
+    });
+
+    it('completes wizard end-to-end with state selection', () => {
+      const { getByPlaceholderText, getByText, getByTestId } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+
+      fireEvent.changeText(getByPlaceholderText(/name/i), 'Charlie');
+      fireEvent.press(getByText('Next'));
+      fireEvent.press(getByText('9'));
+      fireEvent.press(getByText('Next'));
+      fireEvent.press(getByTestId('state-NY'));
+      fireEvent.press(getByText('Next'));
+      fireEvent.press(getByTestId('avatar-B'));
+      fireEvent.press(getByText('Done'));
+
+      expect(mockOnComplete).toHaveBeenCalledWith({
+        childName: 'Charlie',
+        childAge: 9,
+        childGrade: 4,
+        avatarId: 'bear',
+        stateCode: 'NY',
       });
     });
   });

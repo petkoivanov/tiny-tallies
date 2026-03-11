@@ -14,6 +14,7 @@ export { formatAsMultipleChoice } from './multipleChoice';
 export {
   formatAsFreeText,
   parseIntegerInput,
+  parseDecimalInput,
   validateFreeTextAnswer,
 } from './freeText';
 

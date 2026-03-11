@@ -59,7 +59,7 @@ function createMockAppState(): AppState {
     breakReminderMinutes: 0,
     ageRange: null,
     stateCode: null,
-    benchmarkOptIn: false,
+    benchmarkOptIn: true,
     setChildProfile: jest.fn(),
     setTutorConsentGranted: jest.fn(),
     setSoundEnabled: jest.fn(),
@@ -274,6 +274,9 @@ describe('createDefaultChildData', () => {
     expect(data.childAge).toBe(8);
     expect(data.childGrade).toBe(3);
     expect(data.avatarId).toBe('cat');
+    expect(data.ageRange).toBe('8-9');
+    expect(data.stateCode).toBeNull();
+    expect(data.benchmarkOptIn).toBe(true);
     expect(data.xp).toBe(0);
     expect(data.level).toBe(1);
     expect(data.skillStates).toEqual({});

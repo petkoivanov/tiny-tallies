@@ -174,7 +174,7 @@ export function migrateStore(
     // v18 -> v19: Add peer benchmarking demographics
     state.ageRange ??= null;
     state.stateCode ??= null;
-    state.benchmarkOptIn ??= false;
+    state.benchmarkOptIn ??= true;
   }
 
   // Future migrations chain here:

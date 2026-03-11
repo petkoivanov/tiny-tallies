@@ -5,6 +5,10 @@
 
 ---
 
+> **Implementation Note (2026-03-10):** The placement test was implemented using a **staircase algorithm** instead of the CAT/IRT system described below. The staircase approach starts at `child_grade - 2` (minimum grade 1) and promotes based on consecutive correct answers: 1 correct to promote when below `grade - 1`, 2 correct at `grade - 1`, 3 correct at or above the child's grade. Settling occurs after 5 questions at any grade without promotion. This proved simpler and more predictable for the target age range. The CAT engine code (`src/services/cat/`) still exists for potential future use but is not used by the current placement flow. Additional implementation details: answer options are shuffled, graph questions use wider distractor spread, a "Don't know" button was added, NumberPad supports decimals, and scatter plots render in placement. The research below is retained for reference.
+
+---
+
 ## Table of Contents
 
 1. [First-Time Onboarding Flow](#1-first-time-onboarding-flow)

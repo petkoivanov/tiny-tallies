@@ -57,7 +57,16 @@ export type NewChildProfile = {
   childAge: number;
   childGrade: number;
   avatarId: AllAvatarId | null;
+  stateCode?: StateCode;
 };
+
+/** Derive anonymous age range bucket from exact age (for peer benchmarking). */
+export function ageToAgeRange(age: number): AgeRange {
+  if (age <= 6) return '6-7';
+  if (age <= 7) return '7-8';
+  if (age <= 8) return '8-9';
+  return '8-9';
+}
 
 /**
  * Single source of truth for per-child field names.
@@ -112,7 +121,7 @@ export const DEFAULT_CHILD_DATA: ChildData = {
   breakReminderMinutes: 0,
   ageRange: null,
   stateCode: null,
-  benchmarkOptIn: false,
+  benchmarkOptIn: true,
   skillStates: {},
   xp: 0,
   level: 1,
@@ -165,6 +174,7 @@ export function createDefaultChildData(profile: {
   childAge: number;
   childGrade: number;
   avatarId: AllAvatarId | null;
+  stateCode?: StateCode;
   skillStates?: Record<string, SkillState>;
 }): ChildData {
   return {
@@ -173,6 +183,8 @@ export function createDefaultChildData(profile: {
     childAge: profile.childAge,
     childGrade: profile.childGrade,
     avatarId: profile.avatarId,
+    ageRange: ageToAgeRange(profile.childAge),
+    stateCode: profile.stateCode ?? null,
     skillStates: profile.skillStates ?? {},
   };
 }
