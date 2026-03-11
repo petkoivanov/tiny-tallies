@@ -1,21 +1,22 @@
 /**
  * Sound service — manages audio playback for feedback sounds.
  *
- * Uses expo-av for audio. Sounds are loaded lazily on first play,
+ * Uses expo-audio for audio. Sounds are created lazily on first play,
  * then cached for instant replay. Respects the soundEnabled store
  * preference. Gracefully no-ops if sound files are missing.
  *
  * All SFX should be <500ms duration per UX spec.
  */
 
-import { Audio, type AVPlaybackSource } from 'expo-av';
+import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
+import type { AudioPlayer, AudioSource } from 'expo-audio';
 import type { SoundEffect } from './soundTypes';
 
 /**
  * Map each sound effect to its audio asset.
  * require() calls must be static literals for Metro bundler.
  */
-const SOUND_ASSETS: Record<SoundEffect, AVPlaybackSource> = {
+const SOUND_ASSETS: Record<SoundEffect, AudioSource> = {
   correct: require('../../../assets/sounds/correct.mp3'),
   incorrect: require('../../../assets/sounds/incorrect.mp3'),
   levelUp: require('../../../assets/sounds/levelUp.mp3'),
@@ -24,8 +25,8 @@ const SOUND_ASSETS: Record<SoundEffect, AVPlaybackSource> = {
   sessionComplete: require('../../../assets/sounds/sessionComplete.mp3'),
 };
 
-/** Cached Audio.Sound instances keyed by effect name */
-const soundCache = new Map<SoundEffect, Audio.Sound>();
+/** Cached AudioPlayer instances keyed by effect name */
+const playerCache = new Map<SoundEffect, AudioPlayer>();
 
 /** Whether sound is globally enabled (synced from store) */
 let enabled = true;
@@ -40,10 +41,10 @@ let audioConfigured = false;
 async function ensureAudioConfigured(): Promise<void> {
   if (audioConfigured) return;
   try {
-    await Audio.setAudioModeAsync({
-      playsInSilentModeIOS: false,
-      staysActiveInBackground: false,
-      shouldDuckAndroid: true,
+    await setAudioModeAsync({
+      playsInSilentMode: false,
+      shouldPlayInBackground: false,
+      interruptionMode: 'duckOthers',
     });
     audioConfigured = true;
   } catch {
@@ -52,22 +53,20 @@ async function ensureAudioConfigured(): Promise<void> {
 }
 
 /**
- * Load and cache a sound effect. Returns null if asset is missing.
+ * Get or create a cached player for a sound effect. Returns null if asset is missing.
  */
-async function getSound(effect: SoundEffect): Promise<Audio.Sound | null> {
-  const cached = soundCache.get(effect);
+function getPlayer(effect: SoundEffect): AudioPlayer | null {
+  const cached = playerCache.get(effect);
   if (cached) return cached;
 
   const asset = SOUND_ASSETS[effect];
-  if (!asset) return null;
+  if (asset == null) return null;
 
   try {
-    const { sound } = await Audio.Sound.createAsync(asset, {
-      shouldPlay: false,
-      volume: 1.0,
-    });
-    soundCache.set(effect, sound);
-    return sound;
+    const player = createAudioPlayer(asset);
+    player.volume = 1.0;
+    playerCache.set(effect, player);
+    return player;
   } catch {
     return null;
   }
@@ -80,12 +79,12 @@ export async function playSound(effect: SoundEffect): Promise<void> {
   if (!enabled) return;
 
   await ensureAudioConfigured();
-  const sound = await getSound(effect);
-  if (!sound) return;
+  const player = getPlayer(effect);
+  if (!player) return;
 
   try {
-    await sound.setPositionAsync(0);
-    await sound.playAsync();
+    await player.seekTo(0);
+    player.play();
   } catch {
     // Playback failed — silent degradation
   }
@@ -106,14 +105,14 @@ export function isSoundEnabled(): boolean {
 }
 
 /**
- * Unload all cached sounds. Call on app background or cleanup.
+ * Remove all cached players. Call on app background or cleanup.
  */
 export async function unloadAllSounds(): Promise<void> {
-  const entries = [...soundCache.values()];
-  soundCache.clear();
-  for (const sound of entries) {
+  const entries = [...playerCache.values()];
+  playerCache.clear();
+  for (const player of entries) {
     try {
-      await sound.unloadAsync();
+      player.remove();
     } catch {
       // Ignore cleanup errors
     }

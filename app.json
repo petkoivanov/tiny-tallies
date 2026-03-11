@@ -56,7 +56,8 @@
           "organization": "magic-mirror-works",
           "project": "tiny-tallies"
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "owner": "magic.mirror.works",
     "runtimeVersion": {
