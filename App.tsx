@@ -16,6 +16,7 @@ import AppNavigator from '@/navigation/AppNavigator';
 import { ThemeProvider } from '@/theme';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { useSyncTrigger } from '@/hooks/useSyncTrigger';
+import { useReminderInit } from '@/hooks/useReminderInit';
 import { initSentry } from '@/services/sentry/sentryService';
 
 // Initialize Sentry before Sentry.wrap() — must be synchronous at module level
@@ -34,6 +35,7 @@ function App() {
 
   useAutoSave();
   useSyncTrigger();
+  useReminderInit();
 
   useEffect(() => {
     if (fontsLoaded || fontError) {

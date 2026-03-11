@@ -54,6 +54,14 @@ import {
   type OnboardingSlice,
   createOnboardingSlice,
 } from './slices/onboardingSlice';
+import {
+  type WrongAnswerHistorySlice,
+  createWrongAnswerHistorySlice,
+} from './slices/wrongAnswerHistorySlice';
+import {
+  type ReminderSlice,
+  createReminderSlice,
+} from './slices/reminderSlice';
 import { migrateStore } from './migrations';
 import { dehydrateChild, hydrateChild } from './helpers/childDataHelpers';
 
@@ -69,13 +77,15 @@ export type AppState = ChildProfileSlice &
   ProfilesSlice &
   AuthSlice &
   SessionHistorySlice &
-  OnboardingSlice;
+  OnboardingSlice &
+  WrongAnswerHistorySlice &
+  ReminderSlice;
 
 /**
  * Increment + add migration function when changing schema shape.
  * See CLAUDE.md guardrail: never bump version without a corresponding migration.
  */
-export const STORE_VERSION = 19;
+export const STORE_VERSION = 21;
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -93,6 +103,8 @@ export const useAppStore = create<AppState>()(
       ...createAuthSlice(...a),
       ...createSessionHistorySlice(...a),
       ...createOnboardingSlice(...a),
+      ...createWrongAnswerHistorySlice(...a),
+      ...createReminderSlice(...a),
     }),
     {
       name: 'tiny-tallies-store',
@@ -113,6 +125,8 @@ export const useAppStore = create<AppState>()(
         userEmail: state.userEmail,
         userDisplayName: state.userDisplayName,
         isSignedIn: state.isSignedIn,
+        reminderEnabled: state.reminderEnabled,
+        reminderTime: state.reminderTime,
       }),
       onRehydrateStorage: () => (state) => {
         if (state?.activeChildId && state.children[state.activeChildId]) {

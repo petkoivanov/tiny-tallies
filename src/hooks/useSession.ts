@@ -39,6 +39,7 @@ import type { MisconceptionRecord } from '../store/slices/misconceptionSlice';
 import { getConfirmedMisconceptions } from '../store/slices/misconceptionSlice';
 import { evaluateBadges, getBadgeById } from '../services/achievement';
 import { answerNumericValue } from '../services/mathEngine/types';
+import { getSkillById } from '../services/mathEngine/skills';
 import type { BadgeEvaluationSnapshot, BadgeTier } from '../services/achievement';
 import {
   getChallengeSkillIds,
@@ -169,6 +170,7 @@ export function useSession(options?: {
   const misconceptions = useAppStore((s) => s.misconceptions);
   const completeChallenge = useAppStore((s) => s.completeChallenge);
   const addSessionHistory = useAppStore((s) => s.addSessionHistory);
+  const addWrongAnswer = useAppStore((s) => s.addWrongAnswer);
 
   // Synchronous init: queue available on first render
   const initializedRef = useRef(false);
@@ -264,6 +266,19 @@ export function useSession(options?: {
       // Record misconception if wrong answer matched a Bug Library pattern
       if (!isCorrect && bugId) {
         recordMisconception(bugId, problem.skillId);
+      }
+
+      // Record wrong answer for parent review
+      if (!isCorrect) {
+        const skill = getSkillById(problem.skillId);
+        addWrongAnswer({
+          timestamp: new Date().toISOString(),
+          questionText: problem.problem.questionText,
+          childAnswer: selectedValue,
+          correctAnswer: answerNumericValue(problem.problem.correctAnswer),
+          skillId: problem.skillId,
+          skillName: skill?.name ?? problem.skillId,
+        });
       }
 
       // Track remediation progress on correct answers during remediation sessions
@@ -519,6 +534,7 @@ export function useSession(options?: {
       challengeThemeId,
       completeChallenge,
       addSessionHistory,
+      addWrongAnswer,
     ],
   );
 

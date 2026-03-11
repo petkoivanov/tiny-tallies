@@ -35,6 +35,7 @@ const EXPECTED_PARTIALIZE_KEYS = [
   'challengeCompletions',
   'challengesCompleted',
   'sessionHistory',
+  'wrongAnswerHistory',
   'placementComplete',
   'placementGrade',
   'placementTheta',
@@ -147,6 +148,10 @@ function createMockAppState(): AppState {
     sessionHistory: [],
     addSessionHistory: jest.fn(),
 
+    // Wrong answer history
+    wrongAnswerHistory: [],
+    addWrongAnswer: jest.fn(),
+
     // Session state (ephemeral, not in ChildData)
     sessionActive: false,
     currentSkillId: null,
@@ -171,8 +176,8 @@ function createMockAppState(): AppState {
 }
 
 describe('CHILD_DATA_KEYS', () => {
-  it('contains exactly 31 keys', () => {
-    expect(CHILD_DATA_KEYS).toHaveLength(31);
+  it('contains exactly 32 keys', () => {
+    expect(CHILD_DATA_KEYS).toHaveLength(32);
   });
 
   it('matches the partialize fields from appStore', () => {

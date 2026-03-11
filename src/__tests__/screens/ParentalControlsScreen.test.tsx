@@ -17,6 +17,8 @@ jest.mock('@/theme', () => ({
       textSecondary: '#aaaaaa',
       textMuted: '#777777',
       incorrect: '#ef4444',
+      correct: '#22c55e',
+      backgroundLight: '#333',
     },
   }),
   spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 48 },
@@ -77,6 +79,20 @@ jest.mock('@/services/auth/authService', () => ({
   isAppleSignInAvailable: () => mockIsAppleAvailable(),
 }));
 
+// Mock reminder service
+jest.mock('@/services/reminder/reminderService', () => ({
+  ReminderService: {
+    requestPermissions: jest.fn().mockResolvedValue(true),
+    scheduleReminder: jest.fn().mockResolvedValue(true),
+    cancelReminder: jest.fn().mockResolvedValue(undefined),
+    isReminderScheduled: jest.fn().mockResolvedValue(false),
+  },
+  REMINDER_TIME_OPTIONS: [
+    { label: '5:00 PM', value: '17:00' },
+    { label: '5:30 PM', value: '17:30' },
+  ],
+}));
+
 // Mock API client
 const mockVerifyAuth = jest.fn();
 const mockDeleteUserData = jest.fn();
@@ -105,6 +121,13 @@ function setMockState(overrides: Record<string, unknown> = {}) {
     setTutorConsentGranted: mockSetTutorConsentGranted,
     setAuth: mockSetAuth,
     clearAuth: mockClearAuth,
+    wrongAnswerHistory: [],
+    soundEnabled: true,
+    setSoundEnabled: jest.fn(),
+    reminderEnabled: true,
+    reminderTime: '17:00',
+    setReminderEnabled: jest.fn(),
+    setReminderTime: jest.fn(),
     ...overrides,
   };
 }

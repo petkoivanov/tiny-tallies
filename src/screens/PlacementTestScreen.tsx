@@ -234,6 +234,18 @@ export default function PlacementTestScreen() {
     navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
   }, [navigation]);
 
+  const handleRetake = useCallback(() => {
+    staircase.current = createStaircaseState(startGrade);
+    setResults(null);
+    setQuestionIndex(0);
+    setPhase('testing');
+    advanceToNext();
+  }, [startGrade, advanceToNext]);
+
+  const handleBackToHome = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
   /** Generate shuffled answer options (correct + 3 distractors) */
   const answerOptions = useMemo(() => {
     if (!currentProblem) return [];
@@ -427,6 +439,18 @@ export default function PlacementTestScreen() {
           fontSize: typography.fontSize.lg,
           color: colors.textPrimary,
         },
+        secondaryButton: {
+          marginTop: spacing.sm,
+          padding: spacing.md,
+          minHeight: layout.minTouchTarget,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        secondaryButtonText: {
+          fontFamily: typography.fontFamily.medium,
+          fontSize: typography.fontSize.sm,
+          color: colors.textMuted,
+        },
         skipQuestionButton: { marginTop: spacing.md, padding: spacing.md },
         skipQuestionText: {
           fontFamily: typography.fontFamily.medium,
@@ -590,6 +614,24 @@ export default function PlacementTestScreen() {
               testID="finish-button"
             >
               <Text style={styles.finishButtonText}>Start Practicing</Text>
+            </Pressable>
+            <Pressable
+              style={styles.secondaryButton}
+              onPress={handleRetake}
+              accessibilityRole="button"
+              testID="retake-button"
+            >
+              <Text style={styles.secondaryButtonText}>
+                Retake Evaluation
+              </Text>
+            </Pressable>
+            <Pressable
+              style={styles.secondaryButton}
+              onPress={handleBackToHome}
+              accessibilityRole="button"
+              testID="back-to-home-button"
+            >
+              <Text style={styles.secondaryButtonText}>Back to Home</Text>
             </Pressable>
           </>
         )}

@@ -154,6 +154,22 @@ jest.mock('expo-audio', () => ({
   setAudioModeAsync: jest.fn().mockResolvedValue(undefined),
 }));
 
+// Mock expo-notifications
+jest.mock('expo-notifications', () => ({
+  getPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
+  setNotificationHandler: jest.fn(),
+  setNotificationChannelAsync: jest.fn().mockResolvedValue(undefined),
+  scheduleNotificationAsync: jest.fn().mockResolvedValue('mock-id'),
+  cancelScheduledNotificationAsync: jest.fn().mockResolvedValue(undefined),
+  getAllScheduledNotificationsAsync: jest.fn().mockResolvedValue([]),
+  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+  addNotificationReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+  getLastNotificationResponseAsync: jest.fn().mockResolvedValue(null),
+  AndroidImportance: { HIGH: 4 },
+  SchedulableTriggerInputTypes: { DAILY: 'daily' },
+}));
+
 // Mock expo-haptics
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),

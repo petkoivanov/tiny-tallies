@@ -7,6 +7,7 @@ import type { ThemeId } from '@/theme/colors';
 import type { ManipulativeType } from '@/services/cpa/cpaTypes';
 import type { ChallengeCompletion } from '@/services/challenge/challengeTypes';
 import type { SessionHistoryEntry } from '../slices/sessionHistorySlice';
+import type { WrongAnswerRecord } from '../slices/wrongAnswerHistorySlice';
 import type { AgeRange, BedtimeWindow, StateCode } from '../slices/childProfileSlice';
 
 /**
@@ -42,6 +43,7 @@ export interface ChildData {
   challengeCompletions: Record<string, ChallengeCompletion>;
   challengesCompleted: number;
   sessionHistory: SessionHistoryEntry[];
+  wrongAnswerHistory: WrongAnswerRecord[];
   placementComplete: boolean;
   placementGrade: number | null;
   placementTheta: number | null;
@@ -99,6 +101,7 @@ export const CHILD_DATA_KEYS: readonly (keyof ChildData)[] = [
   'challengeCompletions',
   'challengesCompleted',
   'sessionHistory',
+  'wrongAnswerHistory',
   'placementComplete',
   'placementGrade',
   'placementTheta',
@@ -134,6 +137,7 @@ export const DEFAULT_CHILD_DATA: ChildData = {
   challengeCompletions: {},
   challengesCompleted: 0,
   sessionHistory: [],
+  wrongAnswerHistory: [],
   placementComplete: false,
   placementGrade: null,
   placementTheta: null,

@@ -29,6 +29,8 @@ import { PinGate } from '@/components/profile/PinGate';
 import { AppDialog } from '@/components/AppDialog';
 import { BenchmarkSection } from '@/components/parental/BenchmarkSection';
 import { TimeLimitsSection } from '@/components/parental/TimeLimitsSection';
+import { RecentMistakesSection } from '@/components/parental/RecentMistakesSection';
+import { ReminderSection } from '@/components/parental/ReminderSection';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import {
@@ -318,6 +320,13 @@ export default function ParentalControlsScreen() {
             </View>
           </View>
 
+          <RecentMistakesSection
+            sectionStyle={styles.section}
+            sectionHeaderStyle={styles.sectionHeader}
+            sectionTitleStyle={styles.sectionTitle}
+            cardStyle={styles.card}
+          />
+
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Shield size={20} color={colors.primary} />
@@ -476,6 +485,17 @@ export default function ParentalControlsScreen() {
               </Text>
             </View>
           </View>
+
+          <ReminderSection
+            sectionStyle={styles.section}
+            sectionHeaderStyle={styles.sectionHeader}
+            sectionTitleStyle={styles.sectionTitle}
+            cardStyle={styles.card}
+            rowStyle={styles.row}
+            rowLabelStyle={styles.rowLabel}
+            rowSublabelStyle={styles.rowSublabel}
+            dividerStyle={styles.divider}
+          />
         </ScrollView>
       </PinGate>
       <AppDialog

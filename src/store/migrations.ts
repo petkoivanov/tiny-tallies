@@ -17,7 +17,7 @@ export function migrateStore(
   const state = (persistedState ?? {}) as Record<string, unknown>;
 
   // Fast path: skip all checks when store is already current
-  if (version >= 19) return state;
+  if (version >= 21) return state;
 
   if (version < 2) {
     // v1 -> v2: First persistence enablement.
@@ -177,8 +177,19 @@ export function migrateStore(
     state.benchmarkOptIn ??= true;
   }
 
+  if (version < 20) {
+    // v19 -> v20: Add wrong answer history for parent review
+    state.wrongAnswerHistory ??= [];
+  }
+
+  if (version < 21) {
+    // v20 -> v21: Add daily practice reminder (device-level)
+    state.reminderEnabled ??= true;
+    state.reminderTime ??= '17:00';
+  }
+
   // Future migrations chain here:
-  // if (version < 20) { ... }
+  // if (version < 22) { ... }
 
   return state;
 }
