@@ -52,4 +52,4 @@ Tell the user:
 - If a pre-commit hook fails, fix the issue and create a NEW commit (never amend)
 - Never use `--no-verify` or `--force`
 - If push fails due to remote changes, tell the user and suggest `git pull --rebase` — do NOT force push
-- Protect main/master: if on main/master, warn the user before pushing and ask for confirmation
+- Pushing to main/master is fine — do NOT ask for confirmation
