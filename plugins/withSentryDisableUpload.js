@@ -1,32 +1,27 @@
-const { withDangerousMod } = require('@expo/config-plugins');
-const path = require('path');
-const fs = require('fs');
+const { withAppBuildGradle } = require('@expo/config-plugins');
 
 /**
  * Config plugin that disables Sentry source map uploads.
- * Adds upload_sources=false to android/sentry.properties so release
- * builds don't fail without a Sentry auth token.
+ * Uses afterEvaluate to disable SentryUpload tasks after all plugins
+ * have registered their tasks, so no Sentry auth token is required.
  */
 function withSentryDisableUpload(config) {
-  return withDangerousMod(config, [
-    'android',
-    (config) => {
-      const sentryPropsPath = path.join(
-        config.modRequest.platformProjectRoot,
-        'sentry.properties',
-      );
+  return withAppBuildGradle(config, (config) => {
+    const snippet = `
+// Disable Sentry source map uploads (no auth token required)
+afterEvaluate {
+    tasks.matching { it.name.contains("SentryUpload") }.configureEach {
+        enabled = false
+    }
+}
+`;
 
-      if (fs.existsSync(sentryPropsPath)) {
-        let contents = fs.readFileSync(sentryPropsPath, 'utf8');
-        if (!contents.includes('upload_sources=')) {
-          contents += '\nupload_sources=false\n';
-          fs.writeFileSync(sentryPropsPath, contents);
-        }
-      }
+    if (!config.modResults.contents.includes('SentryUpload')) {
+      config.modResults.contents += snippet;
+    }
 
-      return config;
-    },
-  ]);
+    return config;
+  });
 }
 
 module.exports = withSentryDisableUpload;
