@@ -172,32 +172,37 @@ describe('validateContent', () => {
   });
 
   describe('sentence too long', () => {
-    it('rejects a sentence exceeding 20 words for 6-7 bracket (max 20)', () => {
-      const longSentence = 'word '.repeat(21).trim() + '.';
-      const result = validateContent(longSentence, '6-7');
+    it('rejects a 12-word sentence for 6-7 bracket (max 8)', () => {
+      const result = validateContent(
+        'This is a very long sentence with many many many more words.',
+        '6-7',
+      );
       expect(result).toEqual({ valid: false, reason: 'sentence_too_long' });
     });
 
-    it('accepts a 15-word sentence for 6-7 bracket', () => {
+    it('accepts an 8-word sentence for 6-7 bracket', () => {
       const result = validateContent(
-        'When you multiply two numbers together you add equal groups of items.',
+        'Try to count on your hands now.',
         '6-7',
       );
-      expect(result.valid).toBe(true);
+      expect(result).toEqual({ valid: true, reason: null });
     });
 
-    it('rejects a sentence exceeding 25 words for 7-8 bracket (max 25)', () => {
-      const longSentence = 'word '.repeat(26).trim() + '.';
-      const result = validateContent(longSentence, '7-8');
+    it('rejects 11-word sentence for 7-8 bracket (max 10)', () => {
+      const result = validateContent(
+        'This is a sentence that has way too many words here.',
+        '7-8',
+      );
       expect(result).toEqual({ valid: false, reason: 'sentence_too_long' });
     });
   });
 
   describe('vocabulary too complex', () => {
-    it('accepts math operation words like "multiplication" for 6-7 bracket', () => {
-      // Previously blocked — these are essential math vocabulary
-      const result = validateContent('Try multiplication next.', '6-7');
-      expect(result.valid).toBe(true);
+    it('rejects "understanding" (13 chars) for 6-7 bracket (max 7)', () => {
+      const result = validateContent('Try understanding it.', '6-7');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toBe('vocabulary_too_complex');
+      expect(result.complexWords).toContain('understanding');
     });
 
     it('accepts simple words for 6-7 bracket', () => {
@@ -206,13 +211,13 @@ describe('validateContent', () => {
     });
 
     it('accepts longer words for 8-9 bracket', () => {
+      // "carefully" = 9 chars, within limit for 8-9 (max 9)
       const result = validateContent('Look carefully.', '8-9');
       expect(result).toEqual({ valid: true, reason: null });
     });
 
-    it('rejects extremely long non-math words (16+ chars) for 8-9 bracket', () => {
-      // "counterproductive" = 16 chars — truly not age-appropriate
-      const result = validateContent('That is counterproductive.', '8-9');
+    it('rejects "calculating" (11 chars) for 8-9 bracket (max 9)', () => {
+      const result = validateContent('Try calculating.', '8-9');
       expect(result.valid).toBe(false);
       expect(result.reason).toBe('vocabulary_too_complex');
     });

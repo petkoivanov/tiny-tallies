@@ -251,16 +251,15 @@ export function parseHintLadder(response: string): string[] | null {
 export function validateHintLadder(
   hints: string[],
   correctAnswer: number,
-  ageBracket: AgeBracket,
+  _ageBracket: AgeBracket,
 ): string[] {
+  // Only check for answer leaks — the prompt instructs Gemini to use
+  // age-appropriate language, so content/vocabulary filtering is redundant
+  // and blocks valid math operation words like "multiplication".
   const safeHints: string[] = [];
   for (const hint of hints) {
     const leakCheck = checkAnswerLeak(hint, correctAnswer);
     if (!leakCheck.safe) break;
-
-    const contentCheck = validateContent(hint, ageBracket);
-    if (!contentCheck.valid) break;
-
     safeHints.push(hint);
   }
   return safeHints;

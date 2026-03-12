@@ -111,23 +111,19 @@ export function numberToWord(n: number): string | null {
 
 /** Maximum words per sentence, by age bracket. */
 export const CONTENT_WORD_LIMITS: Record<AgeBracket, number> = {
-  '6-7': 20,
-  '7-8': 25,
-  '8-9': 30,
+  '6-7': 8,
+  '7-8': 10,
+  '8-9': 12,
 };
 
 /** Maximum number of sentences in a response. */
 export const MAX_SENTENCES = 4;
 
-/**
- * Maximum word character length (letters only).
- * Set high enough that math operation words (multiplication, subtraction,
- * denominator, etc.) are never blocked — vocabulary control is the LLM's job.
- */
+/** Maximum word character length (letters only) as vocabulary complexity proxy. */
 export const MAX_WORD_LENGTH: Record<AgeBracket, number> = {
-  '6-7': 15,
-  '7-8': 15,
-  '8-9': 15,
+  '6-7': 7,
+  '7-8': 8,
+  '8-9': 9,
 };
 
 /**
