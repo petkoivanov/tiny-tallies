@@ -99,6 +99,7 @@ export interface UseSessionReturn {
   isComplete: boolean;
   score: number;
   handleAnswer: (selectedValue: number) => void;
+  dismissFeedback: () => void;
   handleQuit: () => void;
   sessionResult: SessionResult | null;
 }
@@ -180,6 +181,7 @@ export function useSession(options?: {
   const totalXpEarnedRef = useRef(0);
   const frustrationStateRef = useRef<FrustrationState>(createFrustrationState());
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const advanceRef = useRef<(() => void) | null>(null);
   const maxStreakRef = useRef(0);
   const currentStreakRef = useRef(0);
   const challengeStartDateRef = useRef('');
@@ -368,8 +370,8 @@ export function useSession(options?: {
       frustrationStateRef.current = updateFrustrationState(
         frustrationStateRef.current, problem.skillId, isCorrect);
 
-      // Schedule auto-advance
-      feedbackTimerRef.current = setTimeout(() => {
+      // Build advance callback (shared by auto-advance and manual dismiss)
+      const advance = () => {
         feedbackTimerRef.current = null;
         setFeedbackState(null);
         setSelectedAnswer(null);
@@ -508,7 +510,15 @@ export function useSession(options?: {
         } else {
           setCurrentIndex(nextIndex);
         }
-      }, FEEDBACK_DURATION_MS);
+      };
+
+      // Store advance callback for manual dismiss
+      advanceRef.current = advance;
+
+      // Auto-advance on correct; pause on wrong for review
+      if (isCorrect) {
+        feedbackTimerRef.current = setTimeout(advance, FEEDBACK_DURATION_MS);
+      }
     },
     [
       currentIndex,
@@ -537,6 +547,19 @@ export function useSession(options?: {
       addWrongAnswer,
     ],
   );
+
+  /** Manually dismiss wrong-answer feedback and advance to next question. */
+  const dismissFeedback = useCallback(() => {
+    if (advanceRef.current) {
+      // Cancel any timer that might be pending (shouldn't be on wrong, but defensive)
+      if (feedbackTimerRef.current !== null) {
+        clearTimeout(feedbackTimerRef.current);
+        feedbackTimerRef.current = null;
+      }
+      advanceRef.current();
+      advanceRef.current = null;
+    }
+  }, []);
 
   const handleQuit = useCallback(() => {
     // Clear feedback timer if active
@@ -572,6 +595,7 @@ export function useSession(options?: {
     isComplete,
     score,
     handleAnswer,
+    dismissFeedback,
     handleQuit,
     sessionResult,
   };

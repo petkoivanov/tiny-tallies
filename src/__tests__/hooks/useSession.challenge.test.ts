@@ -69,9 +69,17 @@ function completeSessionWithPattern(
     act(() => {
       result.current.handleAnswer(answer);
     });
-    act(() => {
-      jest.advanceTimersByTime(FEEDBACK_DURATION_MS);
-    });
+    if (pattern[i]) {
+      // Correct: auto-advances after timer
+      act(() => {
+        jest.advanceTimersByTime(FEEDBACK_DURATION_MS);
+      });
+    } else {
+      // Wrong: paused, needs manual dismiss
+      act(() => {
+        result.current.dismissFeedback();
+      });
+    }
   }
 }
 

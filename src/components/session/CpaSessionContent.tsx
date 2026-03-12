@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, type TextStyle } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
+  withSequence,
   withTiming,
+  Easing,
 } from 'react-native-reanimated';
-
-import LottieView from 'lottie-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useCpaMode } from '@/hooks/useCpaMode';
 import { AnswerFeedbackAnimation } from '@/components/animations/AnswerFeedbackAnimation';
@@ -25,6 +25,7 @@ import { NumberPad } from './NumberPad';
 import { PictorialDiagram } from './pictorial/PictorialDiagram';
 import { AnalogClock, clockDetailForSkill } from './AnalogClock';
 import { CoinDisplay, shouldShowCoins } from './CoinDisplay';
+import { Check, Lightbulb, X as XIcon } from 'lucide-react-native';
 import { NarrateButton } from './NarrateButton';
 import { GraphDisplay } from './graphs';
 import { getNextGuidedStep } from '@/services/cpa';
@@ -70,6 +71,8 @@ interface CpaSessionContentProps {
   currentIndex: number;
   onAnswer: (value: number) => void;
   feedbackActive: boolean;
+  feedbackCorrect: boolean | null;
+  onDismissFeedback: () => void;
   selectedAnswer: number | null;
   correctAnswer: number | null;
   showCorrectAnswer: boolean;
@@ -92,6 +95,8 @@ export function CpaSessionContent({
   currentIndex,
   onAnswer,
   feedbackActive,
+  feedbackCorrect,
+  onDismissFeedback,
   selectedAnswer,
   correctAnswer,
   showCorrectAnswer,
@@ -217,12 +222,11 @@ export function CpaSessionContent({
     wordProblemScrollContent: {
       paddingVertical: spacing.sm,
     },
-    longQuestionRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      width: '100%',
-      marginBottom: spacing.xl,
-      paddingHorizontal: spacing.sm,
+    floatingNarrate: {
+      position: 'absolute',
+      top: spacing.sm,
+      right: spacing.sm,
+      zIndex: 5,
     },
     inlineVisual: {
       alignItems: 'center',
@@ -236,14 +240,13 @@ export function CpaSessionContent({
       flexDirection: 'row',
       flexWrap: 'wrap',
       justifyContent: 'center',
-      gap: spacing.md,
+      gap: spacing.sm,
       width: '100%',
-      maxWidth: 320,
     },
     optionButton: {
       backgroundColor: colors.surface,
       borderRadius: layout.borderRadius.lg,
-      minHeight: layout.minTouchTarget + 16,
+      minHeight: layout.minTouchTarget + 8,
       width: '100%',
       alignItems: 'center',
       justifyContent: 'center',
@@ -313,6 +316,38 @@ export function CpaSessionContent({
       color: colors.primaryLight,
       fontFamily: typography.fontFamily.medium,
     },
+    feedbackRow: {
+      alignItems: 'center',
+      marginTop: spacing.md,
+      gap: spacing.md,
+    },
+    feedbackIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    feedbackIconCorrect: {
+      backgroundColor: colors.correct,
+    },
+    feedbackIconIncorrect: {
+      backgroundColor: colors.incorrect,
+    },
+    nextButton: {
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.xl,
+      backgroundColor: colors.primary,
+      borderRadius: layout.borderRadius.md,
+      minHeight: layout.minTouchTarget,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    nextButtonText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.md,
+      color: '#fff',
+    } as TextStyle,
   }), [colors]);
 
   // Render the manipulative component inside the panel
@@ -382,6 +417,7 @@ export function CpaSessionContent({
           onSubmit={handleFreeTextSubmit}
           maxDigits={presentation.format === 'free_text' ? presentation.maxDigits : 5}
           showDecimal={presentation.format === 'free_text' && presentation.allowDecimal}
+          onShowMe={!needHelpActive && scaffoldManipulative ? handleNeedHelp : undefined}
         />
       );
     }
@@ -400,6 +436,10 @@ export function CpaSessionContent({
       );
     }
 
+    // 2 rows: 4 → 2+2, 5 → 3+2, 6 → 3+3
+    const perRow = Math.ceil(options.length / 2);
+    const itemWidth = `${Math.floor(100 / perRow) - 2}%` as const;
+
     return (
       <View style={styles.optionsGrid}>
         {options.map((option, index) => {
@@ -410,6 +450,7 @@ export function CpaSessionContent({
           return (
             <AnswerFeedbackAnimation
               key={`option-${index}`}
+              style={{ width: itemWidth }}
               feedbackType={
                 feedbackActive && option.value === selectedAnswer
                   ? option.value === correctAnswer
@@ -519,22 +560,6 @@ export function CpaSessionContent({
             >
               {renderQuestionText()}
             </ScrollView>
-            <NarrateButton
-              text={problem.questionText}
-              resetKey={currentIndex}
-              primaryColor={colors.primary}
-              primaryLightColor={colors.primaryLight}
-            />
-          </View>
-        ) : isLongQuestion ? (
-          <View style={styles.longQuestionRow}>
-            {renderQuestionText()}
-            <NarrateButton
-              text={problem.questionText}
-              resetKey={currentIndex}
-              primaryColor={colors.primary}
-              primaryLightColor={colors.primaryLight}
-            />
           </View>
         ) : (
           renderQuestionText()
@@ -552,8 +577,39 @@ export function CpaSessionContent({
         {/* Answer Buttons */}
         {renderAnswers()}
 
+        {/* Feedback icon + Next button on wrong answers */}
+        {feedbackActive && feedbackCorrect !== null && (
+          <View style={styles.feedbackRow} testID="feedback-row">
+            <View
+              style={[
+                styles.feedbackIcon,
+                feedbackCorrect
+                  ? styles.feedbackIconCorrect
+                  : styles.feedbackIconIncorrect,
+              ]}
+            >
+              {feedbackCorrect ? (
+                <Check size={28} color="#fff" strokeWidth={3} />
+              ) : (
+                <XIcon size={28} color="#fff" strokeWidth={3} />
+              )}
+            </View>
+            {!feedbackCorrect && (
+              <Pressable
+                onPress={onDismissFeedback}
+                style={styles.nextButton}
+                accessibilityRole="button"
+                accessibilityLabel="Next question"
+                testID="next-button"
+              >
+                <Text style={styles.nextButtonText}>Next</Text>
+              </Pressable>
+            )}
+          </View>
+        )}
+
         {/* "Show me!" button — all modes, before panel is activated */}
-        {!needHelpActive && scaffoldManipulative && (
+        {!needHelpActive && !isFreeText && scaffoldManipulative && (
           <Pressable
             onPress={handleNeedHelp}
             style={styles.needHelpButton}
@@ -576,6 +632,15 @@ export function CpaSessionContent({
           <Text style={styles.guidedHintText}>{guidedHintText}</Text>
         </View>
       )}
+
+      {/* Floating narrate button */}
+      <NarrateButton
+        text={problem.questionText}
+        resetKey={currentIndex}
+        primaryColor={colors.primary}
+        primaryLightColor={colors.primaryLight}
+        style={styles.floatingNarrate}
+      />
 
       {/* Manipulative Panel (any mode, after "Need help?" activated) */}
       {showPanel && scaffoldManipulative && (
@@ -626,21 +691,27 @@ function BoostHighlightWrapper({
   return <Animated.View style={animatedStyle}>{children}</Animated.View>;
 }
 
-/** Animated Lottie lightbulb icon for the "Show me!" button. */
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const bulbAnimation = require('../../../assets/animations/bulb.json');
-
+/** Pulsing yellow lightbulb icon for the "Show me!" button. */
 function GlowingLightbulb() {
+  const scale = useSharedValue(1);
+
+  useEffect(() => {
+    scale.value = withRepeat(
+      withSequence(
+        withTiming(1.15, { duration: 600, easing: Easing.inOut(Easing.quad) }),
+        withTiming(1, { duration: 600, easing: Easing.inOut(Easing.quad) }),
+      ),
+      -1,
+    );
+  }, [scale]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
   return (
-    <LottieView
-      source={bulbAnimation}
-      autoPlay
-      loop
-      style={glowStyles.bulb}
-    />
+    <Animated.View style={animatedStyle}>
+      <Lightbulb size={32} color="#f5c542" fill="#f5c54240" />
+    </Animated.View>
   );
 }
-
-const glowStyles = StyleSheet.create({
-  bulb: { width: 36, height: 36 },
-});

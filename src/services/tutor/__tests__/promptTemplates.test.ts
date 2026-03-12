@@ -60,9 +60,9 @@ describe('buildSystemInstruction', () => {
     expect(result).toContain('NEVER say the result');
   });
 
-  it('includes "guiding questions"', () => {
+  it('includes "guiding hints"', () => {
     const result = buildSystemInstruction(makeParams());
-    expect(result).toContain('guiding questions');
+    expect(result).toContain('guiding hints');
   });
 
   it('includes "age-appropriate"', () => {

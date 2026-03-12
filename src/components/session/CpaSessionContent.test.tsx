@@ -30,6 +30,7 @@ jest.mock('react-native-reanimated', () => {
     withRepeat: (v: any) => v,
     Easing: {
       in: (e: any) => e,
+      inOut: (e: any) => e,
       quad: (v: any) => v,
       linear: (v: any) => v,
     },
@@ -153,6 +154,8 @@ const baseProps = {
   currentIndex: 0,
   onAnswer: jest.fn(),
   feedbackActive: false,
+  feedbackCorrect: null,
+  onDismissFeedback: jest.fn(),
   selectedAnswer: null,
   correctAnswer: null,
   showCorrectAnswer: false,

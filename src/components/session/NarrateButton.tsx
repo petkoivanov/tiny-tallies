@@ -6,7 +6,7 @@
  * Stops automatically when problem advances or component unmounts.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, type ViewStyle } from 'react-native';
 import { Volume2, VolumeX } from 'lucide-react-native';
 
 import { layout, spacing } from '@/theme';
@@ -19,6 +19,7 @@ interface NarrateButtonProps {
   resetKey: number;
   primaryColor: string;
   primaryLightColor: string;
+  style?: ViewStyle;
   testID?: string;
 }
 
@@ -27,6 +28,7 @@ export function NarrateButton({
   resetKey,
   primaryColor,
   primaryLightColor,
+  style,
   testID = 'narrate-button',
 }: NarrateButtonProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -57,7 +59,7 @@ export function NarrateButton({
   return (
     <Pressable
       onPress={handlePress}
-      style={styles.button}
+      style={[styles.button, style]}
       accessibilityRole="button"
       accessibilityLabel={isSpeaking ? 'Stop reading' : 'Read aloud'}
       testID={testID}

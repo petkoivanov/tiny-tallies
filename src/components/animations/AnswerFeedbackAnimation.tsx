@@ -12,6 +12,7 @@ import { springConfigs, durations } from '@/theme';
 interface AnswerFeedbackAnimationProps {
   feedbackType: 'correct' | 'incorrect' | null;
   children: React.ReactNode;
+  style?: object;
 }
 
 /**
@@ -22,6 +23,7 @@ interface AnswerFeedbackAnimationProps {
 export function AnswerFeedbackAnimation({
   feedbackType,
   children,
+  style,
 }: AnswerFeedbackAnimationProps) {
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
@@ -52,15 +54,12 @@ export function AnswerFeedbackAnimation({
   }));
 
   return (
-    <Animated.View style={[styles.wrapper, animatedStyle]}>
+    <Animated.View style={[styles.wrapper, style, animatedStyle]}>
       {children}
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    width: '45%',
-    minWidth: 140,
-  },
+  wrapper: {},
 });

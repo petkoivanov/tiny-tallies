@@ -43,6 +43,7 @@ export default function SessionScreen() {
     isComplete,
     score,
     handleAnswer,
+    dismissFeedback,
     handleQuit,
     sessionResult,
   } = useSession({ mode, remediationSkillIds, challengeThemeId });
@@ -230,6 +231,8 @@ export default function SessionScreen() {
           currentIndex={currentIndex}
           onAnswer={handleAnswerWithBoost}
           feedbackActive={isFeedbackActive}
+          feedbackCorrect={feedbackState?.correct ?? null}
+          onDismissFeedback={dismissFeedback}
           selectedAnswer={selectedAnswer}
           correctAnswer={correctAnswer}
           showCorrectAnswer={showCorrectAnswer}

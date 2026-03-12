@@ -81,7 +81,7 @@ function buildHintSystemInstruction(
     '1. NEVER reveal the answer as a digit or word.',
     '2. NEVER compute math for the child.',
     '3. NEVER say the result of any calculation.',
-    '4. Ask guiding questions to help them discover the answer.',
+    '4. Give guiding hints, NOT questions. The child cannot type answers back. Say things like "Try thinking about..." or "Remember that..." instead of asking questions.',
     ...getSharedSafetyRules(5),
   ].join(' ');
 }
@@ -183,7 +183,7 @@ export function buildHintPrompt(params: PromptParams): string {
     lines.push(misconceptionBlock);
   }
 
-  lines.push(`This is hint level ${params.hintLevel}. Give a Socratic hint.`);
+  lines.push(`This is hint level ${params.hintLevel}. Give a guiding hint (NOT a question — the child cannot type answers).`);
 
   return lines.join('\n');
 }

@@ -23,6 +23,7 @@ jest.mock('react-native-reanimated', () => {
     runOnJS: (fn: any) => fn,
     Easing: {
       in: (e: any) => e,
+      inOut: (e: any) => e,
       quad: (v: any) => v,
       linear: (v: any) => v,
     },
@@ -79,6 +80,7 @@ const defaultUseSessionReturn: UseSessionReturn = {
   isComplete: false,
   score: 0,
   handleAnswer: mockHandleAnswer,
+  dismissFeedback: jest.fn(),
   handleQuit: mockHandleQuit,
   sessionResult: null,
 };
@@ -334,14 +336,19 @@ jest.mock('react-native-safe-area-context', () => ({
 // Mock lucide icons
 jest.mock('lucide-react-native', () => {
   const { View } = require('react-native');
+  const MockIcon = () => <View />;
   return {
-    X: () => <View />,
-    Blocks: () => <View />,
-    Image: () => <View />,
-    Hash: () => <View />,
-    ChevronUp: () => <View />,
-    ChevronDown: () => <View />,
-    CircleHelp: () => <View />,
+    X: MockIcon,
+    Check: MockIcon,
+    Blocks: MockIcon,
+    Image: MockIcon,
+    Hash: MockIcon,
+    ChevronUp: MockIcon,
+    ChevronDown: MockIcon,
+    CircleHelp: MockIcon,
+    Lightbulb: MockIcon,
+    Volume2: MockIcon,
+    VolumeX: MockIcon,
   };
 });
 

@@ -17,7 +17,10 @@ let clientInstance: GoogleGenAI | null = null;
 export async function getGeminiClient(): Promise<GoogleGenAI> {
   if (clientInstance) return clientInstance;
 
-  const apiKey = await SecureStore.getItemAsync(API_KEY_STORE_KEY);
+  const apiKey =
+    (await SecureStore.getItemAsync(API_KEY_STORE_KEY)) ??
+    process.env.EXPO_PUBLIC_GEMINI_API_KEY ??
+    null;
   if (!apiKey) {
     throw new Error(
       'Gemini API key not found. Please add your API key in Settings.',
@@ -86,7 +89,7 @@ export async function callGemini(
       config: {
         systemInstruction: options.systemInstruction,
         temperature: 0.7,
-        maxOutputTokens: 200,
+        maxOutputTokens: 8192,
         safetySettings: GEMINI_SAFETY_SETTINGS,
       },
       // @ts-expect-error -- httpOptions.signal is supported at runtime

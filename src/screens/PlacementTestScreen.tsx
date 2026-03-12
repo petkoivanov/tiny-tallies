@@ -25,7 +25,10 @@ import { answerNumericValue } from '@/services/mathEngine/types';
 import type { Grade } from '@/services/mathEngine/types';
 import { CharacterReaction } from '@/components/animations/CharacterReaction';
 import { GraphDisplay } from '@/components/session/graphs';
+import { NarrateButton } from '@/components/session/NarrateButton';
 import { AppDialog } from '@/components/AppDialog';
+import { useSoundSync } from '@/hooks/useSoundEffects';
+import { playCorrect, playIncorrect } from '@/services/sound';
 
 type PlacementPhase = 'intro' | 'testing' | 'complete';
 
@@ -93,6 +96,8 @@ export default function PlacementTestScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useTheme();
+
+  useSoundSync();
 
   const avatarId = useAppStore((s) => s.avatarId);
   const childGrade = useAppStore((s) => s.childGrade);
@@ -201,6 +206,7 @@ export default function PlacementTestScreen() {
       const correctValue = answerNumericValue(currentProblem.correctAnswer);
       const correct = answer === correctValue;
       setFeedbackReaction(correct ? 'correct' : 'incorrect');
+      if (correct) playCorrect(); else playIncorrect();
 
       setTimeout(() => processAnswer(correct), 1200);
     },
@@ -231,7 +237,13 @@ export default function PlacementTestScreen() {
   }, [navigation]);
 
   const handleFinish = useCallback(() => {
-    navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+    navigation.reset({
+      index: 1,
+      routes: [
+        { name: 'Home' },
+        { name: 'Session', params: { sessionId: String(Date.now()) } },
+      ],
+    });
   }, [navigation]);
 
   const handleRetake = useCallback(() => {
@@ -363,13 +375,28 @@ export default function PlacementTestScreen() {
           fontSize: typography.fontSize.sm,
           color: colors.textMuted,
         },
+        questionRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginTop: spacing.lg,
+          marginBottom: spacing.xl,
+        },
         questionText: {
           fontFamily: typography.fontFamily.bold,
           fontSize: typography.fontSize.xxl,
           color: colors.textPrimary,
           textAlign: 'center',
-          marginTop: spacing.lg,
-          marginBottom: spacing.xl,
+          flex: 1,
+        },
+        questionTextLong: {
+          fontSize: typography.fontSize.xl,
+        },
+        questionTextWord: {
+          fontFamily: typography.fontFamily.medium,
+          fontSize: typography.fontSize.lg,
+          textAlign: 'left',
+          lineHeight: typography.fontSize.lg * 1.5,
         },
         optionsGrid: {
           flexDirection: 'row',
@@ -543,9 +570,26 @@ export default function PlacementTestScreen() {
                 testID="placement-graph"
               />
             )}
-            <Text style={styles.questionText}>
-              {currentProblem.questionText}
-            </Text>
+            <View style={styles.questionRow}>
+              <Text
+                style={[
+                  styles.questionText,
+                  currentProblem.questionText.length > 60 && styles.questionTextWord,
+                  currentProblem.questionText.length > 30 &&
+                    currentProblem.questionText.length <= 60 &&
+                    styles.questionTextLong,
+                ]}
+              >
+                {currentProblem.questionText}
+              </Text>
+              <NarrateButton
+                text={currentProblem.questionText}
+                resetKey={questionIndex}
+                primaryColor={colors.primary}
+                primaryLightColor={colors.textSecondary}
+                testID="narrate-button"
+              />
+            </View>
             <View style={styles.optionsGrid}>
               {answerOptions.map((option) => {
                 const isSelected = selectedAnswer === option;

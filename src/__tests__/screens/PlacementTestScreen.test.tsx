@@ -63,6 +63,24 @@ jest.mock('@/components/session/graphs', () => {
   };
 });
 
+// Mock NarrateButton
+jest.mock('@/components/session/NarrateButton', () => {
+  const { View } = require('react-native');
+  return {
+    NarrateButton: (props: any) => <View testID={props.testID} />,
+  };
+});
+
+// Mock sound effects
+jest.mock('@/hooks/useSoundEffects', () => ({
+  useSoundSync: jest.fn(),
+}));
+
+jest.mock('@/services/sound', () => ({
+  playCorrect: jest.fn(),
+  playIncorrect: jest.fn(),
+}));
+
 // Mock AppDialog
 jest.mock('@/components/AppDialog', () => {
   const { View } = require('react-native');
@@ -267,8 +285,11 @@ describe('PlacementTestScreen', () => {
     fireEvent.press(getByTestId('finish-button'));
 
     expect(mockReset).toHaveBeenCalledWith({
-      index: 0,
-      routes: [{ name: 'Home' }],
+      index: 1,
+      routes: [
+        { name: 'Home' },
+        { name: 'Session', params: expect.objectContaining({ sessionId: expect.any(String) }) },
+      ],
     });
   });
 
