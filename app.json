@@ -50,6 +50,7 @@
         }
       ],
       "./plugins/withUnifiedKeystore",
+      "./plugins/withSentryDisableUpload",
       [
         "@sentry/react-native/expo",
         {
