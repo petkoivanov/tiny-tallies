@@ -345,9 +345,20 @@ export function useTutor(
               }
               return;
             }
+            // Parsed OK but all hints failed safety validation
+            console.warn(
+              `[Tutor] attempt=${attempt + 1} parsed=${parsed.length} hints but safeHints=${safeHints.length} after validation. answer=${correctAnswer}`,
+              parsed,
+            );
+          } else {
+            // JSON parse failed
+            console.warn(
+              `[Tutor] attempt=${attempt + 1} JSON parse failed. response preview:`,
+              responseText.slice(0, 300),
+            );
           }
 
-          // First attempt failed to parse — retry once
+          // First attempt failed — retry once
         }
 
         // Both attempts failed — show error
