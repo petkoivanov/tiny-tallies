@@ -49,16 +49,32 @@ const BUGS_BY_OPERATION: Record<MathDomain, readonly BugPattern[]> = {
 };
 
 /**
+ * Returns true if this problem is a bar graph reading question.
+ * Bar charts have limited resolution — adjacent distractors must use a larger
+ * step so the choices aren't indistinguishable on the visual chart.
+ */
+function isBarGraph(problem: Problem): boolean {
+  return (
+    problem.operation === 'basic_graphs' &&
+    problem.metadata.graphData?.type === 'bar_graph'
+  );
+}
+
+/**
  * Returns bug patterns applicable to the given problem,
  * excluding off-by-one patterns (reserved for adjacent phase).
+ * For bar graphs, also excludes graph_off_by_one — ±1 is meaningless
+ * at bar chart resolution (you can't distinguish 27 vs 28 vs 29 visually).
  */
 function getApplicableBugs(problem: Problem): BugPattern[] {
   const bugs = BUGS_BY_OPERATION[problem.operation] ?? [];
+  const barGraph = isBarGraph(problem);
 
   return bugs.filter(
     (bug) =>
       bug.minDigits <= problem.metadata.digitCount &&
-      !OFF_BY_ONE_IDS.has(bug.id),
+      !OFF_BY_ONE_IDS.has(bug.id) &&
+      !(barGraph && bug.id === 'graph_off_by_one'),
   );
 }
 
@@ -69,7 +85,9 @@ const MAX_RANDOM_ITERATIONS = 50;
  * Three-phase distractor assembly algorithm.
  *
  * Phase 1: Bug Library -- compute misconception-based distractors (target 2)
- * Phase 2: Adjacent -- off-by-one from correct answer (target 1)
+ * Phase 2: Adjacent -- off-by-N from correct answer (target 1)
+ *          N=5 for bar graphs (chart resolution makes ±1 indistinguishable)
+ *          N=1 for all other problem types
  * Phase 3: Random fallback -- fill remaining slots
  *
  * Returns exactly `count` unique, valid distractors (default 3).
@@ -107,20 +125,23 @@ export function generateDistractors(
     }
   }
 
-  // Phase 2: Adjacent off-by-one (target 1)
+  // Phase 2: Adjacent (target 1)
+  // Bar graphs use step=5 — you can't distinguish adjacent values on a bar chart.
+  // All other types use step=1 (off-by-one).
   if (results.length < count) {
-    const plus1 = correctAnswer + 1;
-    const minus1 = correctAnswer - 1;
+    const step = isBarGraph(problem) ? 5 : 1;
+    const plus = correctAnswer + step;
+    const minus = correctAnswer - step;
 
-    if (!used.has(plus1) && isValidDistractor(plus1, correctAnswer, operation)) {
-      results.push({ value: plus1, source: 'adjacent', bugId: undefined });
-      used.add(plus1);
+    if (!used.has(plus) && isValidDistractor(plus, correctAnswer, operation)) {
+      results.push({ value: plus, source: 'adjacent', bugId: undefined });
+      used.add(plus);
     } else if (
-      !used.has(minus1) &&
-      isValidDistractor(minus1, correctAnswer, operation)
+      !used.has(minus) &&
+      isValidDistractor(minus, correctAnswer, operation)
     ) {
-      results.push({ value: minus1, source: 'adjacent', bugId: undefined });
-      used.add(minus1);
+      results.push({ value: minus, source: 'adjacent', bugId: undefined });
+      used.add(minus);
     }
   }
 

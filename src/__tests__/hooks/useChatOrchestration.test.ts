@@ -48,6 +48,8 @@ function createDefaultParams(
       error: null,
       tutorMode: 'hint',
       hintLevel: 0,
+      hasMoreHints: false,
+      ladderExhausted: false,
       shouldExpandManipulative: false,
       manipulativeType: null,
       requestHint: mockRequestHint,
@@ -115,7 +117,7 @@ describe('useChatOrchestration', () => {
     expect(result.current.shouldPulse).toBe(false);
   });
 
-  it('handleHelpTap sets chatOpen=true and calls requestHint when online + consent granted', () => {
+  it('handleHelpTap sets chatOpen=true, shows domain intro locally, does NOT call requestHint', () => {
     const { result } = renderHook(() =>
       useChatOrchestration(createDefaultParams()),
     );
@@ -125,7 +127,10 @@ describe('useChatOrchestration', () => {
     });
 
     expect(result.current.chatOpen).toBe(true);
-    expect(mockRequestHint).toHaveBeenCalled();
+    expect(mockRequestHint).not.toHaveBeenCalled();
+    expect(mockAddTutorMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ role: 'tutor', id: expect.stringMatching(/^tutor-intro-/) }),
+    );
   });
 
   it('handleHelpTap without consent: adds consent message, navigates to Consent, does NOT call requestHint', () => {

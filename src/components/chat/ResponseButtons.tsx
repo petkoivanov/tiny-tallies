@@ -7,6 +7,8 @@ export type ResponseType = 'understand' | 'more' | 'confused' | 'gotit';
 interface ResponseButtonsProps {
   onResponse: (type: ResponseType) => void;
   disabled: boolean;
+  /** When true, disables only the "Tell me more" button (hint ladder exhausted) */
+  moreDisabled?: boolean;
   mode?: 'standard' | 'gotit';
 }
 
@@ -16,7 +18,7 @@ const BUTTONS: { label: string; type: ResponseType; tint?: string }[] = [
   { label: "I'm confused", type: 'confused' },
 ];
 
-export function ResponseButtons({ onResponse, disabled, mode = 'standard' }: ResponseButtonsProps) {
+export function ResponseButtons({ onResponse, disabled, moreDisabled = false, mode = 'standard' }: ResponseButtonsProps) {
   const { colors } = useTheme();
 
   const styles = useMemo(() => StyleSheet.create({
@@ -82,22 +84,25 @@ export function ResponseButtons({ onResponse, disabled, mode = 'standard' }: Res
 
   return (
     <View style={styles.container} testID="response-buttons">
-      {BUTTONS.map((btn) => (
-        <Pressable
-          key={btn.type}
-          onPress={() => onResponse(btn.type)}
-          disabled={disabled}
-          style={[
-            styles.button,
-            btn.tint ? { backgroundColor: btn.tint } : undefined,
-            disabled && styles.buttonDisabled,
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel={btn.label}
-        >
-          <Text style={styles.buttonText}>{btn.label}</Text>
-        </Pressable>
-      ))}
+      {BUTTONS.map((btn) => {
+        const isDisabled = disabled || (btn.type === 'more' && moreDisabled);
+        return (
+          <Pressable
+            key={btn.type}
+            onPress={() => onResponse(btn.type)}
+            disabled={isDisabled}
+            style={[
+              styles.button,
+              btn.tint ? { backgroundColor: btn.tint } : undefined,
+              isDisabled && styles.buttonDisabled,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel={btn.label}
+          >
+            <Text style={styles.buttonText}>{btn.label}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }

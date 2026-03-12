@@ -215,6 +215,57 @@ export function runSafetyPipeline(
   return { passed: true, text: response };
 }
 
+/**
+ * Parses a hint ladder JSON response from Gemini.
+ * Extracts a JSON array from the response text (handles markdown code fences).
+ * Returns null if parsing fails.
+ */
+export function parseHintLadder(response: string): string[] | null {
+  // Strip markdown code fences if present
+  let cleaned = response.trim();
+  const fenceMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch) {
+    cleaned = fenceMatch[1].trim();
+  }
+
+  try {
+    const parsed = JSON.parse(cleaned);
+    if (
+      !Array.isArray(parsed) ||
+      parsed.length < 2 ||
+      !parsed.every((item) => typeof item === 'string' && item.length > 0)
+    ) {
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Validates an entire hint ladder for answer leaks and content safety.
+ * Truncates the ladder at the first hint that fails a safety check.
+ * Returns the safe prefix (may be empty if even the first hint leaks).
+ */
+export function validateHintLadder(
+  hints: string[],
+  correctAnswer: number,
+  ageBracket: AgeBracket,
+): string[] {
+  const safeHints: string[] = [];
+  for (const hint of hints) {
+    const leakCheck = checkAnswerLeak(hint, correctAnswer);
+    if (!leakCheck.safe) break;
+
+    const contentCheck = validateContent(hint, ageBracket);
+    if (!contentCheck.valid) break;
+
+    safeHints.push(hint);
+  }
+  return safeHints;
+}
+
 /** Escapes special regex characters in a string for safe use in RegExp. */
 function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

@@ -74,6 +74,7 @@ export default function SessionScreen() {
     showCorrectAnswer,
     boostHighlightAnswer,
     responseMode,
+    moreDisabled,
     bannerMessage,
     handleAnswerWithBoost,
     handleHelpTap,
@@ -258,6 +259,7 @@ export default function SessionScreen() {
         isOnline={isOnline}
         onResponse={handleResponse}
         responseMode={responseMode}
+        moreDisabled={moreDisabled}
       />
       {/* Quit confirmation dialog */}
       <AppDialog

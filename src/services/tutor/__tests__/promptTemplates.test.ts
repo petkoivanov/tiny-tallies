@@ -38,9 +38,9 @@ describe('buildSystemInstruction', () => {
     expect(result).toContain('under 12 words');
   });
 
-  it('includes "NEVER reveal the answer"', () => {
+  it('includes "NEVER reveal the final answer"', () => {
     const result = buildSystemInstruction(makeParams());
-    expect(result).toContain('NEVER reveal the answer');
+    expect(result).toContain('NEVER reveal the final answer');
   });
 
   it('includes the CPA stage', () => {
@@ -50,19 +50,19 @@ describe('buildSystemInstruction', () => {
     expect(result).toContain('pictorial');
   });
 
-  it('includes "NEVER compute math"', () => {
+  it('includes "NEVER compute the final result"', () => {
     const result = buildSystemInstruction(makeParams());
-    expect(result).toContain('NEVER compute math');
+    expect(result).toContain('NEVER compute the final result');
   });
 
-  it('includes "NEVER say the result"', () => {
+  it('includes progressive hint rules', () => {
     const result = buildSystemInstruction(makeParams());
-    expect(result).toContain('NEVER say the result');
+    expect(result).toContain('PROGRESSIVE HINT RULES');
   });
 
-  it('includes "guiding hints"', () => {
+  it('includes "guiding statements"', () => {
     const result = buildSystemInstruction(makeParams());
-    expect(result).toContain('guiding hints');
+    expect(result).toContain('guiding statements');
   });
 
   it('includes "age-appropriate"', () => {

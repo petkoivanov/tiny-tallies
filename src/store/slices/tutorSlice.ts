@@ -1,11 +1,12 @@
 import type { StateCreator } from 'zustand';
 import type { AppState } from '../appStore';
-import type { TutorMessage, TutorMode } from '@/services/tutor/types';
+import type { TutorMessage, TutorMode, HintLadder } from '@/services/tutor/types';
 
 export interface TutorSlice {
   tutorMessages: TutorMessage[];
   tutorMode: TutorMode;
   hintLevel: number;
+  hintLadder: HintLadder | null;
   tutorLoading: boolean;
   tutorError: string | null;
   problemCallCount: number;
@@ -15,6 +16,8 @@ export interface TutorSlice {
   addTutorMessage: (message: TutorMessage) => void;
   setTutorMode: (mode: TutorMode) => void;
   incrementHintLevel: () => void;
+  setHintLadder: (ladder: HintLadder | null) => void;
+  advanceHintLadder: () => void;
   setTutorLoading: (loading: boolean) => void;
   setTutorError: (error: string | null) => void;
   wrongAnswerCount: number;
@@ -37,6 +40,7 @@ export const createTutorSlice: StateCreator<
   tutorMessages: [],
   tutorMode: 'hint',
   hintLevel: 0,
+  hintLadder: null,
   tutorLoading: false,
   tutorError: null,
   problemCallCount: 0,
@@ -51,6 +55,17 @@ export const createTutorSlice: StateCreator<
   setTutorMode: (mode) => set({ tutorMode: mode }),
   incrementHintLevel: () =>
     set((state) => ({ hintLevel: state.hintLevel + 1 })),
+  setHintLadder: (ladder) => set({ hintLadder: ladder }),
+  advanceHintLadder: () =>
+    set((state) => {
+      if (!state.hintLadder) return {};
+      return {
+        hintLadder: {
+          ...state.hintLadder,
+          nextIndex: state.hintLadder.nextIndex + 1,
+        },
+      };
+    }),
   setTutorLoading: (loading) => set({ tutorLoading: loading }),
   setTutorError: (error) => set({ tutorError: error }),
   resetProblemTutor: () =>
@@ -58,6 +73,7 @@ export const createTutorSlice: StateCreator<
       tutorMessages: [],
       tutorMode: 'hint',
       hintLevel: 0,
+      hintLadder: null,
       tutorError: null,
       problemCallCount: 0,
       wrongAnswerCount: 0,
@@ -67,6 +83,7 @@ export const createTutorSlice: StateCreator<
       tutorMessages: [],
       tutorMode: 'hint',
       hintLevel: 0,
+      hintLadder: null,
       tutorError: null,
       problemCallCount: 0,
       wrongAnswerCount: 0,

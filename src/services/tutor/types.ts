@@ -38,6 +38,16 @@ export interface PromptParams {
 }
 
 /**
+ * A pre-generated sequence of progressive hints, from conceptual to procedural.
+ * The last hint stops just short of revealing the answer (Option A).
+ */
+export interface HintLadder {
+  hints: string[];
+  /** Index of the next hint to show (0-based). */
+  nextIndex: number;
+}
+
+/**
  * Extended parameters for BOOST mode prompts.
  * ONLY type that includes correctAnswer -- type system enforces
  * that HINT/TEACH never see it.

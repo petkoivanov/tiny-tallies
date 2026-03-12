@@ -8,7 +8,12 @@ import {
   buildBoostPrompt,
 } from '@/services/tutor/promptTemplates';
 import { checkRateLimit, getRateLimitMessage } from '@/services/tutor/rateLimiter';
-import { scrubOutboundPii, runSafetyPipeline } from '@/services/tutor/safetyFilter';
+import {
+  scrubOutboundPii,
+  runSafetyPipeline,
+  parseHintLadder,
+  validateHintLadder,
+} from '@/services/tutor/safetyFilter';
 import { getCannedFallback } from '@/services/tutor/safetyConstants';
 import { computeEscalation } from '@/services/tutor/escalationEngine';
 import { getBugDescription } from '@/services/tutor/bugLookup';
@@ -39,6 +44,9 @@ export interface UseTutorReturn {
   error: string | null;
   tutorMode: TutorMode;
   hintLevel: number;
+  hasMoreHints: boolean;
+  /** True when the hint ladder has been loaded and all hints have been delivered */
+  ladderExhausted: boolean;
   shouldExpandManipulative: boolean;
   manipulativeType: ManipulativeType | null;
   requestTutor: () => Promise<void>;
@@ -90,6 +98,8 @@ export function useTutor(
   const resetProblemTutor = useAppStore((s) => s.resetProblemTutor);
   const incrementHintLevel = useAppStore((s) => s.incrementHintLevel);
   const setTutorMode = useAppStore((s) => s.setTutorMode);
+  const setHintLadder = useAppStore((s) => s.setHintLadder);
+  const advanceHintLadder = useAppStore((s) => s.advanceHintLadder);
 
   // Derive age bracket for prompts
   const ageBracket = deriveAgeBracket(childAge);
@@ -101,12 +111,63 @@ export function useTutor(
   // Compute shouldExpandManipulative: true only in teach mode with a manipulative
   const shouldExpandManipulative = tutorMode === 'teach' && manipulativeType !== null;
 
+  // Read hint ladder for hasMoreHints derivation
+  const hintLadder = useAppStore((s) => s.hintLadder);
+  const hasMoreHints =
+    tutorMode === 'hint' &&
+    hintLadder !== null &&
+    hintLadder.nextIndex < hintLadder.hints.length;
+
+  const ladderExhausted =
+    hintLadder !== null &&
+    hintLadder.nextIndex >= hintLadder.hints.length;
+
   // Defense-in-depth: abort on unmount
   useEffect(() => {
     return () => {
       abortRef.current?.abort();
     };
   }, []);
+
+  /**
+   * Delivers a hint from the pre-generated ladder and runs escalation.
+   * Returns true if a hint was delivered, false if ladder is exhausted.
+   */
+  const deliverNextLadderHint = useCallback((): boolean => {
+    const ladder = useAppStore.getState().hintLadder;
+    if (!ladder || ladder.nextIndex >= ladder.hints.length) return false;
+
+    const hint = ladder.hints[ladder.nextIndex];
+    addTutorMessage({
+      id: `tutor-${Date.now()}`,
+      role: 'tutor',
+      text: hint,
+      timestamp: Date.now(),
+    });
+    advanceHintLadder();
+    incrementHintLevel();
+
+    // Run escalation check after delivery
+    const escalation = computeEscalation({
+      currentMode: useAppStore.getState().tutorMode,
+      hintCount: useAppStore.getState().hintLevel,
+      wrongAnswerCount: useAppStore.getState().wrongAnswerCount,
+    });
+
+    if (escalation.shouldTransition) {
+      setTutorMode(escalation.nextMode);
+      if (escalation.transitionMessage) {
+        addTutorMessage({
+          id: `tutor-transition-${Date.now()}`,
+          role: 'tutor',
+          text: escalation.transitionMessage,
+          timestamp: Date.now(),
+        });
+      }
+    }
+
+    return true;
+  }, [addTutorMessage, advanceHintLadder, incrementHintLevel, setTutorMode]);
 
   const requestTutor = useCallback(async () => {
     // Guard: consent required before AI tutor access
@@ -122,6 +183,40 @@ export function useTutor(
     if (!currentProblem) {
       setTutorError('No problem available for hints.');
       return;
+    }
+
+    // Read current mode from store (may differ from subscribed value)
+    const currentMode = useAppStore.getState().tutorMode;
+
+    // HINT MODE with existing ladder: deliver next hint instantly (no API call)
+    if (currentMode === 'hint') {
+      const ladder = useAppStore.getState().hintLadder;
+      if (ladder && ladder.nextIndex < ladder.hints.length) {
+        deliverNextLadderHint();
+        return;
+      }
+      // Ladder exists but exhausted: escalation already ran in deliverNextLadderHint.
+      // If we're still in hint mode, fall through to API call for teach/boost.
+      if (ladder && ladder.nextIndex >= ladder.hints.length) {
+        // Force escalation to teach if not already triggered
+        const escalation = computeEscalation({
+          currentMode: useAppStore.getState().tutorMode,
+          hintCount: useAppStore.getState().hintLevel,
+          wrongAnswerCount: useAppStore.getState().wrongAnswerCount,
+        });
+        if (escalation.shouldTransition) {
+          setTutorMode(escalation.nextMode);
+          if (escalation.transitionMessage) {
+            addTutorMessage({
+              id: `tutor-transition-${Date.now()}`,
+              role: 'tutor',
+              text: escalation.transitionMessage,
+              timestamp: Date.now(),
+            });
+          }
+        }
+        return;
+      }
     }
 
     // Check rate limits
@@ -152,9 +247,6 @@ export function useTutor(
     // Set loading, clear error
     setTutorLoading(true);
     setTutorError(null);
-
-    // Read current mode from store (may differ from subscribed value)
-    const currentMode = useAppStore.getState().tutorMode;
 
     // Assemble confirmed misconception context for this skill
     const skillId = currentProblem.problem.skillId;
@@ -211,13 +303,72 @@ export function useTutor(
     );
 
     try {
+      // HINT MODE: generate ladder with one retry on parse failure
+      if (currentMode === 'hint') {
+        const correctAnswer = answerNumericValue(currentProblem.problem.correctAnswer);
+
+        for (let attempt = 0; attempt < 2; attempt++) {
+          if (controller.signal.aborted) return;
+
+          const responseText = await callGemini({
+            systemInstruction: scrubbed.systemInstruction,
+            userMessage: scrubbed.userMessage,
+            abortSignal: controller.signal,
+          });
+
+          if (responseText === null) {
+            if (!controller.signal.aborted) {
+              addTutorMessage({
+                id: `tutor-fallback-${Date.now()}`,
+                role: 'tutor',
+                text: getCannedFallback('safety_blocked'),
+                timestamp: Date.now(),
+              });
+            }
+            return;
+          }
+
+          const parsed = parseHintLadder(responseText);
+          if (parsed && parsed.length >= 2) {
+            const safeHints = validateHintLadder(parsed, correctAnswer, ageBracket);
+            if (safeHints.length >= 1) {
+              setHintLadder({ hints: safeHints, nextIndex: 1 });
+              incrementCallCount();
+              if (!controller.signal.aborted) {
+                addTutorMessage({
+                  id: `tutor-${Date.now()}`,
+                  role: 'tutor',
+                  text: safeHints[0],
+                  timestamp: Date.now(),
+                });
+                incrementHintLevel();
+              }
+              return;
+            }
+          }
+
+          // First attempt failed to parse — retry once
+        }
+
+        // Both attempts failed — show error
+        if (!controller.signal.aborted) {
+          addTutorMessage({
+            id: `tutor-fallback-${Date.now()}`,
+            role: 'tutor',
+            text: getCannedFallback('error'),
+            timestamp: Date.now(),
+          });
+        }
+        return;
+      }
+
+      // TEACH / BOOST: single call, standard safety pipeline
       const responseText = await callGemini({
         systemInstruction: scrubbed.systemInstruction,
         userMessage: scrubbed.userMessage,
         abortSignal: controller.signal,
       });
 
-      // Handle safety-blocked response (null from Gemini safety filters)
       if (responseText === null) {
         if (!controller.signal.aborted) {
           addTutorMessage({
@@ -230,8 +381,6 @@ export function useTutor(
         return;
       }
 
-      // Run deterministic safety pipeline (answer-leak + content validation)
-      // Pass mode so BOOST bypasses answer-leak check
       const safetyResult = runSafetyPipeline(
         responseText,
         answerNumericValue(currentProblem.problem.correctAnswer),
@@ -251,7 +400,6 @@ export function useTutor(
         return;
       }
 
-      // All safety checks passed -- deliver response to child
       if (!controller.signal.aborted) {
         addTutorMessage({
           id: `tutor-${Date.now()}`,
@@ -261,12 +409,10 @@ export function useTutor(
         });
         incrementCallCount();
 
-        // Increment hint level for hint/teach modes only (BOOST skips it)
         if (currentMode !== 'boost') {
           incrementHintLevel();
         }
 
-        // Run escalation check after successful delivery
         const escalation = computeEscalation({
           currentMode: useAppStore.getState().tutorMode,
           hintCount: useAppStore.getState().hintLevel,
@@ -274,8 +420,6 @@ export function useTutor(
         });
 
         if (escalation.shouldTransition) {
-          // Abort in-flight request if escalation triggers mode change
-          // (current request already completed, but prevent stale follow-ups)
           setTutorMode(escalation.nextMode);
           if (escalation.transitionMessage) {
             addTutorMessage({
@@ -347,6 +491,8 @@ export function useTutor(
     incrementCallCount,
     incrementHintLevel,
     setTutorMode,
+    setHintLadder,
+    deliverNextLadderHint,
   ]);
 
   const resetForProblem = useCallback(() => {
@@ -360,6 +506,8 @@ export function useTutor(
     error,
     tutorMode,
     hintLevel,
+    hasMoreHints,
+    ladderExhausted,
     shouldExpandManipulative,
     manipulativeType,
     requestTutor,

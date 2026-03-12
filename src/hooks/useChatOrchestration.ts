@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAppStore } from '@/store/appStore';
 import { getBugDescription } from '@/services/tutor/bugLookup';
+import { getProblemIntro } from '@/services/tutor/problemIntro';
 import type { UseTutorReturn } from '@/hooks/useTutor';
 import type { FeedbackState } from '@/hooks/useSession';
 import type { SessionProblem } from '@/services/session';
@@ -37,6 +38,8 @@ export interface ChatOrchestrationReturn {
   showCorrectAnswer: boolean;
   boostHighlightAnswer: number | null;
   responseMode: 'standard' | 'gotit';
+  /** True when the hint ladder is loaded but fully delivered — disables "Tell me more" */
+  moreDisabled: boolean;
   bannerMessage: string;
   handleAnswerWithBoost: (selectedValue: number) => void;
   handleHelpTap: () => void;
@@ -205,7 +208,8 @@ export function useChatOrchestration(
     ],
   );
 
-  // Handle help tap: open chat and request first hint (or intercept for consent)
+  // Handle help tap: open chat and show a local domain intro — no Gemini call yet.
+  // The first "Tell me more" press triggers the Gemini call.
   const handleHelpTap = useCallback(() => {
     setHelpUsed(true);
     setShouldPulse(false);
@@ -224,14 +228,21 @@ export function useChatOrchestration(
       return;
     }
 
-    if (isOnline) {
-      tutor.requestHint();
-    }
-  }, [isOnline, tutor, tutorConsentGranted, addTutorMessage, navigation]);
+    // Show domain intro locally — no API call
+    addTutorMessage({
+      id: `tutor-intro-${Date.now()}`,
+      role: 'tutor',
+      text: getProblemIntro(currentProblem?.problem.operation),
+      timestamp: Date.now(),
+    });
+  }, [tutorConsentGranted, addTutorMessage, navigation, currentProblem]);
 
   // Determine response mode based on tutor mode
   const responseMode: 'standard' | 'gotit' =
     tutor.tutorMode === 'boost' ? 'gotit' : 'standard';
+
+  // Disable "Tell me more" once the hint ladder is fully delivered
+  const moreDisabled = tutor.tutorMode === 'hint' && tutor.ladderExhausted;
 
   // Handle response buttons (including gotit for BOOST)
   const handleResponse = useCallback(
@@ -328,6 +339,7 @@ export function useChatOrchestration(
     showCorrectAnswer,
     boostHighlightAnswer: boostReveal ? correctAnswer : null,
     responseMode,
+    moreDisabled,
     bannerMessage,
     handleAnswerWithBoost,
     handleHelpTap,

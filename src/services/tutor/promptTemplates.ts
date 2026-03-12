@@ -64,8 +64,9 @@ function formatMisconceptionContext(
 }
 
 /**
- * Builds hint-mode system instruction (original behavior).
- * CRITICAL: LLM must NEVER reveal the answer.
+ * Builds hint-mode system instruction for hint ladder generation.
+ * Asks the LLM to return a JSON array of 3-4 progressive hints.
+ * CRITICAL: LLM must NEVER reveal the answer in any hint.
  */
 function buildHintSystemInstruction(
   wordLimit: number,
@@ -73,16 +74,21 @@ function buildHintSystemInstruction(
 ): string {
   return [
     'You are a friendly Math Helper for a child.',
-    `Keep sentences under ${wordLimit} words.`,
+    `Keep each hint to 1-2 sentences, under ${wordLimit} words per sentence.`,
     'Use simple, encouraging language with growth mindset.',
     'Praise effort, not talent. Say things like "great try" not "you are smart".',
     `The child is working at the ${cpaStage} stage (CPA framework).`,
+    'RESPONSE FORMAT: Return ONLY a JSON array of 3-4 hint strings. No markdown, no explanation, just the JSON array.',
+    'PROGRESSIVE HINT RULES:',
+    '1. Hint 1: Explain the concept for someone seeing it for the first time. What does the operation mean?',
+    '2. Hint 2: Show how to set up the problem. Break it into steps without computing.',
+    '3. Hint 3: Show intermediate work, leaving ONLY the final step for the child.',
+    '4. Optional Hint 4: Give one more nudge if the problem is complex, but STILL do not reveal the final answer.',
     'CRITICAL SAFETY RULES:',
-    '1. NEVER reveal the answer as a digit or word.',
-    '2. NEVER compute math for the child.',
-    '3. NEVER say the result of any calculation.',
-    '4. Give guiding hints, NOT questions. The child cannot type answers back. Say things like "Try thinking about..." or "Remember that..." instead of asking questions.',
-    ...getSharedSafetyRules(5),
+    '5. NEVER reveal the final answer as a digit or word in ANY hint.',
+    '6. NEVER compute the final result. Stop one step before.',
+    '7. Use guiding statements, NOT questions. The child cannot type answers back.',
+    ...getSharedSafetyRules(8),
   ].join(' ');
 }
 
@@ -157,8 +163,8 @@ export function buildSystemInstruction(params: PromptParams): string {
 }
 
 /**
- * Builds the user message (hint prompt) sent to Gemini.
- * Includes problem context and optional misconception info.
+ * Builds the user message for hint ladder generation.
+ * Asks Gemini to return a JSON array of 3-4 progressive hints.
  * CRITICAL: correctAnswer is deliberately excluded from PromptParams.
  */
 export function buildHintPrompt(params: PromptParams): string {
@@ -183,7 +189,12 @@ export function buildHintPrompt(params: PromptParams): string {
     lines.push(misconceptionBlock);
   }
 
-  lines.push(`This is hint level ${params.hintLevel}. Give a guiding hint (NOT a question — the child cannot type answers).`);
+  lines.push(
+    'Generate 3-4 progressive hints as a JSON array of strings.',
+    'Each hint should be MORE revealing than the last, but NEVER reveal the final answer.',
+    'Hint 1: Explain the concept. Hint 2: Set up the steps. Hint 3: Show work up to the last step. Hint 4 (optional): One more nudge.',
+    'Example format: ["Hint 1 text", "Hint 2 text", "Hint 3 text"]',
+  );
 
   return lines.join('\n');
 }

@@ -26,6 +26,7 @@ interface ChatPanelProps {
   isOnline: boolean;
   onResponse: (type: 'understand' | 'more' | 'confused' | 'retry' | 'gotit') => void;
   responseMode?: 'standard' | 'gotit';
+  moreDisabled?: boolean;
 }
 
 /**
@@ -50,6 +51,7 @@ export function ChatPanel({
   isOnline,
   onResponse,
   responseMode = 'standard',
+  moreDisabled = false,
 }: ChatPanelProps) {
   const { colors } = useTheme();
   const translateY = useSharedValue(PANEL_HEIGHT);
@@ -256,6 +258,7 @@ export function ChatPanel({
           <ResponseButtons
             onResponse={onResponse}
             disabled={isLoading}
+            moreDisabled={moreDisabled}
             mode={responseMode}
           />
         </View>
