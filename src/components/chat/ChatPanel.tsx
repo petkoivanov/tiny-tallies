@@ -8,6 +8,7 @@ import Animated, {
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import { X } from 'lucide-react-native';
+import LottieView from 'lottie-react-native';
 import { useTheme, spacing, typography, layout, springConfigs } from '@/theme';
 import type { TutorMessage } from '@/services/tutor/types';
 import { ChatMessageList } from './ChatMessageList';
@@ -101,6 +102,15 @@ export function ChatPanel({
       borderBottomWidth: 1,
       borderBottomColor: colors.surfaceLight,
     },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    headerLottie: {
+      width: 36,
+      height: 36,
+    },
     headerTitle: {
       fontFamily: typography.fontFamily.semiBold,
       fontSize: typography.fontSize.lg,
@@ -180,7 +190,15 @@ export function ChatPanel({
       {/* Header with swipe-down gesture */}
       <GestureDetector gesture={panGesture}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Tutor</Text>
+          <View style={styles.headerLeft}>
+            <LottieView
+              source={require('../../../assets/animations/math-teacher.json')}
+              autoPlay
+              loop
+              style={styles.headerLottie}
+            />
+            <Text style={styles.headerTitle}>Tutor</Text>
+          </View>
           <Pressable
             onPress={onClose}
             style={styles.closeButton}

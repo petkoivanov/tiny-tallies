@@ -334,6 +334,11 @@ export function CpaSessionContent({
     feedbackIconIncorrect: {
       backgroundColor: colors.incorrect,
     },
+    correctAnswerText: {
+      fontFamily: typography.fontFamily.bold,
+      fontSize: typography.fontSize.lg,
+      color: colors.correct,
+    },
     nextButton: {
       paddingVertical: spacing.sm,
       paddingHorizontal: spacing.xl,
@@ -594,6 +599,11 @@ export function CpaSessionContent({
                 <XIcon size={28} color="#fff" strokeWidth={3} />
               )}
             </View>
+            {!feedbackCorrect && correctAnswer !== null && (
+              <Text style={styles.correctAnswerText} testID="correct-answer-reveal">
+                Answer: {correctAnswer}
+              </Text>
+            )}
             {!feedbackCorrect && (
               <Pressable
                 onPress={onDismissFeedback}

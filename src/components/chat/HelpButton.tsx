@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -7,8 +7,10 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { CircleHelp } from 'lucide-react-native';
-import { useTheme, layout, spacing, typography } from '@/theme';
+import LottieView from 'lottie-react-native';
+import { useTheme, layout, spacing } from '@/theme';
+
+const LOTTIE_SIZE = 72;
 
 interface HelpButtonProps {
   visible: boolean;
@@ -46,25 +48,14 @@ export function HelpButton({ visible, onPress, pulsing }: HelpButtonProps) {
       right: spacing.lg,
     },
     fab: {
-      minWidth: layout.minTouchTarget,
-      minHeight: layout.minTouchTarget,
-      backgroundColor: colors.primary,
-      borderRadius: layout.borderRadius.round,
+      width: LOTTIE_SIZE,
+      height: LOTTIE_SIZE,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 6,
-      elevation: 5,
     },
-    label: {
-      color: colors.textPrimary,
-      fontFamily: typography.fontFamily.semiBold,
-      fontSize: typography.fontSize.xs,
-      marginTop: spacing.xs,
+    lottie: {
+      width: LOTTIE_SIZE,
+      height: LOTTIE_SIZE,
     },
   }), [colors]);
 
@@ -79,8 +70,12 @@ export function HelpButton({ visible, onPress, pulsing }: HelpButtonProps) {
       style={styles.pressable}
     >
       <Animated.View style={[styles.fab, animatedStyle]}>
-        <CircleHelp size={28} color={colors.textPrimary} />
-        <Text style={styles.label}>Help</Text>
+        <LottieView
+          source={require('../../../assets/animations/math-teacher.json')}
+          autoPlay
+          loop
+          style={styles.lottie}
+        />
       </Animated.View>
     </Pressable>
   );

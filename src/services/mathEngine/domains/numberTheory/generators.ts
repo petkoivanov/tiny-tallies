@@ -17,7 +17,8 @@ export function generateGcf(
   const gcfValue = rng.intRange(2, 12);
   let a = rng.intRange(2, 8);
   let b = rng.intRange(2, 8);
-  while (b === a) {
+  // Ensure a and b are coprime so the actual GCF equals gcfValue
+  while (b === a || gcd(a, b) !== 1) {
     b = rng.intRange(2, 8);
   }
   const num1 = gcfValue * a;

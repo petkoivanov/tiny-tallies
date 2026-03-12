@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -152,11 +152,12 @@ export default function ResultsScreen() {
       flex: 1,
       backgroundColor: colors.background,
     },
-    content: {
-      flex: 1,
+    scrollContent: {
+      flexGrow: 1,
       justifyContent: 'center',
       alignItems: 'center',
       paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.lg,
     },
     motivationalMessage: {
       fontFamily: typography.fontFamily.bold,
@@ -178,7 +179,7 @@ export default function ResultsScreen() {
       paddingHorizontal: spacing.xl,
       width: '100%',
       maxWidth: 320,
-      marginBottom: spacing.xxl,
+      marginBottom: spacing.md,
     },
     statRow: {
       flexDirection: 'row',
@@ -329,7 +330,10 @@ export default function ResultsScreen() {
         { paddingTop: insets.top, paddingBottom: insets.bottom },
       ]}
     >
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <Text
           style={[styles.motivationalMessage, { color: motivationalColor }]}
           testID="motivational-message"
@@ -499,7 +503,7 @@ export default function ResultsScreen() {
         >
           <Text style={styles.buttonText}>Done</Text>
         </Pressable>
-      </View>
+      </ScrollView>
 
       {leveledUp && <ConfettiCelebration />}
       {showBadgePopup && (

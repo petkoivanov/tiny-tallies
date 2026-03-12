@@ -19,13 +19,12 @@ interface NumberPadProps {
   onShowMe?: () => void;
 }
 
-const BUTTON_SIZE = 56;
-const GAP = 6;
+const BUTTON_SIZE = 52;
+const GAP = 5;
 
 const DIGIT_ROWS = [
-  ['1', '2', '3'],
-  ['4', '5', '6'],
-  ['7', '8', '9'],
+  ['1', '2', '3', '4', '5'],
+  ['6', '7', '8', '9', '0'],
 ] as const;
 
 export function NumberPad({
@@ -63,11 +62,10 @@ export function NumberPad({
   }, [value, onSubmit]);
 
   const hasValue = value.length > 0;
-  const keypadWidth = 3 * BUTTON_SIZE + 2 * GAP;
 
   return (
     <View style={styles.container}>
-      {/* Display row with Check button on the right */}
+      {/* Display row: [display] [⌫] [✓] */}
       <View style={styles.displayRow}>
         <View
           style={[
@@ -91,6 +89,24 @@ export function NumberPad({
         </View>
 
         <Pressable
+          testID="numpad-key-backspace"
+          style={({ pressed }) => [
+            styles.key,
+            {
+              backgroundColor: pressed
+                ? colors.primaryLight + '30'
+                : colors.surface,
+              borderColor: colors.primaryLight + '20',
+            },
+          ]}
+          onPress={() => handlePress('⌫')}
+        >
+          <Text style={[styles.keyText, { color: colors.textPrimary }]}>
+            ⌫
+          </Text>
+        </Pressable>
+
+        <Pressable
           testID="numpad-submit"
           style={({ pressed }) => [
             styles.checkButton,
@@ -109,43 +125,65 @@ export function NumberPad({
           accessibilityLabel="Check answer"
         >
           <Check
-            size={24}
+            size={22}
             color={hasValue ? '#fff' : colors.textSecondary}
             strokeWidth={3}
           />
         </Pressable>
       </View>
 
-      {/* 3x3 digit grid */}
+      {/* Row 1: 1-5 */}
       <View style={styles.keypad}>
-        {DIGIT_ROWS.map((row, rowIdx) => (
-          <View key={rowIdx} style={styles.row}>
-            {row.map((key) => (
-              <Pressable
-                key={key}
-                testID={`numpad-key-${key}`}
-                style={({ pressed }) => [
-                  styles.key,
-                  {
-                    backgroundColor: pressed
-                      ? colors.primaryLight + '30'
-                      : colors.surface,
-                    borderColor: colors.primaryLight + '20',
-                  },
-                ]}
-                onPress={() => handlePress(key)}
-              >
-                <Text style={[styles.keyText, { color: colors.textPrimary }]}>
-                  {key}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        ))}
-
-        {/* Bottom row: [showMe/decimal/empty] [0] [backspace] */}
         <View style={styles.row}>
-          {onShowMe ? (
+          {DIGIT_ROWS[0].map((key) => (
+            <Pressable
+              key={key}
+              testID={`numpad-key-${key}`}
+              style={({ pressed }) => [
+                styles.key,
+                {
+                  backgroundColor: pressed
+                    ? colors.primaryLight + '30'
+                    : colors.surface,
+                  borderColor: colors.primaryLight + '20',
+                },
+              ]}
+              onPress={() => handlePress(key)}
+            >
+              <Text style={[styles.keyText, { color: colors.textPrimary }]}>
+                {key}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* Row 2: 6-0 */}
+        <View style={styles.row}>
+          {DIGIT_ROWS[1].map((key) => (
+            <Pressable
+              key={key}
+              testID={`numpad-key-${key}`}
+              style={({ pressed }) => [
+                styles.key,
+                {
+                  backgroundColor: pressed
+                    ? colors.primaryLight + '30'
+                    : colors.surface,
+                  borderColor: colors.primaryLight + '20',
+                },
+              ]}
+              onPress={() => handlePress(key)}
+            >
+              <Text style={[styles.keyText, { color: colors.textPrimary }]}>
+                {key}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* Row 3: showMe or decimal (if applicable) */}
+        {onShowMe ? (
+          <View style={styles.row}>
             <Pressable
               testID="numpad-show-me"
               style={({ pressed }) => [
@@ -163,7 +201,9 @@ export function NumberPad({
             >
               <PulsingBulb />
             </Pressable>
-          ) : showDecimal ? (
+          </View>
+        ) : showDecimal ? (
+          <View style={styles.row}>
             <Pressable
               testID="numpad-key-."
               style={({ pressed }) => [
@@ -181,46 +221,8 @@ export function NumberPad({
                 .
               </Text>
             </Pressable>
-          ) : (
-            <View style={styles.emptyKey} />
-          )}
-
-          <Pressable
-            testID="numpad-key-0"
-            style={({ pressed }) => [
-              styles.key,
-              {
-                backgroundColor: pressed
-                  ? colors.primaryLight + '30'
-                  : colors.surface,
-                borderColor: colors.primaryLight + '20',
-              },
-            ]}
-            onPress={() => handlePress('0')}
-          >
-            <Text style={[styles.keyText, { color: colors.textPrimary }]}>
-              0
-            </Text>
-          </Pressable>
-
-          <Pressable
-            testID="numpad-key-backspace"
-            style={({ pressed }) => [
-              styles.key,
-              {
-                backgroundColor: pressed
-                  ? colors.primaryLight + '30'
-                  : colors.surface,
-                borderColor: colors.primaryLight + '20',
-              },
-            ]}
-            onPress={() => handlePress('⌫')}
-          >
-            <Text style={[styles.keyText, { color: colors.textPrimary }]}>
-              ⌫
-            </Text>
-          </Pressable>
-        </View>
+          </View>
+        ) : null}
       </View>
     </View>
   );
@@ -261,7 +263,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   display: {
-    width: 2 * BUTTON_SIZE + GAP,
+    flex: 1,
     height: BUTTON_SIZE,
     borderRadius: layout.borderRadius.md,
     borderWidth: 1,
