@@ -105,6 +105,9 @@ function renderOperandBlocks(
 export function BaseTenBlocksDiagram({ problem }: BaseTenBlocksDiagramProps) {
   const { colors } = useTheme();
   const [a, b] = problem.operands;
+
+  // Skip diagram for numbers too large to render meaningfully as blocks
+  if (a > 999 || b > 999) return null;
   const symbol = problem.operation === 'addition' ? '+' : '\u2212';
   const baseY = PADDING + TEN_HEIGHT;
 

@@ -242,9 +242,17 @@ describe('Word Problem System', () => {
     });
   });
 
+  // Time is excluded from word-problem wrapping: time generators already
+  // produce contextual questions, and operands are raw minute/hour counts
+  // that can't be interpolated as displayable times.
+  const EXCLUDED_FROM_WP: MathDomain[] = ['time'];
+  const WP_OPERATIONS = ALL_OPERATIONS.filter(
+    (op) => !EXCLUDED_FROM_WP.includes(op),
+  );
+
   describe('full domain coverage', () => {
-    it('every operation has at least one template', () => {
-      for (const op of ALL_OPERATIONS) {
+    it('every non-excluded operation has at least one template', () => {
+      for (const op of WP_OPERATIONS) {
         const templates = WORD_PROBLEM_TEMPLATES.filter((t) =>
           t.operations.includes(op),
         );
@@ -252,7 +260,7 @@ describe('Word Problem System', () => {
       }
     });
 
-    it('every operation generates a word problem at appropriate grade', () => {
+    it('every non-excluded operation generates a word problem at appropriate grade', () => {
       const gradeMap: Record<MathDomain, number> = {
         addition: 2,
         subtraction: 2,
@@ -274,19 +282,25 @@ describe('Word Problem System', () => {
         data_analysis: 4,
       };
 
-      for (const op of ALL_OPERATIONS) {
+      for (const op of WP_OPERATIONS) {
         const grade = gradeMap[op];
         const rng = createRng(42);
         const result = generateWordProblem(op, 10, 5, grade, rng, 'Original Q?');
         expect(result).not.toBeNull();
       }
     });
+
+    it('time returns null for word problems (excluded by design)', () => {
+      const rng = createRng(42);
+      const result = generateWordProblem('time', 10, 5, 3, rng, 'Original Q?');
+      expect(result).toBeNull();
+    });
   });
 
   describe('WORD_PROBLEM_TEMPLATES', () => {
-    it('has templates for all 18 domains', () => {
+    it('has templates for all non-excluded domains', () => {
       const ops = new Set(WORD_PROBLEM_TEMPLATES.flatMap((t) => t.operations));
-      for (const op of ALL_OPERATIONS) {
+      for (const op of WP_OPERATIONS) {
         expect(ops.has(op)).toBe(true);
       }
     });

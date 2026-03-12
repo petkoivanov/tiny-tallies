@@ -71,7 +71,7 @@ export function HelpButton({ visible, onPress, pulsing }: HelpButtonProps) {
     >
       <Animated.View style={[styles.fab, animatedStyle]}>
         <LottieView
-          source={require('../../../assets/animations/math-teacher.json')}
+          source={require('../../../assets/animations/ai-tutor.json')}
           autoPlay
           loop
           style={styles.lottie}

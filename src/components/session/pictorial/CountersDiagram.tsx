@@ -22,11 +22,17 @@ interface CountersDiagramProps {
   problem: Problem;
 }
 
+/** Max dots we'll render — beyond this the diagram is unhelpful */
+const MAX_DOTS = 30;
+
 export function CountersDiagram({ problem }: CountersDiagramProps) {
   const { colors } = useTheme();
   const [a, b] = problem.operands;
   const isSubtraction = problem.operation === 'subtraction';
   const totalDots = isSubtraction ? a : a + b;
+
+  // Skip diagram when too many dots to render meaningfully
+  if (totalDots > MAX_DOTS) return null;
   const rows = Math.ceil(totalDots / DOTS_PER_ROW);
   const cols = Math.min(totalDots, DOTS_PER_ROW);
   const svgWidth = cols * DOT_SPACING + PADDING * 2;

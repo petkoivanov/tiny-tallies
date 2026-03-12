@@ -2,18 +2,27 @@ import { numericAnswer } from '../../types';
 import type { DomainProblemData, ProblemTemplate } from '../../types';
 import type { SeededRng } from '../../seededRng';
 
+function gcd(a: number, b: number): number {
+  while (b) {
+    [a, b] = [b, a % b];
+  }
+  return a;
+}
+
 /** Grade 6: Simplify a ratio to its first term */
 export function generateSimplifyRatio(
   _template: ProblemTemplate,
   rng: SeededRng,
 ): DomainProblemData {
-  const gcd = rng.intRange(2, 6);
+  const factor = rng.intRange(2, 6);
   const a = rng.intRange(1, 6);
-  const b = rng.intRange(1, 6);
-  // Ensure a !== b for a non-trivial ratio
-  const bFinal = b === a ? a + 1 : b;
-  const bigA = a * gcd;
-  const bigB = bFinal * gcd;
+  let b = rng.intRange(1, 6);
+  // Ensure a !== b and a,b are coprime so `factor` is the true GCF
+  while (b === a || gcd(a, b) !== 1) {
+    b = rng.intRange(1, 6);
+  }
+  const bigA = a * factor;
+  const bigB = b * factor;
 
   return {
     operands: [bigA, bigB],

@@ -62,5 +62,6 @@ const styles = StyleSheet.create({
     maxHeight: 120,
     alignItems: 'center',
     marginVertical: spacing.md,
+    overflow: 'hidden',
   },
 });

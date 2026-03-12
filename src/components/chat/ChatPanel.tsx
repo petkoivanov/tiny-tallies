@@ -192,7 +192,7 @@ export function ChatPanel({
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <LottieView
-              source={require('../../../assets/animations/math-teacher.json')}
+              source={require('../../../assets/animations/ai-tutor.json')}
               autoPlay
               loop
               style={styles.headerLottie}

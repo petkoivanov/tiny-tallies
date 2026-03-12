@@ -132,25 +132,10 @@ export const WORD_PROBLEM_TEMPLATES: readonly WordProblemTemplate[] = [
     minGrade: 2,
   },
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // TIME — grades 3
-  // ═══════════════════════════════════════════════════════════════════════════
-  {
-    id: 'wp_time_elapsed',
-    operations: ['time'],
-    template:
-      '{name} started reading at {a}. {name} read for {b} minutes.',
-    question: 'What time did {name} finish?',
-    minGrade: 3,
-  },
-  {
-    id: 'wp_time_duration',
-    operations: ['time'],
-    template:
-      '{name} arrived at {place} at {a}. {name} left at {b}.',
-    question: 'How long was {name} there?',
-    minGrade: 3,
-  },
+  // TIME — excluded from word-problem wrapping.
+  // Time generators already produce contextual questions with properly formatted
+  // times (e.g. "It is 2:15..."). Operands are raw minute/hour counts, not
+  // displayable times, so word-problem templates can't use {a}/{b} correctly.
 
   // ═══════════════════════════════════════════════════════════════════════════
   // FRACTIONS — grades 1-4
