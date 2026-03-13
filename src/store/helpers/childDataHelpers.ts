@@ -24,6 +24,8 @@ export interface ChildData {
   frameId: FrameId | null;
   themeId: ThemeId;
   tutorConsentGranted: boolean;
+  youtubeConsentGranted: boolean;
+  videoVotes: Partial<Record<string, 'helpful' | 'not_helpful'>>;
   soundEnabled: boolean;
   dailyLimitMinutes: number;
   bedtimeWindow: BedtimeWindow | null;
@@ -82,6 +84,8 @@ export const CHILD_DATA_KEYS: readonly (keyof ChildData)[] = [
   'frameId',
   'themeId',
   'tutorConsentGranted',
+  'youtubeConsentGranted',
+  'videoVotes',
   'soundEnabled',
   'dailyLimitMinutes',
   'bedtimeWindow',
@@ -118,6 +122,8 @@ export const DEFAULT_CHILD_DATA: ChildData = {
   frameId: null,
   themeId: 'dark',
   tutorConsentGranted: true,
+  youtubeConsentGranted: false,
+  videoVotes: {},
   soundEnabled: true,
   dailyLimitMinutes: 0,
   bedtimeWindow: null,

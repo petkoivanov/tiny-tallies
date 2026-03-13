@@ -1,6 +1,7 @@
 import type { StateCreator } from 'zustand';
 import type { AppState } from '../appStore';
 import type { TutorMessage, TutorMode, HintLadder } from '@/services/tutor/types';
+import type { MathDomain } from '@/services/mathEngine/types';
 
 export interface TutorSlice {
   tutorMessages: TutorMessage[];
@@ -21,6 +22,8 @@ export interface TutorSlice {
   setTutorLoading: (loading: boolean) => void;
   setTutorError: (error: string | null) => void;
   wrongAnswerCount: number;
+  videoVotes: Partial<Record<string, 'helpful' | 'not_helpful'>>;
+  setVideoVote: (domain: MathDomain, vote: 'helpful' | 'not_helpful') => void;
   resetProblemTutor: () => void;
   resetSessionTutor: () => void;
   incrementCallCount: () => void;
@@ -47,6 +50,7 @@ export const createTutorSlice: StateCreator<
   sessionCallCount: 0,
   dailyCallCount: 0,
   wrongAnswerCount: 0,
+  videoVotes: {},
   dailyCountDate: getTodayDate(),
   addTutorMessage: (message) =>
     set((state) => ({
@@ -68,6 +72,8 @@ export const createTutorSlice: StateCreator<
     }),
   setTutorLoading: (loading) => set({ tutorLoading: loading }),
   setTutorError: (error) => set({ tutorError: error }),
+  setVideoVote: (domain, vote) =>
+    set((state) => ({ videoVotes: { ...state.videoVotes, [domain]: vote } })),
   resetProblemTutor: () =>
     set({
       tutorMessages: [],

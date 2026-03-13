@@ -38,6 +38,8 @@ export interface ChildProfileSlice {
   stateCode: StateCode;
   /** Whether parent has opted in to peer benchmarking reports */
   benchmarkOptIn: boolean;
+  /** Whether parent has granted consent for YouTube video playback */
+  youtubeConsentGranted: boolean;
   setChildProfile: (
     profile: Partial<
       Pick<ChildProfileSlice, 'childName' | 'childAge' | 'childGrade' | 'avatarId' | 'frameId' | 'themeId'>
@@ -51,6 +53,7 @@ export interface ChildProfileSlice {
   setAgeRange: (range: AgeRange) => void;
   setStateCode: (code: StateCode) => void;
   setBenchmarkOptIn: (optIn: boolean) => void;
+  setYoutubeConsentGranted: (granted: boolean) => void;
 }
 
 export const createChildProfileSlice: StateCreator<
@@ -73,6 +76,7 @@ export const createChildProfileSlice: StateCreator<
   ageRange: null,
   stateCode: null,
   benchmarkOptIn: false,
+  youtubeConsentGranted: false,
   setChildProfile: (profile) =>
     set((state) => ({
       ...state,
@@ -86,4 +90,5 @@ export const createChildProfileSlice: StateCreator<
   setAgeRange: (range) => set({ ageRange: range }),
   setStateCode: (code) => set({ stateCode: code }),
   setBenchmarkOptIn: (optIn) => set({ benchmarkOptIn: optIn }),
+  setYoutubeConsentGranted: (granted) => set({ youtubeConsentGranted: granted }),
 });

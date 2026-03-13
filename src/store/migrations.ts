@@ -17,7 +17,7 @@ export function migrateStore(
   const state = (persistedState ?? {}) as Record<string, unknown>;
 
   // Fast path: skip all checks when store is already current
-  if (version >= 22) return state;
+  if (version >= 23) return state;
 
   if (version < 2) {
     // v1 -> v2: First persistence enablement.
@@ -195,6 +195,12 @@ export function migrateStore(
     // CLAUDE.md guardrail and document the schema version boundary.
     // Sentinel field confirms this migration block has run.
     state.childGradeV22Migrated = true;
+  }
+
+  if (version < 23) {
+    // v22 -> v23: YouTube video tutor — add per-child consent and vote tracking
+    state.youtubeConsentGranted ??= false;  // explicit parent opt-in required
+    state.videoVotes ??= {};
   }
 
   return state;
