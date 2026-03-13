@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
-status: completed
-stopped_at: Completed 086-03-PLAN.md
-last_updated: "2026-03-13T22:24:10.910Z"
-last_activity: 2026-03-13 — Phase 86 Plan 03 complete (3 word problem templates, AI tutor QA auto-approved)
+status: in-progress
+stopped_at: Completed 087-01-PLAN.md
+last_updated: "2026-03-13T22:44:03.000Z"
+last_activity: 2026-03-13 — Phase 87 Plan 01 complete (RED test stubs for quadratic_equations domain + multiSelect formatter)
 progress:
   total_phases: 19
   completed_phases: 8
   total_plans: 30
-  completed_plans: 29
+  completed_plans: 30
 ---
 
 # Project State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 
 ## Current Position
 
-Phase: 86 of 91 (Systems of Equations Domain)
-Plan: 3 of 3 in current phase (COMPLETE)
-Status: Phase 086 complete — all 3 plans done, SYS-01 through SYS-04 satisfied
-Last activity: 2026-03-13 — Phase 86 Plan 03 complete (3 word problem templates, AI tutor QA auto-approved)
+Phase: 87 of 91 (Quadratic Equations Domain)
+Plan: 1 of 3 in current phase
+Status: Phase 087 in progress — Plan 01 done (RED test stubs), Plans 02-03 remaining
+Last activity: 2026-03-13 — Phase 87 Plan 01 complete (RED test stubs for quadratic_equations domain + multiSelect formatter)
 
 ```
 v1.2: [#...........] 8% (1/12 phases)
@@ -96,6 +96,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 086-01]: systems_equations gradeMap entry is 9 (Common Core HSA.REI standards start grade 9); SYSTEMS_EQUATIONS_BUGS import causes RED at module level
 - [Phase 086]: SkillDomainSummary.tsx and distractorGenerator.ts also need systems_equations entries (Record<MathDomain> exhaustiveness)
 - [Phase 086]: Manual QA sign-off auto-approved per user pre-authorization 2026-03-13; systems_equations tutor prompts reviewed as method-neutral Socratic framing
+- [Phase 087-01]: QUADRATIC_EQUATIONS_BUGS import causes RED at module level -- same pattern as prior domains
+- [Phase 087-01]: quadratic_equations gradeMap entry is 9 (Common Core HSA-REI standards start grade 9)
+- [Phase 087-01]: quadratic_equations expectedTypes uses ['multi_select'] -- first domain to exclusively use non-numeric answer type
 
 ### Pending Todos
 
@@ -116,7 +119,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T22:20:42.264Z
-Stopped at: Completed 086-03-PLAN.md
+Last session: 2026-03-13T22:44:03.000Z
+Stopped at: Completed 087-01-PLAN.md
 Resume file: None
-Resume command: /gsd:execute-phase 086
+Resume command: /gsd:execute-phase 087
