@@ -21,7 +21,7 @@ const EXPECTED_SKILL_IDS = [
   'midpoint',
   'line_equation_yintercept',
   'line_equation_slope',
-  'word_problem',
+  'coord_word_problem',
 ] as const;
 
 /** Compute GCD of two non-negative integers using Euclidean algorithm */

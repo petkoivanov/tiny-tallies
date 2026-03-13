@@ -103,6 +103,11 @@ export const skillMapColors = {
     light: '#3b82f6',
     lighter: '#93c5fd',
   },
+  coordinate_geometry: {
+    primary: '#6d28d9',
+    light: '#8b5cf6',
+    lighter: '#c4b5fd',
+  },
   state: {
     lockedFill: '#374151',
     lockedRing: '#6b7280',

@@ -10,6 +10,7 @@ import type { SeededRng } from '../seededRng';
 const ALLOWS_NEGATIVES = new Set<MathDomain>([
   'expressions',
   'linear_equations',
+  'coordinate_geometry',
 ]);
 
 export function isValidDistractor(

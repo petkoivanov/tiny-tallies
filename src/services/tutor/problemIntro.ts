@@ -20,6 +20,7 @@ const INTROS: Record<MathDomain, string> = {
   basic_graphs: "This is a graph reading problem! Take a good look at the chart.",
   data_analysis: "This is a data problem! Look at the information carefully.",
   linear_equations: "This is a linear equations problem! Read the equation carefully and think about what you need to find.",
+  coordinate_geometry: "This is a coordinate geometry problem! Look at the coordinates carefully and think about what formula you need.",
 };
 
 const DEFAULT_INTRO = "Let's think through this problem together!";
