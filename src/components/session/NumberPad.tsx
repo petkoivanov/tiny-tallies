@@ -17,6 +17,7 @@ interface NumberPadProps {
   maxDigits?: number;
   showDecimal?: boolean;
   onShowMe?: () => void;
+  allowNegative?: boolean;
 }
 
 const BUTTON_SIZE = 52;
@@ -32,6 +33,7 @@ export function NumberPad({
   maxDigits = 5,
   showDecimal = true,
   onShowMe,
+  allowNegative = false,
 }: NumberPadProps) {
   const { colors } = useTheme();
   const [value, setValue] = useState('');
@@ -43,11 +45,19 @@ export function NumberPad({
         return;
       }
 
+      if (key === '±') {
+        setValue((prev) => {
+          if (prev === '' || prev === '-') return prev; // no-op on empty/bare minus
+          return prev.startsWith('-') ? prev.slice(1) : '-' + prev;
+        });
+        return;
+      }
+
       if (key === '.' && !showDecimal) return;
       if (key === '.' && value.includes('.')) return;
 
       setValue((prev) => {
-        if (prev.length >= maxDigits) return prev;
+        if (prev.replace('-', '').length >= maxDigits) return prev;
         return prev + key;
       });
     },
@@ -82,7 +92,7 @@ export function NumberPad({
               { color: value ? colors.textPrimary : colors.textSecondary },
             ]}
             numberOfLines={1}
-            testID="number-pad-display"
+            testID="numberpad-display"
           >
             {value || '?'}
           </Text>
@@ -181,48 +191,69 @@ export function NumberPad({
           ))}
         </View>
 
-        {/* Row 3: showMe or decimal (if applicable) */}
-        {onShowMe ? (
+        {/* Row 3: ± key, showMe, or decimal (if applicable) */}
+        {(allowNegative || onShowMe || showDecimal) && (
           <View style={styles.row}>
-            <Pressable
-              testID="numpad-show-me"
-              style={({ pressed }) => [
-                styles.key,
-                {
-                  backgroundColor: pressed
-                    ? colors.primaryLight + '30'
-                    : colors.surface,
-                  borderColor: colors.primaryLight + '20',
-                },
-              ]}
-              onPress={onShowMe}
-              accessibilityRole="button"
-              accessibilityLabel="Show me how"
-            >
-              <PulsingBulb />
-            </Pressable>
+            {allowNegative && (
+              <Pressable
+                testID="key-plus-minus"
+                style={({ pressed }) => [
+                  styles.key,
+                  styles.specialKey,
+                  {
+                    backgroundColor: pressed
+                      ? colors.primaryLight + '30'
+                      : colors.surface,
+                    borderColor: colors.primaryLight + '20',
+                  },
+                ]}
+                onPress={() => handlePress('±')}
+              >
+                <Text style={[styles.keyText, { color: colors.textPrimary }]}>
+                  ±
+                </Text>
+              </Pressable>
+            )}
+            {onShowMe && (
+              <Pressable
+                testID="numpad-show-me"
+                style={({ pressed }) => [
+                  styles.key,
+                  {
+                    backgroundColor: pressed
+                      ? colors.primaryLight + '30'
+                      : colors.surface,
+                    borderColor: colors.primaryLight + '20',
+                  },
+                ]}
+                onPress={onShowMe}
+                accessibilityRole="button"
+                accessibilityLabel="Show me how"
+              >
+                <PulsingBulb />
+              </Pressable>
+            )}
+            {!onShowMe && showDecimal && (
+              <Pressable
+                testID="numpad-key-."
+                style={({ pressed }) => [
+                  styles.key,
+                  {
+                    backgroundColor: pressed
+                      ? colors.primaryLight + '30'
+                      : colors.surface,
+                    borderColor: colors.primaryLight + '20',
+                  },
+                ]}
+                onPress={() => handlePress('.')}
+              >
+                <Text style={[styles.keyText, { color: colors.textPrimary }]}>
+                  .
+                </Text>
+              </Pressable>
+            )}
           </View>
-        ) : showDecimal ? (
-          <View style={styles.row}>
-            <Pressable
-              testID="numpad-key-."
-              style={({ pressed }) => [
-                styles.key,
-                {
-                  backgroundColor: pressed
-                    ? colors.primaryLight + '30'
-                    : colors.surface,
-                  borderColor: colors.primaryLight + '20',
-                },
-              ]}
-              onPress={() => handlePress('.')}
-            >
-              <Text style={[styles.keyText, { color: colors.textPrimary }]}>
-                .
-              </Text>
-            </Pressable>
-          </View>
-        ) : null}
+        )}
       </View>
     </View>
   );
@@ -298,6 +329,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyKey: {
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
+  },
+  specialKey: {
     width: BUTTON_SIZE,
     height: BUTTON_SIZE,
   },

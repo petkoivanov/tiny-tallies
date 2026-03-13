@@ -95,24 +95,26 @@ describe('NumberPad allowNegative', () => {
   });
 
   it('maxDigits={2} with allowNegative={true}: can type "-99" (2 significant digits)', () => {
-    const { getByText, getByTestId } = render(
+    const { getByTestId } = render(
       <NumberPad onSubmit={onSubmit} allowNegative={true} maxDigits={2} />,
     );
-    fireEvent.press(getByText('9'));
-    fireEvent.press(getByText('9'));
-    fireEvent.press(getByText('±'));
+    // Use testID for digit keys to avoid collision with display showing the same digit
+    fireEvent.press(getByTestId('numpad-key-9'));
+    fireEvent.press(getByTestId('numpad-key-9'));
+    fireEvent.press(getByTestId('key-plus-minus'));
     expect(getByTestId('numberpad-display').props.children).toBe('-99');
   });
 
   it('maxDigits={2} with allowNegative={true}: cannot append 3rd digit to "-99"', () => {
-    const { getByText, getByTestId } = render(
+    const { getByTestId } = render(
       <NumberPad onSubmit={onSubmit} allowNegative={true} maxDigits={2} />,
     );
-    fireEvent.press(getByText('9'));
-    fireEvent.press(getByText('9'));
-    fireEvent.press(getByText('±'));
+    // Use testID for digit keys to avoid collision with display showing the same digit
+    fireEvent.press(getByTestId('numpad-key-9'));
+    fireEvent.press(getByTestId('numpad-key-9'));
+    fireEvent.press(getByTestId('key-plus-minus'));
     // Try to append another digit
-    fireEvent.press(getByText('1'));
+    fireEvent.press(getByTestId('numpad-key-1'));
     expect(getByTestId('numberpad-display').props.children).toBe('-99');
   });
 });
