@@ -29,10 +29,11 @@ const ALL_OPERATIONS: MathDomain[] = [
   'statistics_hs',
   'systems_equations',
   'quadratic_equations',
+  'polynomials',
 ];
 
 describe('Domain Handler Registry', () => {
-  it('has a handler registered for all 24 operations', () => {
+  it('has a handler registered for all 25 operations', () => {
     for (const op of ALL_OPERATIONS) {
       const handler = getHandler(op);
       expect(handler).toBeDefined();
@@ -72,13 +73,13 @@ describe('Domain Handler Registry', () => {
     }
   });
 
-  it('all skills are covered across the 24 domains', () => {
+  it('all skills are covered across the 25 domains', () => {
     let total = 0;
     for (const op of ALL_OPERATIONS) {
       total += getSkillsByOperation(op).length;
     }
     expect(total).toBe(SKILLS.length);
-    expect(total).toBe(186);
+    expect(total).toBe(192);
   });
 
   it('handler generates valid answer types per domain', () => {
@@ -107,6 +108,7 @@ describe('Domain Handler Registry', () => {
       statistics_hs: ['numeric'],
       systems_equations: ['numeric'],
       quadratic_equations: ['multi_select'],
+      polynomials: ['numeric'],
     };
 
     for (const op of ALL_OPERATIONS) {
