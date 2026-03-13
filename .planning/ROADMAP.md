@@ -351,7 +351,11 @@ Plans:
   2. Evaluation problems produce numeric answers; factored-form identification problems produce ExpressionAnswer MC options with canonical string representations
   3. Word problem variants (area and perimeter expression contexts) generate correctly
   4. AI tutor hints for polynomial factoring guide students toward identifying the common factor or recognizing the difference-of-squares pattern without naming the answer
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 088-01-PLAN.md — Wave 0 RED test stubs (polynomials, registry counts 24→25, skill counts 186→192, wordProblems)
+- [ ] 088-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap, CpaSessionContent label support)
+- [ ] 088-03-PLAN.md — Word problem prefix templates + manual AI tutor QA (auto-approved)
 
 ### Phase 89: Exponential Functions Domain
 **Goal**: Students in grades 9-11 can practice evaluating exponential expressions and identifying growth/decay factors including half-life and doubling-time scenarios
@@ -457,7 +461,7 @@ Plans:
 | 85. Statistics Extensions Domain | v1.2 | 0/3 | Not started | - |
 | 86. Systems of Equations Domain | v1.2 | 0/? | Not started | - |
 | 87. Quadratic Equations Domain | v1.2 | 0/3 | Not started | - |
-| 88. Polynomial Operations Domain | v1.2 | 0/? | Not started | - |
+| 88. Polynomial Operations Domain | v1.2 | 0/3 | Not started | - |
 | 89. Exponential Functions Domain | v1.2 | 0/? | Not started | - |
 | 90. Logarithms Domain | v1.2 | 0/? | Not started | - |
 | 91. Integration & Placement | v1.2 | 0/? | Not started | - |
