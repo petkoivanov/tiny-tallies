@@ -18,7 +18,8 @@ export type MathDomain =
   | 'basic_graphs'
   | 'data_analysis';
 
-export type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+export const MAX_GRADE: Grade = 12;
 
 export interface OperandRange {
   min: number;
@@ -61,13 +62,20 @@ export interface ExpressionAnswer {
   readonly value: string;
 }
 
+/** Multi-select answer — student must select ALL correct values (e.g. quadratic roots) */
+export interface MultiSelectAnswer {
+  readonly type: 'multi_select';
+  readonly values: readonly number[];
+}
+
 /** Union of all answer types */
 export type Answer =
   | NumericAnswer
   | FractionAnswer
   | ComparisonAnswer
   | CoordinateAnswer
-  | ExpressionAnswer;
+  | ExpressionAnswer
+  | MultiSelectAnswer;
 
 /** Factory: create a numeric answer */
 export function numericAnswer(value: number): NumericAnswer {
@@ -92,8 +100,47 @@ export function answerNumericValue(answer: Answer): number {
       return answer.x;
     case 'expression':
       return parseFloat(answer.value) || 0;
+    case 'multi_select':
+      return answer.values[0] ?? 0; // Elo proxy — not used for grading
   }
 }
+
+/** Factory: create a multi-select answer */
+export function multiSelectAnswer(values: number[]): MultiSelectAnswer {
+  return { type: 'multi_select', values: Object.freeze([...values]) };
+}
+
+/**
+ * Compare two number arrays as sets (order-independent equality).
+ * Used by MultiSelectMC for all-or-nothing grading.
+ */
+export function setsEqual(a: readonly number[], b: readonly number[]): boolean {
+  if (a.length !== b.length) return false;
+  const setA = new Set(a);
+  return b.every((v) => setA.has(v));
+}
+
+/**
+ * Human-readable display string for any Answer.
+ * Used in BOOST-mode tutor prompts (must NOT be called in HINT or TEACH mode).
+ */
+export function answerDisplayValue(answer: Answer): string {
+  switch (answer.type) {
+    case 'numeric': return String(answer.value);
+    case 'fraction': return `${answer.numerator}/${answer.denominator}`;
+    case 'comparison': return answer.value;
+    case 'coordinate': return `(${answer.x}, ${answer.y})`;
+    case 'expression': return answer.value;
+    case 'multi_select': return answer.values.join(' and ');
+  }
+}
+
+/**
+ * Controls distractor generation strategy for a problem template.
+ * 'default' = bug library + ±1 adjacent + random fill
+ * 'domain_specific' = skip ±1 adjacent phase (domain provides meaningful distractors)
+ */
+export type DistractorStrategy = 'default' | 'domain_specific';
 
 // ---------------------------------------------------------------------------
 // Domain handler interface — each math domain implements this
@@ -152,6 +199,8 @@ export interface ProblemTemplate {
   digitCount: number;
   /** Domain-specific template configuration */
   domainConfig?: Record<string, unknown>;
+  /** Controls distractor generation strategy */
+  distractorStrategy?: DistractorStrategy;
 }
 
 export interface Problem {
@@ -166,6 +215,8 @@ export interface Problem {
   grade: Grade;
   baseElo: number;
   metadata: ProblemMetadata;
+  /** Controls distractor generation strategy */
+  distractorStrategy?: DistractorStrategy;
 }
 
 export interface GenerationParams {
