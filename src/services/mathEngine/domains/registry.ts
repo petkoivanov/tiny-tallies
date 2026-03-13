@@ -26,7 +26,7 @@ import { sequencesSeriesHandler } from './sequencesSeries';
 import { statisticsHsHandler } from './statisticsHs';
 import { systemsEquationsHandler } from './systemsEquations';
 import { quadraticEquationsHandler } from './quadraticEquations';
-import { placeholderHandler } from './placeholderHandler';
+import { polynomialsHandler } from './polynomials';
 
 const HANDLERS: Record<MathDomain, DomainHandler> = {
   addition: arithmeticHandler,
@@ -53,7 +53,7 @@ const HANDLERS: Record<MathDomain, DomainHandler> = {
   statistics_hs: statisticsHsHandler,
   systems_equations: systemsEquationsHandler,
   quadratic_equations: quadraticEquationsHandler,
-  polynomials: placeholderHandler,
+  polynomials: polynomialsHandler,
 };
 
 /** Get the domain handler for a given operation */

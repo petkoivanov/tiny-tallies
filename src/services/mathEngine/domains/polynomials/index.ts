@@ -1,0 +1,1 @@
+export { polynomialsHandler } from './polynomialsHandler';

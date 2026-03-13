@@ -64,6 +64,7 @@ const MANIPULATIVE_LABELS: Record<SessionManipulative, string> = {
 interface AnswerOption {
   readonly value: number;
   readonly bugId?: string;
+  readonly label?: string;
 }
 
 interface CpaSessionContentProps {
@@ -502,10 +503,10 @@ export function CpaSessionContent({
                     getOptionFeedbackStyle(option.value),
                   ]}
                   accessibilityRole="button"
-                  accessibilityLabel={`Answer ${option.value}`}
+                  accessibilityLabel={`Answer ${option.label ?? option.value}`}
                   testID={`answer-option-${index}`}
                 >
-                  <Text style={styles.optionText}>{option.value}</Text>
+                  <Text style={styles.optionText}>{option.label ?? String(option.value)}</Text>
                 </Pressable>
               </BoostHighlightWrapper>
             </AnswerFeedbackAnimation>

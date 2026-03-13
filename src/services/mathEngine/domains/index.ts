@@ -18,3 +18,4 @@ export { sequencesSeriesHandler } from './sequencesSeries';
 export { statisticsHsHandler } from './statisticsHs';
 export { systemsEquationsHandler } from './systemsEquations';
 export { quadraticEquationsHandler } from './quadraticEquations';
+export { polynomialsHandler } from './polynomials';
