@@ -355,7 +355,7 @@ Plans:
 Plans:
 - [x] 088-01-PLAN.md — Wave 0 RED test stubs (polynomials, registry counts 24→25, skill counts 186→192, wordProblems)
 - [x] 088-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap, CpaSessionContent label support)
-- [ ] 088-03-PLAN.md — Word problem prefix templates + manual AI tutor QA (auto-approved)
+- [x] 088-03-PLAN.md — Word problem prefix templates + manual AI tutor QA (auto-approved)
 
 ### Phase 89: Exponential Functions Domain
 **Goal**: Students in grades 9-11 can practice evaluating exponential expressions and identifying growth/decay factors including half-life and doubling-time scenarios
