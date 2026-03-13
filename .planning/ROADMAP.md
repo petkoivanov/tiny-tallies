@@ -290,7 +290,11 @@ Plans:
   2. Templates extend the existing patterns infrastructure and produce higher-order progressions (geometric ratios, partial sums) not present in the K-8 patterns domain
   3. Word problem variants (savings and growth contexts) generate correctly and pass reading level calibration
   4. AI tutor hints for sequences use Socratic questioning about the common difference or ratio without revealing the formula
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 084-01-PLAN.md — Wave 0 test stubs (sequencesSeries, registry counts, wordProblems)
+- [ ] 084-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap)
+- [ ] 084-03-PLAN.md — Word problem templates + manual AI tutor QA checkpoint
 
 ### Phase 85: Statistics Extensions Domain
 **Goal**: Students in grades 9-11 can practice standard deviation concepts, normal distribution properties, z-scores, and percentiles
@@ -437,7 +441,7 @@ Plans:
 | 81. YouTube Video Tutor | v1.2 | 0/4 | Not started | - |
 | 82. Linear Equations Domain | v1.2 | 0/3 | Not started | - |
 | 83. Coordinate Geometry Domain | v1.2 | 1/3 | In progress | - |
-| 84. Sequences & Series Domain | v1.2 | 0/? | Not started | - |
+| 84. Sequences & Series Domain | v1.2 | 0/3 | Not started | - |
 | 85. Statistics Extensions Domain | v1.2 | 0/? | Not started | - |
 | 86. Systems of Equations Domain | v1.2 | 0/? | Not started | - |
 | 87. Quadratic Equations Domain | v1.2 | 0/? | Not started | - |
