@@ -44,10 +44,10 @@
 
 ### Sequences & Series Domain
 
-- [ ] **SEQ-01**: `sequences_series` domain handler — arithmetic sequences, geometric sequences, nth-term formula, partial sums (G9-11, 5 skills)
-- [ ] **SEQ-02**: Sequences templates extending existing patterns infrastructure with higher-order progressions
-- [ ] **SEQ-03**: Word problem variants for sequences (savings/growth contexts)
-- [ ] **SEQ-04**: AI tutor prompt guidance for sequences & series
+- [x] **SEQ-01**: `sequences_series` domain handler — arithmetic sequences, geometric sequences, nth-term formula, partial sums (G9-11, 5 skills)
+- [x] **SEQ-02**: Sequences templates extending existing patterns infrastructure with higher-order progressions
+- [x] **SEQ-03**: Word problem variants for sequences (savings/growth contexts)
+- [x] **SEQ-04**: AI tutor prompt guidance for sequences & series
 
 ### Statistics Extensions Domain
 

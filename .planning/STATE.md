@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: completed
-stopped_at: Completed 083-03-PLAN.md (Phase 83 complete)
-last_updated: "2026-03-13T20:06:05.255Z"
+stopped_at: Completed 084-01-PLAN.md
+last_updated: "2026-03-13T20:34:55.703Z"
 last_activity: 2026-03-13 — Phase 83 Plan 03 complete (6 coordinate_geometry word problem prefix templates, manual QA sign-off on Socratic hints)
 progress:
   total_phases: 19
   completed_phases: 5
-  total_plans: 21
-  completed_plans: 20
+  total_plans: 24
+  completed_plans: 21
 ---
 
 # Project State
@@ -82,6 +82,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 083]: coord_word_problem skill ID avoids collision with linear_equations bare word_problem ID — computeNodePositions uses skillId as Map key
 - [Phase 083]: fractionAnswer factory added to types.ts for symmetry with numericAnswer factory
 - [Phase 083]: videoMap.ts future domain entries moved to comments — adding coordinate_geometry exposed invalid MathDomain keys (sequences_series etc)
+- [Phase 084-01]: arithmetic_partial_sum deferred to Phase 85+ — sequences_series implements 5 skills not 6
 
 ### Pending Todos
 
@@ -100,7 +101,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T19:30:00.000Z
-Stopped at: Completed 083-03-PLAN.md (Phase 83 complete)
+Last session: 2026-03-13T20:34:55.701Z
+Stopped at: Completed 084-01-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80
