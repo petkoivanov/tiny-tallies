@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: executing
-stopped_at: Completed 082-01-PLAN.md
-last_updated: "2026-03-13T16:25:00Z"
-last_activity: 2026-03-13 — Phase 82 Plan 01 complete (Wave 0 RED stubs for linear_equations domain)
+stopped_at: Completed 082-02-PLAN.md
+last_updated: "2026-03-13T16:36:04.934Z"
+last_activity: "2026-03-13 — Phase 82 Plan 02 complete (linear_equations domain: 8 skills, 8 templates, 3 bug patterns, handler, full wiring)"
 progress:
   total_phases: 19
   completed_phases: 3
-  total_plans: 15
-  completed_plans: 15
+  total_plans: 18
+  completed_plans: 16
 ---
 
 # Project State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 ## Current Position
 
 Phase: 82 of 91 (Linear Equations Domain)
-Plan: 1 of 4 in current phase
-Status: In progress — Plan 01 done
-Last activity: 2026-03-13 — Phase 82 Plan 01 complete (Wave 0 RED stubs: linearEquations.test.ts, updated registry+wordProblems tests)
+Plan: 2 of 4 in current phase
+Status: In progress — Plan 02 done
+Last activity: 2026-03-13 — Phase 82 Plan 02 complete (linear_equations domain: 8 skills, 8 templates, 3 bug patterns, handler, full wiring)
 
 ```
 v1.2: [#...........] 8% (1/12 phases)
@@ -73,6 +73,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 081]: showVideoSection requires all four conditions (ladderExhausted, youtubeConsentGranted, isOnline, valid videoId) — enforcing explicit parent opt-in and network gating
 - [Phase 081]: Video props are all optional on ChatPanelProps to avoid breaking existing render sites; videoOpen/voteDone are local ChatPanel state (not store) — transient UI state, not persisted
 - [Phase 081-04]: YouTube Videos section placed after AI Helper — logical grouping of child-content consent toggles; no new styles needed
+- [Phase 082]: Skill IDs use bare names (one_step_addition) not namespaced - matches Wave 0 test stubs
+- [Phase 082]: lin_sign_flip uses operands[0] (wrong-op) and operands[1] (constant b) per distractorGenerator call convention
 
 ### Pending Todos
 
@@ -90,7 +92,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T13:37:55.437Z
-Stopped at: Completed 081-04-PLAN.md
+Last session: 2026-03-13T16:36:04.932Z
+Stopped at: Completed 082-02-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80
