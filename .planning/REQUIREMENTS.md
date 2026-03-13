@@ -76,7 +76,7 @@
 - [x] **POLY-01**: `polynomials` domain handler — FOIL expansion, polynomial evaluation at a point, simple factoring (GCF, difference of squares) (G9-10, 6 skills)
 - [x] **POLY-02**: Polynomial templates with numeric answers (evaluation) and MC expression answers (factored form identification)
 - [ ] **POLY-03**: Word problem variants for polynomials (area/perimeter expressions)
-- [ ] **POLY-04**: AI tutor prompt guidance for polynomial operations
+- [x] **POLY-04**: AI tutor prompt guidance for polynomial operations
 
 ### Exponential Functions Domain
 

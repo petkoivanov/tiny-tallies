@@ -354,7 +354,7 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 088-01-PLAN.md — Wave 0 RED test stubs (polynomials, registry counts 24→25, skill counts 186→192, wordProblems)
-- [ ] 088-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap, CpaSessionContent label support)
+- [x] 088-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap, CpaSessionContent label support)
 - [ ] 088-03-PLAN.md — Word problem prefix templates + manual AI tutor QA (auto-approved)
 
 ### Phase 89: Exponential Functions Domain
