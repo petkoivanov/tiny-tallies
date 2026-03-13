@@ -31,8 +31,14 @@ export const videoMap: Partial<Record<MathDomain, string>> = {
   number_theory:  'ZTErpEEd3ok',   // Khan Academy: Factors and multiples
   basic_graphs:   'SjsA7Hldvtk',   // Khan Academy: Reading bar graphs
   data_analysis:  'hz5fDTrMqTg',   // Khan Academy: Data and statistics
-  // HS domains populated when phases 82-90 land:
-  // linear_equations, coordinate_geometry, sequences_series,
-  // statistics_hs, systems_equations, quadratic_equations,
-  // polynomials, exponential_functions, logarithms
+  // HS domains (phases 82-90):
+  linear_equations:      'bAerID24QJ0',  // Khan Academy: Algebra: Linear equations 1 | Algebra I
+  coordinate_geometry:   'N4nrdf0yYfM',  // Khan Academy: Introduction to the coordinate plane | Algebra I
+  sequences_series:      '_cooC3yG_p0',  // Khan Academy: Introduction to arithmetic sequences | Precalculus
+  statistics_hs:         'h8EYEJ32oQ8',  // Khan Academy: Statistics intro: Mean, median, and mode
+  systems_equations:     'nok99JOhcjo',  // Khan Academy: Systems of equations
+  quadratic_equations:   'IWigvJcCAJ0',  // Khan Academy: Introduction to the quadratic equation | Algebra I
+  polynomials:           'Vm7H0VTlIco',  // Khan Academy: Polynomials intro | High School Math
+  exponential_functions: '6WMZ7J0wwMI',  // Khan Academy: Exponential growth functions | Algebra II
+  logarithms:            'Z5myJ8dg_rM',  // Khan Academy: Logarithms | Algebra II
 };
