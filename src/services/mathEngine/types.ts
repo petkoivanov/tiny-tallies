@@ -16,7 +16,8 @@ export type MathDomain =
   | 'probability'
   | 'number_theory'
   | 'basic_graphs'
-  | 'data_analysis';
+  | 'data_analysis'
+  | 'linear_equations';
 
 export type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export const MAX_GRADE: Grade = 12;

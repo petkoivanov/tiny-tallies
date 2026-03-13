@@ -19,6 +19,7 @@ import { PROBABILITY_TEMPLATES } from './probability';
 import { NUMBER_THEORY_TEMPLATES } from './numberTheory';
 import { BASIC_GRAPHS_TEMPLATES } from './basicGraphs';
 import { DATA_ANALYSIS_TEMPLATES } from './dataAnalysis';
+import { LINEAR_EQUATIONS_TEMPLATES } from './linearEquations';
 
 export const ALL_TEMPLATES: readonly ProblemTemplate[] = [
   ...ADDITION_TEMPLATES,
@@ -41,6 +42,7 @@ export const ALL_TEMPLATES: readonly ProblemTemplate[] = [
   ...NUMBER_THEORY_TEMPLATES,
   ...BASIC_GRAPHS_TEMPLATES,
   ...DATA_ANALYSIS_TEMPLATES,
+  ...LINEAR_EQUATIONS_TEMPLATES,
 ];
 
 export function findTemplate(templateId: string): ProblemTemplate {
@@ -83,3 +85,4 @@ export { PROBABILITY_TEMPLATES } from './probability';
 export { NUMBER_THEORY_TEMPLATES } from './numberTheory';
 export { BASIC_GRAPHS_TEMPLATES } from './basicGraphs';
 export { DATA_ANALYSIS_TEMPLATES } from './dataAnalysis';
+export { LINEAR_EQUATIONS_TEMPLATES } from './linearEquations';

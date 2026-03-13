@@ -123,11 +123,16 @@ describe('Linear Equations Domain', () => {
       // Build a minimal Problem shape for generateDistractors
       const problem = {
         id: 'test-lin-1',
+        templateId: 'lin_one_step_add_sub',
+        skillId: 'one_step_addition',
+        standards: ['8.EE.C.7b'],
+        grade: 8 as const,
+        baseElo: 1000,
         operation: OPERATION,
         correctAnswer: domainData.correctAnswer,
         questionText: domainData.questionText,
         operands: domainData.operands,
-        metadata: domainData.metadata,
+        metadata: { digitCount: 1, requiresCarry: false, requiresBorrow: false, ...domainData.metadata },
         distractorStrategy: 'domain_specific' as const,
       };
 

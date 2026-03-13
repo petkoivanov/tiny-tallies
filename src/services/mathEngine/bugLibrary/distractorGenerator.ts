@@ -17,6 +17,7 @@ import { EXPONENTS_BUGS } from './exponentsBugs';
 import { EXPRESSIONS_BUGS } from './expressionsBugs';
 import { BASIC_GRAPHS_BUGS } from './basicGraphsBugs';
 import { DATA_ANALYSIS_BUGS } from './dataAnalysisBugs';
+import { LINEAR_EQUATIONS_BUGS } from './linearEquationsBugs';
 import { isValidDistractor, shuffleArray } from './validation';
 
 /** IDs of off-by-one patterns excluded from Phase 1 bug library lookup */
@@ -46,6 +47,7 @@ const BUGS_BY_OPERATION: Record<MathDomain, readonly BugPattern[]> = {
   number_theory: [],
   basic_graphs: BASIC_GRAPHS_BUGS,
   data_analysis: DATA_ANALYSIS_BUGS,
+  linear_equations: LINEAR_EQUATIONS_BUGS,
 };
 
 /**

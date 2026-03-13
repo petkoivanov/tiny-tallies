@@ -9,6 +9,7 @@ import type { SeededRng } from '../seededRng';
 /** Operations where negative distractors are plausible */
 const ALLOWS_NEGATIVES = new Set<MathDomain>([
   'expressions',
+  'linear_equations',
 ]);
 
 export function isValidDistractor(

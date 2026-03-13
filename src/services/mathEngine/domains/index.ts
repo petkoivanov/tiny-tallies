@@ -12,3 +12,4 @@ export { expressionsHandler } from './expressions';
 export { placeholderHandler } from './placeholderHandler';
 export { basicGraphsHandler } from './basicGraphs';
 export { dataAnalysisHandler } from './dataAnalysis';
+export { linearEquationsHandler } from './linearEquations';

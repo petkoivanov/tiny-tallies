@@ -21,6 +21,7 @@ export { EXPONENTS_BUGS } from './exponentsBugs';
 export { EXPRESSIONS_BUGS } from './expressionsBugs';
 export { BASIC_GRAPHS_BUGS } from './basicGraphsBugs';
 export { DATA_ANALYSIS_BUGS } from './dataAnalysisBugs';
+export { LINEAR_EQUATIONS_BUGS } from './linearEquationsBugs';
 
 // Validation utilities
 export { isValidDistractor, shuffleArray } from './validation';

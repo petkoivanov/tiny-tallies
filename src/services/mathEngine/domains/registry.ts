@@ -20,6 +20,7 @@ import { probabilityHandler } from './probability';
 import { numberTheoryHandler } from './numberTheory';
 import { basicGraphsHandler } from './basicGraphs';
 import { dataAnalysisHandler } from './dataAnalysis';
+import { linearEquationsHandler } from './linearEquations';
 
 const HANDLERS: Record<MathDomain, DomainHandler> = {
   addition: arithmeticHandler,
@@ -40,6 +41,7 @@ const HANDLERS: Record<MathDomain, DomainHandler> = {
   number_theory: numberTheoryHandler,
   basic_graphs: basicGraphsHandler,
   data_analysis: dataAnalysisHandler,
+  linear_equations: linearEquationsHandler,
 };
 
 /** Get the domain handler for a given operation */

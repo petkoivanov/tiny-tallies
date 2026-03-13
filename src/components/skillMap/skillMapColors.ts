@@ -98,6 +98,11 @@ export const skillMapColors = {
     light: '#14b8a6',
     lighter: '#5eead4',
   },
+  linear_equations: {
+    primary: '#1d4ed8',
+    light: '#3b82f6',
+    lighter: '#93c5fd',
+  },
   state: {
     lockedFill: '#374151',
     lockedRing: '#6b7280',
