@@ -15,3 +15,4 @@ export { dataAnalysisHandler } from './dataAnalysis';
 export { linearEquationsHandler } from './linearEquations';
 export { coordinateGeometryHandler } from './coordinateGeometry';
 export { sequencesSeriesHandler } from './sequencesSeries';
+export { statisticsHsHandler } from './statisticsHs';

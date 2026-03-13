@@ -35,8 +35,8 @@ export const videoMap: Partial<Record<MathDomain, string>> = {
   linear_equations:    'bAerID24QJ0',  // Khan Academy: Algebra: Linear equations 1 | Algebra I
   coordinate_geometry: 'N4nrdf0yYfM',  // Khan Academy: Introduction to the coordinate plane | Algebra I
   sequences_series: '_cooC3yG_p0',  // Khan Academy: Arithmetic sequences (Phase 84)
-  // Future domains (phases 85-90) — video IDs reserved for when those MathDomains land:
-  // statistics_hs:         'h8EYEJ32oQ8'  (Phase 85)
+  statistics_hs: 'h8EYEJ32oQ8',  // Khan Academy: Statistics HS (Phase 85)
+  // Future domains (phases 86-90) — video IDs reserved for when those MathDomains land:
   // systems_equations:     'nok99JOhcjo'  (Phase 86)
   // quadratic_equations:   'IWigvJcCAJ0'  (Phase 87)
   // polynomials:           'Vm7H0VTlIco'  (Phase 88)

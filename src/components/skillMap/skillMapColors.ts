@@ -113,6 +113,11 @@ export const skillMapColors = {
     light: '#38bdf8',
     lighter: '#7dd3fc',
   },
+  statistics_hs: {
+    primary: '#065f46',
+    light: '#10b981',
+    lighter: '#6ee7b7',
+  },
   state: {
     lockedFill: '#374151',
     lockedRing: '#6b7280',

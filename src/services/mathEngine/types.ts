@@ -19,7 +19,8 @@ export type MathDomain =
   | 'data_analysis'
   | 'linear_equations'
   | 'coordinate_geometry'
-  | 'sequences_series';
+  | 'sequences_series'
+  | 'statistics_hs';
 
 export type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export const MAX_GRADE: Grade = 12;

@@ -22,6 +22,7 @@ import { DATA_ANALYSIS_TEMPLATES } from './dataAnalysis';
 import { LINEAR_EQUATIONS_TEMPLATES } from './linearEquations';
 import { COORDINATE_GEOMETRY_TEMPLATES } from './coordinateGeometry';
 import { SEQUENCES_SERIES_TEMPLATES } from './sequencesSeries';
+import { STATISTICS_HS_TEMPLATES } from './statisticsHs';
 
 export const ALL_TEMPLATES: readonly ProblemTemplate[] = [
   ...ADDITION_TEMPLATES,
@@ -47,6 +48,7 @@ export const ALL_TEMPLATES: readonly ProblemTemplate[] = [
   ...LINEAR_EQUATIONS_TEMPLATES,
   ...COORDINATE_GEOMETRY_TEMPLATES,
   ...SEQUENCES_SERIES_TEMPLATES,
+  ...STATISTICS_HS_TEMPLATES,
 ];
 
 export function findTemplate(templateId: string): ProblemTemplate {
@@ -92,3 +94,4 @@ export { DATA_ANALYSIS_TEMPLATES } from './dataAnalysis';
 export { LINEAR_EQUATIONS_TEMPLATES } from './linearEquations';
 export { COORDINATE_GEOMETRY_TEMPLATES } from './coordinateGeometry';
 export { SEQUENCES_SERIES_TEMPLATES } from './sequencesSeries';
+export { STATISTICS_HS_TEMPLATES } from './statisticsHs';

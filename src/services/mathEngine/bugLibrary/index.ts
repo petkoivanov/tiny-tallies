@@ -24,6 +24,7 @@ export { DATA_ANALYSIS_BUGS } from './dataAnalysisBugs';
 export { LINEAR_EQUATIONS_BUGS } from './linearEquationsBugs';
 export { COORDINATE_GEOMETRY_BUGS } from './coordinateGeometryBugs';
 export { SEQUENCES_SERIES_BUGS } from './sequencesSeriesBugs';
+export { STATISTICS_HS_BUGS } from './statisticsHsBugs';
 
 // Validation utilities
 export { isValidDistractor, shuffleArray } from './validation';
