@@ -336,7 +336,11 @@ Plans:
   3. Distractors include wrong-sign roots and sum/product confusion values as distinct options in the checkbox list
   4. Word problem variants (area and projectile contexts) generate correctly
   5. BOOST-mode tutor prompt contains both roots via answerDisplayValue() and never leaks them in HINT or TEACH mode
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 087-01-PLAN.md — Wave 0 RED test stubs (quadraticEquations, multiSelect, registry counts 23→24, skill counts 180→186, wordProblems)
+- [ ] 087-02-PLAN.md — Core domain + multi-select pipeline (types, skills, templates, bugs, handler, formatAsMultiSelect, CpaSessionContent, tutor safety, wiring)
+- [ ] 087-03-PLAN.md — Word problem prefix templates + manual AI tutor QA (auto-approved)
 
 ### Phase 88: Polynomial Operations Domain
 **Goal**: Students in grades 9-10 can practice FOIL expansion, polynomial evaluation, and factoring (GCF and difference of squares)
@@ -452,7 +456,7 @@ Plans:
 | 84. Sequences & Series Domain | v1.2 | 3/3 | Complete | 2026-03-13 |
 | 85. Statistics Extensions Domain | v1.2 | 0/3 | Not started | - |
 | 86. Systems of Equations Domain | v1.2 | 0/? | Not started | - |
-| 87. Quadratic Equations Domain | v1.2 | 0/? | Not started | - |
+| 87. Quadratic Equations Domain | v1.2 | 0/3 | Not started | - |
 | 88. Polynomial Operations Domain | v1.2 | 0/? | Not started | - |
 | 89. Exponential Functions Domain | v1.2 | 0/? | Not started | - |
 | 90. Logarithms Domain | v1.2 | 0/? | Not started | - |
