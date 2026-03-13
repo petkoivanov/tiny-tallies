@@ -68,7 +68,7 @@
 - [x] **QUAD-01**: `quadratic_equations` domain handler — factoring monic quadratics with integer roots, quadratic formula for rational roots (G9-10, 6 skills)
 - [x] **QUAD-02**: Quadratic templates use `MultiSelectAnswer` + `MultiSelectPresentation` — student selects both roots from 4 options
 - [x] **QUAD-03**: Distractor generation for quadratic roots (wrong-sign roots, sum/product confusion bug patterns)
-- [ ] **QUAD-04**: Word problem variants for quadratics (area, projectile contexts)
+- [x] **QUAD-04**: Word problem variants for quadratics (area, projectile contexts)
 - [x] **QUAD-05**: AI tutor prompt guidance for quadratic equations
 
 ### Polynomial Operations Domain

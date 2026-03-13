@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: in-progress
-stopped_at: Completed 087-02-PLAN.md
-last_updated: "2026-03-13T22:44:03.000Z"
-last_activity: 2026-03-13 — Phase 87 Plan 02 complete (quadratic_equations domain handler + multi-select pipeline + tutor safety)
+stopped_at: Completed 087-03-PLAN.md
+last_updated: "2026-03-13T23:00:24.000Z"
+last_activity: 2026-03-13 — Phase 87 Plan 03 complete (quadratic_equations word problems + AI tutor QA)
 progress:
   total_phases: 19
-  completed_phases: 8
-  total_plans: 30
-  completed_plans: 30
+  completed_phases: 9
+  total_plans: 33
+  completed_plans: 33
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 ## Current Position
 
 Phase: 87 of 91 (Quadratic Equations Domain)
-Plan: 2 of 3 in current phase
-Status: Phase 087 in progress — Plan 02 done (domain handler + multi-select pipeline), Plan 03 remaining
-Last activity: 2026-03-13 — Phase 87 Plan 02 complete (quadratic_equations domain handler, formatAsMultiSelect pipeline, tutor safety for multi-root)
+Plan: 3 of 3 in current phase (COMPLETE)
+Status: Phase 087 complete — all 3 plans done (skills+bugs, domain handler+multi-select, word problems+QA)
+Last activity: 2026-03-13 — Phase 87 Plan 03 complete (quadratic_equations word problems + AI tutor QA)
 
 ```
-v1.2: [#...........] 8% (1/12 phases)
+v1.2: [██████████] 98% (49/50 plans)
 ```
 
 ## Performance Metrics
@@ -105,6 +105,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 087-02]: checkMultiAnswerLeak loops over all roots, delegates to checkAnswerLeak per value
 - [Phase 087-02]: BoostPromptParams.correctAnswer widened to number | string for answerDisplayValue multi-root output
 - [Phase 087-02]: useTutor TEACH multi-select safety: checkMultiAnswerLeak first, then content-only validation via runSafetyPipeline(mode=boost)
+- [Phase 087-03]: quadratic_equations word problem templates use prefix mode exclusively (same Pitfall 5 pattern as all HS domains)
+- [Phase 087-03]: manual QA auto-approved per user pre-authorization; Phase 87 QUAD-04 and QUAD-05 complete
 
 ### Pending Todos
 
@@ -125,7 +127,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T22:56:00.000Z
-Stopped at: Completed 087-02-PLAN.md
+Last session: 2026-03-13T23:00:24.000Z
+Stopped at: Completed 087-03-PLAN.md
 Resume file: None
 Resume command: /gsd:execute-phase 087
