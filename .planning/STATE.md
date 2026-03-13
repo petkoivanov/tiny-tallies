@@ -1,23 +1,23 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.8/v0.9
-milestone_name: Social & Subscription / Curriculum Expansion
-status: executing
-stopped_at: Completed domain handler architecture + all placeholder handler replacements
-last_updated: "2026-03-09T12:00:00.000Z"
-last_activity: 2026-03-09 -- Replaced all placeholder handlers with real domain generators (fractions G1-6, place value, time, money, patterns)
+milestone: v1.2
+milestone_name: High School Math Expansion
+status: defining_requirements
+stopped_at: Requirements definition in progress
+last_updated: "2026-03-12T00:00:00.000Z"
+last_activity: 2026-03-12 -- Milestone v1.2 started, defining requirements for K-12 expansion + high school math domains
 progress:
-  total_phases: 7
-  completed_phases: 3
-  total_plans: 10
-  completed_plans: 10
+  total_phases: 12
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-09)
+See: .planning/PROJECT.md (updated 2026-03-12)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
 **Current focus:** v0.9 curriculum expansion — domain handler architecture complete, all 9 domains generating real problems; v0.8 phases 41-44 remaining

@@ -2,7 +2,7 @@
 
 ## What This Is
 
-An AI-powered math learning mobile app for children ages 6-9+ (grades 1-8). Features adaptive daily practice sessions with programmatic problem generation across 16 math domains (addition, subtraction, multiplication, division, fractions, place value, time, money, patterns, measurement, ratios, exponents, expressions, decimals, integers, geometry, probability, number theory) with 132 skills, misconception-based distractors via Bug Library pattern (70+ bug patterns), Elo-based adaptive difficulty with probabilistic MC/free-text answer format selection and dynamic MC option count, deep gamification (XP/levels/streaks, 31 achievement badges, daily challenges, visual skill map), polished UI with animated feedback, NumberPad component, and 5 unlockable color themes, a full adaptive learning engine (BKT, Leitner spaced repetition, prerequisite graph, smart session orchestration), six interactive virtual manipulatives with CPA progression (Concrete -> Pictorial -> Abstract), an on-demand AI tutor powered by Gemini that provides Socratic hints, CPA-aware teaching with manipulative integration, and deep scaffolding — auto-escalating support based on struggle level with full COPPA-compliant safety pipeline, cross-session misconception detection with 2-then-3 confirmation, adaptive session mix, tutor context enrichment, and dedicated remediation mini-sessions, plus avatar/frame customization with achievement-unlockable cosmetics. Domain-specific problem generators produce real curriculum-aligned questions (not placeholder arithmetic). Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
+An AI-powered math learning mobile app for students grades K-12 (ages 6-18). Features adaptive daily practice sessions with programmatic problem generation across 16 math domains (addition, subtraction, multiplication, division, fractions, place value, time, money, patterns, measurement, ratios, exponents, expressions, decimals, integers, geometry, probability, number theory) with 132 skills, misconception-based distractors via Bug Library pattern (70+ bug patterns), Elo-based adaptive difficulty with probabilistic MC/free-text answer format selection and dynamic MC option count, deep gamification (XP/levels/streaks, 31 achievement badges, daily challenges, visual skill map), polished UI with animated feedback, NumberPad component, and 5 unlockable color themes, a full adaptive learning engine (BKT, Leitner spaced repetition, prerequisite graph, smart session orchestration), six interactive virtual manipulatives with CPA progression (Concrete -> Pictorial -> Abstract), an on-demand AI tutor powered by Gemini that provides Socratic hints, CPA-aware teaching with manipulative integration, and deep scaffolding — auto-escalating support based on struggle level with full COPPA-compliant safety pipeline, cross-session misconception detection with 2-then-3 confirmation, adaptive session mix, tutor context enrichment, and dedicated remediation mini-sessions, plus avatar/frame customization with achievement-unlockable cosmetics. Domain-specific problem generators produce real curriculum-aligned questions (not placeholder arithmetic). Sister product to Tiny Tales (children's storytelling app), sharing the same tech stack and patterns.
 
 ## Core Value
 
@@ -100,7 +100,33 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 ### Active
 
-## Current Milestone: v1.1 Monetization & Polish (Phases 70-79)
+- [ ] High school math expansion: 9 new domains covering Algebra 1/2, Pre-Calc topics (linear equations, systems, quadratics, polynomials, exponential, logarithms, coordinate geometry, sequences & series, statistics extensions) — grades 9-12
+- [ ] App repositioned to K-12 (grade type 1-12, onboarding/UI updated)
+- [ ] NumberPad `-` key for negative number answers
+- [ ] Multi-select MC answer format (checkboxes + Check button) for multi-root problems
+- [ ] YouTube video integration in AI tutor: "Watch a video" option when hint ladder exhausted
+
+## Current Milestone: v1.2 High School Math Expansion (Phases 80-?)
+
+**Goal:** Expand curriculum from K-8 to K-12, adding 9 new math domains across Algebra 1/2 and Pre-Calc topics, reposition the app to a wider grade range, and add YouTube-powered video hints in the AI tutor.
+
+**Status:** Defining requirements
+
+**Target features:**
+- Phase 80: Foundation — grade type K-12, app repositioning, NumberPad `-` key, multi-select MC answer type
+- Phase 81: YouTube video tutor integration (react-native-youtube-iframe, Khan Academy curated map, vote system)
+- Phase 82: Linear equations domain (Algebra 1, G8-9, 8 skills)
+- Phase 83: Coordinate geometry domain (G8-10, slope/distance/midpoint, 6 skills)
+- Phase 84: Sequences & series domain (G9-11, extend patterns, 5 skills)
+- Phase 85: Statistics extensions domain (G9-11, std dev/normal dist, extend data_analysis)
+- Phase 86: Systems of equations domain (G9-10, 2×2 integer solutions, 5 skills)
+- Phase 87: Quadratic equations domain (G9-10, factoring/formula, multi-select MC, 6 skills)
+- Phase 88: Polynomial operations domain (G9-10, FOIL/evaluation/factoring, 6 skills)
+- Phase 89: Exponential functions domain (G9-11, growth/decay, 5 skills)
+- Phase 90: Logarithms domain (G10-11, special values/basic rules, 4 skills)
+- Phase 91: Integration & placement test update (new domains in staircase, skill map, prerequisites)
+
+## Previous Milestone: v1.1 Monetization & Polish (Phases 70-79)
 
 **Goal:** Add freemium subscription with IAP, parental time controls, sound/audio feedback, and polish for App Store submission.
 
@@ -174,7 +200,7 @@ Personalized, AI-guided daily math practice that adapts to each child's level, d
 
 - Classroom/teacher mode — future product expansion
 - Multiple curricula beyond Common Core — reduce scope, add later
-- Ages outside 6-9 — clearest market gap, manageable content scope
+- ~~Ages outside 6-9~~ — expanded to K-12 in v1.2
 - Platform expansion (web, iOS-specific) — mobile-first
 - ~~Advanced analytics/reporting~~ ✓ Done (v0.9 Phase 57 — Parent Reports with AI summaries)
 - Real-time multiplayer — COPPA complexity, defer
