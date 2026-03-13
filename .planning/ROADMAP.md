@@ -244,7 +244,12 @@ Plans:
   3. Parent must grant YouTube consent in ParentalControlsScreen before the video player renders for the first time
   4. After the video ends, "Was this helpful?" vote buttons appear; vote is stored per domain and survives app restart
   5. The video player does not render when the device is offline; a graceful offline message appears instead
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 081-01-PLAN.md
+- [ ] 081-02-PLAN.md
+- [ ] 081-03-PLAN.md
+- [ ] 081-04-PLAN.md
 
 ### Phase 82: Linear Equations Domain
 **Goal**: Students in grades 8-9 can practice solving one-step, two-step, and multi-step linear equations with the full adaptive engine, misconception detection, and AI tutor support
@@ -421,7 +426,7 @@ Plans:
 | 57. Parent Reports Screen | v0.9 | 0/? | Not started | - |
 | 58. Integration Testing | v0.9 | 0/? | Not started | - |
 | 80. Foundation | v1.2 | 0/? | Not started | - |
-| 81. YouTube Video Tutor | v1.2 | 0/? | Not started | - |
+| 81. YouTube Video Tutor | v1.2 | 0/4 | Not started | - |
 | 82. Linear Equations Domain | v1.2 | 0/? | Not started | - |
 | 83. Coordinate Geometry Domain | v1.2 | 0/? | Not started | - |
 | 84. Sequences & Series Domain | v1.2 | 0/? | Not started | - |
