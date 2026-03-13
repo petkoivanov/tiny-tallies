@@ -37,10 +37,10 @@
 
 ### Coordinate Geometry Domain
 
-- [ ] **COORD-01**: `coordinate_geometry` domain handler — slope, distance formula, midpoint, equation of a line (G8-10, 6 skills)
-- [ ] **COORD-02**: Coordinate geometry templates with numeric answers (slope as fraction, distance/midpoint as numeric)
+- [x] **COORD-01**: `coordinate_geometry` domain handler — slope, distance formula, midpoint, equation of a line (G8-10, 6 skills)
+- [x] **COORD-02**: Coordinate geometry templates with numeric answers (slope as fraction, distance/midpoint as numeric)
 - [ ] **COORD-03**: Word problem variants for coordinate geometry (real-world distance/slope contexts)
-- [ ] **COORD-04**: AI tutor prompt guidance for coordinate geometry
+- [x] **COORD-04**: AI tutor prompt guidance for coordinate geometry
 
 ### Sequences & Series Domain
 

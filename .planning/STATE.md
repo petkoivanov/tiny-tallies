@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
-status: completed
-stopped_at: Completed 083-01-PLAN.md
-last_updated: "2026-03-13T19:03:00Z"
-last_activity: 2026-03-13 — Phase 83 Plan 01 complete (Wave 0 RED test stubs for coordinate_geometry domain, 4 test files updated)
+status: executing
+stopped_at: Completed 083-02-PLAN.md
+last_updated: "2026-03-13T19:12:33.889Z"
+last_activity: 2026-03-13 — Phase 83 Plan 02 complete (coordinate_geometry domain handler, 6 generators, 6 skills, 7 templates, 3 bug patterns, full registry wiring)
 progress:
   total_phases: 19
   completed_phases: 4
-  total_plans: 18
-  completed_plans: 17
+  total_plans: 21
+  completed_plans: 19
 ---
 
 # Project State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 ## Current Position
 
 Phase: 83 of 91 (Coordinate Geometry Domain)
-Plan: 1 of 3 in current phase
-Status: In progress — Plan 01 done
-Last activity: 2026-03-13 — Phase 83 Plan 01 complete (Wave 0 RED test stubs for coordinate_geometry domain, 4 test files updated)
+Plan: 2 of 3 in current phase
+Status: In progress — Plan 02 done
+Last activity: 2026-03-13 — Phase 83 Plan 02 complete (coordinate_geometry domain handler, 6 generators, 6 skills, 7 templates, 3 bug patterns, full registry wiring)
 
 ```
 v1.2: [#...........] 8% (1/12 phases)
@@ -79,6 +79,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 083-01]: coordinateGeometry.test.ts uses inline gcd helper — avoids importing from fractions/utils for test-only utility; keeps test self-contained
 - [Phase 083-01]: prerequisiteGating count resolved 151→165 in one step — Phase 82 did not update it, this plan jumps directly to post-Phase-83 value
 - [Phase 083-01]: slope distractor test uses distance skill (integer answer) — FractionAnswer has different generateDistractors path, numeric path is cleaner for Wave 0 stubs
+- [Phase 083]: coord_word_problem skill ID avoids collision with linear_equations bare word_problem ID — computeNodePositions uses skillId as Map key
+- [Phase 083]: fractionAnswer factory added to types.ts for symmetry with numericAnswer factory
+- [Phase 083]: videoMap.ts future domain entries moved to comments — adding coordinate_geometry exposed invalid MathDomain keys (sequences_series etc)
 
 ### Pending Todos
 
@@ -96,7 +99,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T19:03:00Z
-Stopped at: Completed 083-01-PLAN.md
+Last session: 2026-03-13T19:12:33.886Z
+Stopped at: Completed 083-02-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80
