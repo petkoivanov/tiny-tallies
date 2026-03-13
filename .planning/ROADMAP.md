@@ -226,7 +226,13 @@ Plans:
   3. A problem with two correct roots renders as checkboxes; tapping both and pressing "Check" evaluates all-or-nothing and advances the session
   4. The safety pipeline correctly flags negative numbers as answer leaks (checkAnswerLeak("-3") returns safe: false)
   5. AI tutor hints for a 16-year-old student use algebra-appropriate register (AgeBracket '14-18' resolves without undefined lookup)
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 080-01-PLAN.md — Wave 0 test stubs (migrations, NumberPad, answerTypes, MultiSelectMC)
+- [ ] 080-02-PLAN.md — Type system expansion (Grade 1-12, AgeBracket, MultiSelectAnswer, DistractorStrategy)
+- [ ] 080-03-PLAN.md — Consumers and migration (safetyFilter fix, BKT/Leitner, distractorGenerator, v21->v22)
+- [ ] 080-04-PLAN.md — UI components (NumberPad ± key, MultiSelectMC checkbox component)
+- [ ] 080-05-PLAN.md — K-12 repositioning copy (ProfileCreationWizard ages/grades)
 
 ### Phase 81: YouTube Video Tutor
 **Goal**: Students who exhaust the hint ladder can watch a curated instructional video inline without leaving the app or exposing personal data
