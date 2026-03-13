@@ -17,7 +17,8 @@ export type MathDomain =
   | 'number_theory'
   | 'basic_graphs'
   | 'data_analysis'
-  | 'linear_equations';
+  | 'linear_equations'
+  | 'coordinate_geometry';
 
 export type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export const MAX_GRADE: Grade = 12;
@@ -81,6 +82,11 @@ export type Answer =
 /** Factory: create a numeric answer */
 export function numericAnswer(value: number): NumericAnswer {
   return { type: 'numeric', value };
+}
+
+/** Factory: create a fraction answer */
+export function fractionAnswer(numerator: number, denominator: number): FractionAnswer {
+  return { type: 'fraction', numerator, denominator };
 }
 
 /**
