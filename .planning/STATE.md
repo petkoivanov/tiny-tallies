@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: High School Math Expansion
-status: defining_requirements
-stopped_at: Requirements definition in progress
+status: ready_to_plan
+stopped_at: Roadmap created — ready to plan Phase 80
 last_updated: "2026-03-12T00:00:00.000Z"
-last_activity: 2026-03-12 -- Milestone v1.2 started, defining requirements for K-12 expansion + high school math domains
+last_activity: 2026-03-12 -- v1.2 roadmap created (12 phases, 80-91, 64 requirements mapped)
 progress:
   total_phases: 12
   completed_phases: 0
@@ -20,31 +20,26 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-12)
 
 **Core value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles.
-**Current focus:** v0.9 curriculum expansion — domain handler architecture complete, all 9 domains generating real problems; v0.8 phases 41-44 remaining
+**Current focus:** v1.2 Phase 80 — Foundation (type system, safety fixes, NumberPad negative input, MultiSelectMC, store migration, K-12 repositioning)
 
 ## Current Position
 
-Phase: Pre-v0.9 domain handler work -- COMPLETE
-Next: v0.8 Phase 41 (Session History) or v0.9 remaining phases (word problems, NumberPad, AnalogClock, CoinDisplay, etc.)
-Status: All placeholder handlers replaced with domain-specific generators. 127 test suites, 1,932 tests passing.
-Last activity: 2026-03-09 -- Implemented time, money, patterns domain handlers; updated bug libraries
+Phase: 80 of 91 (Foundation)
+Plan: 0 of ? in current phase
+Status: Ready to plan
+Last activity: 2026-03-12 — Roadmap created for v1.2, all 64 requirements mapped across phases 80-91
 
 ```
-v0.8: [====......] 43% (3/7 phases complete)
-v0.9: [===.......] ~30% (domain handlers complete, UI/integration phases remaining)
+v1.2: [............] 0% (0/12 phases)
 ```
 
 ## Performance Metrics
 
-**Velocity:**
+**Velocity (prior milestones):**
 - v0.1: 12 plans in 2 days
-- v0.2: 7 plans in 1 day
-- v0.3: 15 plans in 2 days
-- v0.4: 17 plans in 1 day
 - v0.5: 13 plans in 1 day
-- v0.6: 7 plans in 1 day
 - v0.7: 17 plans in 2 days
-- v0.8 (so far): 10 plans across 3 phases in 2 days
+- v0.9 domain handlers: ~9 domains in 1 day
 
 ## Accumulated Context
 
@@ -52,49 +47,31 @@ v0.9: [===.......] ~30% (domain handlers complete, UI/integration phases remaini
 
 Full decision log in PROJECT.md Key Decisions table.
 
-**Pre-v0.9 math engine decisions:**
-- Answer type changed from `number` to discriminated union (`NumericAnswer | FractionAnswer | ComparisonAnswer | CoordinateAnswer | ExpressionAnswer`)
-- `DomainHandler` interface: each domain implements `generate(template, rng) → DomainProblemData`
-- Grade type expanded from `1 | 2 | 3 | 4` to `1 | 2 | 3 | 4 | 5 | 6 | 7 | 8`
-- Fractions extended to grade 6 (4 new skills: add/subtract unlike, multiply fractions, divide unit fractions, divide fractions)
-- All non-arithmetic answers framed as integers for MC compatibility (e.g., missing numerator, cents, elapsed minutes)
-- Domain handler subdirectories for larger handlers (fractions: 5 files), single generators.ts for smaller ones
-- Bug libraries updated with domain-specific operand semantics (not placeholder `a + b`)
-
-**v0.8 execution decisions:**
-- ChildData makes childName/childAge/childGrade non-nullable (new profiles always have values)
-- Pre-mastered skills: eloRating 1100, masteryLocked true, leitnerBox 5, cpaLevel abstract
-- Copy-on-switch pattern for multi-child store (keep flat slice interfaces, hydrate/dehydrate on switch)
-- Cloudflare Workers + D1 backend (same pattern as Tiny Tales)
-- JWT verification via jose JWKS (no Firebase dependency)
-- Incremental delta sync (append-only scores, additive badges, MAX skill states)
-- Module-level Sentry.init before Sentry.wrap (synchronous init, async opt-out)
-- Privacy disclosure as step inside ProfileSetupScreen (PIN → Disclosure → Wizard)
-- API key shared between mobile client and backend (set via wrangler secret)
-
-**v0.8 infrastructure:**
-- Backend URL: https://tiny-tallies-api.magic-mirror-works.workers.dev
-- D1 database: tiny-tallies-db (ID: f871e708-9a2e-4d1d-b367-c5e14d4a25b6)
-- Sentry DSN: https://2c43d29d84b9771541720d5df45c5477@o4510677327675392.ingest.us.sentry.io/4511004483977216
-- STORE_VERSION: 14 (v12→v13 multi-child, v13→v14 auth state)
-- Test count: 1,932 tests across 127 suites (LOC: ~55,500 TypeScript, 388 source files)
-- All 9 math domains now have real domain-specific handlers (no more placeholders)
+**v1.2 key architectural decisions:**
+- Phase 80 is a hard blocker for all other v1.2 phases — type system, safety fixes, and store migration must land first
+- MultiSelectAnswer correctness uses setsEqual(), not sum comparison — answerNumericValue() is Elo proxy only
+- videoMap.ts is a module constant (not a store slice) — video IDs updated via OTA release, not Zustand migration
+- All 9 domain handlers use construction-from-answer pattern — generate answer first, build problem around it
+- Phase 87 (Quadratics) has explicit dependency on FOUND-06 (MultiSelectAnswer) and FOUND-07 (MultiSelectMC) from Phase 80
+- Phase 91 must be last — requires all 9 domain skill registrations to be present
 
 ### Pending Todos
 
 - EAS Build setup needed before Phase 43 (IAP does not work in Expo Go)
 - RevenueCat account + App Store Connect / Play Console product setup needed before Phase 43
-- Grandfathering product decision needed before Phase 43 (existing users have free AI tutor + themes)
+- Grandfathering product decision needed before Phase 43
 - Privacy policy update for RevenueCat disclosure (COPPA compliance)
 
 ### Blockers/Concerns
 
+- Phase 81 (YouTube): react-native-youtube-iframe New Architecture compatibility not explicitly documented — run proof-of-concept on real device early in Phase 81
+- Phase 82 (Linear equations): Manual review of 10+ Gemini Socratic hint outputs required before Phase 82 ships (algebra hints are novel territory)
+- Phase 91 (Integration): Prerequisite DAG edge completeness needs curriculum review against Common Core HS standards before encoding
 - COPPA 2025 amendments expand scope (compliance deadline April 22, 2026)
-- Apple Kids Category + subscription = heightened review scrutiny (budget for rejection cycles)
 
 ## Session Continuity
 
-Last session: 2026-03-09T12:00:00.000Z
-Stopped at: Completed all domain handler replacements (fractions, place value, time, money, patterns)
+Last session: 2026-03-12T00:00:00.000Z
+Stopped at: Roadmap created for v1.2 High School Math Expansion
 Resume file: None
-Resume command: /gsd:progress (to check what's next)
+Resume command: /gsd:plan-phase 80

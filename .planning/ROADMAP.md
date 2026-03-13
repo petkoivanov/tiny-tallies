@@ -11,6 +11,7 @@
 - ✅ **v0.7 Gamification** — Phases 31-37 (shipped 2026-03-06)
 - **v0.8 Social & Subscription** — Phases 38-44
 - **v0.9 Full Curriculum Expansion** — Phases 45-58 (domain handlers complete 2026-03-09, UI/integration phases remaining)
+- 📋 **v1.2 High School Math Expansion** — Phases 80-91 (planned)
 
 ## Phases
 
@@ -102,6 +103,21 @@
 - [ ] **Phase 42: Parent Dashboard** - PIN-gated parent navigator with progress, misconception, and trend views
 - [ ] **Phase 43: Parental Time Controls** - Daily session caps, bedtime lockout, and break reminders per child
 - [ ] **Phase 44: Freemium Subscription & IAP** - RevenueCat integration, paywall, feature gating, restore purchases
+
+### v1.2 High School Math Expansion (Phases 80-91)
+
+- [ ] **Phase 80: Foundation** - Grade 1-12 type expansion, safety fixes, NumberPad negative input, MultiSelectMC, store migration, K-12 repositioning
+- [ ] **Phase 81: YouTube Video Tutor** - react-native-youtube-iframe, COPPA consent gate, inline player, curated videoMap, vote system
+- [ ] **Phase 82: Linear Equations Domain** - linear_equations domain handler, templates, bug patterns, word problems, tutor guidance (G8-9)
+- [ ] **Phase 83: Coordinate Geometry Domain** - coordinate_geometry domain handler, templates, bug patterns, word problems, tutor guidance (G8-10)
+- [ ] **Phase 84: Sequences & Series Domain** - sequences_series domain handler, templates, bug patterns, word problems, tutor guidance (G9-11)
+- [ ] **Phase 85: Statistics Extensions Domain** - statistics_hs domain handler, templates, bug patterns, word problems, tutor guidance (G9-11)
+- [ ] **Phase 86: Systems of Equations Domain** - systems_equations domain handler, templates, bug patterns, word problems, tutor guidance (G9-10)
+- [ ] **Phase 87: Quadratic Equations Domain** - quadratic_equations domain handler with MultiSelectAnswer, templates, bug patterns, word problems, tutor guidance (G9-10)
+- [ ] **Phase 88: Polynomial Operations Domain** - polynomials domain handler, templates, bug patterns, word problems, tutor guidance (G9-10)
+- [ ] **Phase 89: Exponential Functions Domain** - exponential_functions domain handler, templates, bug patterns, word problems, tutor guidance (G9-11)
+- [ ] **Phase 90: Logarithms Domain** - logarithms domain handler, templates, bug patterns, word problems, tutor guidance (G10-11)
+- [ ] **Phase 91: Integration & Placement** - Placement staircase to grade 12, prerequisite DAG HS edges, skill map layout, existing-user migration, domain intro strings
 
 ## Phase Details
 
@@ -200,6 +216,142 @@ Plans:
   5. All purchase and subscription UI is accessible only after entering the parental PIN
 **Plans**: TBD
 
+### Phase 80: Foundation
+**Goal**: The type system, safety pipeline, and store migration are ready to support K-12 grades and multi-select answer formats so all high school domain phases can proceed
+**Depends on**: Nothing (first phase of v1.2; v1.1 phases 70-79 are independent)
+**Requirements**: FOUND-01, FOUND-02, FOUND-03, FOUND-04, FOUND-05, FOUND-06, FOUND-07, FOUND-08, FOUND-09
+**Success Criteria** (what must be TRUE):
+  1. ProfileCreationWizard grade picker accepts grades 1-12 and the store persists grade values up to 12 without error
+  2. A student can enter a negative number answer (e.g., -3) using the NumberPad ± key and submit it correctly
+  3. A problem with two correct roots renders as checkboxes; tapping both and pressing "Check" evaluates all-or-nothing and advances the session
+  4. The safety pipeline correctly flags negative numbers as answer leaks (checkAnswerLeak("-3") returns safe: false)
+  5. AI tutor hints for a 16-year-old student use algebra-appropriate register (AgeBracket '14-18' resolves without undefined lookup)
+**Plans**: TBD
+
+### Phase 81: YouTube Video Tutor
+**Goal**: Students who exhaust the hint ladder can watch a curated instructional video inline without leaving the app or exposing personal data
+**Depends on**: Phase 80
+**Requirements**: VIDEO-01, VIDEO-02, VIDEO-03, VIDEO-04, VIDEO-05, VIDEO-06
+**Success Criteria** (what must be TRUE):
+  1. After BOOST mode completes, a "Watch a video" button appears in ChatPanel and is absent at all earlier tutor stages
+  2. Tapping "Watch a video" opens an inline YouTube player using youtube-nocookie.com; no related videos appear after playback
+  3. Parent must grant YouTube consent in ParentalControlsScreen before the video player renders for the first time
+  4. After the video ends, "Was this helpful?" vote buttons appear; vote is stored per domain and survives app restart
+  5. The video player does not render when the device is offline; a graceful offline message appears instead
+**Plans**: TBD
+
+### Phase 82: Linear Equations Domain
+**Goal**: Students in grades 8-9 can practice solving one-step, two-step, and multi-step linear equations with the full adaptive engine, misconception detection, and AI tutor support
+**Depends on**: Phase 80
+**Requirements**: LIN-01, LIN-02, LIN-03, LIN-04
+**Success Criteria** (what must be TRUE):
+  1. linear_equations domain appears in the domain registry and generates valid problems across all 8 skills for grades 8-9
+  2. Wrong answers reflect algebra-specific bug patterns (wrong-operation, sign-flip, forgot-to-divide) as distractors
+  3. Word problem variants (age, distance, money contexts) generate correctly and pass the word problem system's reading level calibration
+  4. AI tutor hints for linear equations use Socratic balance-model framing and never state the solution step directly
+**Plans**: TBD
+
+### Phase 83: Coordinate Geometry Domain
+**Goal**: Students in grades 8-10 can practice slope, distance, midpoint, and equation-of-a-line problems with the full adaptive engine
+**Depends on**: Phase 80
+**Requirements**: COORD-01, COORD-02, COORD-03, COORD-04
+**Success Criteria** (what must be TRUE):
+  1. coordinate_geometry domain generates valid problems across all 6 skills (slope, distance formula, midpoint, line equation) for grades 8-10
+  2. Slope answers expressed as fractions and distance/midpoint answers expressed as numerics are graded correctly
+  3. Word problem variants (real-world distance/slope contexts) generate without error
+  4. AI tutor hints for coordinate geometry guide students toward the relevant formula without revealing substitution steps
+**Plans**: TBD
+
+### Phase 84: Sequences & Series Domain
+**Goal**: Students in grades 9-11 can practice arithmetic and geometric sequences, nth-term formulas, and partial sums
+**Depends on**: Phase 80
+**Requirements**: SEQ-01, SEQ-02, SEQ-03, SEQ-04
+**Success Criteria** (what must be TRUE):
+  1. sequences_series domain generates valid problems across all 5 skills for grades 9-11
+  2. Templates extend the existing patterns infrastructure and produce higher-order progressions (geometric ratios, partial sums) not present in the K-8 patterns domain
+  3. Word problem variants (savings and growth contexts) generate correctly and pass reading level calibration
+  4. AI tutor hints for sequences use Socratic questioning about the common difference or ratio without revealing the formula
+**Plans**: TBD
+
+### Phase 85: Statistics Extensions Domain
+**Goal**: Students in grades 9-11 can practice standard deviation concepts, normal distribution properties, z-scores, and percentiles
+**Depends on**: Phase 80
+**Requirements**: STATS-01, STATS-02, STATS-03, STATS-04
+**Success Criteria** (what must be TRUE):
+  1. statistics_hs domain generates valid problems across all 5 skills (standard deviation concept, normal distribution, z-scores, percentiles) for grades 9-11
+  2. Templates extend the existing data_analysis infrastructure and do not duplicate any existing K-8 statistics skills
+  3. Word problem variants (survey and test-score contexts) generate correctly
+  4. AI tutor hints distinguish conceptual questions (normal distribution properties) from computational ones (z-score calculation) in their framing
+**Plans**: TBD
+
+### Phase 86: Systems of Equations Domain
+**Goal**: Students in grades 9-10 can practice solving 2×2 linear systems by substitution and elimination with integer solutions
+**Depends on**: Phase 80
+**Requirements**: SYS-01, SYS-02, SYS-03, SYS-04
+**Success Criteria** (what must be TRUE):
+  1. systems_equations domain generates valid problems across all 5 skills for grades 9-10, all with integer solutions
+  2. Distractors reflect algebra-specific bug patterns (swapped-variable, sign-error) rather than generic ±1 adjacency
+  3. Word problem variants (two-variable real-world scenarios) generate correctly
+  4. AI tutor hints guide students to choose a method (substitution or elimination) using Socratic prompts without prescribing the next step
+**Plans**: TBD
+
+### Phase 87: Quadratic Equations Domain
+**Goal**: Students in grades 9-10 can practice factoring and solving quadratic equations with two roots using the multi-select answer format
+**Depends on**: Phase 80 (requires MultiSelectAnswer type from FOUND-06, MultiSelectMC component from FOUND-07)
+**Requirements**: QUAD-01, QUAD-02, QUAD-03, QUAD-04, QUAD-05
+**Success Criteria** (what must be TRUE):
+  1. quadratic_equations domain generates valid problems across all 6 skills for grades 9-10; all templates produce real integer roots (discriminant is always a perfect square)
+  2. Two-root problems render as MultiSelectMC checkboxes; selecting both correct roots and pressing "Check" scores as correct; selecting only one root scores as incorrect (all-or-nothing)
+  3. Distractors include wrong-sign roots and sum/product confusion values as distinct options in the checkbox list
+  4. Word problem variants (area and projectile contexts) generate correctly
+  5. BOOST-mode tutor prompt contains both roots via answerDisplayValue() and never leaks them in HINT or TEACH mode
+**Plans**: TBD
+
+### Phase 88: Polynomial Operations Domain
+**Goal**: Students in grades 9-10 can practice FOIL expansion, polynomial evaluation, and factoring (GCF and difference of squares)
+**Depends on**: Phase 80
+**Requirements**: POLY-01, POLY-02, POLY-03, POLY-04
+**Success Criteria** (what must be TRUE):
+  1. polynomials domain generates valid problems across all 6 skills for grades 9-10
+  2. Evaluation problems produce numeric answers; factored-form identification problems produce ExpressionAnswer MC options with canonical string representations
+  3. Word problem variants (area and perimeter expression contexts) generate correctly
+  4. AI tutor hints for polynomial factoring guide students toward identifying the common factor or recognizing the difference-of-squares pattern without naming the answer
+**Plans**: TBD
+
+### Phase 89: Exponential Functions Domain
+**Goal**: Students in grades 9-11 can practice evaluating exponential expressions and identifying growth/decay factors including half-life and doubling-time scenarios
+**Depends on**: Phase 80
+**Requirements**: EXP-01, EXP-02, EXP-03, EXP-04
+**Success Criteria** (what must be TRUE):
+  1. exponential_functions domain generates valid problems across all 5 skills for grades 9-11; all answers are integers (integer base and exponent inputs only)
+  2. Growth vs. decay factor identification problems generate correctly as MC with base values above and below 1 as distractors
+  3. Word problem variants (population, bacteria, investment contexts) generate correctly and pass reading level calibration
+  4. AI tutor hints help students reason about the base value's relationship to growth/decay without stating the factor directly
+**Plans**: TBD
+
+### Phase 90: Logarithms Domain
+**Goal**: Students in grades 10-11 can practice evaluating logarithms at special values and applying basic log rules, with integer-only answers
+**Depends on**: Phase 80
+**Requirements**: LOG-01, LOG-02, LOG-03, LOG-04
+**Success Criteria** (what must be TRUE):
+  1. logarithms domain generates valid problems across all 4 skills for grades 10-11; all answers are integers (special values only — no floating point)
+  2. Templates cover log₁₀, log₂, and ln at integer powers without requiring log-law symbolic manipulation
+  3. Word problem variants (pH, decibel, Richter scale contexts) generate correctly
+  4. AI tutor hints guide students to reason about "what power gives this result" using Socratic questioning
+**Plans**: TBD
+
+### Phase 91: Integration & Placement
+**Goal**: All 9 new high school domains are reachable through the placement staircase and prerequisite graph, and existing users capped at grade 8 can be re-assessed into grade 9-12 content
+**Depends on**: Phase 80, Phase 82, Phase 83, Phase 84, Phase 85, Phase 86, Phase 87, Phase 88, Phase 89, Phase 90
+**Requirements**: INT-01, INT-02, INT-03, INT-04, INT-05
+**Success Criteria** (what must be TRUE):
+  1. Placement staircase reaches grade 12 — a student answering correctly at grade 8 can be promoted into grade 9 content and continue up to grade 12
+  2. The prerequisite DAG includes HS edges (linear_equations → systems_equations → quadratic_equations → polynomials, exponents → exponential_functions → logarithms, data_analysis → statistics_hs) so HS skills unlock in curriculum order
+  3. The skill map renders all 27 domains without overflow or node collisions at standard phone screen sizes
+  4. An existing user previously capped at grade 8 is offered a re-assessment trigger on the home screen if their grade-8 BKT mastery exceeds 80%
+  5. All 9 new domains display correct intro strings when a skill is first encountered in session
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -262,3 +414,15 @@ Plans:
 | 56. Level Indicator + Elo Transparency | v0.9 | 0/? | Not started | - |
 | 57. Parent Reports Screen | v0.9 | 0/? | Not started | - |
 | 58. Integration Testing | v0.9 | 0/? | Not started | - |
+| 80. Foundation | v1.2 | 0/? | Not started | - |
+| 81. YouTube Video Tutor | v1.2 | 0/? | Not started | - |
+| 82. Linear Equations Domain | v1.2 | 0/? | Not started | - |
+| 83. Coordinate Geometry Domain | v1.2 | 0/? | Not started | - |
+| 84. Sequences & Series Domain | v1.2 | 0/? | Not started | - |
+| 85. Statistics Extensions Domain | v1.2 | 0/? | Not started | - |
+| 86. Systems of Equations Domain | v1.2 | 0/? | Not started | - |
+| 87. Quadratic Equations Domain | v1.2 | 0/? | Not started | - |
+| 88. Polynomial Operations Domain | v1.2 | 0/? | Not started | - |
+| 89. Exponential Functions Domain | v1.2 | 0/? | Not started | - |
+| 90. Logarithms Domain | v1.2 | 0/? | Not started | - |
+| 91. Integration & Placement | v1.2 | 0/? | Not started | - |
