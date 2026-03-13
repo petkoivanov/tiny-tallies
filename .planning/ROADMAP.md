@@ -109,7 +109,7 @@
 - [x] **Phase 80: Foundation** - Grade 1-12 type expansion, safety fixes, NumberPad negative input, MultiSelectMC, store migration, K-12 repositioning (completed 2026-03-13)
 - [ ] **Phase 81: YouTube Video Tutor** - react-native-youtube-iframe, COPPA consent gate, inline player, curated videoMap, vote system
 - [ ] **Phase 82: Linear Equations Domain** - linear_equations domain handler, templates, bug patterns, word problems, tutor guidance (G8-9)
-- [ ] **Phase 83: Coordinate Geometry Domain** - coordinate_geometry domain handler, templates, bug patterns, word problems, tutor guidance (G8-10)
+- [x] **Phase 83: Coordinate Geometry Domain** - coordinate_geometry domain handler, templates, bug patterns, word problems, tutor guidance (G8-10) (completed 2026-03-13)
 - [ ] **Phase 84: Sequences & Series Domain** - sequences_series domain handler, templates, bug patterns, word problems, tutor guidance (G9-11)
 - [ ] **Phase 85: Statistics Extensions Domain** - statistics_hs domain handler, templates, bug patterns, word problems, tutor guidance (G9-11)
 - [ ] **Phase 86: Systems of Equations Domain** - systems_equations domain handler, templates, bug patterns, word problems, tutor guidance (G9-10)
@@ -278,8 +278,8 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 083-01-PLAN.md — Wave 0 test stubs (coordinateGeometry, registry counts, prerequisiteGating fix, wordProblems)
-- [ ] 083-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring)
-- [ ] 083-03-PLAN.md — Word problem templates + manual AI tutor QA checkpoint
+- [x] 083-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring)
+- [x] 083-03-PLAN.md — Word problem templates + manual AI tutor QA checkpoint
 
 ### Phase 84: Sequences & Series Domain
 **Goal**: Students in grades 9-11 can practice arithmetic and geometric sequences, nth-term formulas, and partial sums
