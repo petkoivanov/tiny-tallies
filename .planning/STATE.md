@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: High School Math Expansion
-status: ready_to_plan
-stopped_at: Roadmap created — ready to plan Phase 80
-last_updated: "2026-03-12T00:00:00.000Z"
-last_activity: 2026-03-12 -- v1.2 roadmap created (12 phases, 80-91, 64 requirements mapped)
+milestone: v0.8
+milestone_name: Social & Subscription
+status: planning
+stopped_at: Completed 080-01-PLAN.md
+last_updated: "2026-03-13T11:53:11.453Z"
+last_activity: 2026-03-12 — Roadmap created for v1.2, all 64 requirements mapped across phases 80-91
 progress:
-  total_phases: 12
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 19
+  completed_phases: 1
+  total_plans: 11
+  completed_plans: 6
 ---
 
 # Project State
@@ -54,6 +54,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - All 9 domain handlers use construction-from-answer pattern — generate answer first, build problem around it
 - Phase 87 (Quadratics) has explicit dependency on FOUND-06 (MultiSelectAnswer) and FOUND-07 (MultiSelectMC) from Phase 80
 - Phase 91 must be last — requires all 9 domain skill registrations to be present
+- [Phase 080]: Wave 0 sentinel field pattern: childGradeV22Migrated asserts v22 migration block presence
+- [Phase 080]: MultiSelectMC testID contract: multiselectmc-check-button, multiselectmc-option-N-selected, multiselectmc-option-N-correct
 
 ### Pending Todos
 
@@ -71,7 +73,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-12T00:00:00.000Z
-Stopped at: Roadmap created for v1.2 High School Math Expansion
+Last session: 2026-03-13T11:53:11.451Z
+Stopped at: Completed 080-01-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80

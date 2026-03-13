@@ -12,10 +12,10 @@
 - [ ] **FOUND-01**: Grade type expands from 1-8 to 1-12 across the entire codebase (types.ts, ProfileCreationWizard, age picker, BKT age brackets, store migration)
 - [ ] **FOUND-02**: Safety pipeline fixes for negative numbers — `checkAnswerLeak` regex fixed so negatives like `-3` are correctly detected as answer leaks
 - [ ] **FOUND-03**: `AgeBracket` type expanded to cover ages 10-18 (grades 9-12) so AI tutor hints use appropriate register for teens
-- [ ] **FOUND-04**: Store migration (STORE_VERSION bump) to persist new grade range and any new HS domain skill states
-- [ ] **FOUND-05**: NumberPad gains a `±` toggle key so students can enter negative number answers (e.g., x = -3)
-- [ ] **FOUND-06**: Multi-select MC answer type: `MultiSelectAnswer` added as 6th variant in Answer discriminated union, with `MultiSelectPresentation` in ProblemTemplate
-- [ ] **FOUND-07**: `MultiSelectMC` component — checkbox-style options with a "Check" button that activates once ≥1 option selected; binary grading (all-or-nothing)
+- [x] **FOUND-04**: Store migration (STORE_VERSION bump) to persist new grade range and any new HS domain skill states
+- [x] **FOUND-05**: NumberPad gains a `±` toggle key so students can enter negative number answers (e.g., x = -3)
+- [x] **FOUND-06**: Multi-select MC answer type: `MultiSelectAnswer` added as 6th variant in Answer discriminated union, with `MultiSelectPresentation` in ProblemTemplate
+- [x] **FOUND-07**: `MultiSelectMC` component — checkbox-style options with a "Check" button that activates once ≥1 option selected; binary grading (all-or-nothing)
 - [ ] **FOUND-08**: `distractorStrategy` field added to `ProblemTemplate` so algebra/HS templates can opt out of ±1 adjacency (use domain-specific distractor logic instead)
 - [ ] **FOUND-09**: App repositioned to K-12 — onboarding copy, age/grade picker range, and any "ages 6-9" UI copy updated to reflect wider audience
 
