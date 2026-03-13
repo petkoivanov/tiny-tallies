@@ -16,13 +16,18 @@ jest.mock('react-native-webview', () => {
 jest.mock('@/theme', () => ({
   useTheme: () => ({
     colors: {
-      primary: '#6C63FF',
-      background: '#FFFFFF',
-      surface: '#F5F5F5',
-      text: '#333333',
-      textSecondary: '#666666',
-      border: '#E0E0E0',
-      error: '#FF5252',
+      primary: '#6366f1',
+      primaryLight: '#818cf8',
+      primaryDark: '#4f46e5',
+      background: '#1a1a2e',
+      backgroundLight: '#16213e',
+      surface: '#0f3460',
+      surfaceLight: '#1a4a7a',
+      textPrimary: '#ffffff',
+      textSecondary: '#cbd5e1',
+      textMuted: '#64748b',
+      correct: '#84cc16',
+      incorrect: '#f87171',
     },
   }),
   spacing: {
