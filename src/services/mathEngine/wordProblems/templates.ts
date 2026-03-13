@@ -406,6 +406,58 @@ export const WORD_PROBLEM_TEMPLATES: readonly WordProblemTemplate[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // COORDINATE GEOMETRY — grades 8-10 (prefix mode)
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'wp_coord_map',
+    operations: ['coordinate_geometry'],
+    mode: 'prefix',
+    template: '{name} is reading a map where each unit represents one kilometer.',
+    question: '',
+    minGrade: 8,
+  },
+  {
+    id: 'wp_coord_city',
+    operations: ['coordinate_geometry'],
+    mode: 'prefix',
+    template: '{name} is planning a walking route through {place}.',
+    question: '',
+    minGrade: 8,
+  },
+  {
+    id: 'wp_coord_ramp',
+    operations: ['coordinate_geometry'],
+    mode: 'prefix',
+    template: '{name} is checking the steepness of a ramp for a school project.',
+    question: '',
+    minGrade: 8,
+  },
+  {
+    id: 'wp_coord_phone',
+    operations: ['coordinate_geometry'],
+    mode: 'prefix',
+    template: '{name} is finding the distance between two cell towers on a grid.',
+    question: '',
+    minGrade: 9,
+  },
+  {
+    id: 'wp_coord_bridge',
+    operations: ['coordinate_geometry'],
+    mode: 'prefix',
+    template: '{name} is designing a bridge support and needs to find its slope.',
+    question: '',
+    minGrade: 9,
+  },
+  {
+    id: 'wp_coord_map2',
+    operations: ['coordinate_geometry'],
+    mode: 'prefix',
+    template: '{name} is plotting the path of a delivery drone on a coordinate grid.',
+    question: '',
+    minGrade: 10,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // LINEAR EQUATIONS — grades 6-9 (prefix mode)
   // ═══════════════════════════════════════════════════════════════════════════
   {
