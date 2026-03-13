@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: executing
-stopped_at: Completed 082-02-PLAN.md
-last_updated: "2026-03-13T16:36:04.934Z"
+stopped_at: Completed 082-03-PLAN.md
+last_updated: "2026-03-13T18:09:17.684Z"
 last_activity: "2026-03-13 — Phase 82 Plan 02 complete (linear_equations domain: 8 skills, 8 templates, 3 bug patterns, handler, full wiring)"
 progress:
   total_phases: 19
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 18
-  completed_plans: 16
+  completed_plans: 17
 ---
 
 # Project State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 ## Current Position
 
 Phase: 82 of 91 (Linear Equations Domain)
-Plan: 2 of 4 in current phase
-Status: In progress — Plan 02 done
-Last activity: 2026-03-13 — Phase 82 Plan 02 complete (linear_equations domain: 8 skills, 8 templates, 3 bug patterns, handler, full wiring)
+Plan: 3 of 3 in current phase
+Status: Phase complete — Plan 03 done
+Last activity: 2026-03-13 — Phase 82 Plan 03 complete (6 word problem templates, manual QA sign-off, Phase 82 fully done)
 
 ```
 v1.2: [#...........] 8% (1/12 phases)
@@ -75,6 +75,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 081-04]: YouTube Videos section placed after AI Helper — logical grouping of child-content consent toggles; no new styles needed
 - [Phase 082]: Skill IDs use bare names (one_step_addition) not namespaced - matches Wave 0 test stubs
 - [Phase 082]: lin_sign_flip uses operands[0] (wrong-op) and operands[1] (constant b) per distractorGenerator call convention
+- [Phase 082-linear-equations-domain]: prefix mode word problems: mode='prefix' prepends context sentence before equation text to avoid {a}/{b} operand mismatch (Pitfall 5)
 
 ### Pending Todos
 
@@ -86,13 +87,13 @@ Full decision log in PROJECT.md Key Decisions table.
 ### Blockers/Concerns
 
 - Phase 81 (YouTube): react-native-youtube-iframe New Architecture compatibility not explicitly documented — run proof-of-concept on real device early in Phase 81
-- Phase 82 (Linear equations): Manual review of 10+ Gemini Socratic hint outputs required before Phase 82 ships (algebra hints are novel territory)
+- Phase 82 (Linear equations): RESOLVED — manual QA sign-off given 2026-03-13; 10+ Socratic hints reviewed, none revealed answer in HINT mode
 - Phase 91 (Integration): Prerequisite DAG edge completeness needs curriculum review against Common Core HS standards before encoding
 - COPPA 2025 amendments expand scope (compliance deadline April 22, 2026)
 
 ## Session Continuity
 
-Last session: 2026-03-13T16:36:04.932Z
-Stopped at: Completed 082-02-PLAN.md
+Last session: 2026-03-13T18:09:17.682Z
+Stopped at: Completed 082-03-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80
