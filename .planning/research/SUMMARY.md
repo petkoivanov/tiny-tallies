@@ -1,205 +1,221 @@
 # Project Research Summary
 
-**Project:** Tiny Tallies v0.8 — Multi-Child Profiles, Parent Dashboard, IAP Subscription
-**Domain:** Children's education app monetization and family profile management
-**Researched:** 2026-03-05
+**Project:** Tiny Tallies v1.2 — High School Math Expansion + YouTube Video Tutor Hints
+**Domain:** K-12 adaptive math learning app — expanding from grades 1-8 to 1-12 with 9 new algebra/pre-calc domains and inline YouTube instructional videos
+**Researched:** 2026-03-12
 **Confidence:** HIGH
 
 ## Executive Summary
 
-Tiny Tallies v0.8 introduces four interconnected capabilities: multi-child profiles, a parent analytics dashboard, parental time controls, and a freemium subscription model via in-app purchases. The dominant technical challenge is restructuring the Zustand store from a flat single-child architecture (12 versions of additive migrations) to a multi-child keyed structure. This store migration is the riskiest change in the project's history -- every slice, selector, and persistence mechanism assumes a single child. The recommended approach is a "copy-on-switch" pattern: keep existing slice interfaces unchanged, wrap all per-child data under a `children: Record<childId, ChildData>` map, and hydrate/dehydrate flat state on profile switch. This preserves all existing tests and screen components without modification.
+The v1.2 milestone is a well-scoped extension to an existing, mature adaptive engine. The core infrastructure — Elo + BKT adaptive difficulty, spaced repetition, prerequisite DAG, AI tutor escalation ladder, Bug Library misconception detection — requires zero architectural rework. The expansion adds one new dependency (`react-native-youtube-iframe@2.4.1` via WebView), one new answer union variant (`MultiSelectAnswer`), nine domain handler files, and targeted modifications to a small set of existing files (NumberPad, ChatPanel, useTutor, tutorSlice, safetyFilter). The stack surface change is minimal by design: four of the five capability areas require no new dependencies at all.
 
-The monetization layer uses RevenueCat (react-native-purchases) for IAP/subscription management -- the industry standard for mobile subscriptions with proven Expo compatibility. The only other new dependency is react-native-gifted-charts for parent dashboard visualizations, which uses already-installed react-native-svg with zero new native code. All other features (time controls, session history, analytics, feature gating) are pure TypeScript/Zustand architecture work on existing libraries.
+The recommended approach is a strict phase-order execution: Phase 80 is a hard blocker for all subsequent work. It establishes the type system foundation (Grade 1-12, MultiSelectAnswer, AgeBracket expansion for high school students, distractor strategy field, safety pipeline fixes for negative numbers) and the store migration (STORE_VERSION 21 to 22). YouTube integration (Phase 81) is independent of domain phases but must follow Phase 80 for STORE_VERSION consistency. The nine domain handlers (Phases 82-90) have no inter-dependencies and can be parallelized. Phase 91 integrates everything and must come last since it depends on all domain skills being registered before the placement staircase can reach grade 9-12 content.
 
-The three highest risks are: (1) the v12-to-v13 store migration corrupting existing user data during the structural reshape, (2) existing users losing previously-free features (AI tutor, themes) when freemium gating is introduced, and (3) Apple Kids Category rejection due to missing parental gates on subscription UI. Mitigation requires comprehensive migration fixture tests, grandfathering logic for existing users, and designing all payment-related UI behind the parental PIN gate from day one.
+The two highest risks are COPPA compliance for the YouTube feature and correctness of the MultiSelectAnswer evaluation pipeline. YouTube embedding with default settings exposes related video recommendations, tracks usage via Google's ad network, and constitutes a COPPA violation for under-13 users — this must be mitigated with `rel=0`, `youtube-nocookie.com`, and a dedicated parental consent gate before the feature ships. The MultiSelectAnswer pitfall is subtler: correctness checking must use set equality (not sum comparison), the Elo bridge must return a sum proxy only for Elo calculation while `answerDisplayValue()` serves the BOOST prompt separately, and `checkAnswerLeak` must be extended to check all roots. Both risks are fully preventable with the patterns documented in ARCHITECTURE.md and PITFALLS.md.
+
+---
 
 ## Key Findings
 
 ### Recommended Stack
 
-Only three new npm dependencies are needed. Everything else builds on the existing stack.
+The entire v1.2 milestone requires only one new npm package. All other capability areas are pure TypeScript and component changes within the existing React Native 0.81 + Expo SDK 54 stack. See `.planning/research/STACK.md` for full details.
 
-See full details: `.planning/research/STACK.md`
+**Core technologies:**
 
-**New dependencies:**
-- **react-native-purchases ^9.11**: RevenueCat IAP/subscription management -- handles receipt validation, cross-platform restore, subscription analytics server-side. Free under $2.5K MRR. Confirmed compatible with Expo SDK 54 / RN 0.81.
-- **react-native-purchases-ui ^9.11**: Pre-built paywall and customer center UI -- reduces subscription screen development time significantly. Customizable via RevenueCat dashboard.
-- **react-native-gifted-charts ^1.4**: Line/bar/pie charts for parent dashboard -- pure JS, uses already-installed react-native-svg and expo-linear-gradient as peer deps. Zero new native code.
+- `react-native-youtube-iframe@2.4.1` — YouTube iframe player for AI tutor video hints; only maintained Expo-compatible YouTube wrapper; WebView-based (no native YouTube SDK complications); actively maintained (July 2025 release). Install via `npm install react-native-youtube-iframe`.
+- `react-native-webview@13.16.0` — Peer dependency for youtube-iframe; this is the Expo SDK 54 bundled version. Must install via `npx expo install react-native-webview` (not bare npm) to get the SDK-pinned version.
+- All other capabilities (NumberPad `-` key, MultiSelectMC component, 9 domain handlers, Grade type expansion, symbolic answer display) — no new dependencies; the existing stack covers everything.
 
-**Key rejections:** victory-native (requires Skia, ~2MB native binary, Expo compatibility issues), expo-iap (less mature, no server-side receipt validation), chart-kit (stale, limited animation).
-
-**Critical constraint:** IAP requires EAS Build development builds. Purchases do not work in Expo Go. This must be set up before IAP work begins.
+**Critical constraints:** FlashList v1.x only per CLAUDE.md (v2.x crashes on RN 0.81); no LaTeX renderer needed (plain Text + ExpressionAnswer string is sufficient through logarithms); no CAS library (CLAUDE.md guardrail: LLM must never compute math answers).
 
 ### Expected Features
 
-See full details: `.planning/research/FEATURES.md`
+See `.planning/research/FEATURES.md` for full feature analysis, prioritization matrix, and competitor breakdown.
 
-**Must have (table stakes):**
-- Multi-child profile switcher with independent progress tracking per child
-- Profile CRUD (add/edit/delete children, max 5)
-- Parent dashboard with progress overview and skill analytics per child
-- Daily session time limit (configurable by parent per child)
-- Subscription paywall with clear free vs premium tiers
-- Restore purchases (App Store requirement -- rejection risk if missing)
-- Free tier with meaningful daily practice value (3 sessions, all skills, all manipulatives)
+**Must have (table stakes — v1.2 launch blockers):**
 
-**Should have (differentiators):**
-- Misconception analytics for parents -- no competitor surfaces specific reasoning errors
-- Trend graphs over time -- most competitors show snapshots, not trajectories
-- Bedtime lockout schedule -- built-in without requiring system-level parental controls
-- Break reminders during sessions -- research-backed focus management for ages 6-9
-- Single family subscription covering all children (simpler than per-child pricing)
+- NumberPad `±` key — without it, ~70% of high school answers cannot be entered; iOS numeric keyboard has no `-` key (platform constraint)
+- Grade range 1-12 throughout onboarding, placement, and skill map — foundational repositioning of the product
+- Multi-select MC format with explicit "Check" button — quadratic equations with two roots cannot be correctly assessed without it; all-or-nothing evaluation (no partial credit in v1.2)
+- Linear equations domain — highest-demand Algebra 1 skill; entry point for all high school content
+- Systems of equations and quadratic equations domains — core Algebra 1-2 content completing the minimum viable HS curriculum
+- Prerequisite DAG with K-8 to HS edges — without this, skill map shows disconnected HS nodes and session orchestrator cannot surface HS content appropriately
+- YouTube video hints post-BOOST exhaustion — safety-net UX for stuck students; COPPA compliance is mandatory before ship
 
-**Defer (post-v0.8):**
-- Push notifications to parents (requires server infrastructure)
-- Cross-device data sync (requires cloud backend)
-- Detailed session replays (high storage cost, moderate value)
+**Should have (competitive differentiators):**
 
-**Anti-features (explicitly do NOT build):**
-- Ads in free tier (COPPA violation risk)
-- Upselling UI shown to children (FTC complaint risk, violates design principles)
-- Child-visible subscription status or locked-feature indicators
-- Cross-child comparisons in parent dashboard
-- Push notifications to children
+- Misconception-aware Bug Library for all 9 algebra domains — 4-8 bug patterns per domain; extends the K-8 Bug Library advantage to HS (research base: Lamar University Common Math Errors, ERIC algebra misconception studies)
+- Seamless grade-band transition (K-12) — same unified adaptive engine across all grades; competitors silo by grade band (Khan Academy Kids vs. Khan Academy proper)
+- Inline YouTube player with thumbs vote — no redirect to YouTube app; vote stored locally per skill; more Socratic than Khan Academy's always-available video links
+
+**Defer to v1.3+:**
+
+- CPA pictorial mode for algebra (bar balance model, parabola sketches) — high value but high complexity; separate SVG renderers needed per domain
+- Trigonometry domain — scope equivalent to all 9 planned domains combined; validate HS adoption first
+- Calculus domain — requires graphical output infrastructure not yet built
+- Graphing calculator or Desmos integration — full product scope; Desmos exists as an external tool students already use
+
+**Anti-features (do not build in v1.2):**
+
+- Free-text algebraic expression input — no production-quality CAS for React Native; design problems to avoid requiring it
+- Complex or imaginary number answers — out of scope; generate real-root-only quadratics (if discriminant < 0, generate a different problem)
+- Social leaderboard — COPPA prohibition on comparative child data; also causes math anxiety (research-documented)
+- Step-by-step solution reveal — defeats the Socratic tutor architecture; BOOST mode fills this gap without revealing the final answer
 
 ### Architecture Approach
 
-The recommended architecture uses a "copy-on-switch" pattern for multi-child support: a single Zustand store with a `children: Record<childId, ChildData>` map and an `activeChildId` pointer. The active child's data lives in the existing flat store shape during use (preserving all existing slice interfaces and selectors unchanged), and gets serialized back to the children map on profile switch or app background. Three new slices are needed: `profilesSlice` (children map management), `parentControlsSlice` (per-child time/bedtime config), and `subscriptionSlice` (ephemeral IAP state, NOT persisted). Subscription state is intentionally ephemeral -- RevenueCat is the source of truth, queried on every app foreground, with a 24-hour offline grace period.
+The v1.2 expansion is purely additive. The generator → registry → domain handler pipeline, the Elo/BKT/Leitner engines, the tutor escalation state machine, the session orchestrator, and the safety pipeline are all unchanged. New capabilities wire in at precisely defined extension points. See `.planning/research/ARCHITECTURE.md` for component-level detail, data flows, and the complete file-by-file change inventory.
 
-See full details: `.planning/research/ARCHITECTURE.md`
+**Major new/modified components:**
 
-**Major components:**
-1. **profilesSlice** — Children map, activeChildId, switchChild (hydrate/dehydrate), auto-save on background
-2. **parentControlsSlice** — Per-child daily time cap, bedtime window, break interval configuration
-3. **subscriptionSlice** — Ephemeral subscription tier and entitlements (NOT persisted in AsyncStorage)
-4. **subscriptionService** — RevenueCat lifecycle: init, purchase, restore, entitlement listener
-5. **paywallGuard** — Pure function `canAccess(feature, tier)` for defense-in-depth feature gating
-6. **dashboardAnalytics** — Pure computation from session history; on-demand, not pre-computed
-7. **timeControlService** — Enforcement logic: daily cap check, bedtime comparison, break scheduling
-8. **ParentNavigator** — Nested navigation stack accessed after PIN verification
+1. `src/services/mathEngine/types.ts` (MODIFY) — add `MultiSelectAnswer` as a 6th union variant, extend `Grade` to 9-12, add 9 `MathDomain` values, add `answerDisplayValue()` export alongside existing `answerNumericValue()`
+2. `src/components/session/MultiSelectMC.tsx` (NEW) — checkbox-style MC with independent "Check" button; set equality correctness check; never auto-submit on selection; cap at 4-5 options
+3. `src/services/tutor/videoMap.ts` (NEW) — static `DOMAIN_VIDEO_MAP` constant; `getVideoForDomain()` pure function; module-level constant, NOT a Zustand slice
+4. `src/components/chat/VideoCard.tsx` (NEW) — wraps `react-native-youtube-iframe`; passes restrictive playerVars (`rel: 0, modestbranding: 1, playsinline: 1, disablekb: 1, fs: 0`); gates on `isConnected`
+5. `src/hooks/useTutor.ts` (MODIFY) — expose `videoId: string | null` computed from `ladderExhausted && getVideoForDomain(currentProblem.operation)`
+6. `src/services/mathEngine/domains/*.ts` (9 NEW files) — one `DomainHandler` per domain, each paired with skills + templates files and bug patterns
+7. `src/store/appStore.ts` + `src/store/migrations.ts` (MODIFY) — STORE_VERSION 21 to 22 with migration for grade expansion and new Phase 80 fields (including `youtubeConsentGranted`)
 
-**Store migrations:** v12->v13 (multi-child restructure), v13->v14 (parent controls), v14->v15 (session history bootstrap). Three migration hops matching three natural phase boundaries.
+**Key architectural decisions:**
+
+- `MultiSelectAnswer` correctness uses `setsEqual()`, not sum comparison — `answerNumericValue()` returns sum only as Elo proxy; `answerDisplayValue()` returns "2 and 3" for BOOST prompt; these two purposes must never be conflated
+- `videoMap.ts` is a module constant, not a store slice — video IDs updated via app release or OTA (Expo Updates), not Zustand migration
+- All 9 domain handlers use a construction-from-answer pattern (generate answer first, build problem around it) — ensures integer solutions, avoids irrational outputs
+- No LaTeX renderer, no CAS — plain Text components for symbolic answers; MC-only for expression selection (e.g., choose the factored form)
 
 ### Critical Pitfalls
 
-See full details: `.planning/research/PITFALLS.md`
+See `.planning/research/PITFALLS.md` for all 11 pitfalls with full prevention checklists. Top 5 requiring immediate attention in Phase 80:
 
-1. **Store migration v12->v13 is a structural reshape, not additive** — All 12 prior migrations were "add field with default." This one MOVES existing data into a nested structure. Must delete old flat fields after copying, ensure idempotency, and test with three fixture scenarios (fresh install, full v12 state, minimal v12 state). Migration bugs risk total data loss with no recovery path.
+1. **`checkAnswerLeak` broken for negative numbers** — `\b-3\b` regex fails at word boundaries with negative numbers; must fix before any algebra domain ships; extend to check all roots for multi-select; add regression test `checkAnswerLeak("subtract three", -3)` returns `safe: false`
 
-2. **Existing users lose previously-free features** — AI tutor has been free since v0.5, themes since v0.7. Gating these behind premium violates user trust and the "no paywall" design principle. Must grandfather existing users or restructure the free/premium split so premium adds NEW capabilities only, not restrictions on existing ones.
+2. **YouTube COPPA compliance** — default `react-native-youtube-iframe` settings expose related video recommendations and Google ad tracking; must pass `{ rel: 0, modestbranding: 1, playsinline: 1, disablekb: 1, fs: 0 }` and use `youtube-nocookie.com`; gate behind dedicated `youtubeConsentGranted` parental consent (separate from existing `tutorConsentGranted`); curated allow-list bundled in app, never fetched from YouTube API at runtime
 
-3. **Apple Kids Category + subscription = heightened review scrutiny** — Kids Category apps require parental gate before ANY purchase UI, visible subscription terms before the buy button, and a working restore purchases button. Missing any causes rejection. Budget 2-3 rejection cycles into the timeline.
+3. **`AgeBracket` missing high school brackets** — current `'6-7' | '7-8' | '8-9'` returns `undefined` for age 16; `CONTENT_WORD_LIMITS[undefined]` silently skips word-count validation; `buildSystemInstruction` generates elementary-register hints for 16-year-olds; fix in Phase 80 by adding `'14-18'` bracket with permissive word limits and algebra-appropriate register
 
-4. **Profile switching during active session corrupts data** — Session flow accumulates Elo/XP changes in refs and commits atomically at session end. Switching profiles mid-session commits one child's results to another child's data. Must guard `switchChild` with `isSessionActive` check and hide the switcher during sessions.
+4. **MultiSelectAnswer correctness semantics** — sum comparison is wrong for isCorrect check (e.g., {1,5} and {2,4} both sum to 6 but are different answers); use `setsEqual()` at session evaluation; `answerNumericValue()` is Elo-only; `answerDisplayValue()` is for BOOST prompt
 
-5. **COPPA 2025 amendments expand scope** — Compliance deadline April 22, 2026. Subscription data linked to child profiles may trigger expanded "personal information" requirements. Keep subscription state entirely separate from child learning data. Disclose RevenueCat in privacy policy.
+5. **Elo `baseElo` miscalibration for HS domains** — a grade-8-completing student arrives at Elo approximately 1050-1150; entry-level linear equation templates must have `baseElo: 1000-1050` (not 1300+); over-seeding triggers the frustration guard on the student's first HS session; calibrate each domain before coding templates
+
+---
 
 ## Implications for Roadmap
 
-Based on research, suggested phase structure:
+Based on cross-file research, the 12-phase structure (80-91) is well-founded. The phase ordering is non-negotiable for Phases 80 and 91; Phases 82-90 are parallelizable within that bracket.
 
-### Phase 1: Multi-Child Store Foundation
-**Rationale:** Everything depends on this. The store restructure is a prerequisite for per-child dashboard, per-child time controls, and per-child session counting for free tier limits. This is also the highest-risk change -- isolating it allows focused testing before building features on top.
-**Delivers:** `profilesSlice` with children map, `switchChild` action, v12->v13 migration, `useActiveChild` hook, `useSaveActiveChild` auto-save hook, `ChildData` type definition, session history schema (begin collecting before dashboard exists).
-**Addresses:** Multi-child profile architecture, per-child state isolation.
-**Avoids:** Pitfall 1 (flat store assumption), Pitfall 2 (structural migration), Pitfall 11 (no historical data -- start collecting early).
+### Phase 80: Foundation (HARD BLOCKER — all other phases depend on this)
 
-### Phase 2: Profile Management UI
-**Rationale:** With the store foundation in place, build the user-facing profile management. This validates the copy-on-switch pattern with real UI interaction before layering analytics on top.
-**Delivers:** ProfileSwitcherScreen, AddChildScreen, ChildSwitcher component on HomeScreen, PIN-gated profile management, grade-aware initial state for new children.
-**Addresses:** Profile switcher on home screen, add/edit/delete children.
-**Avoids:** Pitfall 9 (children accessing siblings' profiles -- PIN-gate from day one), Pitfall 13 (empty new-child profiles -- grade-aware initialization).
+**Rationale:** Type system changes, safety pipeline fixes, and store migration must land before any domain or YouTube work. Every subsequent phase touches files that Phase 80 changes. AgeBracket expansion is also required here — the first algebra domain (Phase 82) will issue tutor requests for high school students and must not hit undefined bracket lookups.
+**Delivers:** Grade 1-12 type expansion (Grade type, MAX_GRADE constant, ProfileCreationWizard age-to-grade mapping, AgeRange, BKT age brackets, onboarding slice); MultiSelectAnswer union variant + `answerDisplayValue()`; NumberPad `±` key (prop-gated `showNegative?: boolean`, backward compatible); MultiSelectMC component; `checkAnswerLeak` fix for negative numbers and multi-root answers; AgeBracket expansion to `'14-18'` with algebra-appropriate register; `distractorStrategy` field on ProblemTemplate; STORE_VERSION 21 to 22 with migration
+**Addresses:** NumberPad negative input (table stakes), multi-select MC format (table stakes), grade range expansion (table stakes)
+**Avoids:** Pitfalls 1, 3, 4, 5, 7, 9 (all Phase 80 items from the pitfall-to-phase mapping)
+**Research flag:** Standard patterns — no research phase needed. All changes are direct codebase modifications with full inspection confidence.
 
-### Phase 3: Session History and Analytics Engine
-**Rationale:** The parent dashboard needs historical data to display anything beyond current-state snapshots. Session history must accumulate before the dashboard can show trends. Building the data layer and computation engine before the UI ensures the dashboard has real data to render.
-**Delivers:** SessionHistoryEntry type, append-on-session-complete logic (capped at 200 entries), dashboardAnalytics service (pure computation), trendCalculator service.
-**Addresses:** Trend graphs requirement, session history logging.
-**Avoids:** Pitfall 11 (no historical data for dashboard).
+### Phase 81: YouTube Video Tutor Integration
 
-### Phase 4: Parent Dashboard
-**Rationale:** With multi-child data and session history in place, the dashboard can now display meaningful analytics. Builds on Phase 1 (children map for all-children view) and Phase 3 (historical data for trends).
-**Delivers:** ParentNavigator (nested stack), ParentDashboardScreen, ChildProgressScreen, ProgressChart, MisconceptionBreakdown, TrendLine, SessionHistoryList components.
-**Uses:** react-native-gifted-charts for chart rendering.
-**Avoids:** Pitfall 8 (re-renders -- use snapshot pattern with `getState()`), Pitfall 15 (navigation confusion -- separate parent stack with PIN gate).
+**Rationale:** YouTube integration is independent of domain phases but must follow Phase 80 for STORE_VERSION consistency. It is the highest-risk single change in the milestone (new native dependency + COPPA exposure) and should be proven early to avoid blocking Phase 91.
+**Delivers:** `react-native-youtube-iframe@2.4.1` + `react-native-webview@13.16.0` installed via `npx expo install`; `videoMap.ts` with curated Khan Academy video IDs for all 9 planned domains; `VideoCard.tsx` with correct playerVars and `youtube-nocookie.com`; ChatPanel + useTutor modifications; `tutorSlice.videoVotes` (ephemeral, not persisted); `youtubeConsentGranted` parental consent gate in ParentalControlsScreen; offline guard via existing NetInfo pattern; video lazy-mounted only when "Watch video" is tapped; video starts muted
+**Addresses:** YouTube video hints (differentiator), inline player with vote feedback (differentiator)
+**Avoids:** Pitfall 6 (COPPA), performance trap (lazy-mount WebView only when triggered)
+**Research flag:** Needs early validation. `react-native-youtube-iframe` New Architecture compatibility is not explicitly documented — run a minimal proof-of-concept on a real device (not Expo Go) before committing to the full implementation. If incompatible, the fallback is raw WebView embedding a YouTube embed URL directly.
 
-### Phase 5: Parental Time Controls
-**Rationale:** Time controls are configured within the parent dashboard flow and require per-child data isolation (different limits per child). Placing this after the dashboard means the configuration UI naturally lives inside the parent navigator.
-**Delivers:** parentControlsSlice, v13->v14 migration, timeControlService, useTimeControls hook, TimeControlsScreen, daily cap enforcement, bedtime lockout, break reminders via expo-notifications.
-**Addresses:** Daily session time limit, bedtime lockout, break reminders.
-**Avoids:** Pitfall 7 (bypassable controls -- frame as advisory, use monotonic elapsed-time tracking).
+### Phases 82-90: Nine Domain Handlers (parallelizable)
 
-### Phase 6: Freemium Subscription and IAP
-**Rationale:** Subscription gating is purely additive -- it layers access controls on top of working features. Building it last means all features can be tested ungated first, and IAP integration issues do not block other work. Also requires resolving the grandfathering product decision before implementation.
-**Delivers:** RevenueCat integration, subscriptionSlice (ephemeral), subscriptionService, paywallGuard, SubscriptionScreen (paywall), useSubscription hook, useSessionCounter hook, feature gating on AI tutor/themes/sessions/analytics, v14->v15 migration.
-**Uses:** react-native-purchases, react-native-purchases-ui.
-**Avoids:** Pitfall 3 (Expo Go limitation -- EAS Build pre-work), Pitfall 4 (Kids Category rejection -- parental gate on all purchase UI), Pitfall 5 (losing free features -- grandfather existing users), Pitfall 6 (COPPA -- separate subscription from child data), Pitfall 10 (state desync -- ephemeral state + RevenueCat listener), Pitfall 14 (punitive paywall -- child-friendly messaging).
+**Rationale:** Each domain phase follows the identical 8-step DomainHandler pattern (domain handler file, skills file, templates file, bug patterns, round-trip tests, baseElo calibration doc). No inter-dependencies between domains. Ordered easy-to-hard within the prerequisite dependency graph to validate the MultiSelectAnswer pipeline incrementally before the most complex domain (quadratics, Phase 87).
+
+**Suggested domain order with rationale:**
+
+- **Phase 82 — linear_equations** (G8-9): Simplest answer type (NumericAnswer only); establishes the algebra Socratic hint phrasing pattern in `buildSystemInstruction`; first validation of `checkAnswerLeak` fix for negative answers; entry baseElo 1000-1050
+- **Phase 83 — coordinate_geometry** (G8-10): NumericAnswer + existing CoordinateAnswer; new coordinate plane SVG graph type using existing react-native-svg; validates slope as FractionAnswer path
+- **Phase 84 — sequences_series** (G9-11): NumericAnswer only; extends existing `patterns` domain logic; lowest complexity of the 9 new domains
+- **Phase 85 — statistics_hs** (G9-11): NumericAnswer; standard deviation requires careful dataset generation and rounding strategy; normal distribution concepts use ExpressionAnswer MC-only (string labels)
+- **Phase 86 — systems_equations** (G9-10): NumericAnswer; curated 2x2 integer-coefficient systems with integer solutions via Cramer's rule or substitution
+- **Phase 87 — quadratic_equations** (G9-10): First production use of MultiSelectAnswer and MultiSelectMC; validates end-to-end multi-select pipeline; discriminant must be perfect square for all two-root templates; baseElo 1100-1150
+- **Phase 88 — polynomials** (G9-10): ExpressionAnswer MC for factored forms (canonical strings assembled by handler); NumericAnswer for polynomial evaluation
+- **Phase 89 — exponential_functions** (G9-11): NumericAnswer; integer base and exponent inputs; growth/decay evaluation
+- **Phase 90 — logarithms** (G10-11): NumericAnswer; special-value log tables only (e.g., log₂8 = 3); avoid templates requiring log-law symbolic manipulation; baseElo 1200-1250
+
+**Each phase delivers:** Domain handler + skills + templates files; 4-8 bug patterns in Bug Library; round-trip tests (template → generator → answer type); baseElo calibration document per domain
+**Avoids:** Pitfall 2 (algebra-appropriate distractor strategy per domain), Pitfall 3 (extend checkAnswerLeak per domain), Pitfall 11 (baseElo calibration against K-8 scale)
+**Research flag:** Phase 82 (linear equations) needs manual review of 10 sample AI tutor hints before shipping to verify the Socratic constraint holds for algebra — procedure-revealing hints are the key risk (Pitfall 8). The algebra-aware `buildSystemInstruction` additions from Phase 82 become the template reused by Phases 83-90. All other domain phases are standard patterns.
+
+### Phase 91: Integration (LAST — depends on all domain phases)
+
+**Rationale:** Placement test, skill map, and prerequisite DAG can only be fully integrated after all 9 domain skill registrations exist. `getSkillsByGrade(9)` returning non-empty arrays is a hard prerequisite for Phase 91.
+**Delivers:** `MAX_GRADE = 12` in PlacementTestScreen; HS prerequisite DAG edges (linear_equations → systems_equations, linear_equations → coordinate_geometry, quadratic_equations → polynomials, expressions → polynomials, exponents → exponential_functions, exponential_functions → logarithms, data_analysis → statistics_hs); skill map layout with 9 new HS domain clusters; store migration resetting `placementComplete: false` for existing users stuck at the grade-8 ceiling with >80% grade-8 BKT mastery; "Retake Placement" button in ParentalControlsScreen; integration tests verifying `generateForGrade(9)` through `generateForGrade(12)` return non-null Problems
+**Avoids:** Pitfall 10 (placement test ceiling at grade 8, existing-user regression)
+**Research flag:** Prerequisite DAG edge completeness needs curriculum review against Common Core HS standards before encoding. The dependency graph in FEATURES.md is the starting point but edge cases (e.g., whether statistics_hs requires coordinate_geometry or only data_analysis) should be validated during Phase 91 planning.
 
 ### Phase Ordering Rationale
 
-- **Phase 1 before everything:** The children map is the data foundation. No per-child feature works without it.
-- **Phase 2 immediately after Phase 1:** Validates the store restructure with real user interaction before building analytics.
-- **Phase 3 before Phase 4:** Dashboard needs data to display. Starting history collection early maximizes available data by the time the dashboard ships.
-- **Phase 4 before Phase 5:** Time control configuration UI lives inside the parent dashboard navigator.
-- **Phase 6 last:** Feature gating is additive. Testing ungated features first is faster and cleaner. IAP has external dependencies (RevenueCat account, App Store Connect, Play Console setup, EAS Build) that benefit from parallel preparation while other phases execute.
+- Phase 80 must be first because the Grade type, MultiSelectAnswer union, AgeBracket expansion, distractor strategy field, safety pipeline fixes, and store migration version are all touched by every subsequent phase.
+- Phase 81 must follow Phase 80 (STORE_VERSION consistency) but is otherwise independent — placing it early surfaces YouTube native compatibility issues before they can become blockers.
+- Domain phases 82-90 are ordered by prerequisite dependency graph and by incremental MultiSelectAnswer validation (simpler domains before quadratics). They can be parallelized across branches.
+- Phase 91 must be last because it requires all 9 domain skill registrations to function correctly, and it includes the existing-user placement migration that should only run once all HS content is available.
 
 ### Research Flags
 
 Phases likely needing deeper research during planning:
-- **Phase 1:** The v12->v13 migration needs careful field-by-field mapping from the actual codebase. Research the exact fields in `partialize` and all slice interfaces to build the `PER_CHILD_FIELDS` constant. The copy-on-switch pattern must be validated against the full list of per-child state.
-- **Phase 6:** RevenueCat SDK integration patterns, Apple sandbox testing setup, Google Play internal test tracks, Kids Category review requirements, and the grandfathering product decision all need phase-level research. EAS Build pipeline setup is a prerequisite.
+
+- **Phase 81 (YouTube):** New Architecture compatibility of `react-native-youtube-iframe` not explicitly documented. Run proof-of-concept on a real device early. COPPA playerVars and consent flow should be reviewed against YouTube's Data API COPPA documentation and 16 CFR Part 312 before shipping.
+- **Phase 82 (linear_equations):** Socratic hint phrasing for algebra is genuinely novel territory for this codebase. Manual review of 10+ Gemini outputs for linear equation hints is required before Phase 82 ships. The `buildSystemInstruction` algebra-aware additions must be documented for reuse by Phases 83-90.
+- **Phase 91 (integration):** Prerequisite DAG edge completeness needs curriculum review against Common Core HS standards. Placement test staircase promotion thresholds (currently "3 consecutive correct") should be reconsidered for the grade-8 to grade-9 transition boundary.
 
 Phases with standard patterns (skip research-phase):
-- **Phase 2:** Standard CRUD UI + React Navigation screens. Well-documented patterns.
-- **Phase 3:** Pure TypeScript data transformation services. No external dependencies or complex patterns.
-- **Phase 4:** Standard chart rendering with react-native-gifted-charts. Well-documented API. Parent navigation is a standard nested stack.
-- **Phase 5:** Straightforward time comparison logic + expo-notifications local scheduling (already used in v0.7 for daily challenge reminders).
+
+- **Phases 83-90 (domain handlers):** All follow the identical 8-step DomainHandler pattern established in Phase 82. Each is a mechanical application of the existing registry/handler/skills/templates structure.
+- **Phase 80 (foundation):** Entirely within existing codebase with full direct inspection confidence. All changes are type additions, component additions, and targeted safety pipeline fixes with no external library unknowns.
+
+---
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Only 3 new dependencies, all verified compatible with Expo SDK 54 / RN 0.81. RevenueCat has official Expo partnership and documentation. react-native-gifted-charts uses already-installed peer deps. |
-| Features | HIGH | Competitive analysis covers SplashLearn, Prodigy, Khan Academy with current pricing. Feature split (free vs premium) is benchmarked against industry medians. Anti-features clearly identified with COPPA/FTC rationale. |
-| Architecture | HIGH | Copy-on-switch pattern well-reasoned against alternatives (separate stores, dynamic persist keys). Existing codebase analyzed in detail (36+ files with useAppStore selectors, 12 migration versions, all 9 slices). Migration strategy includes concrete code examples. |
-| Pitfalls | HIGH | 15 pitfalls identified across critical/moderate/minor severity with prevention strategies and phase assignments. COPPA 2025 amendments researched with compliance deadline (April 22, 2026). Recovery strategies documented for each critical pitfall. |
+| Stack | HIGH | All library choices verified against official Expo SDK 54 docs, npm registry, and direct codebase inspection. Only one new dependency. Peer dependency version locked to Expo 54 bundled version. Installation commands verified. |
+| Features | MEDIUM-HIGH | Pedagogy claims HIGH (IES practice guides, Common Core standards, PMC meta-analyses). Competitor UX patterns MEDIUM (inferred from public behavior for IXL, Khan Academy — not official API docs). Anti-feature rationale HIGH (first-principles technical and legal analysis). |
+| Architecture | HIGH | Based on direct codebase inspection of all integration points: types.ts, useTutor.ts, ChatPanel.tsx, NumberPad.tsx, PlacementTestScreen.tsx, appStore.ts, tutorSlice.ts, onboardingSlice.ts, safetyFilter.ts, distractorGenerator.ts, eloCalculator.ts. Architecture is additive and all extension points are precisely identified. |
+| Pitfalls | HIGH | All 11 pitfalls identified via direct codebase analysis. Regex behavior (`\b` with negative numbers), COPPA requirements (16 CFR Part 312), Zustand partialize behavior, BKT bracket lookup patterns, and Elo sigmoid calibration all verified against actual code and official sources. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Grandfathering product decision:** Research identifies the risk of losing free features but the exact free/premium split for existing users needs a product decision before Phase 6 implementation. Options: (a) full grandfather for pre-v0.8 users, (b) limited free AI tutor (3 uses/day) instead of full gating, (c) premium-only themes are NEW themes, existing earned themes stay free. This decision affects feature gating implementation and must be resolved during Phase 6 planning.
-- **Pricing validation:** Proposed $5.99/mo / $49.99/yr is research-informed but untested. Consider A/B testing via RevenueCat's experiment features post-launch.
-- **EAS Build pipeline:** The team needs development builds for IAP testing. This is infrastructure work that should be prepared during Phases 4-5 so it is ready for Phase 6.
-- **RevenueCat account and store setup:** Creating the RevenueCat project, configuring products in App Store Connect and Play Console, and setting up entitlements requires lead time. Start this during Phase 4-5 so it is ready for Phase 6.
-- **Privacy policy update:** COPPA compliance requires disclosing RevenueCat as a data processor before the subscription feature ships. Legal review may be needed. Must be completed before Phase 6 ships.
-- **Free tier profile limit:** Research suggests 2 profiles free, 5 premium. This limit needs product validation -- too restrictive risks conversion friction; too generous removes upgrade incentive.
+- **react-native-youtube-iframe New Architecture compatibility:** Library docs do not explicitly confirm RN New Architecture support. Expo SDK 54 enables New Architecture by default. Resolve with a minimal integration proof-of-concept in Phase 81 before full implementation. The fallback (raw WebView with YouTube embed URL) is well-understood.
+- **Elo baseElo calibration for HS domains:** The anchor point (grade-8-completing student at Elo 1050-1150) is a reasoned estimate, not a measured value from production analytics. Check actual student Elo distribution at grade-8 completion before setting template baseElo values.
+- **Socratic hint register for algebra:** The AI tutor has no precedent for algebra domains in this codebase. The Phase 82 hint pattern must be established carefully and used as the template for Phases 83-90. Manual review of Gemini outputs is required before Phase 82 ships.
+- **Prerequisite DAG completeness:** The dependency graph in FEATURES.md covers obvious edges. Edge cases should be reviewed against Common Core HS standards during Phase 91 planning before encoding as permanent DAG structure.
+
+---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [RevenueCat Expo Installation Docs](https://www.revenuecat.com/docs/getting-started/installation/expo) -- Expo managed workflow setup
-- [Expo IAP Guide](https://docs.expo.dev/guides/in-app-purchases/) -- official Expo IAP guidance
-- [Expo + RevenueCat Tutorial](https://expo.dev/blog/expo-revenuecat-in-app-purchase-tutorial) -- official Expo partnership
-- [Apple Kids Category Guidelines](https://developer.apple.com/kids/) -- parental gate requirements
-- [App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) -- Guideline 1.3
-- [COPPA 2025 Compliance Guide](https://blog.promise.legal/startup-central/coppa-compliance-in-2025-a-practical-guide-for-tech-edtech-and-kids-apps/)
-- [FTC COPPA Rule Amendments 2025](https://www.federalregister.gov/documents/2025/04/22/2025-05904/childrens-online-privacy-protection-rule)
+
+- Direct codebase inspection: `src/services/mathEngine/types.ts`, `src/hooks/useTutor.ts`, `src/components/chat/ChatPanel.tsx`, `src/components/session/NumberPad.tsx`, `src/screens/PlacementTestScreen.tsx`, `src/store/appStore.ts`, `src/store/slices/tutorSlice.ts`, `src/services/tutor/safetyFilter.ts`, `src/services/tutor/types.ts`, `src/services/adaptive/eloCalculator.ts`, `src/services/mathEngine/bugLibrary/distractorGenerator.ts`
+- [react-native-youtube-iframe official docs](https://lonelycpp.github.io/react-native-youtube-iframe/install/) — installation, Expo managed workflow, playerVars support
+- [Expo WebView docs](https://docs.expo.dev/versions/latest/sdk/webview/) — SDK 54 bundled version 13.16.0 confirmed, `npx expo install` required
+- [Common Core HS Algebra Standards (HSA)](https://www.thecorestandards.org/Math/Content/HSA/) — domain structure and skill progression
+- [Common Core HS Functions Standards (HSF)](https://www.thecorestandards.org/Math/Content/HSF/) — exponential, logarithmic, sequence domains
+- [IES Practice Guide: Teaching Strategies for Improving Algebra Knowledge](https://ies.ed.gov/ncee/wwc/docs/practiceguide/wwc_algebra_040715.pdf) — symbolic vs contextual mix, word problem pedagogy
+- COPPA (16 CFR Part 312) — YouTube embedding compliance requirements for under-13 users
+- YouTube IFrame Player API docs — `rel=0`, `modestbranding`, `youtube-nocookie.com` parameters
 
 ### Secondary (MEDIUM confidence)
-- [react-native-gifted-charts GitHub](https://github.com/Abhinandan-Kushwaha/react-native-gifted-charts) -- Expo compatibility, peer deps
-- [react-native-purchases npm](https://www.npmjs.com/package/react-native-purchases) -- version compatibility
-- [Khan Academy Parent Dashboard](https://support.khanacademy.org/hc/en-us/articles/360039664491) -- competitor feature analysis
-- [SplashLearn Parent Features](https://www.splashlearn.com/features/parents) -- competitor feature analysis
-- [Prodigy Parent Dashboard](https://prodigygame.zendesk.com/hc/en-us/articles/115001744726) -- competitor feature analysis
-- [Education App Revenue Benchmarks](https://www.mirava.io/blog/subscription-benchmarks-education-apps) -- median annual price $44.99
 
-### Codebase Analysis
-- `src/store/appStore.ts` (STORE_VERSION=12, flat partialize with all child fields at root)
-- `src/store/migrations.ts` (12 additive migrations, all null-coalesce pattern)
-- `src/store/slices/` (9 slices, all assuming single-child flat state)
-- `src/services/consent/parentalPin.ts` (existing PIN gate, reusable for parent dashboard)
-- `app.json` (existing plugins configuration)
+- [PMC: Calculation vs Word-Problem Instruction](https://pmc.ncbi.nlm.nih.gov/articles/PMC4274629/) — contextual before symbolic for conceptual understanding
+- [react-native-youtube-iframe GitHub](https://github.com/LonelyCpp/react-native-youtube-iframe) — v2.4.1 July 2025; `useLocalHTML` workaround for iframe timeout; open issues reviewed
+- [IXL: Solve quadratic by factoring](https://www.ixl.com/math/algebra-1/solve-a-quadratic-equation-by-factoring) — competitor two-box answer format reference
+- [Lamar University: Common Math Errors](https://tutorial.math.lamar.edu/extras/commonerrors/algebraerrors.aspx) — algebra misconception source for Bug Library patterns
+- [ERIC: Common Errors in Algebraic Expressions](https://files.eric.ed.gov/fulltext/EJ1264037.pdf) — distractor and bug pattern research base
+
+### Tertiary (LOW confidence)
+
+- Khan Academy hint behavior (inferred from public UX, not official docs) — video-first vs. video-last placement pattern comparison
+- `react-native-youtube-iframe` New Architecture compatibility — not explicitly documented; inferred from library activity and RN 0.81 compatibility claims
 
 ---
-*Research completed: 2026-03-05*
+
+*Research completed: 2026-03-12*
 *Ready for roadmap: yes*

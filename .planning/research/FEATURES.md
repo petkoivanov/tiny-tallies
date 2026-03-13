@@ -1,188 +1,424 @@
-# Feature Landscape
+# Feature Research
 
-**Domain:** Multi-child profiles, parent dashboard, time controls, and freemium IAP subscription for children's math learning app (ages 6-9)
-**Researched:** 2026-03-05
-**Confidence:** HIGH
+**Domain:** K-12 math learning app — high school expansion (Algebra 1/2, Pre-Calc) + YouTube video hints
+**Researched:** 2026-03-12
+**Confidence:** MEDIUM (competitor UX mostly inferred from public behavior; pedagogy claims HIGH from research literature)
 
-## Table Stakes
+---
 
-Features parents expect from any children's education app that supports multiple children and charges a subscription. Missing these makes the product feel incomplete compared to SplashLearn, Prodigy, and Khan Academy.
+## Context: What Is Already Built
+
+The following exist and are NOT re-researched here:
+
+- 18 math domains, 151 skills, grades 1-8
+- Single-select MC + numeric free-text (NumberPad)
+- AI tutor (HINT/TEACH/BOOST) — Socratic, never reveals answers
+- Staircase placement test (grades 1-8)
+- Elo + BKT adaptive difficulty, spaced repetition, prerequisite DAG
+- Bug Library misconception detection, remediation mini-sessions
+- Full gamification stack (XP, badges, themes, avatars, daily challenges)
+
+This research focuses exclusively on the **v1.2 additions**:
+- 9 high school domains (Algebra 1/2 + Pre-Calc topics)
+- Grade range expansion from 1-8 to 1-12
+- NumberPad negative input (`-` key)
+- Multi-select MC format (checkbox-style, for quadratic roots)
+- YouTube video integration in AI tutor (post-hint-ladder)
+
+---
+
+## Five Domain Questions Answered
+
+### Q1: Algebra Problem Presentation — Symbolic vs Word Problem Mix
+
+**Finding (MEDIUM confidence):** Effective algebra instruction requires both, but the optimal mix shifts with grade level and topic type.
+
+Research consensus (IES practice guide, PMC meta-analyses):
+- **Grades 8-9 (Algebra 1 entry):** Start with contextual/word problems to anchor abstract ideas. Seeing "3x + 5 = 20" makes more sense after "three times a number plus 5 equals 20."
+- **Grades 9-11 (Algebra 1-2):** Shift to approximately 60% symbolic, 40% contextual. Pure symbolic problems build procedural fluency; word problems build transfer and motivation.
+- **Grades 10-12 (Pre-Calc):** Topics like logarithms and sequences lean heavily symbolic (~70-80%) because real-world context is harder to construct authentically.
+
+App behavior of major competitors:
+- **Khan Academy:** Mixes symbolic exercises with word problem exercises within the same topic unit. Video lessons often use real-world framing; exercises are primarily symbolic.
+- **IXL:** Almost entirely symbolic for algebra (type answer into text boxes). Occasionally uses table/graph context. Word problems appear at the "Applied math" level, not the default skill drill level.
+- **Photomath/Symbolab:** Pure symbolic — these are homework-solver tools, not practice platforms.
+
+**Recommendation for Tiny Tallies:** Follow the existing word problem system architecture. Apply the `prefix` mode for linear equations, quadratics at the entry level; use pure symbolic for the advanced sub-skills (completing the square, log rules). The existing `maxGrade` reading-level calibration already handles appropriate complexity of prose.
+
+**Specific notes per new domain:**
+- Linear equations: Both modes — "solve 3x - 7 = 14" AND "a bike costs $7 more than three times a helmet; total is $97"
+- Systems of equations: Mostly symbolic 2×2 grids; word problems valuable for motivation ("two trains leave...")
+- Quadratics: Symbolic for factoring/formula; word problems for projectile motion (parabola arc, area problems)
+- Exponential / logarithms: Primarily symbolic — authentic word problems require compound interest or decay rates that introduce reading-level complexity beyond the math
+
+---
+
+### Q2: Multi-Part Answers — Quadratic Roots UX
+
+**Finding (HIGH confidence from first-principles analysis, MEDIUM from competitor research):**
+
+Quadratic equations solved by factoring or the quadratic formula typically yield two roots, e.g., x = 3 and x = -2. This is the primary multi-answer scenario in the 9 new domains. Other multi-answer cases are rare within the planned scope.
+
+**How major apps handle it:**
+
+| Approach | Example Apps | How It Works |
+|----------|-------------|--------------|
+| Two free-text boxes | IXL, Desmos Activity Builder | "x = [ ] or x = [ ]" with two NumberPad inputs |
+| Multi-select MC | Some textbook platforms | Checkbox list of four options, select both correct roots |
+| Ordered free text | Khan Academy | Single answer expected, often asks "list smaller root first" |
+| Single root drill | Drill-style apps | Asks for "one root" per problem, avoids two-answer UX entirely |
+
+**IXL approach (verified via public behavior):** IXL's quadratic practice presents "x = ___ or x = ___" with two separate text entry boxes. Students must enter both roots in order (typically smaller first). This avoids "select all that apply" UI complexity but requires two validation passes.
+
+**Planned approach (multi-select MC checkbox):** The planned multi-select MC format is a sound differentiator versus IXL's free-text two-box approach. Checkboxes reduce keyboard fatigue for mobile users and let the app construct meaningful distractors from the Bug Library (e.g., sign flip error, missing one root).
+
+**Design imperatives for multi-select MC:**
+- Make it unambiguous that multiple selections are valid — label says "Select all correct answers"
+- Show a distinct "Check" button (not auto-submit on selection) — this is the correct pattern for multi-select
+- Require at least 1 selection before enabling "Check"
+- Confirm-on-submit visual: selected items glow, correct items turn green, incorrect items turn red
+- For quadratics: always offer exactly 4 options (both correct roots + 2 distractors) — distractors drawn from common errors: sign flip, forgot ±, computed wrong discriminant
+
+**When NOT to use multi-select MC:** Use single-select or free-text for problems with unique answers (one root from a perfect square, evaluate polynomial at a point, exponential growth rate). Multi-select only when the problem genuinely has multiple correct discrete answers.
+
+---
+
+### Q3: Negative Number Input UX
+
+**Finding (HIGH confidence — direct constraint from iOS platform):**
+
+iOS numeric keyboards do not include a negative/minus key in the standard `numeric` or `decimal` input modes. This is a documented platform limitation with no system-level workaround.
+
+**Approaches used by apps:**
+
+| Approach | UX Quality | Complexity |
+|----------|-----------|------------|
+| Custom NumberPad with `-` toggle key | Best — taps natively, no context switch | LOW (existing NumberPad already built) |
+| `+/-` button that toggles sign of entered number | Good — familiar from calculator UX | LOW |
+| Text field with system keyboard | Acceptable on Android, broken on iOS (no `-` key) | PROBLEMATIC |
+| Up/down stepper | Good for small integers, bad for large values | MEDIUM |
+
+**Recommendation:** Add a `-` toggle key to the existing custom NumberPad. The key should toggle the sign of the current entered number (like a calculator `+/-` key), NOT prefix a new digit. This is familiar to older students who have used calculators.
+
+**Placement in NumberPad:** Bottom-left position (where `0` has expanded space currently) or dedicated left-column position. The key must visually distinguish itself from digit keys — use a different background color or the `±` symbol label.
+
+**Edge case considerations:**
+- What is `−0`? Normalize to `0`.
+- Student types `−` then digits: display as `−3` not `3−`
+- Maximum digit length should still apply to the absolute value portion
+- For coordinate pairs like `(x, y)`: may need two separate NumberPad states (x negative, y negative independently) — this is a future concern for coordinate geometry sub-skills
+
+---
+
+### Q4: Video Hints Within Learning Flow
+
+**Finding (MEDIUM confidence — pattern observed from competitor UX, not official docs):**
+
+**How Khan Academy integrates video hints:**
+Khan Academy is the canonical reference for "video + exercise" integration in math learning. Their pattern:
+1. Primary path: Exercise → Hint (text/worked example)
+2. Secondary path: "Watch a video" link always present in hint panel
+3. Video plays inline (or in a separate tab), then returns to exercise
+4. Video is a pre-recorded lesson, not specific to the student's exact current problem
+
+**Key observation:** Khan Academy shows the "Watch a video" link BEFORE the student struggles, as a peer option alongside hints. Tiny Tallies' planned approach (offer video AFTER hint ladder exhausted) is more targeted and pedagogically defensible — it avoids video becoming a shortcut to avoid thinking.
+
+**Placement pattern recommendation:**
+```
+Hint ladder flow:
+  HINT (Socratic prompt)
+    → wrong again → TEACH (CPA explanation)
+      → wrong again → BOOST (scaffolded walkthrough)
+        → still stuck → "Watch a video?" button appears [NEW]
+          → YouTube player opens (inline or modal)
+          → Video plays Khan Academy or similar curated content
+          → User votes: Helpful / Not helpful
+          → Returns to problem with attempt counter reset
+```
+
+**Video player UX patterns from EdTech:**
+- Inline players (not full-screen redirect) preserve learning context
+- Auto-pause when leaving app (iOS/Android lifecycle)
+- No autoplay of next video — intentional single-video consumption
+- Close/dismiss button always visible (not hidden behind fullscreen controls)
+- Vote prompt shown after video ends, not during
+
+**react-native-youtube-iframe status:**
+- Version 2.4.1, released July 1, 2025 (relatively recent)
+- 63 open GitHub issues; primary known issue is iframe timeout due to GitHub Pages dependency (solved via `useLocalHTML={true}` prop)
+- New Architecture compatibility not explicitly documented — moderate risk
+- `useLocalHTML={true}` is the recommended configuration to avoid the GitHub Pages timeout issue
+- LOW confidence on full New Architecture stability; recommend testing early in Phase 81
+
+**Alternative if react-native-youtube-iframe proves incompatible:**
+- `expo-video` with YouTube URL deep-link (opens YouTube app) — worst UX but zero library risk
+- WebView embedding YouTube embed URL directly — lower-level but controllable
+- `react-native-bridges/react-native-youtube-bridge` — newer alternative (less community testing)
+
+**Vote system design:**
+- Thumbs up / Thumbs down after video ends
+- Store votes per `(videoId, skillId)` pair in local store
+- Use votes to surface most helpful videos per skill in future (ML potential, but local heuristic sufficient for v1.2)
+- Do NOT use votes for COPPA-sensitive cloud collection of child behavior
+
+---
+
+### Q5: Difficulty Progression — Algebra 1 → Algebra 2 → Pre-Calc
+
+**Finding (HIGH confidence — based on Common Core CCSS standards, IES guidance, and curriculum analysis):**
+
+The standard US high school math sequence:
+```
+Algebra 1 (grades 8-10) → Geometry (grades 9-10) → Algebra 2 (grades 10-12) → Pre-Calculus (grades 11-12)
+```
+
+Tiny Tallies' 9 new domains span this range. Prerequisite relationships that must be encoded in the prerequisite DAG:
+
+```
+Linear equations (G8-9, Algebra 1)
+    └──prereq──> Systems of equations (G9-10, Algebra 1-2)
+    └──prereq──> Coordinate geometry (G8-10, Algebra 1-2)
+
+Coordinate geometry (G8-10)
+    └──enables──> Quadratic equations (G9-10, Algebra 1-2)
+
+Quadratic equations (G9-10)
+    └──prereq──> Polynomial operations (G9-10, Algebra 1-2)
+
+Polynomial operations (G9-10)
+    └──prereq──> Exponential functions (G9-11, Algebra 2)
+
+Exponential functions (G9-11)
+    └──prereq──> Logarithms (G10-11, Algebra 2)
+
+Sequences & series (G9-11)
+    └──parallel──> Exponential functions (geometric sequences share base)
+
+Statistics extensions (G9-11)
+    └──prereq from K-8──> data_analysis domain (already built)
+```
+
+**Intra-domain difficulty laddering:**
+Each new domain should follow the existing skill progression model:
+- Entry skills: concrete (numeric values, simple integers)
+- Intermediate skills: abstract (variables, signed numbers)
+- Advanced skills: combined (multi-step, real-valued coefficients)
+
+Example for linear equations:
+1. One-step equations (add/subtract): `x + 5 = 12`
+2. One-step equations (multiply/divide): `3x = 15`
+3. Two-step equations: `2x + 3 = 11`
+4. Variables on both sides: `3x + 2 = x + 8`
+5. Distribution: `2(x + 3) = 14`
+6. Fractional coefficients: `x/3 + 2 = 5`
+7. Inequalities (linear): `2x - 1 > 5`
+8. Absolute value basics: `|x| = 4`
+
+Example for quadratic equations:
+1. Factor when a=1, positive roots: `x² - 5x + 6 = 0`
+2. Factor when a=1, negative roots: `x² + x - 6 = 0`
+3. Factor perfect squares: `x² - 9 = 0`
+4. Factor when a≠1: `2x² - 7x + 3 = 0`
+5. Quadratic formula (integer solutions): discriminant is perfect square
+6. Quadratic formula (non-integer): discriminant gives irrational roots
+
+**Progression from K-8 anchor points:**
+- Integers domain (already built) → Linear equations (new) via one-variable thinking
+- Expressions domain (already built) → Polynomial operations (new) via algebraic manipulation
+- Exponents domain (already built) → Exponential functions (new) via extending power rules
+- Data analysis domain (already built) → Statistics extensions (new) via extending central tendency to spread
+
+---
+
+## Feature Landscape
+
+### Table Stakes (Users Expect These)
+
+Features that a K-12 math app must have when expanding to high school. Missing these makes the product feel underpowered for the high school audience.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Multi-child profile switcher | SplashLearn family plan supports up to 3 kids. Prodigy has per-child accounts. Parents with 2-3 children in the target age range need independent progress tracking per child. Without this, families must use separate devices or lose progress switching. | HIGH | Current architecture is single-child: one flat `childProfileSlice` with `childName/childAge/childGrade`, one `skillStatesSlice`, one `gamificationSlice`, one `misconceptionSlice`. Moving to multi-child requires either (a) namespacing all per-child state under a `children: Record<childId, ChildState>` with an `activeChildId` selector, or (b) separate persisted stores per child. Option (a) is cleaner with Zustand. Needs STORE_VERSION migration to restructure entire store. This is the highest-risk feature -- a migration of all existing single-child data into the multi-child structure. |
-| Add/edit/delete child profiles | Parents need to manage children: add a new child, update age/grade as child grows, remove a profile if no longer needed. Standard in every multi-child app. | MEDIUM | Profile CRUD operations. Add creates new child entry with defaults. Edit updates name/age/grade/avatar. Delete requires parental PIN confirmation (safety net against child accidentally deleting sibling's progress). Max 5 children per family is reasonable limit (SplashLearn uses 3). |
-| Profile switcher on home screen | Quick switching without navigating deep menus. Khan Academy shows child avatars at top of parent dashboard. SplashLearn Parent Connect shows all children in a list. | LOW | Avatar row or dropdown on home screen. Each avatar shows child's name and current level. Tap to switch `activeChildId`. Must be gated behind parental PIN if the child could switch to a sibling's profile and mess with their progress. |
-| Parent dashboard: progress overview | SplashLearn shows "last week's progress" and "overall Math Score." Prodigy shows "recent activity" with topics and correctness. Khan Academy shows "Activity Overview Report." Parents need at-a-glance understanding of how each child is doing. | MEDIUM | Summary cards per child: sessions completed this week, problems attempted/correct, current level/XP, weekly streak status, active skills. Data already exists in `skillStatesSlice` (BKT mastery per skill), `gamificationSlice` (XP, level, streak), and `sessionStateSlice`. This is primarily a read-only view composing existing data. |
-| Parent dashboard: skill analytics | Prodigy shows "grade level your child is performing at" and "Report Card with breakdown by skill." SplashLearn shows "mastery of skills" and "trouble spots." Parents want to know WHAT their child is learning, not just how much. | MEDIUM | Per-skill mastery display using existing BKT P(L) values. Group by category (addition/subtraction). Show mastered vs in-progress vs struggling skills. Leverage existing prerequisite DAG for visual context. Color-coded mastery levels. |
-| Daily session time limit | Every major parental control app (Boomerang, Apple Screen Time, Google Family Link) offers daily time limits. Parents expect educational apps to support self-limiting. American Academy of Pediatrics recommends managing screen time even for educational content. | MEDIUM | Timer service tracking cumulative session time per day. When limit reached, show friendly "Time's up for today!" screen. Must persist across app restarts (store daily elapsed time). Default off -- parent opts in via dashboard. Suggested presets: 15/30/45/60 minutes. |
-| Subscription paywall for premium features | SplashLearn ($7.99-$11.99/mo), Prodigy (~$60/yr), Education.com (tiered). Freemium with clear free tier is standard monetization for children's education apps. Parents expect to try before buying. | HIGH | RevenueCat integration (Expo-compatible, handles receipt validation, cross-platform). Subscription state persisted and synced. Paywall screen showing free vs premium comparison. Must comply with COPPA: all purchase flows require parental interaction, no upselling to children. |
-| Restore purchases | Apple and Google both require restore functionality. Users switch devices, reinstall, etc. Without restore, subscriptions appear lost. App store review rejection risk. | LOW | RevenueCat handles this automatically via `restorePurchases()`. Need a "Restore Purchases" button in parent settings. |
-| Free tier with meaningful functionality | Khan Academy Kids is 100% free. SplashLearn and Prodigy offer substantial free tiers. If the free tier feels crippled, parents uninstall rather than subscribe. The free tier IS the conversion funnel. | LOW (design) | Design decision, not implementation complexity. Free tier must provide real daily practice value: 3 sessions/day, all 14 skills, full adaptive engine, all manipulatives. Premium adds: unlimited sessions, AI tutor, all themes, parent analytics. The math learning must not be paywalled. |
+| Negative number input on NumberPad | High school math pervasively involves negative numbers (integers, linear equations, quadratics). Without it, free-text answers for half the new domains are impossible. | LOW | Existing NumberPad + one new `±` toggle key. Sign stored in answer state. Normalize −0 to 0. |
+| Multi-answer format for quadratics | Quadratic equations have two roots. Asking only for one root feels wrong to a student who knows both. Major platforms (IXL) support dual-answer entry. | MEDIUM | Multi-select MC checkbox-style with "Check" button. 4 options (2 correct roots + 2 distractors). Label "Select all correct answers." |
+| Correct answer progression logic for new domains | New domains must feed the existing Elo + BKT + Leitner engine. Without this, high school skills don't get spaced repetition. | LOW | Register all new domain handlers in domain registry. Implement `DomainHandler` interface per domain. No new engine work needed. |
+| Prerequisite graph connectivity | High school skills must connect to the existing K-8 prerequisite DAG. Without edges, the placement test and skill map show disconnected floating nodes. | MEDIUM | Add DAG edges from existing anchor domains (integers → linear equations, expressions → polynomials, exponents → exponential, data_analysis → stats extensions). |
+| Grade 9-12 Elo seeding | Placement test needs to seed starting Elo for grade 9-12 students correctly. Without calibrated initial values, students start at wrong difficulty. | LOW | Extend `eloToLevel` mapping and `gradeToElo` initial seeding function to cover grades 9-12. |
+| Updated placement test staircase (grades 9-12) | Current staircase tops out at grade 8. A grade 10 student placed in the app would not reach high school content. | LOW | Extend staircase algorithm upper bound from grade 8 to grade 12. Add new domain problems to the question bank for grades 9-12 staircase. |
+| Skill map with high school nodes | The existing visual DAG skill map must show new nodes. Students expect to see where high school skills fit relative to what they've mastered. | MEDIUM | Layout engine must accommodate ~9 new domain clusters. May need scroll or zoom for the extended map. |
+| Word problems in high school domains | Even algebraically sophisticated students need application problems to understand what they're actually computing. Pure-symbolic practice without context is demotivating. | MEDIUM | Apply existing word problem prefix mode to linear equations, systems, quadratics, exponential (growth/decay). Log and stats keep minimal prose. |
 
-## Differentiators
-
-Features that set Tiny Tallies apart from competitors. Not universally expected, but high-value.
+### Differentiators (Competitive Advantage)
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Misconception analytics for parents | No major competitor shows parents WHAT misconceptions their child has (e.g., "forgets to carry in addition"). Prodigy shows grade level, SplashLearn shows skill mastery, but neither surfaces the specific reasoning errors. Tiny Tallies already tracks misconceptions with the Bug Library + 2-then-3 confirmation system. Exposing this to parents is a genuine differentiator. | MEDIUM | Read from existing `misconceptionSlice`. Display confirmed misconceptions with human-readable descriptions from Bug Library. Show status (suspected/confirmed/resolved) and remediation progress. This is the "aha moment" for parents -- "Oh, THAT's what my child struggles with." |
-| Trend graphs over time | SplashLearn shows "improvement in grade" but most competitors show point-in-time snapshots, not trajectories. Parents want to see "is my child getting better?" over weeks/months. | HIGH | Requires historical data that is NOT currently stored. Need to add session history records (date, problems attempted, correct count, time spent, skills practiced, misconceptions encountered). Lightweight session log appended after each session. Chart rendering with react-native-svg or victory-native. Weekly/monthly aggregation. |
-| Bedtime lockout schedule | Apple Screen Time has "Downtime" scheduling. Google Family Link has bedtime mode. Building this into the app directly means parents don't need a separate parental control app. Convenient for parents who want education-specific limits without system-wide restrictions. | MEDIUM | Schedule definition: start time, end time, days of week. When active, app shows a calming "sleeping" screen. No app-level enforcement can prevent OS-level bypass, but the gentle friction is usually sufficient for ages 6-9. Store schedule in parent settings, check on app foreground. |
-| Break reminders during sessions | Research shows children ages 6-9 lose focus after 15-20 minutes of concentrated activity. No major competitor actively reminds children to take breaks. This is a health-conscious differentiator that parents appreciate. | LOW | Simple timer during active sessions. At configurable interval (default 20 min), show a brief "Take a stretch break!" interstitial with a 30-second timer. Child can dismiss or wait. Not blocking -- just a nudge. |
-| Per-child subscription (family plan pricing) | SplashLearn charges ~$135/year for a 3-child family plan vs ~$90/year for single child. A single subscription covering all children in the app is simpler and more parent-friendly than per-child pricing. | LOW (design) | One subscription = all children. No per-child pricing tiers. This simplifies IAP logic and is more generous than competitors. Marketing angle: "One subscription, whole family." |
+| YouTube video hint (post-exhaustion) | When hint ladder is fully used and student is still stuck, showing a curated instructional video is a safety net with real value. Khan Academy shows videos from the start as an alternative; Tiny Tallies shows them as a last resort — more Socratic, less shortcut-enabling. | MEDIUM | react-native-youtube-iframe with `useLocalHTML={true}`. Khan Academy video IDs curated per skill (static map). Vote system (helpful/not helpful) stored locally per skill. Requires COPPA review — no video data sent to server. |
+| Misconception-aware Bug Library for algebra | The K-8 Bug Library with 70+ patterns is a genuine differentiator. Extending it to cover high school algebra misconceptions (sign errors in quadratics, exponent rule confusion, log domain violations) gives unique diagnostic value not found in IXL or Khan Academy's hint systems. | HIGH | Each new domain needs 4-8 bug patterns. Algebra bugs are well-documented in research literature (Lamar University Common Math Errors, ERIC studies). High ROI: wrong answers become diagnostic. |
+| CPA progression for algebra (pictorial phase) | Most algebra apps go straight to abstract symbols. Bar model diagrams for linear equations (visual balance model) and number lines for inequalities are CPA-consistent. | HIGH | Extends existing CPA system to new domains. Requires new PictorialDiagram SVG renderers for each domain. Bar balance for linear equations, number line for inequalities, parabola sketch for quadratics. This is ambitious — defer to post-v1.2 for most domains. |
+| Seamless grade-band transition (K-12) | Very few apps span K-12 without feeling like two different products. Tiny Tallies' unified BKT/Elo/Leitner engine means a student who mastered fractions in grade 4 has the same adaptive experience in linear equations in grade 9. Competitors typically silo by grade band (Khan Academy Kids vs Khan Academy proper). | LOW (engineering) HIGH (positioning) | No new engineering required — existing engine handles it. Marketing and onboarding must communicate continuity. Placement test update handles grade-band bridging. |
+| Inline video with vote feedback (no redirect) | Most apps redirect to YouTube or open a browser. Keeping video inline preserves learning context and reduces drop-off. | LOW | react-native-youtube-iframe handles this. Key: "back to problem" button always visible during video. |
 
-## Anti-Features
+### Anti-Features (Commonly Requested, Often Problematic)
 
-Features to explicitly NOT build, even if competitors have them.
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Graphing calculator built-in | Every high school student uses Desmos. Seems like a natural addition for coordinate geometry, quadratics, exponential functions. | ENORMOUS scope. Building a functional, trustworthy graphing calculator is a product in itself. Desmos took years. A bad one damages trust. Also: state testing policies prohibit CAS calculators. Students who rely on a built-in grapher won't develop understanding. | Teach the CONCEPTS behind graphs via CPA pictorial mode (static SVG parabola sketches, labeled number lines). Students do not need to graph interactively to understand slope or vertex. Defer graphing to a future version if demand is validated. |
+| Free-text algebraic expression input | "Type x^2 - 5x + 6" as an answer. Seems necessary for some algebra problems. | Parsing algebraic expressions from keyboard input is a non-trivial NLP + math parsing problem. Students on mobile have no `^` key, no parentheses muscle memory. Error rate and frustration would be very high. Not what the existing NumberPad was designed for. | Design problems to avoid needing expression input. Use MC for "identify the factored form." Use NumberPad for coefficient-only answers. For multi-step, break the problem into sub-problems each with a numeric answer. |
+| Calculus domain | Pre-calculus is in scope. Calculus is the logical "next step." | The planned scope is 9 new domains; calculus (limits, derivatives, integrals) would add at minimum 8-10 more domains of equivalent complexity. Calculus also requires graphical output that the app cannot yet produce. Scope creep would delay v1.2 launch by months. | Flag as a v1.3+ milestone candidate once high school adoption is validated. Limits (informal) can be the final skill in the exponential/logarithms domain as a teaser. |
+| Complex/imaginary number answers | Some quadratic equations produce complex roots (discriminant < 0). Students will encounter these in Algebra 2. | NumberPad extension for `i` (imaginary unit) is a significant UX problem. Displaying complex answers requires special rendering. Complex numbers are also out of scope of the 9 planned domains. | When discriminant < 0, generate a different problem or note "this equation has no real solutions" and give a fact-acknowledgment question. Do not introduce complex numbers in v1.2. |
+| Trigonometry | Appears in Pre-Calc and is adjacent to coordinate geometry and sequences. | Sin, cos, tan require unit circle visualization, radian/degree input, and calculator-level precision. This is a domain of comparable size to all 9 planned domains combined. | Flag as a v1.3+ milestone. Coordinate geometry (slope, distance, midpoint) provides a sufficient Pre-Calc foundation for v1.2. |
+| Step-by-step worked solution reveal | Students want to see the full solution path after getting a problem wrong. Competitors like Photomath do this. | The entire tutor architecture is designed around Socratic learning — NEVER revealing the answer. A "show solution" button bypasses the HINT/TEACH/BOOST ladder and defeats the pedagogical model. Also: once the answer is seen, BKT should not credit the subsequent "correct" attempt. | The BOOST mode already provides deep scaffolding that walks through the reasoning without explicitly giving the final answer. The YouTube video fills the remaining gap. Do NOT add a "show solution" button. |
+| Social leaderboard by grade | High school students are more competitive than elementary students. A leaderboard by grade sounds engaging. | COPPA compliance. Any ranking that reveals one child's data to another is prohibited. Also, rankings cause math anxiety and harm motivation for lower-performing students (well-documented in math anxiety research). | Keep daily challenges with XP/badges as the competitive outlet. XP is personal, not comparative. Daily challenge completion badges provide social proof without head-to-head ranking. |
 
-| Anti-Feature | Why Avoid | What to Do Instead |
-|--------------|-----------|-------------------|
-| Ads in free tier | COPPA prohibits behavioral advertising to children under 13. Even "kid-safe" ad networks (e.g., SuperAwesome) disrupt learning flow and erode parent trust. Khan Academy Kids proves ads-free is viable. | Session limit (3/day free) is the conversion lever, not ads. The free experience must be clean and focused. |
-| Upselling UI shown to children | Prodigy received FTC complaint for showing premium-locked items to children in-game, creating "nag factor." Children cannot consent to purchases and should not be pressured. | Paywall screen is only accessible from parent dashboard (behind parental PIN). Children never see "upgrade" prompts. Premium features silently unavailable in free tier -- not locked with a visible padlock. |
-| Child-visible subscription status | Showing "FREE" vs "PREMIUM" badges or locked icons in the child experience creates a have/have-not dynamic. | Free tier simply does not show AI tutor button or locked themes. The child experience is complete within its tier. No indicators that "more" exists. |
-| Detailed usage analytics sent to server | COPPA restricts collection of persistent identifiers and behavioral data from children. Server-side analytics create compliance risk and require privacy infrastructure. | All analytics computed on-device from local session history. No telemetry, no server-side user profiles. Parent dashboard reads local store data only. |
-| Social/comparative features between children | Showing one child's progress vs another sibling creates competition and resentment. "Your sister is ahead of you" is toxic for learning motivation. | Each child's dashboard is independent. No cross-child comparisons. Parent sees each child's progress separately, never side-by-side rankings. |
-| Free trial that auto-converts | Many apps use 7-day free trial that silently charges. This is widely disliked by parents and potentially a COPPA issue if a child initiated the trial. | If offering a trial, require explicit parental confirmation at trial start AND at conversion. RevenueCat supports trial management. Prefer a generous free tier over trial. |
-| Push notifications to children | Notifications bypass parental mediation. Children ages 6-9 should not receive app notifications. | Notifications only go to parent (if parent opts in). Child-facing app never sends push. Session reminders are parent-only features. |
-| Locking existing free features behind paywall | If math practice, manipulatives, or badges were free in v0.7, they must remain free. "Rug-pulling" free features into premium destroys trust. | All existing v0.7 features stay free. Premium adds NEW capabilities (AI tutor, unlimited sessions, analytics, themes) that were never available in free tier before. |
+---
 
 ## Feature Dependencies
 
 ```
-Multi-Child Profile Architecture (store restructure)
-    |
-    |----> Profile CRUD (add/edit/delete children)
-    |           |
-    |           +----> Profile Switcher UI (home screen)
-    |
-    |----> Per-Child State Isolation
-    |           |
-    |           +----> Parent Dashboard (reads per-child data)
-    |           |           |
-    |           |           +----> Progress Overview Cards
-    |           |           |
-    |           |           +----> Skill Analytics View
-    |           |           |
-    |           |           +----> Misconception Breakdown
-    |           |           |
-    |           |           +----> Trend Graphs (requires session history)
-    |           |
-    |           +----> Parental Time Controls (per-child settings)
-    |                       |
-    |                       +----> Daily Session Time Limit
-    |                       |
-    |                       +----> Bedtime Lockout Schedule
-    |                       |
-    |                       +----> Break Reminders
+Grade range expansion (1-8 → 1-12)
+    └──requires──> Placement test staircase updated to grade 12
+    └──requires──> eloToLevel + gradeToElo extended to grade 12
+    └──enables──> All 9 new domain handlers to register correctly
 
-Subscription System (RevenueCat integration)
-    |
-    |----> Subscription State Slice (active/expired/free)
-    |           |
-    |           +----> Feature Gating Service (checks entitlements)
-    |           |           |
-    |           |           +----> Session Limit Enforcement (3/day free)
-    |           |           |
-    |           |           +----> AI Tutor Gating (premium only)
-    |           |           |
-    |           |           +----> Theme Gating (premium unlocks all)
-    |           |
-    |           +----> Paywall Screen (parent-only, behind PIN)
-    |           |
-    |           +----> Restore Purchases
+NumberPad negative input (± key)
+    └──requires──> Existing NumberPad refactor (add ± key + sign state)
+    └──enables──> Linear equations (negative coefficients)
+    └──enables──> Systems of equations (negative solutions)
+    └──enables──> Quadratic roots (negative roots)
+    └──enables──> Statistics extensions (negative z-scores, deviations)
 
-Session History Log (NEW data layer)
-    |
-    +----> Trend Graphs (requires historical records)
-    |
-    +----> Parent Dashboard Enhanced Analytics
+Multi-select MC (checkbox + Check button)
+    └──requires──> New answer format type in Answer discriminated union
+    └──requires──> New UI component: CheckboxMC + CheckButton
+    └──enables──> Quadratic equations (two roots)
+    └──enables──> Polynomial operations (multiple correct factorings)
+    └──independent──> All other new domains (use existing MC or free-text)
+
+Domain handlers (all 9 new)
+    └──requires──> DomainHandler interface (already exists)
+    └──requires──> NumberPad negative input (for domains using signed answers)
+    └──requires──> Multi-select MC (for quadratic domain)
+    └──enables──> Prerequisite DAG edges (can't add edges to non-existent domains)
+    └──enables──> Placement test questions for new domains
+
+Prerequisite DAG edges (K-8 → HS)
+    └──requires──> All 9 new domain handlers registered
+    └──enables──> Skill map new nodes visible and connected
+    └──enables──> Session orchestrator to surface HS skills appropriately
+
+YouTube video integration
+    └──requires──> react-native-youtube-iframe installed + tested
+    └──requires──> Khan Academy video ID map per skill (static JSON)
+    └──requires──> Tutor state machine: new EXHAUSTED state after BOOST
+    └──independent──> Domain handlers (can ship before or after)
+    └──independent──> Multi-select MC
 ```
 
-### Critical Dependency Notes
+### Dependency Notes
 
-- **Multi-child profile restructure is the prerequisite for everything.** The entire store must be reorganized before parent dashboard or per-child time controls can exist. This is the riskiest and most complex change.
-- **Subscription system is independent of multi-child profiles.** It can be built in parallel -- subscription state is family-level, not per-child.
-- **Parent dashboard requires both multi-child profiles AND session history logging** for full functionality. Basic dashboard (current state snapshot) can ship without history; trend graphs need accumulated data.
-- **Time controls require multi-child profiles** because limits are per-child (a 6-year-old gets different limits than an 8-year-old).
-- **Feature gating (free vs premium) can start simple** and does not block multi-child work. A boolean `isPremium` checked at key points.
+- **NumberPad negative input is a prerequisite for most new domains.** Signed-number answers appear throughout algebra. Phase 80 (foundation) correctly places this first.
+- **Multi-select MC is only required by quadratic equations domain.** It can be built in Phase 80 as a foundation piece or deferred to Phase 87. Building it in Phase 80 is cleaner since it touches the Answer union type.
+- **YouTube integration is fully independent of the 9 new domains.** Phase 81 can proceed in any order relative to domain phases.
+- **Prerequisite DAG edges should be added after all 9 domain handlers exist.** Adding partial edges introduces misleading skill map connections. Phase 91 (integration) is the right time.
+- **Grade range expansion (1-12) must land before any HS domain can appear in the placement test.** Phase 80 correctly addresses this.
 
-## MVP Recommendation
+---
 
-### Prioritize (Build First)
+## MVP Definition
 
-1. **Multi-child store restructure + migration** -- Everything depends on this. Wrap all per-child state under `children: Record<childId, ChildState>` with `activeChildId`. Migrate existing single-child data to first child entry. STORE_VERSION 13.
-2. **Profile CRUD + switcher UI** -- Add/edit/delete children. Profile picker on home screen. PIN-gated delete.
-3. **Subscription integration (RevenueCat)** -- Subscription state slice, paywall screen, restore purchases, basic feature gating (session count, AI tutor access).
-4. **Basic parent dashboard** -- Progress overview cards per child using existing BKT/XP/streak data. Skill mastery grid. Misconception breakdown. No trend graphs yet (needs history).
+### Launch With (v1.2 — Phases 80-91)
 
-### Prioritize (Build Second)
+Phase 80 (foundation) unlocks everything:
+- [ ] Grade range 1-12 throughout (placement, onboarding, skill map labels)
+- [ ] NumberPad `±` key — required for all new domains with signed answers
+- [ ] Multi-select MC format — required for quadratic domain specifically
 
-5. **Session history logging** -- Append lightweight session record after each session. Enables trend graphs.
-6. **Daily time limit + bedtime lockout** -- Per-child time controls with schedule.
-7. **Trend graphs** -- Weekly/monthly progress charts from session history.
-8. **Break reminders** -- Simple in-session timer nudge.
+Phase 81 (YouTube):
+- [ ] YouTube video integration in tutor, post-BOOST state
+- [ ] Khan Academy video map for at least the first 3 new domains
+- [ ] Helpful/not helpful vote stored locally
 
-### Defer
+Phases 82-90 (9 domain handlers, one per phase):
+- [ ] Each domain: problem generator, bug patterns, word problem templates, BKT skill registration
+- [ ] Dependencies respected: linear equations first, logarithms last
 
-- **Push notifications to parents** -- Requires server infrastructure (no backend currently). Defer to post-v0.8.
-- **Cross-device sync** -- Would require cloud backend. All data is device-local. Defer.
-- **Detailed session replays** -- Showing parents exactly which problems the child got wrong. High storage cost, moderate value. Defer.
+Phase 91 (integration):
+- [ ] Full prerequisite DAG with K-8 → HS edges
+- [ ] Placement test staircase extended to grade 12 with HS questions
+- [ ] Skill map updated to show HS domain nodes
 
-## Competitive Pricing Analysis
+### Add After Validation (v1.3+)
 
-| App | Free Tier | Premium Price | What Premium Adds |
-|-----|-----------|---------------|-------------------|
-| Khan Academy Kids | 100% free | N/A | N/A (nonprofit) |
-| SplashLearn | Limited daily access | $7.99-11.99/mo ($89-135/yr family) | Full curriculum, detailed reports, up to 3 kids |
-| Prodigy Math | Core game free | ~$60/yr per child | Parent tools, video lessons, premium rewards |
-| Education.com | 3 downloads/mo | ~$9.99/mo | Unlimited access, all grades |
-| Duolingo | Full course free | $7-14/mo | No ads, unlimited hearts, offline |
-| **Tiny Tallies (proposed)** | 3 sessions/day, all skills, all manipulatives, basic badges | $5.99/mo or $49.99/yr | Unlimited sessions, AI tutor, all themes, parent analytics, time controls |
+- [ ] CPA pictorial mode for algebra domains (bar balance model for linear equations, parabola sketch for quadratics) — high value, high complexity
+- [ ] Calculus domain (limits, derivatives) — only if high school adoption is validated
+- [ ] Trigonometry domain — large scope, validate demand first
+- [ ] Richer bug library coverage (> 8 patterns per HS domain) — iterate on real usage data
 
-### Pricing Rationale
+### Future Consideration (v2+)
 
-- **$5.99/mo / $49.99/yr** undercuts SplashLearn ($7.99+) and Prodigy (~$60/yr) while offering comparable features.
-- Median education app annual price is $44.99 (industry benchmark). $49.99/yr is competitive.
-- Annual discount (30% off monthly rate) incentivizes commitment and reduces churn.
-- Single subscription covers all children -- no per-child pricing complexity.
+- [ ] Graphing calculator integration (or Desmos deep-link) — validate whether students actually want this vs just need concept understanding
+- [ ] Teacher/classroom mode — separate product track, COPPA + FERPA complexity
+- [ ] Competition/SAT prep mode — distinct content pipeline, validate market
 
-### Free vs Premium Feature Split
+---
 
-| Feature | Free | Premium |
-|---------|------|---------|
-| Daily practice sessions | 3 per day | Unlimited |
-| All 14 math skills | Yes | Yes |
-| Adaptive difficulty (Elo + BKT) | Yes | Yes |
-| Virtual manipulatives (all 6) | Yes | Yes |
-| Achievement badges | Yes | Yes |
-| Daily challenges | Yes | Yes |
-| Visual skill map | Yes | Yes |
-| Avatar customization | Basic (8 avatars) | All avatars + frames |
-| AI Tutor (Gemini) | No | Yes |
-| Color themes (beyond default) | No | Yes |
-| Parent dashboard | Basic (current snapshot) | Full (analytics + trends + misconceptions) |
-| Time controls | No | Yes |
-| Multi-child profiles | Up to 2 | Up to 5 |
-| Session history/trends | No | Yes |
+## Feature Prioritization Matrix
 
-**Key design principle:** The free tier must provide a genuinely good daily math practice experience. A child using only the free tier should still learn effectively. Premium adds convenience (unlimited sessions), intelligence (AI tutor), insight (parent analytics), and polish (themes/cosmetics).
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| NumberPad `±` key | HIGH — without it, ~70% of HS answers can't be entered | LOW — existing NumberPad, add one key + sign state | P1 |
+| Grade range 1-12 (type + placement) | HIGH — foundational repositioning | LOW — extend existing gradeToElo mapping, update strings | P1 |
+| Linear equations domain | HIGH — foundational Algebra 1 skill, highest demand | MEDIUM — 8 skills, 6 bug patterns, word problems | P1 |
+| Multi-select MC format | HIGH — quadratics without it are pedagogically wrong | MEDIUM — new Answer type, new UI component | P1 |
+| YouTube video integration | HIGH — critical UX upgrade for stuck students | MEDIUM — library integration + curated video map | P1 |
+| Systems of equations domain | HIGH — standard Algebra 1 content | MEDIUM — 5 skills, 2×2 substitution/elimination | P1 |
+| Quadratic equations domain | HIGH — most-searched algebra topic | MEDIUM — 6 skills, uses multi-select MC | P1 |
+| Coordinate geometry domain | MEDIUM — connects geometry to algebra | MEDIUM — 6 skills, slope/distance/midpoint | P2 |
+| Polynomial operations domain | MEDIUM — enables quadratic factoring context | MEDIUM — 6 skills, FOIL as primary | P2 |
+| Exponential functions domain | MEDIUM — Algebra 2 core topic | MEDIUM — 5 skills, growth/decay | P2 |
+| Sequences & series domain | MEDIUM — covers patterns at HS level | LOW-MEDIUM — 5 skills, builds on K-8 patterns | P2 |
+| Statistics extensions domain | MEDIUM — connects to built data_analysis | MEDIUM — 4-5 skills, std dev + normal dist | P2 |
+| Logarithms domain | MEDIUM — inverse of exponential | LOW-MEDIUM — 4 skills, special values + log rules | P2 |
+| Prerequisite DAG integration (Phase 91) | HIGH — makes skill map coherent | MEDIUM — adding edges, testing placement | P1 (after all domains) |
+| CPA pictorial for algebra | HIGH — differentiator, but complex | HIGH — new SVG renderers per domain | P3 (v1.3) |
+| Graphing calculator | LOW — Desmos exists, students have it | VERY HIGH — full product scope | P3 (v2+) |
+| Trigonometry domain | MEDIUM — natural follow-on | HIGH — large scope, unit circle, radians | P3 (v1.3) |
+
+---
+
+## Competitor Feature Analysis
+
+| Feature | Khan Academy | IXL | Photomath/Symbolab | Tiny Tallies (v1.2) |
+|---------|--------------|-----|--------------------|----------------------|
+| HS algebra content (grades 9-12) | Yes — full curriculum | Yes — standards-aligned | Yes — solver tool | Yes — 9 new domains |
+| Negative number input | System keyboard (freetext) | System keyboard (freetext) | Photo or system keyboard | Custom NumberPad with ± key |
+| Quadratic two-root answer entry | Single text box (one answer at a time) or separate graded steps | "x = ___ or x = ___" two text boxes | Shows solution, not a practice tool | Multi-select MC (4 options, checkbox) |
+| Video hints during practice | Always-available video link | No inline video | Step-by-step animation | Video only after BOOST exhausted — more Socratic |
+| Video integration style | First-class alongside text hints | Not available | Built-in animated steps | Inline YouTube player, vote prompt |
+| Adaptive difficulty | Yes — mastery-based progression | Yes — adaptive question selection | No (homework tool) | Yes — Elo + BKT (existing) |
+| Bug/misconception detection | No explicit misconception model | Shows "SmartScore" | No | Bug Library: 4-8 patterns per domain |
+| Graphing calculator | Linked to Desmos | Not built-in | Yes (photo input) | Not in scope |
+| Placement/diagnostic test | Yes (Khan Diagnostic) | Yes (grade-level diagnostic) | No | Staircase algorithm extended to grade 12 |
+
+---
 
 ## Sources
 
-- [Khan Academy Parent Dashboard](https://support.khanacademy.org/hc/en-us/articles/360039664491-Guide-to-the-Parent-Dashboard) -- dashboard features, multi-child management
-- [Khan Academy creating child accounts](https://support.khanacademy.org/hc/en-us/articles/202262994-How-do-I-create-child-accounts) -- add-child flow
-- [Prodigy Parent Dashboard](https://prodigygame.zendesk.com/hc/en-us/articles/115001744726-Parent-Dashboard) -- goal overview, recent activity, grade level display
-- [SplashLearn Parent Features](https://www.splashlearn.com/features/parents) -- real-time progress, mastery notifications, trouble spots
-- [SplashLearn Pricing](https://www.myengineeringbuddy.com/blog/splashlearn-reviews-alternatives-pricing-offerings/) -- $7.99-$11.99/mo, family plans
-- [RevenueCat Expo Integration](https://www.revenuecat.com/docs/getting-started/installation/expo) -- Expo managed workflow support
-- [Expo IAP Guide](https://docs.expo.dev/guides/in-app-purchases/) -- official Expo in-app purchase documentation
-- [RevenueCat Expo Tutorial](https://expo.dev/blog/expo-revenuecat-in-app-purchase-tutorial) -- official Expo blog on RevenueCat integration
-- [COPPA Compliance Guide 2025](https://blog.promise.legal/startup-central/coppa-compliance-in-2025-a-practical-guide-for-tech-edtech-and-kids-apps/) -- SDK audit, parental consent, persistent identifiers
-- [Education App Revenue Benchmarks](https://www.mirava.io/blog/subscription-benchmarks-education-apps) -- median annual price $44.99
-- [Education App Monetization Strategies](https://www.ptolemay.com/post/how-to-monetize-your-educational-app-strategies-for-success) -- freemium best practices
-- Existing project context: `.planning/PROJECT.md`, `src/store/appStore.ts`, `src/store/slices/childProfileSlice.ts`
+- [IES Practice Guide: Teaching Strategies for Improving Algebra Knowledge](https://ies.ed.gov/ncee/wwc/docs/practiceguide/wwc_algebra_040715.pdf) — symbolic vs contextual mix, word problem pedagogy
+- [PMC: Does Calculation or Word-Problem Instruction Provide a Stronger Route to Pre-Algebraic Knowledge?](https://pmc.ncbi.nlm.nih.gov/articles/PMC4274629/) — contextual before symbolic for conceptual understanding
+- [Common Core High School Algebra Standards (HSA)](https://www.thecorestandards.org/Math/Content/HSA/) — domain structure and skill progression
+- [Common Core High School Functions Standards (HSF)](https://www.thecorestandards.org/Math/Content/HSF/) — exponential, logarithmic, sequence functions
+- [Lamar University: Common Math Errors](https://tutorial.math.lamar.edu/extras/commonerrors/algebraerrors.aspx) — algebra misconceptions research base for Bug Library
+- [ERIC: Common Errors in Algebraic Expressions](https://files.eric.ed.gov/fulltext/EJ1264037.pdf) — distractor and bug pattern source
+- [Nature: Math Anxiety and Word Problem Performance](https://www.nature.com/articles/s41598-025-16997-0) — word problems and anxiety interaction
+- [react-native-youtube-iframe GitHub](https://github.com/LonelyCpp/react-native-youtube-iframe) — v2.4.1, `useLocalHTML` workaround for iframe timeout
+- [Expo SDK 54 New Architecture](https://docs.expo.dev/guides/new-architecture/) — New Architecture default, compatibility warnings
+- [Khan Academy: Hint Option behavior](https://support.khanacpp.org/hc/en-us/community/posts/360054875972) — video-first hint placement pattern
+- [IXL: Solve quadratic by factoring](https://www.ixl.com/math/algebra-1/solve-a-quadratic-equation-by-factoring) — competitor answer format reference
+- [CSS-Tricks: Negative numbers on iOS keyboard](https://forum.bubble.io/t/negative-numbers-on-ios-keyboard/107662) — iOS platform constraint confirmation
+- [Common Core HS Math Sequence](https://ospi.k12.wa.us/sites/default/files/2022-12/mathstandards_highschool.pdf) — Algebra 1 → Algebra 2 → Pre-Calc progression
+- Existing project context: `.planning/PROJECT.md`, `src/services/tutor/`, `src/store/slices/tutorSlice.ts`
 
 ---
-*Feature research for: v0.8 Multi-child profiles, parent dashboard, time controls, freemium IAP subscription*
-*Researched: 2026-03-05*
+
+*Feature research for: v1.2 High School Math Expansion + YouTube Video Hints*
+*Researched: 2026-03-12*

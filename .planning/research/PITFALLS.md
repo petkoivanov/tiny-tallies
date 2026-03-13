@@ -1,455 +1,418 @@
-# Domain Pitfalls
+# Pitfalls Research
 
-**Domain:** Multi-child profiles, parent dashboard, parental controls, and freemium IAP subscription added to an existing children's math learning app
-**Researched:** 2026-03-05
-**Confidence:** HIGH (codebase analysis + platform documentation + COPPA regulations + IAP ecosystem research)
+**Domain:** High school math expansion (K-12) added to an existing K-8 numeric math engine — algebra domains, multi-select MC, negative input, YouTube tutor integration, grade type expansion, placement test gaps
+**Researched:** 2026-03-12
+**Confidence:** HIGH (direct codebase analysis: types.ts, distractorGenerator.ts, safetyFilter.ts, eloCalculator.ts, appStore.ts, migrations.ts, PlacementTestScreen.tsx, multipleChoice.ts, onboardingSlice.ts)
+
+---
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites, app store rejections, data loss, or legal exposure.
-
-### Pitfall 1: Single-Child Assumption Baked into Store Architecture
+### Pitfall 1: Treating Algebra as Numeric When Answers Are Symbolic
 
 **What goes wrong:**
-The entire Zustand store (STORE_VERSION=12) treats child data as a singleton. Fields like `childName`, `childAge`, `childGrade`, `skillStates`, `xp`, `level`, `weeklyStreak`, `misconceptions`, `earnedBadges`, `challengeCompletions`, `avatarId`, `frameId`, `themeId`, and `tutorConsentGranted` all live at the top level of the store with no child ID scoping. The `partialize` function in `appStore.ts` explicitly lists every one of these as top-level keys. Every screen, hook, and service reads these flat -- `useAppStore(state => state.xp)` appears across 36+ files. Adding multi-child support requires either (a) nesting all child data under a `children: Record<childId, ChildData>` structure, which is a massive schema change breaking every selector in the app, or (b) swapping the entire persisted store when switching children, which creates complex data lifecycle issues.
+The current `Answer` discriminated union (`NumericAnswer | FractionAnswer | ComparisonAnswer | CoordinateAnswer | ExpressionAnswer`) and the bridge function `answerNumericValue()` force every answer into a single number for Elo calculation, distractor generation, and the safety pipeline. High school algebra introduces problems where the answer is `x = -3` or `{x: 2, y: 5}` — not a scalar. If a developer adds a `LinearEquationAnswer { type: 'linear_equation'; variable: string; value: number }` type and forgets to update `answerNumericValue()`, the fallback branch `parseFloat(answer.value) || 0` returns `NaN` or `0`, silently corrupting Elo updates and distractor generation for every linear equation problem ever presented.
 
 **Why it happens:**
-The app was designed for a single child from v0.1. Twelve store versions of migrations have cemented this assumption. The `partialize` function, migration chain, all slice interfaces, and every `useAppStore` selector assume flat top-level access. This is not a bug -- it was the correct architecture for a single-child app. But it means multi-child is a fundamental schema restructuring, not an additive feature.
+`answerNumericValue()` has an exhaustive switch but the `expression` branch uses `parseFloat(answer.value) || 0` as a numeric approximation for a string. Developers adding new answer types will add a branch but may not realize the numeric bridge is used downstream by the Elo calculator (`calculateEloUpdate`), the distractor generator (`generateDistractors`), and the safety filter (`checkAnswerLeak`). Each of those systems calls `answerNumericValue()` on the `correctAnswer` field.
 
-**Consequences:**
-- Attempting a flat migration (v12 -> v13) that restructures all child data into a nested map will be the most complex migration in the app's history
-- If the migration has a bug, ALL existing user data (skill states, Elo ratings, BKT mastery, Leitner boxes, misconception records, badge progress, XP, streaks) is at risk of corruption or loss
-- Every `useAppStore` selector across 36+ files must be updated to scope to the active child
-- The `commitSessionResults` flow in `useSession.ts` (28 `useAppStore` references) must be rewired entirely
+**How to avoid:**
+- For problems where the answer is a variable's value (e.g. `x = -3`), keep using `NumericAnswer { type: 'numeric', value: -3 }` — the answer IS the numeric value -3. The variable name is display/question text, not the answer type.
+- For multi-root quadratic answers (e.g. `x = 2` and `x = -5`), use a new `MultiNumericAnswer { type: 'multi_numeric'; values: number[] }` type, and update `answerNumericValue()` to return the primary root (lowest absolute value, or first element), with a unit test confirming the bridge value.
+- Do NOT create a string-based answer type for anything the safety pipeline must compare against a number. String answers bypass `checkAnswerLeak` which operates on `number`, making it impossible to detect if the LLM reveals the answer.
+- Write a TypeScript exhaustive check assertion in `answerNumericValue()` so adding a new Answer branch without a case is a compile-time error.
 
-**Prevention:**
-- Use the "active child pointer" pattern: keep `activeChildId` at the store root, nest all per-child data under `children: Record<string, ChildData>`, and create a `useActiveChild()` hook that resolves `children[activeChildId]` so selectors remain simple
-- Create a `ChildData` type that is the union of all per-child state (profile + skills + gamification + misconceptions + achievements + challenges) -- extract this from existing slice types
-- Write the v12 -> v13 migration as a "wrap existing data" operation: take all current top-level fields and nest them under `children: { [generatedId]: { ...existingFields } }` with `activeChildId: generatedId`
-- Build a comprehensive migration test fixture that captures a real v12 store snapshot and verifies every field survives the restructuring
-- Create the `useActiveChild()` hook FIRST, then migrate all 36+ files to use it, BEFORE enabling multi-child UI -- this way the refactor can be validated with a single child before the switching logic exists
-- Keep `partialize` in sync: it must now include `children`, `activeChildId`, and the subscription/parental-control fields, but NOT the old flat fields
+**Warning signs:**
+- Elo stays stuck at 1000 for algebra skills (NaN from parseFloat rounds to 0 → K*0 delta → no movement)
+- Distractor generator `isValidDistractor` passes all values because `correctAnswer` is 0 or NaN
+- Safety pipeline never trips on answer leaks for algebra problems
 
-**Detection:**
-- XP resets to 0 after switching children and switching back
-- "Child A" sees "Child B"'s badges or skill progress
-- App crashes on first launch after update (migration failure)
-- Store migration test fails when starting from v12 fixture data
-
-**Phase to address:**
-Phase 1 (Multi-child profiles) -- this is THE foundational change. Everything else depends on it.
+**Phase to address:** Phase 80 (Foundation — type system expansion)
 
 ---
 
-### Pitfall 2: Store Migration v12->v13 Is a Structural Reshape, Not an Additive Migration
+### Pitfall 2: Adjacent ±1 Distractor Phase Generates Nonsensical Algebra Distractors
 
 **What goes wrong:**
-All previous 12 migrations have been additive: "add field X with default Y." The multi-child migration is fundamentally different -- it must MOVE existing data from the root into a nested structure. The existing `migrateStore` function in `migrations.ts` treats `state` as a flat `Record<string, unknown>` and uses `state.fieldName ??= default`. A structural reshape requires creating a new `children` map, copying every child-related field into it, and DELETING the old top-level fields. If old fields are left at the root alongside the nested structure, `partialize` will persist duplicates, the store will grow, and stale root-level data will shadow the nested data.
+`generateDistractors()` Phase 2 always appends `correctAnswer + 1` or `correctAnswer - 1` as an "adjacent" distractor. For arithmetic, this is pedagogically meaningful (off-by-one errors are real). For algebra it creates absurd options. If the answer to a linear equation is `x = -3`, the adjacent distractor `-2` carries no conceptual meaning — it implies "I almost balanced the equation" which is not a real misconception. For sequences/series (e.g. arithmetic sequence next term = 47), ±1 is plausible but for a quadratic factoring problem where roots are `{2, -5}`, a distractor of `{2, -4}` (generated as numeric -4 adjacent to -5) looks arbitrary to a student.
+
+Worse: the random fallback Phase 3 uses `rangeHalf = Math.max(Math.floor(Math.abs(correctAnswer) * 0.4), 5)`. For `x = -3`, the range is `[-3 - 1.2, -3 + 1.2]` clamped to `[-5, -2]` — a cluster of negative values. For `x = 100` (slope calculation result), the range is `[60, 140]` — and the "wrong" options would all be plausible slopes, which is actually decent, but it happened by accident not design.
 
 **Why it happens:**
-The migration pattern established in v1-v12 is "null-coalesce defaults." Developers follow the pattern and write `state.children ??= {}` without moving the existing data into it. The result: existing users get an empty `children` map alongside their existing flat data, and the app shows "no children" despite having a full history.
+The distractor generator was designed for K-8 arithmetic answers (integers 0–999, decimals 0–99.99). The "adjacent ±1 is a meaningful misconception signal" assumption breaks for any domain where the answer space is not a linear number line (roots, slopes, intercepts with specific meaning, logarithm values).
 
-**Consequences:**
-- Existing user's learning history appears lost (it is still there, just not in the expected location)
-- If both flat and nested data exist, which does the app read? Race condition between old and new code paths
-- Rollback is extremely difficult once the migration ships
+**How to avoid:**
+- Add a `distractorStrategy` field to `ProblemTemplate` with values: `'adjacent'` (default, current behavior), `'algebra_root'` (±2, ±5, ±10 offsets for roots), `'slope'` (multiples and sign-flips), `'logarithm'` (common wrong log values: off-by-exponent), `'sequence_next_term'` (common delta errors).
+- For multi-root problems, generate distractors as full root-sets where one root is wrong, not individual numeric distractors.
+- The Phase 2 adjacent step should be configurable per domain: `adjacentStep: number` on the template, defaulting to 1. Algebra templates set `adjacentStep: 5` or `adjacentStep: 10`.
+- Bug Library patterns for algebra must be added BEFORE Phase 82 ships, otherwise 100% of distractors come from Phase 3 random — which works but destroys misconception detection.
 
-**Prevention:**
-- Write the migration as a two-step operation: (1) construct the `ChildData` object from existing flat fields, (2) delete the flat fields from root state
-- The migration MUST be idempotent: if run twice (which Zustand can do in edge cases), it should not create duplicate children
-- Add a guard: `if (state.children && Object.keys(state.children).length > 0) return` at the top of the v13 migration to prevent re-migration
-- Test with three fixture scenarios: fresh install (no state), v12 state with full history, v12 state with minimal data (no badges, no misconceptions)
-- Consider a "migration validation" step that runs after migration and logs warnings if unexpected root-level child fields still exist
+**Warning signs:**
+- All algebra distractors have `source: 'random'` in the `DistractorResult[]` — no bug library hits, no meaningful adjacent distractors
+- MC options for a quadratic root problem are `{-3, -2, -1}` — a cluster of adjacent integers instead of pedagogically distinct wrong roots
 
-**Detection:**
-- After update, app shows onboarding screen instead of home screen (no active child found)
-- Store size doubles (duplicate data at root and nested levels)
-- `partialize` includes both old flat fields AND new nested structure
-
-**Phase to address:**
-Phase 1 (Multi-child profiles) -- the migration IS the phase. Get it wrong and nothing else works.
+**Phase to address:** Phase 80 (distractor strategy field on template), then each domain phase (82–90) adds its own bug library patterns
 
 ---
 
-### Pitfall 3: IAP Requires Development Build -- Expo Go Cannot Test Purchases
+### Pitfall 3: `checkAnswerLeak` Breaks for Negative Answers and Multi-Root Answers
 
 **What goes wrong:**
-The team has been developing with Expo Go (implied by managed workflow + no mention of dev builds). IAP libraries (RevenueCat `react-native-purchases` or `expo-iap`) require native modules not included in Expo Go. Attempting to test IAP in Expo Go either crashes or silently uses mock/preview mode that does not exercise real purchase flows. The first time the team discovers this, they must set up EAS Build and a development build, which introduces a new build pipeline, provisioning profiles, and significantly longer iteration cycles.
+`checkAnswerLeak(response, correctAnswer: number)` builds regex patterns from `String(correctAnswer)`. For `correctAnswer = -3`, `answerStr = "-3"`, and `escapeRegex("-3")` produces `\-3`. The word boundary pattern `\b\-3\b` will NOT match "-3" in a sentence because `\b` does not work at the boundary between whitespace and a minus sign in JavaScript regex. The hint "Try subtracting 3 from both sides" would pass the leak check even though it reveals the procedure leading directly to -3.
+
+For multi-root answers where `answerNumericValue()` returns only the primary root (say `2` from `{2, -5}`), the secondary root `-5` is never checked. The LLM could say "one of the roots is negative five" and the safety pipeline would not catch it.
 
 **Why it happens:**
-IAP is one of the few features in Expo managed workflow that CANNOT work in Expo Go at all. Unlike most Expo modules that have JS fallbacks, IAP requires StoreKit 2 (iOS) and Google Play Billing (Android) native bindings. RevenueCat's docs explicitly state: "purchases won't work [in Expo Go] because Expo Go doesn't include all the native APIs required."
+The safety pipeline was designed when all answers were positive integers or simple decimals. The `numberToWord()` helper only covers integers 0–20 (or similar small range). The `\b` anchor does not recognize `-` as a word boundary character.
 
-**Consequences:**
-- Development velocity drops significantly during IAP phase (minutes per build instead of seconds per reload)
-- IAP bugs cannot be caught until deployed to TestFlight/internal testing tracks
-- Sandbox purchase accounts (Apple) and test accounts (Google) must be configured separately
-- Android: if Activity `launchMode` is not `standard` or `singleTop`, purchases cancel when user backgrounds to verify in banking app
+**How to avoid:**
+- Fix `checkAnswerLeak` to handle negative numbers: check for both `String(Math.abs(correctAnswer))` with a preceding `-` or `negative` word pattern.
+- For multi-root answer types, call `checkAnswerLeak` once per root value, OR pass all roots as an array to a new `checkMultiAnswerLeak(response, roots: number[])` function.
+- Add regression tests: `checkAnswerLeak("subtract three from x", -3)` should return `safe: false`. `checkAnswerLeak("one root is negative five", -5)` should return `safe: false`.
+- The `numberToWord()` function must handle negative number descriptions: "negative three", "minus three".
 
-**Prevention:**
-- Set up EAS Build and development builds BEFORE starting IAP work -- treat this as Phase 0 infrastructure
-- Use RevenueCat over raw `expo-iap` or `react-native-iap` because RevenueCat handles receipt validation server-side, subscription status tracking, cross-platform entitlement management, and provides a dashboard -- this eliminates an entire class of receipt-validation bugs
-- RevenueCat is confirmed compatible with Expo SDK 54 / React Native 0.81
-- Add `react-native-purchases` to app.json plugins array for config plugin support
-- Create Apple sandbox test accounts and Google Play internal test tracks early
-- Gate IAP testing behind a feature flag so the rest of the app remains testable in Expo Go during development
+**Warning signs:**
+- Unit tests for `checkAnswerLeak` with `correctAnswer = -3` pass when they should fail
+- Hint for a linear equation problem includes the procedure that trivially reveals a negative answer
 
-**Detection:**
-- `E_IAP_NOT_AVAILABLE` error in development
-- Purchases "succeed" in development but never grant entitlements
-- App crashes on import of IAP module in Expo Go
-
-**Phase to address:**
-IAP/Subscription phase -- but development build setup should happen as pre-work before the phase begins.
+**Phase to address:** Phase 80 (before any algebra domain ships — fix the safety pipeline first)
 
 ---
 
-### Pitfall 4: Apple Kids Category + Subscription Creates Heightened Review Scrutiny
+### Pitfall 4: `Grade` Type Is a Literal Union — Adding 9/10/11/12 Is Not One Line
 
 **What goes wrong:**
-Apps in Apple's Kids Category face stricter review guidelines (Guideline 1.3). Kids Category apps with subscriptions must: (a) have a parental gate before ANY purchase UI, (b) not use manipulative subscription patterns (free trial that auto-converts without clear disclosure), (c) not show ads (the app doesn't, but analytics SDKs could trigger this), (d) clearly communicate subscription terms before the purchase button, and (e) provide a restore purchases button. Missing ANY of these causes rejection. Multiple rejections delay launch by weeks.
+`Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8` in `src/services/mathEngine/types.ts` is used as the `grades` array type on every `ProblemTemplate` and every `SkillDefinition`, as a cast in `PlacementTestScreen.tsx` (`grade as Grade`), in `getSkillsByGrade(grade as Grade)`, in `profileInitService`, and in the BKT age-bracket mapping. The staircase algorithm hard-codes `MAX_GRADE = 8` in `PlacementTestScreen.tsx`. The `onboardingSlice` comment says `placementGrade: number | null` — grade 1-8 — and the completed placement calls `completePlacement(grade, theta)` with no guard above 8.
+
+If a developer simply adds `| 9 | 10 | 11 | 12` to the `Grade` type, TypeScript will compile, but `getSkillsByGrade(9)` returns an empty array (no skills registered at grade 9 yet), `MAX_GRADE = 8` in the placement screen means grade 9-12 is unreachable in placement, and any UI that displays grade as an ordinal string (`"${grade}th grade"`) will show "8th grade" as the ceiling.
 
 **Why it happens:**
-Developers implement IAP following standard RevenueCat/Apple patterns without accounting for Kids Category-specific requirements. Standard paywall templates show pricing and a "Subscribe" button -- in a Kids Category app, this button must be behind a parental gate. The existing parental PIN gate (expo-secure-store) handles tutor consent but was not designed to gate purchases.
+The `Grade` type was intentionally constrained to 1-8 as a correctness guard. It was expanded from 1-4 to 1-8 in a prior milestone (noted in PROJECT.md: "Grade type expanded from 1-4 to 1-8 — pre-v0.9"), which means there is precedent for the pattern, but each expansion requires updating more than just the type.
 
-**Consequences:**
-- App store rejection with vague "Guideline 1.3" message
-- Multiple resubmission cycles (each takes 1-3 days for review)
-- Potential removal from Kids Category if violations are found post-launch
-- Google Play has similar "Designed for Families" program requirements
+**How to avoid:**
+A checklist for the Grade type expansion (Phase 80):
+1. Change `Grade = 1|2|3|4|5|6|7|8` to `Grade = 1|2|3|4|5|6|7|8|9|10|11|12`.
+2. Update `MAX_GRADE` constant in `PlacementTestScreen.tsx` from `8` to `12`.
+3. Update `requiredStreak()` in `PlacementTestScreen.tsx` — the "at or above child's grade" boundary may need recalibration for older students.
+4. Update `onboardingSlice.ts` comment.
+5. Update `ProfileCreationWizard.tsx`: `autoGrade = Math.max(0, Math.min(6, selectedAge - 5))` — currently caps at grade 6 for age 11. High school students need grades up to 12. Change to `Math.max(0, Math.min(12, selectedAge - 5))`.
+6. Update the `AgeRange` type in `childProfileSlice.ts`: `'6-7' | '7-8' | '8-9' | null` — this needs brackets through `'17-18'` or a more flexible representation for high school students.
+7. The BKT parameters are age-bracketed — high school students (14-18) have different learning rates than the existing 6-9 brackets. A missing bracket defaults to undefined, causing `undefined` parameter lookups in `bktCalculator.ts`.
+8. Run `npm run typecheck` — TypeScript exhaustive checks on the Grade union will surface any missed consumers.
 
-**Prevention:**
-- Require parental PIN verification before showing ANY subscription UI (paywall screen, manage subscription, cancel subscription)
-- Subscription terms must be visible BEFORE the purchase button (price, billing period, auto-renewal terms, cancellation instructions)
-- Include a prominent "Restore Purchases" button accessible without purchase -- Apple rejects if this is missing
-- Never use "free trial" language without clearly stating what happens after the trial ends and how much it costs
-- Do not include any third-party analytics SDK that could be classified as advertising (RevenueCat analytics are fine as they are first-party purchase tracking)
-- Test the full purchase flow on a real device via TestFlight before submission
-- Review Apple's "Helping Protect Kids Online" (February 2025) document for current guidelines
-- On Google Play: ensure the app is enrolled in the "Designed for Families" program and meets its requirements
+**Warning signs:**
+- `getSkillsByGrade(9)` returns `[]` after the type change but before skills are registered
+- Placement test completes at grade 8 for a student who gets every question right
+- BKT mastery probability never changes for grade 9+ students (missing age bracket → NaN parameters)
 
-**Detection:**
-- App Review rejection citing Guideline 1.3
-- Subscription UI is accessible without parental authentication
-- "Restore Purchases" button missing or non-functional
-- Free trial terms not clearly displayed before purchase button
-
-**Phase to address:**
-IAP/Subscription phase -- design the parental-gated paywall flow before implementing any RevenueCat integration.
+**Phase to address:** Phase 80 — Grade type expansion must be the very first thing, before any domain handlers are added
 
 ---
 
-### Pitfall 5: Freemium Gating Turns Existing Free Features Into Lost Functionality
+### Pitfall 5: Store Migration Version Must Be Bumped for Grade Type Change
 
 **What goes wrong:**
-The v0.8 spec says "free: 3 sessions/day, no AI tutor; premium: unlimited + AI tutor + all themes." But the AI tutor has been free and available since v0.5. Themes have been free since v0.7 (earned through achievements, "all cosmetics earned through badges, zero paywall" is an explicit design decision). Existing users who update to v0.8 will LOSE access to the AI tutor and theme unlocks they previously had. This violates user trust, creates negative reviews, and contradicts the "no paywall" philosophy that was a core design principle.
+Expanding the Grade type from 1-8 to 1-12 does not by itself require a store migration — BUT if the `childGrade` field in `childProfileSlice` is currently stored as a number validated elsewhere to be 1-8, existing users re-taking placement in high school might get assigned grade 9-12. That stored value then flows into `getSkillsByGrade()` which returns `[]` until Phase 82 domains are registered. More critically, any store field that uses `Grade` as an array element type (e.g. `grades: Grade[]` in skill state) will have persisted grade values of 1-8. When `Grade` expands, the persisted data is still valid, but the developer may be tempted to skip the migration since "no data changes." The real danger is any new slice fields added in Phase 80 (e.g. a `gradeRange` field for K-12 app positioning, a `youtubeConsentGranted` boolean, a `negativeInputEnabled` feature flag) without a migration function.
+
+The CLAUDE.md guardrail is explicit: "Don't modify store migration version without adding a corresponding migration function." The complementary risk is adding new slice fields WITHOUT bumping the version — existing users never get the new field initialized, causing `undefined` reads that TypeScript doesn't catch because `partialize` only persists a subset of the store.
 
 **Why it happens:**
-Feature gating is designed from the new-user perspective ("free users get X, premium users get X+Y"). But existing users have been using Y for free. The migration from "everything free" to "freemium" must handle grandfathering or users perceive it as taking away features they already had.
+Developers add new fields to slices and test on a clean install (where Zustand initializes everything from slice defaults). On upgrade, existing users have the old persisted JSON which does not include the new field. Zustand's `persist` middleware does NOT deep-merge new fields from defaults — it replaces the persisted subtree entirely only when the version changes and `migrate()` runs. Without a version bump, the missing field is simply absent, and JavaScript `undefined` propagates silently.
 
-**Consequences:**
-- 1-star reviews: "App used to have a tutor, now it wants me to pay"
-- Children who relied on AI tutor hints for challenging problems suddenly lose their support system
-- Parents who valued the "no paywall" positioning lose trust in the app
-- Violates the "all cosmetics earned through badges, zero paywall" design decision documented in PROJECT.md
+**How to avoid:**
+- Current `STORE_VERSION = 21`. Phase 80 adds at least: `youtubeConsentGranted: boolean` (new parental consent), potentially `negativeInputEnabled: boolean`. Bump to STORE_VERSION 22 and add migration: `state.youtubeConsentGranted ??= false`.
+- Phase 81 (YouTube) must bump again if it adds any persisted fields.
+- Any phase that adds slice fields must bump and migrate. Add a CI test that cross-references STORE_VERSION with the count of `if (version < N)` blocks in migrations.ts.
+- The `partialize` function in `appStore.ts` only persists the per-child `ChildData` blob plus auth fields. New top-level (non-child) fields must be explicitly added to `partialize` or they will not survive app restart, even with correct migration.
 
-**Prevention:**
-- Grandfather existing users: anyone who has used the app before the freemium update gets a permanent "legacy" entitlement for AI tutor access
-- OR: make the AI tutor always available but limit it (e.g., 3 tutor interactions/day free, unlimited premium) rather than fully gating it
-- Themes earned through achievements MUST remain free -- paywall only applies to additional premium-exclusive themes, not the 5 existing ones
-- Premium features should be NEW features, not restrictions on existing ones: premium could mean "unlimited sessions" + "parent dashboard analytics" + "premium-exclusive themes" + "priority AI tutor" (no daily limit)
-- Communicate the change clearly in update notes: "New premium features added! Everything you had before is still free."
-- Add a `legacyUser` flag in the v12->v13 migration that detects existing data and grants appropriate entitlements
+**Warning signs:**
+- New feature works on fresh install but fails on upgrade (classic "upgrade regression")
+- `youtubeConsentGranted` is `undefined` at runtime despite being typed as `boolean`
+- `STORE_VERSION` is bumped but no `if (version < N)` block exists in `migrations.ts`
 
-**Detection:**
-- Existing user updates and immediately hits paywall for AI tutor
-- Badge-unlocked themes show lock icons after update
-- User reviews mention "they took away features"
-
-**Phase to address:**
-Freemium/Subscription design phase -- must be resolved BEFORE implementing any feature gating. This is a product decision, not a technical one.
+**Phase to address:** Phase 80 and every subsequent phase that touches slice state
 
 ---
 
-### Pitfall 6: COPPA 2025 Amendments Expand Scope for Subscription Data
+### Pitfall 6: YouTube Embedding in COPPA-Regulated App Requires Specific Technical Controls
 
 **What goes wrong:**
-The 2025 COPPA amendments (effective June 23, 2025, compliance deadline April 22, 2026) expand the definition of "personal information" and add stricter data retention requirements. Subscription management inherently involves collecting parent email (for receipt), payment processing (Apple/Google handle this, but the app may store subscription status), and linking a child's usage data to a paying account. If subscription status is stored alongside child learning data, the combined dataset may constitute "personal information" under the expanded COPPA definition, triggering additional consent and data retention obligations.
+Embedding YouTube via `react-native-youtube-iframe` with default settings loads YouTube's standard player, which includes: autoplay recommendations ("Up Next"), the YouTube branding that leads to a full YouTube app, comments visible on some embeds, and possibly ads targeted by Google's ad network. In a COPPA-regulated app for users under 13, this is a direct legal exposure. The YouTube Data API v3 and YouTube IFrame Player API both have specific COPPA compliance modes, but they are not enabled by default. The `react-native-youtube-iframe` library wraps the IFrame Player API but does not automatically pass `origin`, `rel=0`, `modestbranding=1`, or `playsinline=1` unless the developer explicitly sets them.
+
+Additionally, `react-native-youtube-iframe` renders inside a WebView. If the WebView allows JavaScript execution (it must, for the player to work), it creates a new attack surface: the YouTube player iframe can execute JavaScript that may reach back into the WebView's bridge. This is mitigated by the library's sandboxing but not eliminated.
 
 **Why it happens:**
-Developers treat subscription as a parent-only concern ("it's the parent's payment, not the child's data"). But in a children's app, the subscription unlocks child-facing features, and the subscription status is inherently linked to the child's profile. Under 2025 COPPA, "separate verifiable parental consent" may be required when personal information is disclosed to third parties -- and RevenueCat is a third party.
+Developers integrate YouTube for the content (Khan Academy curated videos) and do not realize the player carries behavioral tracking and recommendation logic that violates COPPA. The "it works" moment hides the compliance issue entirely — the player loads fine, plays video fine, but is sending analytics to Google and potentially showing non-compliant content paths.
 
-**Consequences:**
-- FTC enforcement action if COPPA requirements are not met (fines up to $50,000+ per violation)
-- Need to disclose RevenueCat as a data processor in privacy policy
-- Must limit data retention: cannot store subscription history indefinitely
-- May need enhanced parental consent mechanism beyond the current PIN gate
+**How to avoid:**
+- Always pass `playerVars` with: `{ rel: 0, modestbranding: 1, playsinline: 1, disablekb: 1, fs: 0, cc_load_policy: 0 }`. The `rel: 0` flag prevents related videos after playback (limits cross-links to YouTube content).
+- Use YouTube's "No Cookie" domain (`youtube-nocookie.com`) — `react-native-youtube-iframe` supports this via `webViewProps` or by passing a custom `baseUrl`. This reduces tracking.
+- Gate the entire YouTube feature behind the existing `tutorConsentGranted` parental PIN consent — the same consent that gates the AI tutor. Do NOT show YouTube videos to children whose parent has not consented to the AI tutor (treat YouTube as equivalent risk).
+- Add a second specific consent disclosure for video content in the `ParentalControlsScreen` (separate boolean: `youtubeConsentGranted`), since parents may consent to AI text tutoring but not to embedding YouTube.
+- Maintain a curated allow-list of video IDs (Khan Academy specific videos only). Never dynamically fetch recommended videos from YouTube API. Hardcode or store the curated map in the app bundle.
+- The curated map should live in a file that can be updated via OTA (Expo Updates), not in the app binary, so broken or inappropriate videos can be pulled without an App Store release.
 
-**Prevention:**
-- Keep subscription state entirely separate from child learning data: `subscriptionSlice` should store only `{ isActive: boolean, expiresAt: string | null, tier: 'free' | 'premium' }` -- no child identifiers, no usage correlation
-- RevenueCat handles all payment data server-side; the app should only store the resulting entitlement status, not payment details
-- Update the privacy policy to disclose RevenueCat as a service provider and what data it processes
-- The existing parental PIN gate satisfies "verifiable parental consent" for basic COPPA, but subscription adds a new consent surface -- parents must explicitly consent to the purchase (Apple/Google handle this via their payment flows, which counts as VPC)
-- Set data retention policy: subscription state expires and is cleared when subscription lapses + grace period
-- Never send child learning data (skill states, misconceptions, BKT probabilities) to RevenueCat or any external service -- this is already the pattern but must be explicitly enforced in code review
-- Ensure the app complies by April 22, 2026 (the COPPA amendment compliance deadline)
+**Warning signs:**
+- YouTube player shows "Up Next" recommendations after video ends
+- YouTube player shows YouTube logo that deep-links to YouTube app
+- Parent reports "my child ended up watching unrelated YouTube content"
+- App Store review flags embedded browser/WebView content
 
-**Detection:**
-- Privacy policy does not mention RevenueCat or subscription data processing
-- Child identifiers (name, age, grade) are included in RevenueCat user attributes
-- Subscription history is stored alongside child profile data with no expiration
-
-**Phase to address:**
-IAP/Subscription phase -- privacy policy update and data architecture must precede implementation.
+**Phase to address:** Phase 81 (YouTube integration) — consent gate is prerequisite, curated allow-list is mandatory before shipping
 
 ---
 
-## Moderate Pitfalls
-
-### Pitfall 7: Parental Controls Time Limits Are Trivially Bypassable
+### Pitfall 7: AI Tutor `AgeBracket` Is Hard-Coded to `'6-7' | '7-8' | '8-9'` — High School Students Get Wrong Hint Register
 
 **What goes wrong:**
-App-level time controls ("30 minutes per day," "no sessions after 8pm") are enforced in JavaScript. A child can bypass them by: (a) changing the device clock, (b) force-quitting and reopening the app, (c) clearing app data, or (d) having a second device. Parents set controls expecting enforcement, then discover their child played for 2 hours because they changed the clock forward.
+`AgeBracket = '6-7' | '7-8' | '8-9'` is used throughout the tutor pipeline: `CONTENT_WORD_LIMITS`, `MAX_WORD_LENGTH`, `buildSystemInstruction`, `runSafetyPipeline`, and `validateContent`. A 15-year-old doing Algebra 2 should receive hints with adult vocabulary and full sentences. Currently, any child in grades 9-12 would have `childAge` outside 6-9, and whatever age-to-bracket mapping exists would either clamp to `'8-9'` or produce `undefined` (causing `CONTENT_WORD_LIMITS[undefined]` to return `undefined`, and `maxWordsPerSentence = undefined` would skip the word count check entirely — a silent over-permissive failure).
 
-**Prevention:**
-- Accept that app-level time controls are ADVISORY, not enforcement. Frame them as "reminders" not "limits" in the UI
-- Use `Date.now()` for elapsed-time tracking (harder to fake than wall-clock comparisons), but still validate against last known server time if available
-- Store cumulative session time per day with a monotonic counter (increments during sessions, never decrements), not wall-clock comparisons
-- Bedtime lockout: compare against device time but also check if time jumped (current time < last recorded time = clock manipulation)
-- Accept gracefully when bypassed: the app should never crash or corrupt data if the clock is wrong
-- Do NOT use iOS Screen Time API or Android Digital Wellbeing API -- these are OS-level and create platform dependency nightmares; keep controls app-internal
+The `buildSystemInstruction` prompt tells Gemini to "use vocabulary appropriate for a [age]-year-old child." For a 16-year-old, this produces kindergarten-register hints, which are insulting and ineffective.
 
-**Detection:**
-- Time controls work in testing but parents report they are ineffective
-- `sessionStartTime > currentTime` (clock was set backward)
+**Why it happens:**
+`AgeBracket` was sized for the original 6-9 age target. The type is a literal union with exactly 3 values. There is no default/fallback bracket for ages outside 6-9.
 
-**Phase to address:**
-Parental controls phase -- set correct user expectations in UI copy.
+**How to avoid:**
+- Add high school brackets to `AgeBracket`: `'9-10' | '10-11' | '11-12' | '12-14' | '14-18'`. The last bracket covers all of high school.
+- Update `CONTENT_WORD_LIMITS` and `MAX_WORD_LENGTH` in `safetyConstants.ts` with appropriate values for each new bracket. For `'14-18'`, the word limit should be 25-30 (no restriction needed), word length 15+ (no restriction).
+- Update `buildSystemInstruction` to use age-appropriate register: for `'14-18'`, instruct Gemini to use "algebra terminology appropriate for a high school student."
+- The existing content validation for high school brackets should still check for *mathematical* vocabulary appropriateness (no accidentally adult topics) but the word-length filter becomes irrelevant — keep the structure but with permissive limits.
+- The age-to-bracket mapping function (wherever it lives) must handle ages 10-18. Add a test: `ageToBracket(16)` returns `'14-18'`, not `undefined` or `'8-9'`.
+
+**Warning signs:**
+- Hints for a 16-year-old say "great job!" and "count on your fingers" — '8-9' bracket limits are being applied
+- `validateContent` never rejects any hint for grade 9+ students — undefined word limits = permissive fallback
+- TypeScript shows no error when a grade-11 student's `ageBracket` is computed as `'8-9'`
+
+**Phase to address:** Phase 80 (AgeBracket expansion) or Phase 81 (whichever phase first sends tutor requests for high school students)
 
 ---
 
-### Pitfall 8: Parent Dashboard Reads Same Store as Child, Causing Re-renders
+### Pitfall 8: Socratic Hints for Algebra Are Harder to Write Without Implying the Answer
 
 **What goes wrong:**
-The parent dashboard needs to read ALL children's data (skill states, misconception records, session history, XP progression) to render analytics. If the dashboard subscribes to the entire `children` map via `useAppStore`, any child state change (mid-session Elo update, BKT transition) triggers a re-render of the dashboard. Worse: if the parent is viewing the dashboard while a child session is in progress on the same device, every answer submission triggers a dashboard re-render.
+For arithmetic, the Socratic constraint is clear: "don't say 7, say count up from 5." For algebra, ANY procedural hint implies the answer if the student knows how to follow the procedure. "Think about what operation isolates x" → student does the operation → gets the answer. The existing safety pipeline checks if the LLM response contains the numeric answer digit, but for `x = -3`, a hint like "what happens when you subtract 6 from both sides?" does NOT contain `-3` but directly reveals the solving step. The `checkAnswerLeak` regex for `-3` would not fire.
 
-**Prevention:**
-- Parent dashboard should read from persisted store data, not live reactive state. Use `useAppStore.getState()` for initial data load, not reactive selectors
-- OR use Zustand's `shallow` comparator with narrow selectors that only pick the specific analytics-relevant fields
-- Dashboard analytics (trend graphs, mastery breakdowns) should be computed once on screen mount and NOT reactively updated
-- Consider computing analytics in a service function (`computeChildAnalytics(childData)`) that returns a snapshot, not a live subscription
-- Parent dashboard and child session should never run simultaneously in practice (child uses the app, parent reviews later), but the architecture should not break if they do
+The existing Socratic prompting strategy in `buildSystemInstruction` is calibrated for K-8 arithmetic ("what is the missing piece?", "count the groups"). These phrasings are meaningless for algebra where the concept is equality preservation, not counting.
 
-**Detection:**
-- Dashboard scrolling stutters or lags
-- Dashboard shows mid-session partial data (e.g., Elo rating that has not been committed yet)
-- React profiler shows excessive re-renders on dashboard components
+**Why it happens:**
+The tutor's `promptTemplates.ts` builds system instructions referencing `operation` (the `MathDomain` value). For arithmetic domains, the CPA progression (Concrete → Pictorial → Abstract) maps naturally: concrete = manipulatives, pictorial = diagrams, abstract = symbols. For algebra, "concrete" has no natural manipulative analog in the existing 6-manipulative set (counters, ten frames, number line, base-ten blocks, fraction strips, bar models).
 
-**Phase to address:**
-Parent dashboard phase -- use snapshot pattern from the start.
+**How to avoid:**
+- Add algebra-specific hint phrasings to `buildSystemInstruction` keyed on the new algebra `MathDomain` values. For `linear_equations`, the hint strategy should be: "Does the equation look balanced? What operation could you apply to both sides to move terms?". This is Socratic but algebra-aware.
+- Extend `checkAnswerLeak` with an algebra-aware procedure leak check: any hint that contains "subtract [operand]", "divide by [operand]", "add [operand]" where [operand] is a coefficient in the problem should be flagged as potentially revealing the solving step.
+- For the CPA stage of algebra: "concrete" should map to a balance-scale mental model prompt (not a manipulative), "pictorial" maps to a worked example with boxes/blanks, "abstract" maps to equation notation. Update `cpaMappingService` to not assign a physical manipulative to algebra domains.
+- The BOOST mode for algebra domains must show the full solution method, not just the answer number. This requires `BoostPromptParams.correctAnswer` to be supplemented with `solvingSteps?: string[]` for algebra.
+
+**Warning signs:**
+- Hints for linear equations include solving steps that trivially give away the answer
+- CPA stage for a linear equation problem is "concrete" but there is no manipulative to show
+- The hint ladder for a quadratic has 4 hints all at the same level of abstraction
+
+**Phase to address:** Phase 82 (linear equations domain — first algebra domain) establishes the pattern; Phase 80 lays the infrastructure (AgeBracket, operation-keyed hint phrasings)
 
 ---
 
-### Pitfall 9: Profile Switcher Without Authentication Lets Children Access Each Other's Profiles
+### Pitfall 9: Multi-Select MC Changes the Answer Correctness Semantics Everywhere
 
 **What goes wrong:**
-A profile switcher that shows all children's names/avatars with a tap-to-switch pattern means any child can switch to a sibling's profile and mess up their progress. Six-year-olds will absolutely do this, either intentionally ("I want to see what my sister unlocked") or accidentally.
+The existing `MultipleChoicePresentation` returns `correctIndex: number` — one correct answer. Checking correctness is `selectedIndex === correctIndex`. Multi-select (for quadratic roots `{2, -5}`) requires `correctIndices: number[]` and the correctness check is "selected set equals correct set" (order-independent). This change touches:
+- `sessionStateSlice.ts`: answer evaluation logic
+- `useChatOrchestration.ts`: the `isCorrect` determination fed to Elo update and tutor trigger
+- `checkAnswerLeak` in `safetyFilter.ts`: now needs to check both roots
+- `answerNumericValue()`: returns only one value, but multi-select answer has two
+- `misconceptionSlice.ts`: misconception detection compares `selectedDistractorBugId` against the bug library — for multi-select, a student might get one root right and one wrong
 
-**Prevention:**
-- Put the profile switcher behind the parental PIN gate -- only parents can switch active child profiles
-- The child-facing app shows only the active child's avatar and name with no visible "switch" option
-- Profile management (add/edit/delete children) also requires PIN
-- Deleting a child profile should require PIN + confirmation ("Type DELETE to confirm") to prevent accidental data loss
-- Profile data isolation: switching profiles must be a clean boundary -- no leaked state from previous child's session
+Additionally, partial credit is a UX trap. If the correct answer is `{2, -5}` and the student selects `{2}` only, marking that as "wrong" feels harsh. But marking it as "partially correct" requires a third answer state in the session flow, which currently only knows `correct/incorrect`.
 
-**Detection:**
-- Child's misconception records show patterns inconsistent with their age/grade (sibling was using their profile)
-- Elo rating oscillates wildly (two children of different skill levels sharing a profile)
-- Children report seeing unfamiliar avatars or badges
+**Why it happens:**
+The entire answer evaluation, Elo update, BKT update, and misconception recording pipeline assumes binary correct/incorrect. Adding a "partial" state requires threading that through every downstream consumer.
 
-**Phase to address:**
-Phase 1 (Multi-child profiles) -- PIN-gating must be designed into the profile switcher from day one.
+**How to avoid:**
+- Do not implement partial credit for v1.2. Multi-select is all-or-nothing: all roots selected = correct, anything else = incorrect. Communicate this to players via UX copy: "Select ALL roots."
+- Create a new `MultiSelectPresentation` type alongside (not replacing) `MultipleChoicePresentation`. The session UI renders either depending on `formattedProblem.format === 'multi_select'`.
+- `answerNumericValue()` for multi-select answer: return the product of roots (for Elo calculation uniqueness) or the sum — document the choice explicitly. The exact value matters less than consistency.
+- The `Check Answer` button on multi-select should not be submit-on-tap like single MC. It needs an explicit "Check" button press after all selections are made.
+- Ordering bias: always shuffle the multi-select options with the same seeded RNG as single MC. Never display options in magnitude order (students learn to pick the two extreme values).
+
+**Warning signs:**
+- Elo updates fire with `isCorrect = true` when only one of two roots was selected
+- `misconceptionSlice` records wrong-answer bug tags for a multi-select problem where the "distractor" was one of the correct roots
+- BKT `masteryProbability` increases for a student who only gets half the roots right
+
+**Phase to address:** Phase 80 (multi-select answer type), Phase 87 (quadratic equations — first consumer of multi-select)
 
 ---
 
-### Pitfall 10: Subscription State Desynchronizes Between RevenueCat and Local Store
+### Pitfall 10: Placement Test Staircase Cannot Reach Grade 9-12 Content
 
 **What goes wrong:**
-RevenueCat manages subscription state server-side. The app queries entitlements and stores `isPremium: boolean` locally. If the user's subscription expires, the RevenueCat server knows but the local store still says `isPremium: true` until the next entitlement check. The app must check entitlements on every app foreground, but if the check fails (no network), the app must decide: assume still premium (risk of unpaid access) or assume expired (punishes users with connectivity issues).
+The staircase algorithm in `PlacementTestScreen.tsx` calls `generateForGrade(grade, usedSkillIds)`, which calls `getSkillsByGrade(grade as Grade)`. Until Phase 82-90 domain handlers are registered (phases that add grade 9-12 skills), `getSkillsByGrade(9)` returns `[]`, and `generateForGrade(9)` returns `null`. The staircase logic then cannot advance above grade 8, and `MAX_GRADE = 8` enforces this explicitly. The placement test update is listed as Phase 91 (the last phase), but the staircase needs grade 9-12 skills to be available to function. This creates a dependency: Phase 91 cannot be executed until all domain phases (82-90) are complete — but Phase 91 is already positioned last, so this is fine IF the skills are registered. The pitfall is that Phase 91 may be under-specified: "add new domains in staircase" could be interpreted as just changing `MAX_GRADE = 12`, when in fact it also requires:
 
-**Prevention:**
-- Check RevenueCat entitlements on every app foreground (`AppState` listener) and on subscription-gated actions
-- Cache the last successful entitlement check with a timestamp; treat cached status as valid for 24 hours (grace period)
-- If entitlement check fails (network error), use cached status -- do not punish the user
-- Never store subscription status in the main Zustand store alongside child data -- use a separate, non-persisted or separately-persisted slice with short TTL
-- RevenueCat's `CustomerInfo` listener handles real-time subscription changes; wire it up in the app root
-- Handle edge cases: subscription purchased on another device, family sharing, promotional offers, refunds
-- The "restore purchases" flow must be accessible and functional for users who reinstall or switch devices
+1. Skills at grades 9, 10, 11, 12 actually registered in `skills.ts`
+2. Templates for those skills registered in `templates.ts`
+3. Domain handlers registered in `registry.ts`
+4. The staircase's promotion thresholds reconsidered for grades 8→9 transition (current: "3 consecutive correct at or above child's grade" — for a grade 8 student tested at grade 9 content, this is correct, but for a grade 12 senior, starting at grade 10 and requiring 3 consecutive correct is reasonable)
 
-**Detection:**
-- User paid but app shows free tier (entitlement check not running)
-- User's subscription expired but app still shows premium features (cached status not refreshed)
-- "Restore Purchases" button does nothing or throws an error
+The deeper gap: a student currently in grade 9 who already has the app installed gets `placementGrade: 8` (the old ceiling). When Phase 91 ships, they get re-tested via absence decay / re-assessment — but only if the absence threshold fires. If they use the app daily, they will never re-take placement and remain stuck at grade 8.
 
-**Phase to address:**
-IAP/Subscription phase -- entitlement synchronization is the core technical challenge.
+**How to avoid:**
+- Phase 91 must include a store migration that resets `placementComplete: false` for any child whose `placementGrade === 8` AND who has mastered >80% of grade 8 skills (BKT mastery). This triggers automatic re-assessment via the existing `useAbsenceCheck` hook.
+- Add a "retake placement" button in `ParentalControlsScreen` for parents of high schoolers who were assessed under the old ceiling.
+- Verify that `getSkillsByGrade(9)` through `getSkillsByGrade(12)` return non-empty arrays in integration tests before Phase 91 ships.
+
+**Warning signs:**
+- `generateForGrade(9)` returns null in Phase 91 test run
+- High school student's placement completes at grade 8 despite answering every question correctly
+- No store migration in Phase 91 for the grade-8-ceiling users
+
+**Phase to address:** Phase 91 (placement update), with prerequisite check in Phase 82 (verify skill registration pattern)
 
 ---
 
-### Pitfall 11: Parent Dashboard Analytics Require Session History That Does Not Exist
+### Pitfall 11: Elo `baseElo` for High School Topics Must Be Calibrated Against the Existing 1-8 Scale, Not Invented Independently
 
 **What goes wrong:**
-The parent dashboard needs trend graphs (progress over time), skill breakdowns, and misconception timelines. But the current store only tracks CURRENT state: current Elo rating, current BKT mastery, current streak count. There is no session history -- no record of "on March 1, child scored 80% on addition problems." The `sessionsCompleted` counter is just a number; `lastSessionDate` is a single date. To show trends, the app needs historical data that was never collected.
+The existing `baseElo` values for K-8 templates range from approximately 600 (early addition) to ~1200 (grade 8 geometry, exponents). High school developers will see this range and might set `baseElo: 1300` for a "hard" quadratic problem and `baseElo: 1100` for a "simple" linear equation. The problem is that the Elo sigmoid `expectedScore(studentElo, templateBaseElo)` means a student at Elo 1000 has a 50% chance of answering a `baseElo: 1000` problem correctly. If ALL high school templates have `baseElo: 1200+`, the app becomes extremely hard for a student transitioning from grade 8 at Elo 1000 — they will fail 85%+ of grade 9 problems, triggering the frustration guard (3 consecutive wrong → easier) repeatedly and making the session demoralizing.
 
-**Prevention:**
-- Add a `sessionHistory` array to the per-child data structure: `{ date: string, problemCount: number, correctCount: number, skillsWorked: string[], duration: number }`
-- Keep entries lightweight (no full problem replay, just summary stats) to avoid store bloat
-- Cap history at 90 days (rolling window) to bound storage growth
-- Start collecting session history in the multi-child migration (v13) even before the dashboard is built -- you cannot show historical trends without historical data
-- For existing users upgrading: accept that pre-v13 history is not available. Show "tracking started [date]" in the dashboard rather than empty charts
-- Consider computing derived analytics (weekly averages, skill trends) as materialized views updated at session commit, not computed on-the-fly from raw history
+The target is 85% success rate. A new grade 9 student arriving with Elo ~1000 (grade 8 completion) should start with problems at `baseElo: 950-1050` — only slightly above their current level.
 
-**Detection:**
-- Dashboard shows "no data" for users who have been using the app for months (history not retroactively available)
-- Store size grows unboundedly (session history not capped)
-- Dashboard load time increases as history grows (computing trends from raw records on every render)
+**Why it happens:**
+Developers assign `baseElo` based on subjective "this is hard" reasoning, not calibrated to what existing student Elos will be at the point of encountering the problem. The curriculum experts writing algebra domain handlers will naturally view quadratics as harder than linear equations, so they assign higher baseElo — but the relative ordering within high school is less important than the absolute calibration against the K-8 Elo ladder.
 
-**Phase to address:**
-Phase 1 (Multi-child profiles) -- begin collecting session summaries in the schema restructure, even if dashboard phase comes later.
+**How to avoid:**
+- Anchor the `baseElo` calibration: a student who has mastered all 18 existing domains through grade 8 should have Elo approximately in the 1050-1150 range. A first-contact linear equations problem should have `baseElo: 1000-1050` (targeting ~55% success rate for that student — slightly challenging, not punishing).
+- Linear equations entry: `baseElo: 1000-1050`. Quadratics: `baseElo: 1100-1150`. Logarithms (hardest): `baseElo: 1200-1250`.
+- Within each domain, the easiest template (e.g. `x + 5 = 8`) should be `baseElo: 1000`; the hardest (e.g. `2x + 3 = 4x - 7`) should be `baseElo: 1100`.
+- Create a calibration document per domain at the time of handler development. Do not rely on intuition alone.
 
----
+**Warning signs:**
+- New domain's easiest problems have `baseElo > 1200`
+- Grade 9 students encounter frustration guard (3 consecutive wrong) on their first session
+- Average session score drops below 70% for students transitioning from grade 8
 
-## Minor Pitfalls
-
-### Pitfall 12: expo-secure-store Key Format Restrictions
-
-**What goes wrong:**
-expo-secure-store only supports keys matching `[A-Za-z0-9.-_]`. If child IDs use UUIDs with other characters, or if per-child secure store keys include special characters, the key gets silently mangled (characters replaced with `_`). Two different child IDs could map to the same secure store key.
-
-**Prevention:**
-- Use alphanumeric child IDs (nanoid with custom alphabet `[A-Za-z0-9]`) or UUID v4 (which only uses hex + hyphens, both valid characters)
-- The parental PIN should remain a single key (`parental-pin`), not per-child -- there is one parent, one PIN
-- Test secure store operations with the actual child ID format before committing to an ID scheme
-
-**Phase to address:** Phase 1 (Multi-child profiles).
+**Phase to address:** Each domain phase (82-90) — must specify baseElo range per template in the phase spec before coding begins
 
 ---
 
-### Pitfall 13: Adding Child Profiles Without Onboarding Creates Empty Shells
+## Technical Debt Patterns
 
-**What goes wrong:**
-When a parent adds a second child, the new profile has no skill states, no Elo baseline, no BKT data. The first session defaults to the lowest difficulty with all skills locked. For a child who is already in grade 3, this means they get grade 1 addition problems. The experience feels broken compared to the first child's calibrated experience.
-
-**Prevention:**
-- When adding a new child, collect age and grade (as the original onboarding does)
-- Use age/grade to set initial BKT parameters (the existing age-adjusted BKT parameters system handles this)
-- Unlock prerequisite-appropriate skills based on grade level
-- Consider a brief "placement session" (5-10 problems) for new profiles to calibrate Elo faster
-- The existing Elo K-factor system (K=40 decaying to K=16) will handle rapid initial calibration if the starting point is grade-appropriate
-
-**Phase to address:** Phase 1 (Multi-child profiles).
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Reuse `NumericAnswer` for algebra variable solutions (e.g. `x = -3` → `{type: 'numeric', value: -3}`) | No new answer types, no changes to distractor/safety pipeline | Loses semantic meaning that answer is a variable value, not a direct count | Acceptable permanently — it IS the right approach |
+| Skip bug library patterns for Phase 82-90 and rely on Phase 3 random distractors | Ship domains faster, distractors still function | 100% of distractors become random; misconception detection impossible for algebra | MVP only — add bug patterns in a fast-follow phase |
+| Hardcode YouTube video IDs per skill in a static map | Simple, no API rate limits, no network latency on lookup | Video IDs become stale when Khan Academy restructures; requires app update to fix broken videos | Acceptable if map is in a hot-patch-able file (not compiled into native binary) |
+| Clamp `AgeBracket` to `'8-9'` for ages 10+ | No changes to safety/tutor pipeline in Phase 80 | High school students get elementary-register hints; insulting and ineffective | Never — fix AgeBracket before first algebra domain ships |
+| All-or-nothing multi-select (no partial credit) | No new session state, simple correctness check | Students who get 1 of 2 roots correct feel unfairly penalized | Acceptable for v1.2; revisit in v1.3 |
 
 ---
 
-### Pitfall 14: Subscription Paywall Screen Violates "No Punitive Mechanics" Principle
+## Integration Gotchas
 
-**What goes wrong:**
-Standard paywall design uses scarcity/loss framing: "You've used your 3 free sessions today! Upgrade to continue." For children ages 6-9, this is functionally identical to a "game over" screen -- the app is telling them they cannot do math anymore today. This directly violates the core design principle and creates negative associations with learning.
-
-**Prevention:**
-- The session limit message should be shown to the PARENT (behind PIN gate), not the child
-- The child-facing message should be positive: "Great job today! Come back tomorrow for more practice!" -- no mention of payment or limits
-- The paywall/subscription screen is ONLY accessible to parents (behind PIN) and uses adult-appropriate language
-- Never show pricing, subscription terms, or "upgrade" messaging to children
-- If a child hits the session limit mid-discovery (exploring manipulative sandboxes, viewing skill map), those non-session features should remain accessible -- only sessions are limited
-
-**Phase to address:** IAP/Subscription phase -- paywall UX must be designed with the child/parent separation in mind.
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| `react-native-youtube-iframe` | Default `playerVars` allow related videos and YouTube branding | Pass `{ rel: 0, modestbranding: 1, playsinline: 1, disablekb: 1, fs: 0 }` and set `webViewProps` to use `youtube-nocookie.com` |
+| YouTube API / IFrame Player API | Fetch video metadata from YouTube Data API v3 at runtime | Store all curated video IDs statically in the app; never make YouTube API calls from children's sessions |
+| `checkAnswerLeak` with negative answers | Regex `\b-3\b` does not match because `\b` requires word boundary before `-` | Check `\b3\b` AND preceding context, or strip sign and check absolute value separately |
+| Store migration with `partialize` | Add new field to slice, assume it persists automatically | New top-level fields must be explicitly added to `appStore.ts` `partialize` function AND a migration must set the default |
+| `getSkillsByGrade(9)` before skills registered | Returns `[]` silently — no error, no crash | Add guard in staircase: if `skills.length === 0`, do not advance to that grade; log warning |
+| BKT `ageToBracket` with age 16 | Returns `undefined` if age-bracket mapping only covers 6-9 | Add `'14-18'` bracket with permissive but defined parameters before first high school student session |
 
 ---
 
-### Pitfall 15: Parent Dashboard Navigation Conflicts with Child Navigation
+## Performance Traps
 
-**What goes wrong:**
-The app currently uses a single native-stack navigator. Adding parent dashboard screens (overview, per-child detail, settings, subscription management) to the same stack means the parent can navigate to the dashboard, hand the device to the child, and the child is now in the parent section. Or worse: the child navigates back from a session and lands on a parent dashboard screen.
-
-**Prevention:**
-- Use separate navigation stacks: child stack (existing) and parent stack (new), switched via profile/role context
-- Parent dashboard entry requires PIN verification, and exiting the parent section returns to the child's last screen
-- Consider a bottom tab or drawer that is only visible in parent mode
-- Use `usePreventRemove` in parent screens to prevent children from swiping back into dashboard content
-- Parent stack should not share navigation history with child stack
-
-**Phase to address:** Parent dashboard phase -- navigation architecture must be designed before building screens.
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| YouTube WebView instantiated inside session screen | Session screen takes 2-3 seconds to mount when player pre-loads | Lazy-mount the WebView only when "Watch video" is tapped; unmount on close | First user who taps the session screen after Phase 81 ships |
+| Distractor generator `MAX_RANDOM_ITERATIONS = 50` insufficient for sparse integer spaces | Generates only 1-2 distractors for logarithm answers where valid integers are rare | Increase `MAX_RANDOM_ITERATIONS` for domains with sparse answer spaces, or add domain-specific fallback candidates | Any logarithm answer that is a small integer (e.g. `log₂(8) = 3`) |
+| Multi-select MC option count scaling | Multi-select with 6 options for 2 correct answers creates 15 possible subsets — confusing | Cap multi-select option count at 4-5; never use the Elo-based `mcOptionCount(elo)` formula for multi-select | Any multi-select problem presented to a student with Elo ≥ 1100 |
 
 ---
 
-## Phase-Specific Warnings
+## Security / Compliance Mistakes
 
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| Multi-child profiles | Migration corrupts existing data | Comprehensive v12 fixture tests; idempotent migration; `useActiveChild()` hook before UI |
-| Multi-child profiles | Profile switcher accessible to children | PIN-gate all profile management; child sees only active profile |
-| Multi-child profiles | New child gets grade-1 problems regardless of age | Grade-aware initial state; age-adjusted BKT parameters |
-| Parent dashboard | No historical data to display | Begin collecting session summaries in v13 migration |
-| Parent dashboard | Re-renders from live session data | Snapshot pattern with `getState()`; compute analytics once |
-| Parent dashboard | Navigation bleeds into child experience | Separate navigation stacks; PIN-gated entry/exit |
-| Parental controls | Time limits trivially bypassed by clock change | Frame as advisory reminders; monotonic elapsed-time tracking |
-| Parental controls | Bedtime lockout uses wrong timezone | Use device local time (this IS the correct behavior for bedtime); but validate against monotonic time |
-| Freemium subscription | Existing users lose AI tutor access | Grandfather existing users or limit (not gate) free AI tutor |
-| Freemium subscription | Paywall shown to children | All subscription UI behind parental PIN; child sees positive "come back tomorrow" message |
-| IAP implementation | Cannot test in Expo Go | Set up EAS Build + development builds as pre-work |
-| IAP implementation | App Store rejection for Kids Category violations | Parental gate before purchase UI; restore button; clear terms |
-| IAP implementation | Subscription state desyncs | RevenueCat listener + 24h cache grace period |
-| COPPA compliance | Subscription data treated as non-personal | Keep subscription state separate from child data; disclose RevenueCat in privacy policy |
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| YouTube player shown without parental consent | COPPA violation — third-party video service accessed by under-13 without VPC | Gate behind existing `tutorConsentGranted` AND add a separate `youtubeConsentGranted` disclosure |
+| LLM receives algebra problem context that trivially reveals the variable value | Answer leak via problem context, not response | Ensure `PromptParams.problemText` is scrubbed of intermediate steps before sending; only send the original problem statement |
+| `checkAnswerLeak` passes for algebra hints that procedurally reveal the answer | Socratic constraint violated — student gets answer via procedure, not discovery | Add procedure-reveal detection: flag hints that include both the operation and the coefficient that isolates x |
+| YouTube video ID allow-list stored server-side and fetched at runtime | Stale allow-list can serve invalid IDs; network failure exposes null video | Bundle the allow-list in the app; use OTA update (Expo Updates) for patches, not server fetch |
+
+---
+
+## UX Pitfalls
+
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| Multi-select "submit" auto-triggers on second tap | Student accidentally submits before selecting both roots | Require explicit "Check" button press; show selection count ("2 of 2 selected") |
+| NumberPad with `-` key placed beside `0` | Students learning negative numbers accidentally enter `-` when reaching for `0` | Place `-` key in top-left or as a modifier toggle, not adjacent to `0` |
+| YouTube video plays audio while parent is not nearby | Parent cannot monitor content; child hears content without context | Always start video muted; show prominent unmute button; respect system mute state via `useSoundSync` hook |
+| Hint ladder exhausted → "Watch video" shown immediately | Jump from text hint to 10-minute video is jarring; students will tap "Watch video" to avoid solving | Position video as an optional enrichment ("Want to see how this works in a full lesson?"), not as a hint continuation |
+| Placement test reaches grade 9 content for existing grade-8 user | Student suddenly encounters unfamiliar algebra with no explanation | Add a "Level Up" interstitial when placement reaches a new grade band (e.g. transitioning into high school content) |
+
+---
 
 ## "Looks Done But Isn't" Checklist
 
-Things that appear complete but are missing critical pieces.
+- [ ] **Grade type expansion:** `Grade` type updated, `MAX_GRADE` updated in PlacementTestScreen, `ProfileCreationWizard` age-to-grade mapping updated, BKT brackets extended — verify ALL four, not just the type definition
+- [ ] **AgeBracket expansion:** Type updated, `CONTENT_WORD_LIMITS` and `MAX_WORD_LENGTH` have entries for all new brackets, `buildSystemInstruction` generates age-appropriate register for `'14-18'` — verify `ageToBracket(16)` returns `'14-18'`, not `undefined`
+- [ ] **Negative NumberPad:** `-` key added to UI — verify it also works in PLACEMENT TEST (not just practice sessions), that the answer evaluation `parseInt(input)` handles `-3` correctly, and that the input display shows the sign correctly
+- [ ] **Multi-select MC:** `MultiSelectPresentation` type added, UI renders checkboxes — verify `isCorrect` requires ALL correct options selected, verify Elo and BKT updates use the binary correct/incorrect (not partial), verify distractor `bugId` tracking still works for single wrong options
+- [ ] **YouTube integration:** Player loads and plays — verify `rel: 0` in playerVars (no related videos), verify parent consent gate fires before player renders, verify curated allow-list rejects unknown IDs, verify video does not auto-play on screen mount
+- [ ] **Safety pipeline for algebra:** `checkAnswerLeak` updated for negative numbers — verify `checkAnswerLeak("subtract three", -3)` returns `safe: false` in unit tests
+- [ ] **Store migration:** STORE_VERSION bumped — verify `migrations.ts` has a corresponding `if (version < N)` block with defaults for ALL new fields, verify `partialize` includes any new top-level fields
+- [ ] **Placement test ceiling:** `MAX_GRADE` updated to 12 — verify `generateForGrade(9)` returns a non-null Problem (requires Phase 82 skills to be registered first)
 
-- [ ] **Multi-child migration:** Often missing deletion of old flat fields from root state -- verify v12 fields are moved, not copied, to nested structure
-- [ ] **Multi-child migration:** Often missing `partialize` update -- verify it now includes `children` and `activeChildId`, and REMOVES old flat fields
-- [ ] **Profile switcher:** Often missing session state cleanup on switch -- verify mid-session data (queue, tutor state, manipulative state) is cleared when changing active child
-- [ ] **Profile switcher:** Often missing PIN protection -- verify profile management requires parental PIN
-- [ ] **Parent dashboard:** Often missing empty-state handling -- verify dashboard shows meaningful content for a child who has completed 0 sessions
-- [ ] **Parent dashboard:** Often missing multi-child comparison -- verify dashboard can show data for all children, not just active child
-- [ ] **Time controls:** Often missing persistence -- verify time-used-today counter persists across app restart (child force-quits to reset timer)
-- [ ] **Subscription:** Often missing restore purchases -- Apple WILL reject without a working restore button
-- [ ] **Subscription:** Often missing subscription state on cold start -- verify app checks entitlements before showing gated features, not just on subscription change
-- [ ] **Subscription:** Often missing parental gate before paywall -- verify subscription UI is only accessible after PIN entry
-- [ ] **Freemium gating:** Often missing grandfathering logic -- verify existing users retain previously free features after update
-- [ ] **COPPA:** Often missing privacy policy update -- verify RevenueCat and subscription data processing are disclosed
-- [ ] **All features:** Often missing per-child data isolation -- verify one child's actions never affect another child's state
-- [ ] **All features:** Often missing store migration test with v12 fixture -- verify migration from actual v12 data to v13+ works end-to-end
+---
 
 ## Recovery Strategies
 
-When pitfalls occur despite prevention, how to recover.
-
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Store migration corrupts child data | CRITICAL | Cannot recover lost data. Must ship hotfix with corrected migration + "reset profile" option. Add migration roundtrip tests to prevent recurrence. Previous v12 data may still be recoverable from AsyncStorage if not overwritten. |
-| Existing users lose free features | HIGH | Ship immediate update removing the gate or adding grandfathering. Issue app store update notes apologizing. Reputation damage is hard to undo. |
-| App Store rejection (Kids Category) | MEDIUM | Fix cited issues (usually parental gate + restore purchases). Resubmit. Each cycle takes 1-3 days. Budget 2-3 rejection cycles into timeline. |
-| Subscription state desync | LOW | Force entitlement refresh on next app open. RevenueCat's `syncPurchases()` resolves most cases. Add retry logic. |
-| Time controls bypassed | LOW | Accept as inherent limitation. Update UI to frame as "reminders." No technical fix for clock manipulation. |
-| Dashboard re-renders cause jank | LOW | Switch from reactive selectors to snapshot pattern. Pure refactor, no data change. |
-| Profile data leaks between children | MEDIUM | Audit all `useAppStore` selectors for `activeChildId` scoping. Add integration test that switches profiles and verifies isolation. |
-| Navigation confusion (parent/child) | LOW | Add PIN check on parent screen mount. If PIN not verified, redirect to child home. |
+| `answerNumericValue()` returns NaN for new answer type | MEDIUM | Hotfix the bridge function; Elo states for affected users will be anomalous but self-correcting over 20-30 sessions as the variable K-factor re-converges |
+| YouTube player shows unfiltered related videos in production | HIGH | Disable YouTube feature via OTA feature flag; add `rel: 0` fix in next OTA release; file incident report per COPPA breach procedure |
+| Store migration bug corrupts existing child data | HIGH | Revert STORE_VERSION to previous; provide a "Reset Placement Test" button in ParentalControlsScreen as emergency escape hatch; restore from cloud sync delta if backend records are intact |
+| Placement test ceiling at grade 8 for existing users after Phase 91 | LOW | Add migration in Phase 91 that resets `placementComplete` for users at the ceiling grade; existing users re-take placement on next app open |
+| AgeBracket returns undefined for high school students | MEDIUM | `CONTENT_WORD_LIMITS[undefined]` is undefined → `maxWordsPerSentence = undefined` → word count check skipped → content over-permissive (hints too long), not dangerous. Fix in next OTA. |
+
+---
+
+## Pitfall-to-Phase Mapping
+
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| Algebra answers treated as symbolic strings | Phase 80 — type system review | TypeScript exhaustive switch on `answerNumericValue`; unit test `answerNumericValue({type:'numeric',value:-3})` returns -3 |
+| Adjacent ±1 distractor nonsensical for algebra | Phase 80 — `distractorStrategy` field on template | Distractor generator test: algebra template produces no `source: 'adjacent'` distractors with step=1 |
+| `checkAnswerLeak` broken for negative answers | Phase 80 — before any algebra domain | Unit test: `checkAnswerLeak("subtract three", -3)` returns `safe: false` |
+| `Grade` type needs checklist expansion | Phase 80 | `tsc --noEmit` passes; `getSkillsByGrade(9)` returns skills after Phase 82; `MAX_GRADE = 12` |
+| Store migration skipped for new fields | Every phase adding slice fields | CI assertion: `STORE_VERSION` matches count of migration blocks in `migrations.ts` |
+| YouTube COPPA compliance | Phase 81 | Manual test: video ends, no related videos shown; consent gate blocks video without parent PIN |
+| AgeBracket missing high school brackets | Phase 80 | Unit test: `ageToBracket(16)` returns `'14-18'`; `buildSystemInstruction` output contains appropriate register |
+| Socratic algebra hints reveal procedure | Phase 82 (first algebra domain) | Prompt test: 10 sample hints for linear equations, manually verify none reveal solving steps |
+| Multi-select correctness semantics | Phase 80 (type) + Phase 87 (quadratics) | Session test: selecting one of two correct roots evaluated as `isCorrect: false` |
+| Placement test staircase gap at grade 8→9 | Phase 91 | Integration test: `generateForGrade(9)` non-null; migration resets placement for grade-8-ceiling users |
+| Elo `baseElo` miscalibration | Each domain phase 82-90 | Calibration check: grade 9 entry problem `baseElo ≤ 1060`; student at Elo 1000 has >45% expected success |
+
+---
 
 ## Sources
 
-- [Expo Documentation: In-App Purchases](https://docs.expo.dev/guides/in-app-purchases/) -- confirms development build requirement
-- [RevenueCat Expo Installation Guide](https://www.revenuecat.com/docs/getting-started/installation/expo) -- Expo managed workflow compatibility
-- [Expo + RevenueCat Tutorial](https://expo.dev/blog/expo-revenuecat-in-app-purchase-tutorial) -- official Expo blog, confirmed pattern
-- [COPPA 2025 Compliance Guide](https://blog.promise.legal/startup-central/coppa-compliance-in-2025-a-practical-guide-for-tech-edtech-and-kids-apps/) -- expanded personal information definition
-- [FTC COPPA Rule Amendments 2025](https://www.federalregister.gov/documents/2025/04/22/2025-05904/childrens-online-privacy-protection-rule) -- Federal Register, compliance deadline April 22, 2026
-- [Apple Kids Category Guidelines](https://developer.apple.com/kids/) -- parental gate requirements for purchases
-- [App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) -- Guideline 1.3 Kids Category
-- [Helping Protect Kids Online February 2025](https://developer.apple.com/support/downloads/Helping-Protect-Kids-Online-2025.pdf) -- Apple developer document
-- [App Store IAP Review Checklist](https://capgo.app/blog/how-to-pass-app-store-review-iap/) -- common rejection reasons
-- [expo-secure-store Documentation](https://docs.expo.dev/versions/latest/sdk/securestore/) -- key format restrictions
-- [Expo SDK 54 Changelog](https://expo.dev/changelog/sdk-54) -- confirms React Native 0.81 compatibility
-- Codebase analysis: `appStore.ts` (STORE_VERSION=12, flat partialize), `migrations.ts` (12 additive migrations), `childProfileSlice.ts` (singleton pattern), `skillStatesSlice.ts` (unscoped skillStates), `gamificationSlice.ts` (flat XP/level/streak), all at `C:/projects/tiny-tallies/src/store/`
+- Codebase analysis: `src/services/mathEngine/types.ts` (Answer union, Grade type, answerNumericValue)
+- Codebase analysis: `src/services/mathEngine/bugLibrary/distractorGenerator.ts` (three-phase distractor assembly, adjacent step logic)
+- Codebase analysis: `src/services/tutor/safetyFilter.ts` (checkAnswerLeak regex patterns, validateContent word limits)
+- Codebase analysis: `src/services/tutor/types.ts` (AgeBracket literal union, BoostPromptParams)
+- Codebase analysis: `src/services/adaptive/eloCalculator.ts` (ELO_MIN/MAX, K-factor decay, expectedScore formula)
+- Codebase analysis: `src/store/appStore.ts` (STORE_VERSION=21, partialize function, migration chain)
+- Codebase analysis: `src/screens/PlacementTestScreen.tsx` (MAX_GRADE=8, staircase algorithm, generateForGrade)
+- Codebase analysis: `src/store/slices/onboardingSlice.ts` (placementGrade: number | null)
+- Codebase analysis: `src/store/slices/childProfileSlice.ts` (AgeRange type '6-7'|'7-8'|'8-9')
+- Codebase analysis: `src/services/mathEngine/answerFormats/multipleChoice.ts` (correctIndex: number, single correct answer assumption)
+- `.planning/PROJECT.md` (milestone context, STORE_VERSION history, architecture decisions)
+- COPPA regulations (16 CFR Part 312) — YouTube embedding requires VPC before collecting data on known under-13 users
+- YouTube IFrame Player API docs — `rel=0`, `modestbranding`, `youtube-nocookie.com` parameters (HIGH confidence from official docs)
+- `react-native-youtube-iframe` library — WebView-based, supports `playerVars` passthrough (MEDIUM confidence — library behavior may vary by version)
 
 ---
-*Pitfalls research for: Multi-child profiles, parent dashboard, parental controls, and freemium IAP subscription in Tiny Tallies (children's math learning app, ages 6-9)*
-*Researched: 2026-03-05*
+*Pitfalls research for: v1.2 High School Math Expansion — K-12 grade type, algebra domains, multi-select MC, negative input, YouTube tutor integration*
+*Researched: 2026-03-12*
