@@ -87,7 +87,7 @@ describe('callGemini', () => {
     expect(callArg.model).toBe('gemini-2.5-flash');
     expect(callArg.config.systemInstruction).toBe('Be helpful');
     expect(callArg.config.temperature).toBe(0.7);
-    expect(callArg.config.maxOutputTokens).toBe(200);
+    expect(callArg.config.maxOutputTokens).toBe(8192);
     expect(callArg.contents).toBe('What is 3 + 4?');
   });
 

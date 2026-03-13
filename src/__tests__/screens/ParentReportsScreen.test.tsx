@@ -95,6 +95,7 @@ function setMockState(overrides: Record<string, unknown> = {}) {
     earnedBadges: {},
     childName: 'Alex',
     sessionHistory: [],
+    videoVotes: {},
     ...overrides,
   };
 }

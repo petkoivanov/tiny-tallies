@@ -22,6 +22,13 @@ jest.mock('@/services/tutor/safetyFilter', () => ({
   runSafetyPipeline: jest.fn(
     (text: string) => ({ passed: true, text }),
   ),
+  // Hint ladder parsing — returns a 2-hint array by default so ladder flow succeeds
+  parseHintLadder: jest.fn(
+    (text: string) => [text, 'second hint'],
+  ),
+  validateHintLadder: jest.fn(
+    (hints: string[]) => hints,
+  ),
 }));
 jest.mock('@/services/tutor/safetyConstants', () => ({
   getCannedFallback: jest.fn(() => 'Friendly fallback message'),
@@ -49,6 +56,8 @@ import {
 import {
   scrubOutboundPii,
   runSafetyPipeline,
+  parseHintLadder,
+  validateHintLadder,
 } from '@/services/tutor/safetyFilter';
 import { getCannedFallback } from '@/services/tutor/safetyConstants';
 import { computeEscalation } from '@/services/tutor/escalationEngine';
@@ -77,6 +86,8 @@ const mockScrubOutboundPii = scrubOutboundPii as jest.MockedFunction<
 const mockRunSafetyPipeline = runSafetyPipeline as jest.MockedFunction<
   typeof runSafetyPipeline
 >;
+const mockParseHintLadder = parseHintLadder as jest.MockedFunction<typeof parseHintLadder>;
+const mockValidateHintLadder = validateHintLadder as jest.MockedFunction<typeof validateHintLadder>;
 const mockGetCannedFallback = getCannedFallback as jest.MockedFunction<
   typeof getCannedFallback
 >;
@@ -147,6 +158,11 @@ describe('useTutor', () => {
       shouldTransition: false,
       transitionMessage: null,
     });
+    // Safety pipeline: always passes for non-answer-leak/content tests
+    mockRunSafetyPipeline.mockImplementation((text: string) => ({ passed: true, text }));
+    // Hint ladder mocks: parse returns a 2-element array, validate passes through
+    mockParseHintLadder.mockImplementation((text: string) => [text, 'second hint']);
+    mockValidateHintLadder.mockImplementation((hints: string[]) => hints);
   });
 
   it('requestHint calls checkRateLimit and returns early with child-friendly message when rate limited', async () => {
@@ -463,7 +479,9 @@ describe('useTutor', () => {
   });
 
   describe('answer-leak detection', () => {
-    it('adds canned fallback for answer_leaked when runSafetyPipeline detects a leak', async () => {
+    it('adds canned fallback for answer_leaked when runSafetyPipeline detects a leak (teach mode)', async () => {
+      // Safety pipeline is used in teach/boost mode (not hint mode, which uses ladder flow)
+      setupStore({ tutorMode: 'teach' });
       mockCallGemini.mockResolvedValue('The answer is 7!');
       mockRunSafetyPipeline.mockReturnValue({
         passed: false,
@@ -475,7 +493,7 @@ describe('useTutor', () => {
       const { result } = renderHook(() => useTutor(makeProblem()));
 
       await act(async () => {
-        await result.current.requestHint();
+        await result.current.requestTutor();
       });
 
       expect(mockGetCannedFallback).toHaveBeenCalledWith('answer_leaked');
@@ -488,7 +506,9 @@ describe('useTutor', () => {
   });
 
   describe('content validation', () => {
-    it('adds canned fallback for content_invalid when runSafetyPipeline fails validation', async () => {
+    it('adds canned fallback for content_invalid when runSafetyPipeline fails validation (teach mode)', async () => {
+      // Safety pipeline is used in teach/boost mode (not hint mode, which uses ladder flow)
+      setupStore({ tutorMode: 'teach' });
       mockCallGemini.mockResolvedValue('A very long complicated response');
       mockRunSafetyPipeline.mockReturnValue({
         passed: false,
@@ -500,7 +520,7 @@ describe('useTutor', () => {
       const { result } = renderHook(() => useTutor(makeProblem()));
 
       await act(async () => {
-        await result.current.requestHint();
+        await result.current.requestTutor();
       });
 
       expect(mockGetCannedFallback).toHaveBeenCalledWith('content_invalid');
@@ -513,9 +533,10 @@ describe('useTutor', () => {
 
   describe('full success path', () => {
     it('adds safe response as tutor message and increments call count when all checks pass', async () => {
+      // In hint mode, response flows through parseHintLadder/validateHintLadder (not safety pipeline)
       const safeText = 'Try counting on your fingers!';
       mockCallGemini.mockResolvedValue(safeText);
-      mockRunSafetyPipeline.mockReturnValue({ passed: true, text: safeText });
+      // parseHintLadder mock returns [safeText, 'second hint'] by default (see beforeEach)
 
       const { result } = renderHook(() => useTutor(makeProblem()));
 
@@ -747,7 +768,10 @@ describe('useTutor', () => {
   });
 
   describe('escalation checks', () => {
-    it('runs computeEscalation after successful hint delivery', async () => {
+    it('runs computeEscalation after successful response delivery in teach mode', async () => {
+      // Hint mode uses ladder delivery (no API-call escalation on first fetch).
+      // Escalation via API response is tested in teach mode.
+      setupStore({ tutorMode: 'teach' });
       const { result } = renderHook(() => useTutor(makeProblem()));
 
       await act(async () => {
@@ -756,14 +780,15 @@ describe('useTutor', () => {
 
       expect(mockComputeEscalation).toHaveBeenCalledWith(
         expect.objectContaining({
-          currentMode: 'hint',
+          currentMode: 'teach',
         }),
       );
     });
 
-    it('transitions to teach mode and adds transition message when escalation triggers', async () => {
+    it('transitions to boost mode and adds transition message when escalation triggers', async () => {
+      setupStore({ tutorMode: 'teach' });
       mockComputeEscalation.mockReturnValue({
-        nextMode: 'teach',
+        nextMode: 'boost',
         shouldTransition: true,
         transitionMessage: 'Let me show you a different way!',
       });
@@ -775,7 +800,7 @@ describe('useTutor', () => {
       });
 
       const state = useAppStore.getState();
-      expect(state.tutorMode).toBe('teach');
+      expect(state.tutorMode).toBe('boost');
       // Should have the LLM response message + the transition message
       const msgs = state.tutorMessages;
       expect(msgs.length).toBe(2);
@@ -912,7 +937,8 @@ describe('useTutor', () => {
   });
 
   describe('safety pipeline mode passthrough', () => {
-    it('passes mode=hint to runSafetyPipeline in hint mode', async () => {
+    it('does NOT call runSafetyPipeline in hint mode (uses ladder flow instead)', async () => {
+      // Hint mode parses a JSON ladder from Gemini; safety pipeline is teach/boost only
       setupStore({ tutorMode: 'hint' });
       const { result } = renderHook(() => useTutor(makeProblem()));
 
@@ -920,12 +946,7 @@ describe('useTutor', () => {
         await result.current.requestTutor();
       });
 
-      expect(mockRunSafetyPipeline).toHaveBeenCalledWith(
-        expect.any(String),
-        7,
-        expect.any(String),
-        'hint',
-      );
+      expect(mockRunSafetyPipeline).not.toHaveBeenCalled();
     });
 
     it('passes mode=teach to runSafetyPipeline in teach mode', async () => {

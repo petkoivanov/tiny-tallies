@@ -22,6 +22,7 @@ import {
   BarChart3,
   AlertTriangle,
   Activity,
+  PlayCircle,
 } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
@@ -105,6 +106,7 @@ export default function ParentReportsScreen() {
   const earnedBadges = useAppStore((s) => s.earnedBadges);
   const childName = useAppStore((s) => s.childName);
   const sessionHistory = useAppStore((s) => s.sessionHistory);
+  const videoVotes = useAppStore((s) => s.videoVotes);
 
   const averageElo = useMemo(() => computeAverageElo(skillStates), [skillStates]);
   const masteryCounts = useMemo(
@@ -381,6 +383,35 @@ export default function ParentReportsScreen() {
             </View>
           </View>
         </View>
+
+        {/* Video Usage */}
+        {Object.keys(videoVotes).length > 0 && (
+          <View style={styles.activityCard} testID="video-usage-section">
+            <View style={styles.summaryHeader}>
+              <PlayCircle size={20} color={colors.primary} />
+              <Text style={styles.sectionTitle}>Instructional Videos</Text>
+            </View>
+            <Text style={[styles.emptyText, { marginBottom: spacing.sm }]}>
+              Videos watched in topics where {childName ?? 'your child'} needed
+              extra support:
+            </Text>
+            {Object.entries(videoVotes).map(([domain, vote]) => (
+              <View key={domain} style={styles.misconceptionItem}>
+                <Text
+                  style={[
+                    styles.statusBadge,
+                    vote === 'helpful' ? styles.confirmedBadge : styles.suspectedBadge,
+                  ]}
+                >
+                  {vote === 'helpful' ? 'Helpful' : 'Not helpful'}
+                </Text>
+                <Text style={styles.misconceptionBugTag}>
+                  {domain.replace(/_/g, ' ')}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         {/* Misconceptions */}
         <View style={styles.misconceptionCard} testID="misconceptions-section">

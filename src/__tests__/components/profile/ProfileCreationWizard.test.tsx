@@ -9,6 +9,7 @@ jest.mock('lucide-react-native', () => {
     ChevronRight: (props: any) => <View testID="chevron-right" {...props} />,
     Check: (props: any) => <View testID="check-icon" {...props} />,
     X: (props: any) => <View testID="x-icon" {...props} />,
+    PlayCircle: (props: any) => <View testID="play-circle-icon" {...props} />,
   };
 });
 
@@ -265,21 +266,36 @@ describe('ProfileCreationWizard', () => {
       expect(getByTestId('avatar-B')).toBeTruthy();
     });
 
+    it('Next button on avatar step proceeds to youtube step', () => {
+      const { getByPlaceholderText, getByText, getAllByText } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+
+      goToAvatar(getByPlaceholderText, getByText, getAllByText);
+      fireEvent.press(getByText('Next'));
+
+      expect(getByText(/unlock video/i)).toBeTruthy();
+    });
+
     it('calls onComplete with null avatarId and stateCode when skipped', () => {
       const { getByPlaceholderText, getByText, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
       goToAvatar(getByPlaceholderText, getByText, getAllByText);
-      fireEvent.press(getByText('Done'));
+      fireEvent.press(getByText('Next')); // avatar → youtube
+      fireEvent.press(getByText('Done')); // youtube → complete
 
-      expect(mockOnComplete).toHaveBeenCalledWith({
-        childName: 'Alice',
-        childAge: 7,
-        childGrade: 2,
-        avatarId: null,
-        stateCode: null,
-      });
+      expect(mockOnComplete).toHaveBeenCalledWith(
+        {
+          childName: 'Alice',
+          childAge: 7,
+          childGrade: 2,
+          avatarId: null,
+          stateCode: null,
+        },
+        false,
+      );
     });
 
     it('calls onComplete with selected avatarId', () => {
@@ -289,15 +305,19 @@ describe('ProfileCreationWizard', () => {
 
       goToAvatar(getByPlaceholderText, getByText, getAllByText);
       fireEvent.press(getByTestId('avatar-O'));
-      fireEvent.press(getByText('Done'));
+      fireEvent.press(getByText('Next')); // avatar → youtube
+      fireEvent.press(getByText('Done')); // youtube → complete
 
-      expect(mockOnComplete).toHaveBeenCalledWith({
-        childName: 'Alice',
-        childAge: 7,
-        childGrade: 2,
-        avatarId: 'owl',
-        stateCode: null,
-      });
+      expect(mockOnComplete).toHaveBeenCalledWith(
+        {
+          childName: 'Alice',
+          childAge: 7,
+          childGrade: 2,
+          avatarId: 'owl',
+          stateCode: null,
+        },
+        false,
+      );
     });
 
     it('Back button returns to location step', () => {
@@ -309,6 +329,69 @@ describe('ProfileCreationWizard', () => {
       fireEvent.press(getByText('Back'));
 
       expect(getByText(/where does/i)).toBeTruthy();
+    });
+  });
+
+  describe('Step 5: YouTube consent', () => {
+    function goToYoutube(getByPlaceholderText: any, getByText: any, getAllByText: any) {
+      fireEvent.changeText(getByPlaceholderText(/name/i), 'Alice');
+      fireEvent.press(getByText('Next'));
+      fireEvent.press(getAllByText('7')[0]);
+      fireEvent.press(getByText('Next'));
+      fireEvent.press(getByText('Skip'));
+      fireEvent.press(getByText('Next')); // avatar → youtube
+    }
+
+    it('renders youtube consent step with toggle off by default', () => {
+      const { getByPlaceholderText, getByText, getAllByText, getByTestId } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+
+      goToYoutube(getByPlaceholderText, getByText, getAllByText);
+
+      expect(getByText(/unlock video/i)).toBeTruthy();
+      const toggle = getByTestId('youtube-consent-onboarding');
+      expect(toggle.props.value).toBe(false);
+    });
+
+    it('calls onComplete with youtubeConsent=true when toggle enabled', () => {
+      const { getByPlaceholderText, getByText, getAllByText, getByTestId } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+
+      goToYoutube(getByPlaceholderText, getByText, getAllByText);
+      fireEvent(getByTestId('youtube-consent-onboarding'), 'valueChange', true);
+      fireEvent.press(getByText('Done'));
+
+      expect(mockOnComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ childName: 'Alice' }),
+        true,
+      );
+    });
+
+    it('calls onComplete with youtubeConsent=false when toggle left off', () => {
+      const { getByPlaceholderText, getByText, getAllByText } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+
+      goToYoutube(getByPlaceholderText, getByText, getAllByText);
+      fireEvent.press(getByText('Done'));
+
+      expect(mockOnComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ childName: 'Alice' }),
+        false,
+      );
+    });
+
+    it('Back button returns to avatar step', () => {
+      const { getByPlaceholderText, getByText, getAllByText } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+
+      goToYoutube(getByPlaceholderText, getByText, getAllByText);
+      fireEvent.press(getByText('Back'));
+
+      expect(getByText(/avatar/i)).toBeTruthy();
     });
   });
 
@@ -358,12 +441,14 @@ describe('ProfileCreationWizard', () => {
       goToAgeGrade(getByPlaceholderText, getByText);
       fireEvent.press(getByText('18'));
       fireEvent.press(getByText('Next'));
-      // Navigate through location and avatar steps
+      // Navigate through location, avatar, and youtube steps
       fireEvent.press(getByText('Skip'));
+      fireEvent.press(getByText('Next')); // avatar → youtube
       fireEvent.press(getByText('Done'));
 
       expect(mockOnComplete).toHaveBeenCalledWith(
         expect.objectContaining({ childAge: 18, childGrade: 12 }),
+        false,
       );
     });
 
@@ -376,10 +461,12 @@ describe('ProfileCreationWizard', () => {
       fireEvent.press(getAllByText('10')[0]);
       fireEvent.press(getByText('Next'));
       fireEvent.press(getByText('Skip'));
+      fireEvent.press(getByText('Next')); // avatar → youtube
       fireEvent.press(getByText('Done'));
 
       expect(mockOnComplete).toHaveBeenCalledWith(
         expect.objectContaining({ childAge: 10, childGrade: 5 }),
+        false,
       );
     });
 
@@ -392,10 +479,12 @@ describe('ProfileCreationWizard', () => {
       fireEvent.press(getAllByText('5')[0]);
       fireEvent.press(getByText('Next'));
       fireEvent.press(getByText('Skip'));
+      fireEvent.press(getByText('Next')); // avatar → youtube
       fireEvent.press(getByText('Done'));
 
       expect(mockOnComplete).toHaveBeenCalledWith(
         expect.objectContaining({ childAge: 5, childGrade: 0 }),
+        false,
       );
     });
   });
@@ -413,15 +502,19 @@ describe('ProfileCreationWizard', () => {
       fireEvent.press(getByText('Next'));
       fireEvent.press(getByText('Skip'));
       fireEvent.press(getByTestId('avatar-B'));
+      fireEvent.press(getByText('Next')); // avatar → youtube
       fireEvent.press(getByText('Done'));
 
-      expect(mockOnComplete).toHaveBeenCalledWith({
-        childName: 'Charlie',
-        childAge: 9,
-        childGrade: 4,
-        avatarId: 'bear',
-        stateCode: null,
-      });
+      expect(mockOnComplete).toHaveBeenCalledWith(
+        {
+          childName: 'Charlie',
+          childAge: 9,
+          childGrade: 4,
+          avatarId: 'bear',
+          stateCode: null,
+        },
+        false,
+      );
     });
 
     it('completes wizard end-to-end with state selection', () => {
@@ -437,15 +530,39 @@ describe('ProfileCreationWizard', () => {
       fireEvent.press(getByTestId('state-NY'));
       fireEvent.press(getByText('Next'));
       fireEvent.press(getByTestId('avatar-B'));
+      fireEvent.press(getByText('Next')); // avatar → youtube
       fireEvent.press(getByText('Done'));
 
-      expect(mockOnComplete).toHaveBeenCalledWith({
-        childName: 'Charlie',
-        childAge: 9,
-        childGrade: 4,
-        avatarId: 'bear',
-        stateCode: 'NY',
-      });
+      expect(mockOnComplete).toHaveBeenCalledWith(
+        {
+          childName: 'Charlie',
+          childAge: 9,
+          childGrade: 4,
+          avatarId: 'bear',
+          stateCode: 'NY',
+        },
+        false,
+      );
+    });
+
+    it('completes wizard end-to-end with youtube consent enabled', () => {
+      const { getByPlaceholderText, getByText, getByTestId, getAllByText } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+
+      fireEvent.changeText(getByPlaceholderText(/name/i), 'Dana');
+      fireEvent.press(getByText('Next'));
+      fireEvent.press(getAllByText('8')[0]);
+      fireEvent.press(getByText('Next'));
+      fireEvent.press(getByText('Skip'));
+      fireEvent.press(getByText('Next')); // avatar → youtube
+      fireEvent(getByTestId('youtube-consent-onboarding'), 'valueChange', true);
+      fireEvent.press(getByText('Done'));
+
+      expect(mockOnComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ childName: 'Dana', childAge: 8 }),
+        true,
+      );
     });
   });
 });

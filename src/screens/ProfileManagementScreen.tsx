@@ -88,7 +88,7 @@ export default function ProfileManagementScreen() {
     setMode('editing');
   };
 
-  const handleEditComplete = (profile: NewChildProfile) => {
+  const handleEditComplete = (profile: NewChildProfile, _youtubeConsent: boolean) => {
     if (editingChild) {
       updateChild(editingChild.id, {
         childName: profile.childName,

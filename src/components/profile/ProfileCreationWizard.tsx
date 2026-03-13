@@ -3,11 +3,12 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
 } from 'react-native';
-import { ChevronLeft, ChevronRight, Check } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Check, PlayCircle } from 'lucide-react-native';
 import { useTheme } from '@/theme';
 import { AvatarCircle } from '@/components/avatars';
 import { StateSelector } from '@/components/shared/StateSelector';
@@ -16,10 +17,10 @@ import type { AllAvatarId } from '@/store/constants/avatars';
 import type { NewChildProfile } from '@/store/helpers/childDataHelpers';
 import type { StateCode } from '@/store/slices/childProfileSlice';
 
-type WizardStep = 'name' | 'age-grade' | 'location' | 'avatar';
+type WizardStep = 'name' | 'age-grade' | 'location' | 'avatar' | 'youtube';
 
 export interface ProfileCreationWizardProps {
-  onComplete: (profile: NewChildProfile) => void;
+  onComplete: (profile: NewChildProfile, youtubeConsent: boolean) => void;
   onCancel?: () => void;
   initialValues?: Partial<NewChildProfile>;
 }
@@ -61,6 +62,7 @@ export function ProfileCreationWizard({
   const [stateCode, setStateCode] = useState<StateCode>(
     initialValues?.stateCode ?? null,
   );
+  const [youtubeConsent, setYoutubeConsent] = useState(false);
 
   const trimmedName = name.trim();
   const isNameValid =
@@ -80,6 +82,8 @@ export function ProfileCreationWizard({
       setStep('location');
     } else if (step === 'location') {
       setStep('avatar');
+    } else if (step === 'avatar') {
+      setStep('youtube');
     }
   }
 
@@ -87,16 +91,20 @@ export function ProfileCreationWizard({
     if (step === 'age-grade') setStep('name');
     else if (step === 'location') setStep('age-grade');
     else if (step === 'avatar') setStep('location');
+    else if (step === 'youtube') setStep('avatar');
   }
 
   function handleDone() {
-    onComplete({
-      childName: trimmedName,
-      childAge: age!,
-      childGrade: grade!,
-      avatarId,
-      stateCode,
-    });
+    onComplete(
+      {
+        childName: trimmedName,
+        childAge: age!,
+        childGrade: grade!,
+        avatarId,
+        stateCode,
+      },
+      youtubeConsent,
+    );
   }
 
   function handleAvatarSelect(id: AllAvatarId) {
@@ -360,6 +368,58 @@ export function ProfileCreationWizard({
             </Pressable>
             <Pressable
               style={[styles.navButton, { backgroundColor: colors.primary }]}
+              onPress={handleNext}
+            >
+              <ChevronRight size={18} color="#fff" />
+              <Text style={[styles.navButtonText, { color: '#fff' }]}>
+                Next
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+
+      {step === 'youtube' && (
+        <View style={styles.stepContainer}>
+          <PlayCircle size={48} color={colors.primary} style={{ marginBottom: 16 }} />
+          <Text style={[styles.heading, { color: colors.textPrimary }]}>
+            Unlock video support
+          </Text>
+          <Text style={[styles.locationSubtext, { color: colors.textSecondary, marginBottom: 24, paddingHorizontal: 8 }]}>
+            When {trimmedName} gets stuck, we can show a short educational video
+            from Khan Academy — hand-picked for the exact topic they're struggling
+            with.{'\n\n'}
+            You'll see which videos were watched and whether they helped in your
+            Parent Report. You're always in control.
+          </Text>
+          <View style={[styles.youtubeToggleRow, { backgroundColor: colors.surface, borderRadius: 12 }]}>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.navButtonText, { color: colors.textPrimary, fontSize: 16 }]}>
+                Enable instructional videos
+              </Text>
+              <Text style={[styles.charCount, { color: colors.textSecondary, marginTop: 2 }]}>
+                Can be changed anytime in Parental Controls
+              </Text>
+            </View>
+            <Switch
+              testID="youtube-consent-onboarding"
+              value={youtubeConsent}
+              onValueChange={setYoutubeConsent}
+              trackColor={{ true: colors.primary }}
+            />
+          </View>
+          <View style={styles.buttonRow}>
+            <Pressable
+              style={[styles.navButton, { backgroundColor: colors.surface }]}
+              onPress={handleBack}
+            >
+              <ChevronLeft size={18} color={colors.textPrimary} />
+              <Text style={[styles.navButtonText, { color: colors.textPrimary }]}>
+                Back
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[styles.navButton, { backgroundColor: colors.primary }]}
               onPress={handleDone}
             >
               <Check size={18} color="#fff" />
@@ -398,6 +458,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center', gap: 12, marginBottom: 24,
   },
   avatarCell: { padding: 4, alignItems: 'center', justifyContent: 'center' },
+  youtubeToggleRow: {
+    flexDirection: 'row', alignItems: 'center',
+    padding: 16, gap: 12, width: '100%', marginBottom: 24,
+  },
   buttonRow: {
     flexDirection: 'row', justifyContent: 'space-between',
     width: '100%', marginTop: 24, gap: 16,

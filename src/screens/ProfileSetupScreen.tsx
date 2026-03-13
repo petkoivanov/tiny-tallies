@@ -27,6 +27,7 @@ export default function ProfileSetupScreen() {
   const addChild = useAppStore((s) => s.addChild);
   const needsMigrationPrompt = useAppStore((s) => s._needsMigrationPrompt);
   const setMigrationComplete = useAppStore((s) => s.setMigrationComplete);
+  const setYoutubeConsentGranted = useAppStore((s) => s.setYoutubeConsentGranted);
 
   const isFreshInstall = childCount === 0;
 
@@ -49,8 +50,9 @@ export default function ProfileSetupScreen() {
     setShowDisclosure(false);
   }, []);
 
-  function handleComplete(profile: NewChildProfile) {
+  function handleComplete(profile: NewChildProfile, youtubeConsent: boolean) {
     addChild(profile);
+    if (youtubeConsent) setYoutubeConsentGranted(true);
 
     if (needsMigrationPrompt) {
       setMigrationComplete();

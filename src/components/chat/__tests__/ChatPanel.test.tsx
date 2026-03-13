@@ -1,6 +1,13 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import type { TutorMessage } from '@/services/tutor/types';
+
+// Mock react-native-webview — requires native binary unavailable in Jest
+jest.mock('react-native-webview', () => {
+  const { View } = require('react-native');
+  return { default: (props: any) => <View testID="webview" {...props} /> };
+});
+
 import { ChatPanel } from '../ChatPanel';
 
 // Mock ChatMessageList
