@@ -22,6 +22,7 @@ import { BASIC_GRAPHS_SKILLS } from './basicGraphs';
 import { DATA_ANALYSIS_SKILLS } from './dataAnalysis';
 import { LINEAR_EQUATIONS_SKILLS } from './linearEquations';
 import { COORDINATE_GEOMETRY_SKILLS } from './coordinateGeometry';
+import { SEQUENCES_SERIES_SKILLS } from './sequencesSeries';
 
 export const SKILLS: readonly SkillDefinition[] = [
   ...ADDITION_SKILLS,
@@ -46,6 +47,7 @@ export const SKILLS: readonly SkillDefinition[] = [
   ...DATA_ANALYSIS_SKILLS,
   ...LINEAR_EQUATIONS_SKILLS,
   ...COORDINATE_GEOMETRY_SKILLS,
+  ...SEQUENCES_SERIES_SKILLS,
 ];
 
 export function getSkillById(id: string): SkillDefinition | undefined {
@@ -85,4 +87,5 @@ export {
   DATA_ANALYSIS_SKILLS,
   LINEAR_EQUATIONS_SKILLS,
   COORDINATE_GEOMETRY_SKILLS,
+  SEQUENCES_SERIES_SKILLS,
 };

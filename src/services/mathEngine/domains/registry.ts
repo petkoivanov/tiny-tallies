@@ -22,6 +22,7 @@ import { basicGraphsHandler } from './basicGraphs';
 import { dataAnalysisHandler } from './dataAnalysis';
 import { linearEquationsHandler } from './linearEquations';
 import { coordinateGeometryHandler } from './coordinateGeometry';
+import { sequencesSeriesHandler } from './sequencesSeries';
 
 const HANDLERS: Record<MathDomain, DomainHandler> = {
   addition: arithmeticHandler,
@@ -44,6 +45,7 @@ const HANDLERS: Record<MathDomain, DomainHandler> = {
   data_analysis: dataAnalysisHandler,
   linear_equations: linearEquationsHandler,
   coordinate_geometry: coordinateGeometryHandler,
+  sequences_series: sequencesSeriesHandler,
 };
 
 /** Get the domain handler for a given operation */

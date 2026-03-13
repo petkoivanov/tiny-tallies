@@ -35,6 +35,7 @@ const DOMAIN_LABELS: Record<MathDomain, string> = {
   data_analysis: 'Data Analysis',
   linear_equations: 'Linear Equations',
   coordinate_geometry: 'Coordinate Geometry',
+  sequences_series: 'Sequences & Series',
 };
 
 const DOMAIN_ORDER: MathDomain[] = [
@@ -58,6 +59,7 @@ const DOMAIN_ORDER: MathDomain[] = [
   'data_analysis',
   'linear_equations',
   'coordinate_geometry',
+  'sequences_series',
 ];
 
 interface DomainData {
