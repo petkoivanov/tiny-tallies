@@ -1,0 +1,211 @@
+import React from 'react';
+import { render, fireEvent } from '@testing-library/react-native';
+
+// Mock react-native-webview (native module)
+jest.mock('react-native-webview', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: ({ testID }: { testID?: string }) =>
+      React.createElement(View, { testID: testID ?? 'webview' }),
+  };
+});
+
+// Mock videoMap so tests control which domains have videos
+jest.mock('@/services/video/videoMap', () => ({
+  videoMap: {
+    addition: 'abc123',
+    // all other domains intentionally absent — tests use 'addition' or 'fractions'
+  },
+}));
+
+// Mock youtubeHtml service (used by VideoPlayer)
+jest.mock('@/services/video/youtubeHtml', () => ({
+  buildNocookieHtml: (videoId: string) => `<html>${videoId}</html>`,
+}));
+
+// Mock lucide-react-native icons used by VideoVoteButtons
+jest.mock('lucide-react-native', () => {
+  const { View } = require('react-native');
+  return {
+    ThumbsUp: (props: any) => <View testID="thumbs-up-icon" {...props} />,
+    ThumbsDown: (props: any) => <View testID="thumbs-down-icon" {...props} />,
+    X: (props: any) => <View testID="x-icon" {...props} />,
+  };
+});
+
+// Mock lottie-react-native (used by ChatPanel header)
+jest.mock('lottie-react-native', () => {
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: (props: any) => <View testID="lottie-view" {...props} />,
+  };
+});
+
+// Mock react-native-reanimated
+jest.mock('react-native-reanimated', () => {
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: {
+      View,
+      Text: require('react-native').Text,
+      createAnimatedComponent: (c: any) => c,
+      call: jest.fn(),
+    },
+    useSharedValue: (init: any) => ({ value: init }),
+    useAnimatedStyle: (fn: () => any) => fn(),
+    withTiming: (v: any) => v,
+    withSpring: (v: any) => v,
+    withDelay: (_d: number, v: any) => v,
+    withSequence: (...args: any[]) => args[args.length - 1],
+    withRepeat: (v: any) => v,
+    runOnJS: (fn: any) => fn,
+    Easing: {
+      in: (e: any) => e,
+      inOut: (e: any) => e,
+      quad: (v: any) => v,
+      linear: (v: any) => v,
+    },
+    useReducedMotion: jest.fn(() => false),
+  };
+});
+
+// Mock react-native-gesture-handler
+jest.mock('react-native-gesture-handler', () => ({
+  GestureDetector: ({ children }: { children: React.ReactNode }) => children,
+  Gesture: {
+    Pan: () => ({
+      onEnd: () => ({
+        onEnd: () => ({}),
+      }),
+    }),
+  },
+}));
+
+// Import after mocks
+import { ChatPanel } from '@/components/chat/ChatPanel';
+
+const BASE_PROPS = {
+  isOpen: true,
+  onClose: jest.fn(),
+  messages: [],
+  isLoading: false,
+  isOnline: true,
+  onResponse: jest.fn(),
+};
+
+describe('ChatPanel video section — button visibility (VIDEO-02)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('does NOT show watch button when ladderExhausted=false', () => {
+    const { queryByTestId } = render(
+      <ChatPanel
+        {...BASE_PROPS}
+        ladderExhausted={false}
+        youtubeConsentGranted={true}
+        currentDomain="addition"
+      />,
+    );
+    expect(queryByTestId('chat-watch-video-button')).toBeNull();
+  });
+
+  it('does NOT show watch button when youtubeConsentGranted=false', () => {
+    const { queryByTestId } = render(
+      <ChatPanel
+        {...BASE_PROPS}
+        ladderExhausted={true}
+        youtubeConsentGranted={false}
+        currentDomain="addition"
+      />,
+    );
+    expect(queryByTestId('chat-watch-video-button')).toBeNull();
+  });
+
+  it('does NOT show watch button when isOnline=false', () => {
+    const { queryByTestId } = render(
+      <ChatPanel
+        {...BASE_PROPS}
+        isOnline={false}
+        ladderExhausted={true}
+        youtubeConsentGranted={true}
+        currentDomain="addition"
+      />,
+    );
+    expect(queryByTestId('chat-watch-video-button')).toBeNull();
+  });
+
+  it('does NOT show watch button when domain has no videoMap entry', () => {
+    const { queryByTestId } = render(
+      <ChatPanel
+        {...BASE_PROPS}
+        ladderExhausted={true}
+        youtubeConsentGranted={true}
+        currentDomain="fractions"
+      />,
+    );
+    expect(queryByTestId('chat-watch-video-button')).toBeNull();
+  });
+
+  it('shows watch button when all four conditions are met', () => {
+    const { getByTestId } = render(
+      <ChatPanel
+        {...BASE_PROPS}
+        ladderExhausted={true}
+        youtubeConsentGranted={true}
+        currentDomain="addition"
+      />,
+    );
+    expect(getByTestId('chat-watch-video-button')).toBeTruthy();
+  });
+
+  it('shows VideoPlayer after pressing watch button', () => {
+    const { getByTestId } = render(
+      <ChatPanel
+        {...BASE_PROPS}
+        ladderExhausted={true}
+        youtubeConsentGranted={true}
+        currentDomain="addition"
+      />,
+    );
+    fireEvent.press(getByTestId('chat-watch-video-button'));
+    expect(getByTestId('youtube-webview')).toBeTruthy();
+  });
+
+  it('shows VideoVoteButtons after pressing Done watching', () => {
+    const { getByTestId, queryByTestId } = render(
+      <ChatPanel
+        {...BASE_PROPS}
+        ladderExhausted={true}
+        youtubeConsentGranted={true}
+        currentDomain="addition"
+        onVideoVote={jest.fn()}
+      />,
+    );
+    fireEvent.press(getByTestId('chat-watch-video-button'));
+    fireEvent.press(getByTestId('youtube-done-button'));
+    expect(getByTestId('video-vote-helpful')).toBeTruthy();
+    expect(queryByTestId('youtube-webview')).toBeNull();
+  });
+
+  it('fires onVideoVote with domain and vote when vote button pressed', () => {
+    const onVideoVote = jest.fn();
+    const { getByTestId } = render(
+      <ChatPanel
+        {...BASE_PROPS}
+        ladderExhausted={true}
+        youtubeConsentGranted={true}
+        currentDomain="addition"
+        onVideoVote={onVideoVote}
+      />,
+    );
+    fireEvent.press(getByTestId('chat-watch-video-button'));
+    fireEvent.press(getByTestId('youtube-done-button'));
+    fireEvent.press(getByTestId('video-vote-helpful'));
+    expect(onVideoVote).toHaveBeenCalledWith('addition', 'helpful');
+  });
+});

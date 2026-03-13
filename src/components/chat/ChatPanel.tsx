@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -11,8 +11,12 @@ import { X } from 'lucide-react-native';
 import LottieView from 'lottie-react-native';
 import { useTheme, spacing, typography, layout, springConfigs } from '@/theme';
 import type { TutorMessage } from '@/services/tutor/types';
+import type { MathDomain } from '@/services/mathEngine/types';
+import { videoMap } from '@/services/video/videoMap';
 import { ChatMessageList } from './ChatMessageList';
 import { ResponseButtons } from './ResponseButtons';
+import { VideoPlayer } from './VideoPlayer';
+import { VideoVoteButtons } from './VideoVoteButtons';
 
 const PANEL_HEIGHT = Dimensions.get('window').height * 0.6;
 
@@ -27,6 +31,11 @@ interface ChatPanelProps {
   onResponse: (type: 'understand' | 'more' | 'confused' | 'retry' | 'gotit') => void;
   responseMode?: 'standard' | 'gotit';
   moreDisabled?: boolean;
+  ladderExhausted?: boolean;
+  youtubeConsentGranted?: boolean;
+  currentDomain?: MathDomain | null;
+  videoVotes?: Partial<Record<string, 'helpful' | 'not_helpful'>>;
+  onVideoVote?: (domain: MathDomain, vote: 'helpful' | 'not_helpful') => void;
 }
 
 /**
@@ -52,9 +61,25 @@ export function ChatPanel({
   onResponse,
   responseMode = 'standard',
   moreDisabled = false,
+  ladderExhausted,
+  youtubeConsentGranted,
+  currentDomain,
+  videoVotes,
+  onVideoVote,
 }: ChatPanelProps) {
   const { colors } = useTheme();
   const translateY = useSharedValue(PANEL_HEIGHT);
+
+  // Local video state
+  const [videoOpen, setVideoOpen] = useState(false);
+  const [voteDone, setVoteDone] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setVideoOpen(false);
+      setVoteDone(false);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     translateY.value = withSpring(
@@ -81,6 +106,14 @@ export function ChatPanel({
 
   // Inline offline indicator for mid-conversation disconnect
   const offlineInline = !isOnline && messages.length > 0;
+
+  // Video section: all four conditions must be true
+  const videoId = currentDomain ? videoMap[currentDomain] : undefined;
+  const showVideoSection =
+    (ladderExhausted ?? false) &&
+    (youtubeConsentGranted ?? false) &&
+    isOnline &&
+    !!videoId;
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -182,6 +215,19 @@ export function ChatPanel({
       fontSize: typography.fontSize.md,
       color: colors.textPrimary,
     },
+    watchVideoContainer: {
+      padding: spacing.md,
+    },
+    watchVideoButton: {
+      padding: spacing.md,
+      borderRadius: 8,
+      alignItems: 'center' as const,
+    },
+    watchVideoText: {
+      fontFamily: typography.fontFamily.semiBold,
+      fontSize: typography.fontSize.md,
+      fontWeight: '600' as const,
+    },
   }), [colors]);
 
   return (
@@ -262,6 +308,36 @@ export function ChatPanel({
             mode={responseMode}
           />
         </View>
+      )}
+
+      {/* Video section: Watch button, VideoPlayer, VideoVoteButtons */}
+      {!videoOpen && showVideoSection && (
+        <View style={styles.watchVideoContainer}>
+          <Pressable
+            testID="chat-watch-video-button"
+            onPress={() => setVideoOpen(true)}
+            style={[styles.watchVideoButton, { backgroundColor: colors.primary }]}
+            accessibilityRole="button"
+          >
+            <Text style={[styles.watchVideoText, { color: colors.background }]}>
+              Watch a video
+            </Text>
+          </Pressable>
+        </View>
+      )}
+      {videoOpen && videoId && !voteDone && (
+        <VideoPlayer
+          videoId={videoId}
+          isOnline={isOnline}
+          onDone={() => setVoteDone(true)}
+        />
+      )}
+      {videoOpen && voteDone && currentDomain && (
+        <VideoVoteButtons
+          domain={currentDomain}
+          existingVote={videoVotes?.[currentDomain]}
+          onVote={(vote) => onVideoVote?.(currentDomain, vote)}
+        />
       )}
     </Animated.View>
   );
