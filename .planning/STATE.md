@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: planning
-stopped_at: Completed 080-02-PLAN.md
-last_updated: "2026-03-13T11:58:18.133Z"
+stopped_at: Completed 080-03-PLAN.md
+last_updated: "2026-03-13T12:11:20.374Z"
 last_activity: 2026-03-12 — Roadmap created for v1.2, all 64 requirements mapped across phases 80-91
 progress:
   total_phases: 19
   completed_phases: 1
   total_plans: 11
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -58,6 +58,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 080]: MultiSelectMC testID contract: multiselectmc-check-button, multiselectmc-option-N-selected, multiselectmc-option-N-correct
 - [Phase 080-foundation]: answerNumericValue for multi_select returns values[0] as Elo proxy — grading must use setsEqual(), never this function
 - [Phase 080-foundation]: DistractorStrategy is optional on ProblemTemplate/Problem — existing templates implicitly use 'default'
+- [Phase 080-foundation]: buildNumberPattern uses look-behind for negative numbers since word boundary fails with '-' prefix
+- [Phase 080-foundation]: v22 migration is no-op with childGradeV22Migrated sentinel — K-12 grade expansion needs no schema change
+- [Phase 080-foundation]: DistractorStrategy defaults to 'default' so all existing callers are unaffected
 
 ### Pending Todos
 
@@ -75,7 +78,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T11:58:18.131Z
-Stopped at: Completed 080-02-PLAN.md
+Last session: 2026-03-13T12:11:20.372Z
+Stopped at: Completed 080-03-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80

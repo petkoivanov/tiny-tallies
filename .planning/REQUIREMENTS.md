@@ -10,7 +10,7 @@
 ### Foundation
 
 - [x] **FOUND-01**: Grade type expands from 1-8 to 1-12 across the entire codebase (types.ts, ProfileCreationWizard, age picker, BKT age brackets, store migration)
-- [ ] **FOUND-02**: Safety pipeline fixes for negative numbers — `checkAnswerLeak` regex fixed so negatives like `-3` are correctly detected as answer leaks
+- [x] **FOUND-02**: Safety pipeline fixes for negative numbers — `checkAnswerLeak` regex fixed so negatives like `-3` are correctly detected as answer leaks
 - [x] **FOUND-03**: `AgeBracket` type expanded to cover ages 10-18 (grades 9-12) so AI tutor hints use appropriate register for teens
 - [x] **FOUND-04**: Store migration (STORE_VERSION bump) to persist new grade range and any new HS domain skill states
 - [x] **FOUND-05**: NumberPad gains a `±` toggle key so students can enter negative number answers (e.g., x = -3)
