@@ -17,7 +17,7 @@
 - [x] **FOUND-06**: Multi-select MC answer type: `MultiSelectAnswer` added as 6th variant in Answer discriminated union, with `MultiSelectPresentation` in ProblemTemplate
 - [x] **FOUND-07**: `MultiSelectMC` component — checkbox-style options with a "Check" button that activates once ≥1 option selected; binary grading (all-or-nothing)
 - [x] **FOUND-08**: `distractorStrategy` field added to `ProblemTemplate` so algebra/HS templates can opt out of ±1 adjacency (use domain-specific distractor logic instead)
-- [ ] **FOUND-09**: App repositioned to K-12 — onboarding copy, age/grade picker range, and any "ages 6-9" UI copy updated to reflect wider audience
+- [x] **FOUND-09**: App repositioned to K-12 — onboarding copy, age/grade picker range, and any "ages 6-9" UI copy updated to reflect wider audience
 
 ### YouTube Video Tutor
 
@@ -144,7 +144,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 through FOUND-09 | Phase 80 | Pending |
+| FOUND-01 through FOUND-09 | Phase 80 | Complete (2026-03-13) |
 | VIDEO-01 through VIDEO-06 | Phase 81 | Pending |
 | LIN-01 through LIN-04 | Phase 82 | Pending |
 | COORD-01 through COORD-04 | Phase 83 | Pending |

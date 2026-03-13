@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: planning
-stopped_at: Completed 080-04-PLAN.md
+stopped_at: Completed 080-05-PLAN.md
 last_updated: "2026-03-13T12:27:02.228Z"
 last_activity: 2026-03-12 — Roadmap created for v1.2, all 64 requirements mapped across phases 80-91
 progress:
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 ## Current Position
 
 Phase: 80 of 91 (Foundation)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-03-12 — Roadmap created for v1.2, all 64 requirements mapped across phases 80-91
+Plan: 5 of 5 in current phase
+Status: Phase complete — ready for Phase 81
+Last activity: 2026-03-13 — Phase 80 complete (plans 01-05 executed, K-12 type system, safety, NumberPad, MultiSelectMC, and profile wizard scope all landed)
 
 ```
-v1.2: [............] 0% (0/12 phases)
+v1.2: [#...........] 8% (1/12 phases)
 ```
 
 ## Performance Metrics
@@ -64,6 +64,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 080-04]: NumberPad testID is numberpad-display (no hyphen between number and pad) — matches test contract from plan 080-01 stubs
 - [Phase 080-04]: MultiSelectMC uses named export to match test stub import pattern; ChoiceOption extended with optional label for display fallback
 - [Phase 080-04]: RNTL 13.x getByText and getByTestId both filter by accessibility — test stubs fixed to use getByTestId for digit key presses that collide with display value
+- [Phase 080-05]: ProfileCreationWizard age/grade chip tests use getAllByText(n)[0] — GRADES K-12 introduces labels 5-12 that overlap AGES 5-12; age chip is always first in DOM order
 
 ### Pending Todos
 
@@ -81,7 +82,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T12:27:02.226Z
-Stopped at: Completed 080-04-PLAN.md
+Last session: 2026-03-13T12:31:44Z
+Stopped at: Completed 080-05-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80

@@ -106,7 +106,7 @@
 
 ### v1.2 High School Math Expansion (Phases 80-91)
 
-- [ ] **Phase 80: Foundation** - Grade 1-12 type expansion, safety fixes, NumberPad negative input, MultiSelectMC, store migration, K-12 repositioning
+- [x] **Phase 80: Foundation** - Grade 1-12 type expansion, safety fixes, NumberPad negative input, MultiSelectMC, store migration, K-12 repositioning (completed 2026-03-13)
 - [ ] **Phase 81: YouTube Video Tutor** - react-native-youtube-iframe, COPPA consent gate, inline player, curated videoMap, vote system
 - [ ] **Phase 82: Linear Equations Domain** - linear_equations domain handler, templates, bug patterns, word problems, tutor guidance (G8-9)
 - [ ] **Phase 83: Coordinate Geometry Domain** - coordinate_geometry domain handler, templates, bug patterns, word problems, tutor guidance (G8-10)
@@ -228,11 +228,11 @@ Plans:
   5. AI tutor hints for a 16-year-old student use algebra-appropriate register (AgeBracket '14-18' resolves without undefined lookup)
 **Plans**: 5 plans
 Plans:
-- [ ] 080-01-PLAN.md — Wave 0 test stubs (migrations, NumberPad, answerTypes, MultiSelectMC)
-- [ ] 080-02-PLAN.md — Type system expansion (Grade 1-12, AgeBracket, MultiSelectAnswer, DistractorStrategy)
-- [ ] 080-03-PLAN.md — Consumers and migration (safetyFilter fix, BKT/Leitner, distractorGenerator, v21->v22)
-- [ ] 080-04-PLAN.md — UI components (NumberPad ± key, MultiSelectMC checkbox component)
-- [ ] 080-05-PLAN.md — K-12 repositioning copy (ProfileCreationWizard ages/grades)
+- [x] 080-01-PLAN.md — Wave 0 test stubs (migrations, NumberPad, answerTypes, MultiSelectMC)
+- [x] 080-02-PLAN.md — Type system expansion (Grade 1-12, AgeBracket, MultiSelectAnswer, DistractorStrategy)
+- [x] 080-03-PLAN.md — Consumers and migration (safetyFilter fix, BKT/Leitner, distractorGenerator, v21->v22)
+- [x] 080-04-PLAN.md — UI components (NumberPad ± key, MultiSelectMC checkbox component)
+- [x] 080-05-PLAN.md — K-12 repositioning copy (ProfileCreationWizard ages/grades)
 
 ### Phase 81: YouTube Video Tutor
 **Goal**: Students who exhaust the hint ladder can watch a curated instructional video inline without leaving the app or exposing personal data
