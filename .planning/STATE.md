@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: planning
-stopped_at: Completed 080-01-PLAN.md
-last_updated: "2026-03-13T11:53:11.453Z"
+stopped_at: Completed 080-02-PLAN.md
+last_updated: "2026-03-13T11:58:18.133Z"
 last_activity: 2026-03-12 — Roadmap created for v1.2, all 64 requirements mapped across phases 80-91
 progress:
   total_phases: 19
   completed_phases: 1
   total_plans: 11
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -56,6 +56,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - Phase 91 must be last — requires all 9 domain skill registrations to be present
 - [Phase 080]: Wave 0 sentinel field pattern: childGradeV22Migrated asserts v22 migration block presence
 - [Phase 080]: MultiSelectMC testID contract: multiselectmc-check-button, multiselectmc-option-N-selected, multiselectmc-option-N-correct
+- [Phase 080-foundation]: answerNumericValue for multi_select returns values[0] as Elo proxy — grading must use setsEqual(), never this function
+- [Phase 080-foundation]: DistractorStrategy is optional on ProblemTemplate/Problem — existing templates implicitly use 'default'
 
 ### Pending Todos
 
@@ -73,7 +75,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T11:53:11.451Z
-Stopped at: Completed 080-01-PLAN.md
+Last session: 2026-03-13T11:58:18.131Z
+Stopped at: Completed 080-02-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80
