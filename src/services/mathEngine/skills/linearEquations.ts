@@ -1,0 +1,68 @@
+import type { SkillDefinition } from '../types';
+
+export const LINEAR_EQUATIONS_SKILLS: readonly SkillDefinition[] = [
+  {
+    id: 'one_step_addition',
+    name: 'One-step equations (addition/subtraction)',
+    operation: 'linear_equations',
+    grade: 8,
+    standards: ['8.EE.C.7b'],
+    prerequisites: ['expressions.one-step-equation'],
+  },
+  {
+    id: 'one_step_multiplication',
+    name: 'One-step equations (multiplication/division)',
+    operation: 'linear_equations',
+    grade: 8,
+    standards: ['8.EE.C.7b'],
+    prerequisites: ['one_step_addition'],
+  },
+  {
+    id: 'two_step_add_mul',
+    name: 'Two-step equations (addition and multiplication)',
+    operation: 'linear_equations',
+    grade: 8,
+    standards: ['8.EE.C.7b'],
+    prerequisites: ['one_step_multiplication'],
+  },
+  {
+    id: 'two_step_sub_div',
+    name: 'Two-step equations (subtraction and division)',
+    operation: 'linear_equations',
+    grade: 8,
+    standards: ['8.EE.C.7b'],
+    prerequisites: ['two_step_add_mul'],
+  },
+  {
+    id: 'two_step_mixed',
+    name: 'Two-step equations (mixed operations)',
+    operation: 'linear_equations',
+    grade: 8,
+    standards: ['8.EE.C.7b'],
+    prerequisites: ['two_step_sub_div'],
+  },
+  {
+    id: 'multi_step',
+    name: 'Multi-step equations',
+    operation: 'linear_equations',
+    grade: 9,
+    standards: ['8.EE.C.7a'],
+    prerequisites: ['two_step_mixed'],
+  },
+  {
+    id: 'negative_solution',
+    name: 'Equations with negative solutions',
+    operation: 'linear_equations',
+    grade: 8,
+    standards: ['8.EE.C.7b'],
+    prerequisites: ['one_step_multiplication'],
+  },
+  {
+    id: 'word_problem',
+    name: 'Linear equation word problems',
+    operation: 'linear_equations',
+    grade: 9,
+    standards: ['8.EE.C.7'],
+    prerequisites: ['two_step_mixed'],
+  },
+];
