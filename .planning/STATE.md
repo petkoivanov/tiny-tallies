@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: planning
-stopped_at: Completed 080-03-PLAN.md
-last_updated: "2026-03-13T12:11:20.374Z"
+stopped_at: Completed 080-04-PLAN.md
+last_updated: "2026-03-13T12:27:02.228Z"
 last_activity: 2026-03-12 — Roadmap created for v1.2, all 64 requirements mapped across phases 80-91
 progress:
   total_phases: 19
   completed_phases: 1
   total_plans: 11
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -61,6 +61,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 080-foundation]: buildNumberPattern uses look-behind for negative numbers since word boundary fails with '-' prefix
 - [Phase 080-foundation]: v22 migration is no-op with childGradeV22Migrated sentinel — K-12 grade expansion needs no schema change
 - [Phase 080-foundation]: DistractorStrategy defaults to 'default' so all existing callers are unaffected
+- [Phase 080-04]: NumberPad testID is numberpad-display (no hyphen between number and pad) — matches test contract from plan 080-01 stubs
+- [Phase 080-04]: MultiSelectMC uses named export to match test stub import pattern; ChoiceOption extended with optional label for display fallback
+- [Phase 080-04]: RNTL 13.x getByText and getByTestId both filter by accessibility — test stubs fixed to use getByTestId for digit key presses that collide with display value
 
 ### Pending Todos
 
@@ -78,7 +81,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T12:11:20.372Z
-Stopped at: Completed 080-03-PLAN.md
+Last session: 2026-03-13T12:27:02.226Z
+Stopped at: Completed 080-04-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80
