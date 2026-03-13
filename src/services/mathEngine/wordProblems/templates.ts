@@ -560,4 +560,32 @@ export const WORD_PROBLEM_TEMPLATES: readonly WordProblemTemplate[] = [
     question: '',
     minGrade: 10,
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // STATISTICS HS — grades 9-10 (prefix mode)
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'wp_stats_survey',
+    operations: ['statistics_hs'],
+    mode: 'prefix',
+    template: '{name} is analyzing survey results about test scores at {place}.',
+    question: '',
+    minGrade: 9,
+  },
+  {
+    id: 'wp_stats_scores',
+    operations: ['statistics_hs'],
+    mode: 'prefix',
+    template: '{name} is studying how exam scores are distributed in a class.',
+    question: '',
+    minGrade: 9,
+  },
+  {
+    id: 'wp_stats_data',
+    operations: ['statistics_hs'],
+    mode: 'prefix',
+    template: '{name} collected data on heights of students and is analyzing the spread.',
+    question: '',
+    minGrade: 10,
+  },
 ];
