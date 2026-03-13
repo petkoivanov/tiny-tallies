@@ -60,7 +60,7 @@
 
 - [x] **SYS-01**: `systems_equations` domain handler — 2×2 linear systems with integer solutions via substitution and elimination (G9-10, 5 skills)
 - [x] **SYS-02**: Systems templates with algebra-aware distractor generation (swapped-variable, sign-error bug patterns)
-- [ ] **SYS-03**: Word problem variants for systems (two-variable real-world scenarios)
+- [x] **SYS-03**: Word problem variants for systems (two-variable real-world scenarios)
 - [x] **SYS-04**: AI tutor prompt guidance for systems of equations
 
 ### Quadratic Equations Domain
