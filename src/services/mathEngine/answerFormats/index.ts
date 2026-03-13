@@ -10,6 +10,9 @@ export type {
 // Multiple choice formatter
 export { formatAsMultipleChoice } from './multipleChoice';
 
+// Multi-select formatter
+export { formatAsMultiSelect } from './multiSelect';
+
 // Free text formatter and validation
 export {
   formatAsFreeText,

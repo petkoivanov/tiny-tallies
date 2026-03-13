@@ -21,7 +21,8 @@ export type MathDomain =
   | 'coordinate_geometry'
   | 'sequences_series'
   | 'statistics_hs'
-  | 'systems_equations';
+  | 'systems_equations'
+  | 'quadratic_equations';
 
 export type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export const MAX_GRADE: Grade = 12;

@@ -20,7 +20,7 @@ const EXPECTED_SKILL_IDS = [
   'quadratic_formula_simple',
   'quadratic_formula_rational',
   'completing_the_square',
-  'word_problem',
+  'quad_word_problem',
 ] as const;
 
 describe('Quadratic Equations Domain', () => {
@@ -129,7 +129,8 @@ describe('Quadratic Equations Domain', () => {
         (b) => b.id === 'quad_wrong_sign',
       );
       expect(bug).toBeDefined();
-      const result = bug!.compute({ operands: [3, -5, -2, -15] });
+      // operands[0] = wrongSignR1 = -3, operands[1] = wrongSignR2 = 5
+      const result = bug!.compute(-3, 5, 'quadratic_equations' as MathDomain);
       expect(result).not.toBeNull();
       expect(typeof result).toBe('number');
     });
@@ -139,7 +140,7 @@ describe('Quadratic Equations Domain', () => {
         (b) => b.id === 'quad_sum_product_confusion',
       );
       expect(bug).toBeDefined();
-      const result = bug!.compute({ operands: [3, -5, -2, -15] });
+      const result = bug!.compute(-3, 5, 'quadratic_equations' as MathDomain);
       expect(result).not.toBeNull();
       expect(typeof result).toBe('number');
     });
@@ -149,7 +150,7 @@ describe('Quadratic Equations Domain', () => {
         (b) => b.id === 'quad_only_one_root',
       );
       expect(bug).toBeDefined();
-      const result = bug!.compute({ operands: [3, -5, -2, -15] });
+      const result = bug!.compute(-3, 5, 'quadratic_equations' as MathDomain);
       expect(result).not.toBeNull();
       expect(typeof result).toBe('number');
     });

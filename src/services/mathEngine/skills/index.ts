@@ -25,6 +25,7 @@ import { COORDINATE_GEOMETRY_SKILLS } from './coordinateGeometry';
 import { SEQUENCES_SERIES_SKILLS } from './sequencesSeries';
 import { STATISTICS_HS_SKILLS } from './statisticsHs';
 import { SYSTEMS_EQUATIONS_SKILLS } from './systemsEquations';
+import { QUADRATIC_EQUATIONS_SKILLS } from './quadraticEquations';
 
 export const SKILLS: readonly SkillDefinition[] = [
   ...ADDITION_SKILLS,
@@ -52,6 +53,7 @@ export const SKILLS: readonly SkillDefinition[] = [
   ...SEQUENCES_SERIES_SKILLS,
   ...STATISTICS_HS_SKILLS,
   ...SYSTEMS_EQUATIONS_SKILLS,
+  ...QUADRATIC_EQUATIONS_SKILLS,
 ];
 
 export function getSkillById(id: string): SkillDefinition | undefined {
@@ -94,4 +96,5 @@ export {
   SEQUENCES_SERIES_SKILLS,
   STATISTICS_HS_SKILLS,
   SYSTEMS_EQUATIONS_SKILLS,
+  QUADRATIC_EQUATIONS_SKILLS,
 };

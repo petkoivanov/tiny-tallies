@@ -1,0 +1,1 @@
+export { quadraticEquationsHandler } from './quadraticEquationsHandler';

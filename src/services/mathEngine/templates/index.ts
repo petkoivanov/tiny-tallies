@@ -24,6 +24,7 @@ import { COORDINATE_GEOMETRY_TEMPLATES } from './coordinateGeometry';
 import { SEQUENCES_SERIES_TEMPLATES } from './sequencesSeries';
 import { STATISTICS_HS_TEMPLATES } from './statisticsHs';
 import { SYSTEMS_EQUATIONS_TEMPLATES } from './systemsEquations';
+import { QUADRATIC_EQUATIONS_TEMPLATES } from './quadraticEquations';
 
 export const ALL_TEMPLATES: readonly ProblemTemplate[] = [
   ...ADDITION_TEMPLATES,
@@ -51,6 +52,7 @@ export const ALL_TEMPLATES: readonly ProblemTemplate[] = [
   ...SEQUENCES_SERIES_TEMPLATES,
   ...STATISTICS_HS_TEMPLATES,
   ...SYSTEMS_EQUATIONS_TEMPLATES,
+  ...QUADRATIC_EQUATIONS_TEMPLATES,
 ];
 
 export function findTemplate(templateId: string): ProblemTemplate {
@@ -98,3 +100,4 @@ export { COORDINATE_GEOMETRY_TEMPLATES } from './coordinateGeometry';
 export { SEQUENCES_SERIES_TEMPLATES } from './sequencesSeries';
 export { STATISTICS_HS_TEMPLATES } from './statisticsHs';
 export { SYSTEMS_EQUATIONS_TEMPLATES } from './systemsEquations';
+export { QUADRATIC_EQUATIONS_TEMPLATES } from './quadraticEquations';

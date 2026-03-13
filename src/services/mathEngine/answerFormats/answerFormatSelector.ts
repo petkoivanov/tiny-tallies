@@ -2,6 +2,7 @@ import type { Problem } from '../types';
 import type { SeededRng } from '../seededRng';
 import { createRng } from '../seededRng';
 import { formatAsMultipleChoice } from './multipleChoice';
+import { formatAsMultiSelect } from './multiSelect';
 import { formatAsFreeText } from './freeText';
 import type { FormattedProblem } from './types';
 
@@ -34,6 +35,11 @@ export function selectAndFormatAnswer(
   elo: number,
   seed: number,
 ): FormattedProblem {
+  // Multi-select answers always use the multi-select format (no MC/free-text split)
+  if (problem.correctAnswer.type === 'multi_select') {
+    return formatAsMultiSelect(problem, createRng(seed));
+  }
+
   const rng = createRng(seed);
   const pFreeText = freeTextProbability(elo);
 
