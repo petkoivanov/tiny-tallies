@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: completed
-stopped_at: Completed 084-03-PLAN.md
-last_updated: "2026-03-13T21:00:00.000Z"
+stopped_at: Completed 085-01-PLAN.md
+last_updated: "2026-03-13T21:19:23.284Z"
 last_activity: 2026-03-13 — Phase 84 Plan 03 complete (6 sequences_series word problem prefix templates, manual QA sign-off on Socratic hints)
 progress:
   total_phases: 19
-  completed_phases: 5
-  total_plans: 24
-  completed_plans: 22
+  completed_phases: 6
+  total_plans: 27
+  completed_plans: 24
 ---
 
 # Project State
@@ -87,6 +87,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 084-02]: seq_word_problem reuses generateArithmeticNthTerm — consistent with coord_word_problem reusing generateDistance
 - [Phase 084-03]: sequences_series word problem templates use prefix mode exclusively — arithmetic contexts (savings/growth/stacking) at minGrade 9, geometric (population/tiles/interest) at minGrade 10
 - [Phase 084-03]: manual QA sign-off given 2026-03-13; 10+ Socratic hints reviewed across arithmetic and geometric sequence types, none revealed common difference or ratio in HINT mode
+- [Phase 085-01]: statistics_hs z-score bounds test uses [-2, 2] integer range — generator constrained to small integer z-scores for grade 9
+- [Phase 085-01]: statistics_hs gradeMap entry is 9 (Common Core HSS.ID.A standards start in grade 9)
+- [Phase 085-01]: STATISTICS_HS_BUGS IDs: stats_zscore_sign_flip, stats_zscore_forgot_mean, stats_normal_wrong_band — follow existing bug ID naming convention
 
 ### Pending Todos
 
@@ -106,7 +109,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T21:00:00.000Z
-Stopped at: Completed 084-03-PLAN.md
+Last session: 2026-03-13T21:19:17.886Z
+Stopped at: Completed 085-01-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80

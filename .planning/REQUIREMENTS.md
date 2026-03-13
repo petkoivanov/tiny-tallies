@@ -51,10 +51,10 @@
 
 ### Statistics Extensions Domain
 
-- [ ] **STATS-01**: `statistics_hs` domain handler — standard deviation (conceptual), normal distribution properties, z-scores (integer), percentiles (G9-11, 5 skills)
-- [ ] **STATS-02**: Statistics HS templates extending existing data_analysis infrastructure
-- [ ] **STATS-03**: Word problem variants for statistics (survey, test scores contexts)
-- [ ] **STATS-04**: AI tutor prompt guidance for statistics extensions
+- [x] **STATS-01**: `statistics_hs` domain handler — standard deviation (conceptual), normal distribution properties, z-scores (integer), percentiles (G9-11, 5 skills)
+- [x] **STATS-02**: Statistics HS templates extending existing data_analysis infrastructure
+- [x] **STATS-03**: Word problem variants for statistics (survey, test scores contexts)
+- [x] **STATS-04**: AI tutor prompt guidance for statistics extensions
 
 ### Systems of Equations Domain
 
