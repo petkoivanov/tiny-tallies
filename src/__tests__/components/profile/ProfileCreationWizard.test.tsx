@@ -164,12 +164,13 @@ describe('ProfileCreationWizard', () => {
     });
 
     it('auto-selects grade when age is tapped', () => {
-      const { getByPlaceholderText, getByText } = render(
+      const { getByPlaceholderText, getByText, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
       goToAgeGrade(getByPlaceholderText, getByText);
-      fireEvent.press(getByText('7'));
+      // Age 7 also appears as grade label — use getAllByText and press the first (age chip)
+      fireEvent.press(getAllByText('7')[0]);
 
       const nextButton = getByText('Next');
       const disabled = nextButton.props.accessibilityState?.disabled || nextButton.parent?.props.accessibilityState?.disabled;
@@ -189,19 +190,20 @@ describe('ProfileCreationWizard', () => {
   });
 
   describe('Step 3: Location', () => {
-    function goToLocation(getByPlaceholderText: any, getByText: any) {
+    function goToLocation(getByPlaceholderText: any, getByText: any, getAllByText: any) {
       fireEvent.changeText(getByPlaceholderText(/name/i), 'Alice');
       fireEvent.press(getByText('Next'));
-      fireEvent.press(getByText('7'));
+      // Age 7 also appears as grade label — press the first (age chip)
+      fireEvent.press(getAllByText('7')[0]);
       fireEvent.press(getByText('Next'));
     }
 
     it('renders state selector after age-grade step', () => {
-      const { getByPlaceholderText, getByText, getByTestId } = render(
+      const { getByPlaceholderText, getByText, getByTestId, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
-      goToLocation(getByPlaceholderText, getByText);
+      goToLocation(getByPlaceholderText, getByText, getAllByText);
 
       expect(getByText(/where does/i)).toBeTruthy();
       expect(getByText(/optional/i)).toBeTruthy();
@@ -209,30 +211,30 @@ describe('ProfileCreationWizard', () => {
     });
 
     it('shows Skip button when no state selected', () => {
-      const { getByPlaceholderText, getByText } = render(
+      const { getByPlaceholderText, getByText, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
-      goToLocation(getByPlaceholderText, getByText);
+      goToLocation(getByPlaceholderText, getByText, getAllByText);
       expect(getByText('Skip')).toBeTruthy();
     });
 
     it('shows Next button when state is selected', () => {
-      const { getByPlaceholderText, getByText, getByTestId } = render(
+      const { getByPlaceholderText, getByText, getByTestId, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
-      goToLocation(getByPlaceholderText, getByText);
+      goToLocation(getByPlaceholderText, getByText, getAllByText);
       fireEvent.press(getByTestId('state-NY'));
       expect(getByText('Next')).toBeTruthy();
     });
 
     it('Back button returns to age-grade step', () => {
-      const { getByPlaceholderText, getByText } = render(
+      const { getByPlaceholderText, getByText, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
-      goToLocation(getByPlaceholderText, getByText);
+      goToLocation(getByPlaceholderText, getByText, getAllByText);
       fireEvent.press(getByText('Back'));
 
       expect(getByText(/how old/i)).toBeTruthy();
@@ -240,21 +242,22 @@ describe('ProfileCreationWizard', () => {
   });
 
   describe('Step 4: Avatar', () => {
-    function goToAvatar(getByPlaceholderText: any, getByText: any) {
+    function goToAvatar(getByPlaceholderText: any, getByText: any, getAllByText: any) {
       fireEvent.changeText(getByPlaceholderText(/name/i), 'Alice');
       fireEvent.press(getByText('Next'));
-      fireEvent.press(getByText('7'));
+      // Age 7 also appears as grade label — press the first (age chip)
+      fireEvent.press(getAllByText('7')[0]);
       fireEvent.press(getByText('Next'));
       // Skip location step
       fireEvent.press(getByText('Skip'));
     }
 
     it('renders avatar grid', () => {
-      const { getByPlaceholderText, getByText, getByTestId } = render(
+      const { getByPlaceholderText, getByText, getByTestId, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
-      goToAvatar(getByPlaceholderText, getByText);
+      goToAvatar(getByPlaceholderText, getByText, getAllByText);
 
       expect(getByText(/avatar/i)).toBeTruthy();
       expect(getByTestId('avatar-F')).toBeTruthy();
@@ -263,11 +266,11 @@ describe('ProfileCreationWizard', () => {
     });
 
     it('calls onComplete with null avatarId and stateCode when skipped', () => {
-      const { getByPlaceholderText, getByText } = render(
+      const { getByPlaceholderText, getByText, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
-      goToAvatar(getByPlaceholderText, getByText);
+      goToAvatar(getByPlaceholderText, getByText, getAllByText);
       fireEvent.press(getByText('Done'));
 
       expect(mockOnComplete).toHaveBeenCalledWith({
@@ -280,11 +283,11 @@ describe('ProfileCreationWizard', () => {
     });
 
     it('calls onComplete with selected avatarId', () => {
-      const { getByPlaceholderText, getByText, getByTestId } = render(
+      const { getByPlaceholderText, getByText, getByTestId, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
-      goToAvatar(getByPlaceholderText, getByText);
+      goToAvatar(getByPlaceholderText, getByText, getAllByText);
       fireEvent.press(getByTestId('avatar-O'));
       fireEvent.press(getByText('Done'));
 
@@ -298,26 +301,115 @@ describe('ProfileCreationWizard', () => {
     });
 
     it('Back button returns to location step', () => {
-      const { getByPlaceholderText, getByText } = render(
+      const { getByPlaceholderText, getByText, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
-      goToAvatar(getByPlaceholderText, getByText);
+      goToAvatar(getByPlaceholderText, getByText, getAllByText);
       fireEvent.press(getByText('Back'));
 
       expect(getByText(/where does/i)).toBeTruthy();
     });
   });
 
+  describe('K-12 scope (AGES 5-18, GRADES K-12)', () => {
+    function goToAgeGrade(getByPlaceholderText: any, getByText: any) {
+      fireEvent.changeText(getByPlaceholderText(/name/i), 'Alex');
+      fireEvent.press(getByText('Next'));
+    }
+
+    it('AGES array contains 14 entries (5 through 18)', () => {
+      const { getByPlaceholderText, getByText, getAllByText } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+      goToAgeGrade(getByPlaceholderText, getByText);
+
+      // Verify ages 13-18 are present in the age selector
+      expect(getByText('13')).toBeTruthy();
+      expect(getByText('14')).toBeTruthy();
+      expect(getByText('15')).toBeTruthy();
+      expect(getByText('16')).toBeTruthy();
+      expect(getByText('17')).toBeTruthy();
+      expect(getByText('18')).toBeTruthy();
+    });
+
+    it('GRADES array contains 13 entries (K through 12)', () => {
+      const { getByPlaceholderText, getByText, getAllByText } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+      goToAgeGrade(getByPlaceholderText, getByText);
+
+      // Verify grades 7-12 are present in the grade selector.
+      // Some numbers (7-12) also appear as age chips — use getAllByText to confirm at least one match.
+      expect(getAllByText('7').length).toBeGreaterThanOrEqual(1);
+      expect(getAllByText('8').length).toBeGreaterThanOrEqual(1);
+      expect(getAllByText('9').length).toBeGreaterThanOrEqual(1);
+      expect(getAllByText('10').length).toBeGreaterThanOrEqual(1);
+      expect(getAllByText('11').length).toBeGreaterThanOrEqual(1);
+      expect(getAllByText('12').length).toBeGreaterThanOrEqual(1);
+      // K is unique to grade selector
+      expect(getByText('K')).toBeTruthy();
+    });
+
+    it('handleAgeSelect(18) auto-sets grade to 12 not 6', () => {
+      const { getByPlaceholderText, getByText } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+      goToAgeGrade(getByPlaceholderText, getByText);
+      fireEvent.press(getByText('18'));
+      fireEvent.press(getByText('Next'));
+      // Navigate through location and avatar steps
+      fireEvent.press(getByText('Skip'));
+      fireEvent.press(getByText('Done'));
+
+      expect(mockOnComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ childAge: 18, childGrade: 12 }),
+      );
+    });
+
+    it('handleAgeSelect(10) auto-sets grade to 5', () => {
+      const { getByPlaceholderText, getByText, getAllByText } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+      goToAgeGrade(getByPlaceholderText, getByText);
+      // Age 10 also appears as grade label — press the first (age chip)
+      fireEvent.press(getAllByText('10')[0]);
+      fireEvent.press(getByText('Next'));
+      fireEvent.press(getByText('Skip'));
+      fireEvent.press(getByText('Done'));
+
+      expect(mockOnComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ childAge: 10, childGrade: 5 }),
+      );
+    });
+
+    it('handleAgeSelect(5) auto-sets grade to 0 (Kindergarten)', () => {
+      const { getByPlaceholderText, getByText, getAllByText } = render(
+        <ProfileCreationWizard onComplete={mockOnComplete} />,
+      );
+      goToAgeGrade(getByPlaceholderText, getByText);
+      // Age 5 chip appears first; grade 5 chip also exists — use getAllByText and take the first
+      fireEvent.press(getAllByText('5')[0]);
+      fireEvent.press(getByText('Next'));
+      fireEvent.press(getByText('Skip'));
+      fireEvent.press(getByText('Done'));
+
+      expect(mockOnComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ childAge: 5, childGrade: 0 }),
+      );
+    });
+  });
+
   describe('full flow', () => {
     it('completes wizard end-to-end without state selection', () => {
-      const { getByPlaceholderText, getByText, getByTestId } = render(
+      const { getByPlaceholderText, getByText, getByTestId, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
       fireEvent.changeText(getByPlaceholderText(/name/i), 'Charlie');
       fireEvent.press(getByText('Next'));
-      fireEvent.press(getByText('9'));
+      // Age 9 also appears as grade label — press the first (age chip)
+      fireEvent.press(getAllByText('9')[0]);
       fireEvent.press(getByText('Next'));
       fireEvent.press(getByText('Skip'));
       fireEvent.press(getByTestId('avatar-B'));
@@ -333,13 +425,14 @@ describe('ProfileCreationWizard', () => {
     });
 
     it('completes wizard end-to-end with state selection', () => {
-      const { getByPlaceholderText, getByText, getByTestId } = render(
+      const { getByPlaceholderText, getByText, getByTestId, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
 
       fireEvent.changeText(getByPlaceholderText(/name/i), 'Charlie');
       fireEvent.press(getByText('Next'));
-      fireEvent.press(getByText('9'));
+      // Age 9 also appears as grade label — press the first (age chip)
+      fireEvent.press(getAllByText('9')[0]);
       fireEvent.press(getByText('Next'));
       fireEvent.press(getByTestId('state-NY'));
       fireEvent.press(getByText('Next'));

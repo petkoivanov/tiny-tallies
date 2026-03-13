@@ -25,7 +25,7 @@ export interface ProfileCreationWizardProps {
 }
 
 const NAME_MAX_LENGTH = 20;
-const AGES = [5, 6, 7, 8, 9, 10, 11, 12];
+const AGES = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
 const GRADES = [
   { label: 'K', value: 0 },
   { label: '1', value: 1 },
@@ -34,6 +34,12 @@ const GRADES = [
   { label: '4', value: 4 },
   { label: '5', value: 5 },
   { label: '6', value: 6 },
+  { label: '7', value: 7 },
+  { label: '8', value: 8 },
+  { label: '9', value: 9 },
+  { label: '10', value: 10 },
+  { label: '11', value: 11 },
+  { label: '12', value: 12 },
 ];
 
 export function ProfileCreationWizard({
@@ -63,7 +69,7 @@ export function ProfileCreationWizard({
 
   function handleAgeSelect(selectedAge: number) {
     setAge(selectedAge);
-    const autoGrade = Math.max(0, Math.min(6, selectedAge - 5));
+    const autoGrade = Math.max(0, Math.min(12, selectedAge - 5));
     setGrade(autoGrade);
   }
 
