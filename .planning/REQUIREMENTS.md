@@ -1,131 +1,167 @@
-# Requirements: Tiny Tallies
+# Requirements: Tiny Tallies v1.2 High School Math Expansion
 
-**Defined:** 2026-03-05
-**Core Value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles
+**Defined:** 2026-03-12
+**Core Value:** Personalized, AI-guided daily math practice that adapts to each child's level, detects misconceptions, and teaches from first principles — making math fun and building real understanding.
 
-## v0.8 Requirements
+---
 
-Requirements for Social & Subscription milestone. Each maps to roadmap phases.
+## v1.2 Requirements
 
-### Multi-Child Profiles
+### Foundation
 
-- [x] **PROF-01**: User can switch between child profiles from the home screen
-- [x] **PROF-02**: Parent can add a new child profile with name, age, and grade level (PIN-gated)
-- [x] **PROF-03**: Parent can edit an existing child profile's name, age, and grade level
-- [x] **PROF-04**: Parent can delete a child profile with confirmation
-- [x] **PROF-05**: Each child profile has independent progress (Elo, BKT, skills, XP, achievements, cosmetics)
-- [x] **PROF-06**: App supports up to 5 child profiles per device
-- [x] **PROF-07**: New child profiles initialize with grade-appropriate skill unlocks and difficulty
-- [x] **PROF-08**: Active child data auto-saves on app background and profile switch
+- [ ] **FOUND-01**: Grade type expands from 1-8 to 1-12 across the entire codebase (types.ts, ProfileCreationWizard, age picker, BKT age brackets, store migration)
+- [ ] **FOUND-02**: Safety pipeline fixes for negative numbers — `checkAnswerLeak` regex fixed so negatives like `-3` are correctly detected as answer leaks
+- [ ] **FOUND-03**: `AgeBracket` type expanded to cover ages 10-18 (grades 9-12) so AI tutor hints use appropriate register for teens
+- [ ] **FOUND-04**: Store migration (STORE_VERSION bump) to persist new grade range and any new HS domain skill states
+- [ ] **FOUND-05**: NumberPad gains a `±` toggle key so students can enter negative number answers (e.g., x = -3)
+- [ ] **FOUND-06**: Multi-select MC answer type: `MultiSelectAnswer` added as 6th variant in Answer discriminated union, with `MultiSelectPresentation` in ProblemTemplate
+- [ ] **FOUND-07**: `MultiSelectMC` component — checkbox-style options with a "Check" button that activates once ≥1 option selected; binary grading (all-or-nothing)
+- [ ] **FOUND-08**: `distractorStrategy` field added to `ProblemTemplate` so algebra/HS templates can opt out of ±1 adjacency (use domain-specific distractor logic instead)
+- [ ] **FOUND-09**: App repositioned to K-12 — onboarding copy, age/grade picker range, and any "ages 6-9" UI copy updated to reflect wider audience
 
-### Parent Dashboard
+### YouTube Video Tutor
 
-- [ ] **DASH-01**: Parent can view a progress overview per child (mastery, sessions, streaks, time spent)
-- [ ] **DASH-02**: Parent can view misconception analytics showing specific reasoning errors per child
-- [ ] **DASH-03**: Parent can view trend graphs of skill mastery and performance over time
-- [ ] **DASH-04**: Parent can view a scrollable session history with per-session details
-- [ ] **DASH-05**: Parent dashboard is accessible behind PIN gate from home screen
+- [ ] **VIDEO-01**: `react-native-youtube-iframe` + `react-native-webview` installed and working in Expo managed workflow build
+- [ ] **VIDEO-02**: "Watch a video" button appears in ChatPanel after hint ladder is exhausted (BOOST mode complete) — triggered by `ladderExhausted` signal from useTutor
+- [ ] **VIDEO-03**: Tapping "Watch a video" opens an inline YouTube player using youtube-nocookie.com for COPPA compliance
+- [ ] **VIDEO-04**: Static `videoMap.ts` curated lookup: `MathDomain → YouTube video ID` for all 27 domains (18 existing + 9 new), sourced from Khan Academy YouTube channel
+- [ ] **VIDEO-05**: Post-video vote: "Was this helpful?" with 👍 / 👎 buttons; vote stored per domain in tutorSlice
+- [ ] **VIDEO-06**: COPPA parental consent gate for YouTube — separate from AI tutor consent; parent must approve before first YouTube embed renders; stored in parental controls
 
-### Parental Controls
+### Linear Equations Domain
 
-- [ ] **CTRL-01**: Parent can set a daily session time cap per child
-- [ ] **CTRL-02**: Parent can set a bedtime lockout window per child (e.g., 8pm-7am)
-- [ ] **CTRL-03**: App shows break reminders after configurable continuous practice time
-- [ ] **CTRL-04**: Time controls are configured within the parent dashboard
+- [ ] **LIN-01**: `linear_equations` domain handler — one-step, two-step, and multi-step equations with integer solutions (G8-9, 8 skills)
+- [ ] **LIN-02**: Linear equation templates with algebra-aware distractor generation (wrong-operation, sign-flip, forgot-to-divide bug patterns)
+- [ ] **LIN-03**: Word problem variants for linear equations (age, distance, money contexts)
+- [ ] **LIN-04**: AI tutor prompt guidance for linear equations (Socratic balance-model framing without revealing steps)
 
-### Privacy, Auth & Sync (Phase 40)
+### Coordinate Geometry Domain
 
-- [x] **PRIV-01**: Privacy disclosure shown during first profile setup with COPPA-compliant content
-- [x] **PRIV-02**: Sentry error tracking with PII scrubbing (child names, ages, emails) and opt-out toggle
-- [x] **AUTH-01**: Google Sign-In with backend JWT verification and user creation
-- [x] **AUTH-02**: Apple Sign-In with backend JWT verification and user creation
-- [x] **SYNC-01**: Cloud sync of child progress (incremental deltas, badges, skill states) with offline queue
-- [x] **SYNC-02**: Data deletion flow (remote + local cleanup + sign out) accessible from ParentalControlsScreen
-- [x] **CTRL-05**: ParentalControlsScreen with privacy settings, account management, and AI helper toggle
+- [ ] **COORD-01**: `coordinate_geometry` domain handler — slope, distance formula, midpoint, equation of a line (G8-10, 6 skills)
+- [ ] **COORD-02**: Coordinate geometry templates with numeric answers (slope as fraction, distance/midpoint as numeric)
+- [ ] **COORD-03**: Word problem variants for coordinate geometry (real-world distance/slope contexts)
+- [ ] **COORD-04**: AI tutor prompt guidance for coordinate geometry
 
-### Subscription
+### Sequences & Series Domain
 
-- [ ] **SUB-01**: App displays a freemium paywall with clear free vs premium tier comparison
-- [ ] **SUB-02**: Free tier allows 3 practice sessions per day with full adaptive engine
-- [ ] **SUB-03**: Premium tier unlocks unlimited sessions, AI tutor, and all color themes
-- [ ] **SUB-04**: User can restore purchases on reinstall or new device
-- [ ] **SUB-05**: All purchase UI is behind the parental PIN gate
-- [ ] **SUB-06**: Subscription state is managed via RevenueCat (not persisted locally)
+- [ ] **SEQ-01**: `sequences_series` domain handler — arithmetic sequences, geometric sequences, nth-term formula, partial sums (G9-11, 5 skills)
+- [ ] **SEQ-02**: Sequences templates extending existing patterns infrastructure with higher-order progressions
+- [ ] **SEQ-03**: Word problem variants for sequences (savings/growth contexts)
+- [ ] **SEQ-04**: AI tutor prompt guidance for sequences & series
 
-## Future Requirements
+### Statistics Extensions Domain
 
-### Push Notifications
+- [ ] **STATS-01**: `statistics_hs` domain handler — standard deviation (conceptual), normal distribution properties, z-scores (integer), percentiles (G9-11, 5 skills)
+- [ ] **STATS-02**: Statistics HS templates extending existing data_analysis infrastructure
+- [ ] **STATS-03**: Word problem variants for statistics (survey, test scores contexts)
+- [ ] **STATS-04**: AI tutor prompt guidance for statistics extensions
 
-- **NOTF-01**: Parent receives push notification summary of child's daily progress
-- **NOTF-02**: Parent receives notification when child achieves a milestone badge
+### Systems of Equations Domain
 
-### Cloud Sync (Advanced)
+- [ ] **SYS-01**: `systems_equations` domain handler — 2×2 linear systems with integer solutions via substitution and elimination (G9-10, 5 skills)
+- [ ] **SYS-02**: Systems templates with algebra-aware distractor generation (swapped-variable, sign-error bug patterns)
+- [ ] **SYS-03**: Word problem variants for systems (two-variable real-world scenarios)
+- [ ] **SYS-04**: AI tutor prompt guidance for systems of equations
 
-- ~~**SYNC-01**: Child progress syncs across devices via cloud backend~~ ✓ Done in Phase 40
-- **SYNC-03**: Family group shared across devices
+### Quadratic Equations Domain
 
-### Advanced Analytics
+- [ ] **QUAD-01**: `quadratic_equations` domain handler — factoring monic quadratics with integer roots, quadratic formula for rational roots (G9-10, 6 skills)
+- [ ] **QUAD-02**: Quadratic templates use `MultiSelectAnswer` + `MultiSelectPresentation` — student selects both roots from 4 options
+- [ ] **QUAD-03**: Distractor generation for quadratic roots (wrong-sign roots, sum/product confusion bug patterns)
+- [ ] **QUAD-04**: Word problem variants for quadratics (area, projectile contexts)
+- [ ] **QUAD-05**: AI tutor prompt guidance for quadratic equations
 
-- **ANLYT-01**: Parent can view detailed session replays
-- **ANLYT-02**: Parent can export progress reports as PDF
+### Polynomial Operations Domain
+
+- [ ] **POLY-01**: `polynomials` domain handler — FOIL expansion, polynomial evaluation at a point, simple factoring (GCF, difference of squares) (G9-10, 6 skills)
+- [ ] **POLY-02**: Polynomial templates with numeric answers (evaluation) and MC expression answers (factored form identification)
+- [ ] **POLY-03**: Word problem variants for polynomials (area/perimeter expressions)
+- [ ] **POLY-04**: AI tutor prompt guidance for polynomial operations
+
+### Exponential Functions Domain
+
+- [ ] **EXP-01**: `exponential_functions` domain handler — evaluate exponential expressions, growth/decay factor identification, half-life/doubling-time (G9-11, 5 skills)
+- [ ] **EXP-02**: Exponential templates with numeric answers (integer exponents, simple base values)
+- [ ] **EXP-03**: Word problem variants for exponential functions (population, bacteria, investment contexts)
+- [ ] **EXP-04**: AI tutor prompt guidance for exponential functions
+
+### Logarithms Domain
+
+- [ ] **LOG-01**: `logarithms` domain handler — evaluate log at special values (log₁₀, log₂, ln of integer powers), basic log rules (G10-11, 4 skills)
+- [ ] **LOG-02**: Logarithm templates with integer numeric answers only (special values — no floating point)
+- [ ] **LOG-03**: Word problem variants for logarithms (pH, decibel, Richter scale contexts)
+- [ ] **LOG-04**: AI tutor prompt guidance for logarithms
+
+### Integration & Placement
+
+- [ ] **INT-01**: Placement staircase extended to grade 12 — `MAX_GRADE = 12`, HS skills registered so staircase can sample them
+- [ ] **INT-02**: Prerequisite DAG edges wired for HS skills (linear_equations → systems_equations → quadratic_equations → polynomials)
+- [ ] **INT-03**: Skill map layout updated to accommodate 27 total domains without overflow
+- [ ] **INT-04**: Existing-user store migration — users previously capped at grade 8 can be placed into grade 9-12 via re-assessment trigger
+- [ ] **INT-05**: `problemIntro.ts` updated with domain intro strings for all 9 new HS domains
+
+---
+
+## Future Requirements (v1.3+)
+
+### Hard Domains (Deferred)
+- Trigonometry — visual unit circle, floating-point answers
+- Rational expressions — symbolic CAS required
+- Matrices — new MatrixAnswer type + new UI
+- Geometry proofs — proof validation not automatable
+
+### Visual Aids (Deferred)
+- Algebra balance scale manipulative (CPA for linear equations)
+- Parabola sketch component for quadratics
+- CPA pictorial mode for HS algebra domains
+
+### Other Deferred
+- Free-text algebraic expression input (type "2x+3")
+- Step-by-step solution reveal
+- Complex/imaginary roots for quadratics
+- Calculus (limits, derivatives)
+
+---
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| ~~Cross-device sync~~ | ✓ Implemented in Phase 40 |
-| Push notifications to parents | Requires server infrastructure |
-| Push notifications to children | COPPA compliance risk |
-| Ads in free tier | COPPA violation risk, violates design principles |
-| Upselling UI visible to children | FTC complaint risk, violates no-punitive-mechanics principle |
-| Child-visible locked-feature indicators | Children should not see what they can't access |
-| Cross-child comparisons in dashboard | Harmful to sibling dynamics, violates non-punitive principles |
-| Session replays | High storage cost, moderate value, defer to future |
-| Grandfathering existing users | Not selected for this milestone |
+| Graphing calculator / Desmos integration | Desmos-level scope |
+| Free-text symbolic expression input | Parser + equivalence checking complexity |
+| Step-by-step solution reveal | Violates Socratic tutoring model |
+| Calculus | Beyond easy/moderate, requires CAS |
+| Trigonometry | Hard category — deferred to v1.3 |
+| Rational expressions | Requires symbolic simplification |
+| Matrices | New UI paradigm — hard category |
+| Complex/imaginary roots | Outside standard K-12 scope |
+| LaTeX rendering | Not needed — ExpressionAnswer renders as plain text |
+| Partial credit for multi-select MC | Complicates Elo/BKT — binary grading only |
+
+---
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROF-01 | Phase 39 | Complete |
-| PROF-02 | Phase 39 | Complete |
-| PROF-03 | Phase 39 | Complete |
-| PROF-04 | Phase 39 | Complete |
-| PROF-05 | Phase 38 | Complete |
-| PROF-06 | Phase 38 | Complete |
-| PROF-07 | Phase 38 | Complete |
-| PROF-08 | Phase 38 | Complete |
-| DASH-01 | Phase 41 | Pending |
-| DASH-02 | Phase 41 | Pending |
-| DASH-03 | Phase 40 | Pending |
-| DASH-04 | Phase 40 | Pending |
-| DASH-05 | Phase 41 | Pending |
-| CTRL-01 | Phase 42 | Pending |
-| CTRL-02 | Phase 42 | Pending |
-| CTRL-03 | Phase 42 | Pending |
-| CTRL-04 | Phase 42 | Pending |
-| SUB-01 | Phase 43 | Pending |
-| SUB-02 | Phase 43 | Pending |
-| SUB-03 | Phase 43 | Pending |
-| SUB-04 | Phase 43 | Pending |
-| SUB-05 | Phase 43 | Pending |
-| SUB-06 | Phase 44 | Pending |
-| PRIV-01 | Phase 40 | Complete |
-| PRIV-02 | Phase 40 | Complete |
-| AUTH-01 | Phase 40 | Complete |
-| AUTH-02 | Phase 40 | Complete |
-| SYNC-01 | Phase 40 | Complete |
-| SYNC-02 | Phase 40 | Complete |
-| CTRL-05 | Phase 40 | Complete |
+| FOUND-01 through FOUND-09 | Phase 80 | Pending |
+| VIDEO-01 through VIDEO-06 | Phase 81 | Pending |
+| LIN-01 through LIN-04 | Phase 82 | Pending |
+| COORD-01 through COORD-04 | Phase 83 | Pending |
+| SEQ-01 through SEQ-04 | Phase 84 | Pending |
+| STATS-01 through STATS-04 | Phase 85 | Pending |
+| SYS-01 through SYS-04 | Phase 86 | Pending |
+| QUAD-01 through QUAD-05 | Phase 87 | Pending |
+| POLY-01 through POLY-04 | Phase 88 | Pending |
+| EXP-01 through EXP-04 | Phase 89 | Pending |
+| LOG-01 through LOG-04 | Phase 90 | Pending |
+| INT-01 through INT-05 | Phase 91 | Pending |
 
 **Coverage:**
-- v0.8 requirements: 30 total
-- Mapped to phases: 30
-- Unmapped: 0
-- Complete: 17 | Pending: 13
+- v1.2 requirements: 64 total
+- Mapped to phases: 64
+- Unmapped: 0 ✓
 
 ---
-*Requirements defined: 2026-03-05*
-*Last updated: 2026-03-07 after Phase 40 completion*
+*Requirements defined: 2026-03-12*
+*Last updated: 2026-03-12 after initial definition*
