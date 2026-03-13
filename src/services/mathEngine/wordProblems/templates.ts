@@ -648,4 +648,35 @@ export const WORD_PROBLEM_TEMPLATES: readonly WordProblemTemplate[] = [
     question: '',
     minGrade: 9,
   },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // POLYNOMIALS — grades 9-10 (prefix mode)
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'wp_poly_area',
+    operations: ['polynomials'],
+    mode: 'prefix',
+    template:
+      'A rectangular garden has a length of (x + 3) meters and a width of (x + 2) meters. The area is given by the polynomial expression.',
+    question: '',
+    minGrade: 9,
+  },
+  {
+    id: 'wp_poly_floor',
+    operations: ['polynomials'],
+    mode: 'prefix',
+    template:
+      'An architect designs a room with dimensions that follow a polynomial pattern. To find the total floor area,',
+    question: '',
+    minGrade: 9,
+  },
+  {
+    id: 'wp_poly_volume',
+    operations: ['polynomials'],
+    mode: 'prefix',
+    template:
+      'A storage container has dimensions modeled by polynomial expressions. To find the total capacity,',
+    question: '',
+    minGrade: 10,
+  },
 ];
