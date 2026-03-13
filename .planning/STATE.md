@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: completed
-stopped_at: Completed 085-01-PLAN.md
-last_updated: "2026-03-13T21:19:23.284Z"
-last_activity: 2026-03-13 — Phase 84 Plan 03 complete (6 sequences_series word problem prefix templates, manual QA sign-off on Socratic hints)
+stopped_at: Completed 085-02-PLAN.md
+last_updated: "2026-03-13T21:25:48.174Z"
+last_activity: 2026-03-13 — Phase 85 Plan 02 complete (statistics_hs domain handler, 5 skills, 5 templates, 3 bug patterns, 4 generators, all tests GREEN)
 progress:
   total_phases: 19
   completed_phases: 6
   total_plans: 27
-  completed_plans: 24
+  completed_plans: 25
 ---
 
 # Project State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 
 ## Current Position
 
-Phase: 84 of 91 (Sequences & Series Domain)
-Plan: 3 of 3 in current phase
-Status: Phase complete — all 3 plans done, SEQ-01 through SEQ-04 satisfied
-Last activity: 2026-03-13 — Phase 84 Plan 03 complete (6 sequences_series word problem prefix templates, manual QA sign-off on Socratic hints)
+Phase: 85 of 91 (Statistics Extensions Domain)
+Plan: 2 of 2 in current phase
+Status: Phase complete — both plans done, STATS-01 and STATS-02 satisfied
+Last activity: 2026-03-13 — Phase 85 Plan 02 complete (statistics_hs domain handler, 5 skills, 5 templates, 3 bug patterns, 4 generators)
 
 ```
 v1.2: [#...........] 8% (1/12 phases)
@@ -90,6 +90,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 085-01]: statistics_hs z-score bounds test uses [-2, 2] integer range — generator constrained to small integer z-scores for grade 9
 - [Phase 085-01]: statistics_hs gradeMap entry is 9 (Common Core HSS.ID.A standards start in grade 9)
 - [Phase 085-01]: STATISTICS_HS_BUGS IDs: stats_zscore_sign_flip, stats_zscore_forgot_mean, stats_normal_wrong_band — follow existing bug ID naming convention
+- [Phase 085]: 'statistics_hs' metadata fields use empty Partial<ProblemMetadata> — ProblemMetadata is a fixed interface, domain-specific data does not persist beyond generation
 
 ### Pending Todos
 
@@ -109,7 +110,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T21:19:17.886Z
-Stopped at: Completed 085-01-PLAN.md
+Last session: 2026-03-13T21:25:43.791Z
+Stopped at: Completed 085-02-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80
