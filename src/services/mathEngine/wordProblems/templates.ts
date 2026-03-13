@@ -588,4 +588,33 @@ export const WORD_PROBLEM_TEMPLATES: readonly WordProblemTemplate[] = [
     question: '',
     minGrade: 10,
   },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // SYSTEMS OF EQUATIONS — grades 9-10 (prefix mode)
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'wp_sys_tickets',
+    operations: ['systems_equations'],
+    mode: 'prefix',
+    template: '{name} is selling two types of tickets for a school event.',
+    question: '',
+    minGrade: 9,
+  },
+  {
+    id: 'wp_sys_prices',
+    operations: ['systems_equations'],
+    mode: 'prefix',
+    template: '{name} is comparing the prices of two different items at {place}.',
+    question: '',
+    minGrade: 9,
+  },
+  {
+    id: 'wp_sys_ages',
+    operations: ['systems_equations'],
+    mode: 'prefix',
+    template:
+      "{name} is solving a puzzle about the combined and difference of two people's ages.",
+    question: '',
+    minGrade: 10,
+  },
 ];
