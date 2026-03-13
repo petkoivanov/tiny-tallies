@@ -239,7 +239,7 @@ describe('sessionOrchestrator', () => {
           expect(item.presentation.options.length).toBeGreaterThanOrEqual(4);
           const values = item.presentation.options.map((o: { value: number }) => o.value);
           expect(values).toContain(answerNumericValue(item.problem.correctAnswer));
-        } else {
+        } else if (item.presentation.format === 'free_text') {
           expect(item.presentation.maxDigits).toBeGreaterThanOrEqual(2);
         }
       }

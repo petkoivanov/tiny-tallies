@@ -9,6 +9,9 @@ export const WORD_LIMITS: Record<string, number> = {
   '6-7': 8,
   '7-8': 10,
   '8-9': 12,
+  '10-11': 15,
+  '12-13': 20,
+  '14-18': 25,
 };
 
 /**

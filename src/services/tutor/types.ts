@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export type TutorMode = 'hint' | 'teach' | 'boost';
-export type AgeBracket = '6-7' | '7-8' | '8-9';
+export type AgeBracket = '6-7' | '7-8' | '8-9' | '10-11' | '12-13' | '14-18';
 
 export interface TutorMessage {
   id: string;

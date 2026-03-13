@@ -1,7 +1,7 @@
 import type { Problem } from '../types';
 
 /** Supported answer presentation formats */
-export type AnswerFormat = 'multiple_choice' | 'free_text';
+export type AnswerFormat = 'multiple_choice' | 'free_text' | 'multi_select';
 
 /** A single option in a multiple choice presentation */
 export interface ChoiceOption {
@@ -25,7 +25,17 @@ export interface FreeTextPresentation {
   readonly format: 'free_text';
   readonly maxDigits: number;
   readonly allowDecimal: boolean;
+  readonly allowNegative?: boolean;
+}
+
+/** Multi-select (checkbox) presentation for problems with multiple correct values */
+export interface MultiSelectPresentation {
+  readonly problem: Problem;
+  readonly format: 'multi_select';
+  readonly options: readonly ChoiceOption[];
+  /** Indices into options[] that are correct — used for binary grading */
+  readonly correctIndices: readonly number[];
 }
 
 /** Union of all answer format presentations */
-export type FormattedProblem = MultipleChoicePresentation | FreeTextPresentation;
+export type FormattedProblem = MultipleChoicePresentation | FreeTextPresentation | MultiSelectPresentation;

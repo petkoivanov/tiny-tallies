@@ -114,6 +114,9 @@ export const CONTENT_WORD_LIMITS: Record<AgeBracket, number> = {
   '6-7': 8,
   '7-8': 10,
   '8-9': 12,
+  '10-11': 15,
+  '12-13': 20,
+  '14-18': 25,
 };
 
 /** Maximum number of sentences in a response. */
@@ -124,6 +127,9 @@ export const MAX_WORD_LENGTH: Record<AgeBracket, number> = {
   '6-7': 7,
   '7-8': 8,
   '8-9': 9,
+  '10-11': 11,
+  '12-13': 13,
+  '14-18': 16,
 };
 
 /**
