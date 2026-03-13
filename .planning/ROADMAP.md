@@ -260,7 +260,11 @@ Plans:
   2. Wrong answers reflect algebra-specific bug patterns (wrong-operation, sign-flip, forgot-to-divide) as distractors
   3. Word problem variants (age, distance, money contexts) generate correctly and pass the word problem system's reading level calibration
   4. AI tutor hints for linear equations use Socratic balance-model framing and never state the solution step directly
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 082-01-PLAN.md — Wave 0 test stubs (linearEquations, registry counts, wordProblems)
+- [ ] 082-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring)
+- [ ] 082-03-PLAN.md — Word problem templates + manual AI tutor QA checkpoint
 
 ### Phase 83: Coordinate Geometry Domain
 **Goal**: Students in grades 8-10 can practice slope, distance, midpoint, and equation-of-a-line problems with the full adaptive engine
@@ -427,7 +431,7 @@ Plans:
 | 58. Integration Testing | v0.9 | 0/? | Not started | - |
 | 80. Foundation | v1.2 | 0/? | Not started | - |
 | 81. YouTube Video Tutor | v1.2 | 0/4 | Not started | - |
-| 82. Linear Equations Domain | v1.2 | 0/? | Not started | - |
+| 82. Linear Equations Domain | v1.2 | 0/3 | Not started | - |
 | 83. Coordinate Geometry Domain | v1.2 | 0/? | Not started | - |
 | 84. Sequences & Series Domain | v1.2 | 0/? | Not started | - |
 | 85. Statistics Extensions Domain | v1.2 | 0/? | Not started | - |
