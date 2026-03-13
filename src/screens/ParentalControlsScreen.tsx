@@ -22,6 +22,7 @@ import {
   BarChart3,
   ChevronRight,
   Volume2,
+  Youtube,
 } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
@@ -57,6 +58,8 @@ export default function ParentalControlsScreen() {
   const authProvider = useAppStore((s) => s.authProvider);
   const tutorConsentGranted = useAppStore((s) => s.tutorConsentGranted);
   const setTutorConsentGranted = useAppStore((s) => s.setTutorConsentGranted);
+  const youtubeConsentGranted = useAppStore((s) => s.youtubeConsentGranted);
+  const setYoutubeConsentGranted = useAppStore((s) => s.setYoutubeConsentGranted);
   const soundEnabled = useAppStore((s) => s.soundEnabled);
   const setSoundEnabled = useAppStore((s) => s.setSoundEnabled);
   const setAuth = useAppStore((s) => s.setAuth);
@@ -438,6 +441,28 @@ export default function ParentalControlsScreen() {
                 {tutorConsentGranted
                   ? 'Your child receives gentle math hints from the AI helper.'
                   : 'AI tutoring is turned off. Turn on to let your child receive math guidance.'}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Youtube size={20} color={colors.primary} />
+              <Text style={styles.sectionTitle}>YouTube Videos</Text>
+            </View>
+            <View style={styles.card}>
+              <View style={styles.row}>
+                <Text style={styles.rowLabel}>YouTube videos enabled</Text>
+                <Switch
+                  value={youtubeConsentGranted}
+                  onValueChange={setYoutubeConsentGranted}
+                  testID="youtube-consent-toggle"
+                />
+              </View>
+              <Text style={styles.rowSublabel}>
+                {youtubeConsentGranted
+                  ? 'Your child can watch curated math videos when they need extra help.'
+                  : 'YouTube videos are turned off. Turn on to allow instructional video access after hints are exhausted.'}
               </Text>
             </View>
           </View>
