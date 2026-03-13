@@ -262,7 +262,7 @@ Plans:
   4. AI tutor hints for linear equations use Socratic balance-model framing and never state the solution step directly
 **Plans**: 3 plans
 Plans:
-- [ ] 082-01-PLAN.md — Wave 0 test stubs (linearEquations, registry counts, wordProblems)
+- [x] 082-01-PLAN.md — Wave 0 test stubs (linearEquations, registry counts, wordProblems)
 - [ ] 082-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring)
 - [ ] 082-03-PLAN.md — Word problem templates + manual AI tutor QA checkpoint
 
