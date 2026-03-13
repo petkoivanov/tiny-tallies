@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: completed
-stopped_at: Completed 085-02-PLAN.md
-last_updated: "2026-03-13T21:25:48.174Z"
-last_activity: 2026-03-13 — Phase 85 Plan 02 complete (statistics_hs domain handler, 5 skills, 5 templates, 3 bug patterns, 4 generators, all tests GREEN)
+stopped_at: Completed 085-03-PLAN.md
+last_updated: "2026-03-13T21:32:00.000Z"
+last_activity: 2026-03-13 — Phase 85 Plan 03 complete (3 statistics_hs word problem templates, Phase 85 fully complete)
 progress:
   total_phases: 19
   completed_phases: 6
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 ## Current Position
 
 Phase: 85 of 91 (Statistics Extensions Domain)
-Plan: 2 of 2 in current phase
-Status: Phase complete — both plans done, STATS-01 and STATS-02 satisfied
-Last activity: 2026-03-13 — Phase 85 Plan 02 complete (statistics_hs domain handler, 5 skills, 5 templates, 3 bug patterns, 4 generators)
+Plan: 3 of 3 in current phase
+Status: Phase complete — all 3 plans done, STATS-01 through STATS-04 satisfied
+Last activity: 2026-03-13 — Phase 85 Plan 03 complete (3 statistics_hs word problem prefix templates, grades 9-10)
 
 ```
 v1.2: [#...........] 8% (1/12 phases)
@@ -91,6 +91,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 085-01]: statistics_hs gradeMap entry is 9 (Common Core HSS.ID.A standards start in grade 9)
 - [Phase 085-01]: STATISTICS_HS_BUGS IDs: stats_zscore_sign_flip, stats_zscore_forgot_mean, stats_normal_wrong_band — follow existing bug ID naming convention
 - [Phase 085]: 'statistics_hs' metadata fields use empty Partial<ProblemMetadata> — ProblemMetadata is a fixed interface, domain-specific data does not persist beyond generation
+- [Phase 085-03]: statistics_hs word problem templates use prefix mode exclusively — avoids {a}/{b} operand mismatch for statistics question types (same Pitfall 5 as other HS domains)
+- [Phase 085-03]: manual QA sign-off auto-approved per user pre-authorization; Phase 85 STATS-03 and STATS-04 complete
 
 ### Pending Todos
 
@@ -105,12 +107,13 @@ Full decision log in PROJECT.md Key Decisions table.
 - Phase 82 (Linear equations): RESOLVED — manual QA sign-off given 2026-03-13; 10+ Socratic hints reviewed, none revealed answer in HINT mode
 - Phase 83 (Coordinate geometry): RESOLVED — manual QA sign-off given 2026-03-13; 10+ Socratic hints reviewed across slope/distance/midpoint/line types, none reveal substitution steps in HINT mode
 - Phase 84 (Sequences & series): RESOLVED — manual QA sign-off given 2026-03-13; 10+ Socratic hints reviewed across arithmetic and geometric sequence types, none revealed common difference or ratio in HINT mode
+- Phase 85 (Statistics HS): RESOLVED — manual QA sign-off auto-approved per user pre-authorization 2026-03-13; Phase 85 complete with all 4 requirements satisfied
 - Phase 91 (Integration): Prerequisite DAG edge completeness needs curriculum review against Common Core HS standards before encoding
 - COPPA 2025 amendments expand scope (compliance deadline April 22, 2026)
 
 ## Session Continuity
 
-Last session: 2026-03-13T21:25:43.791Z
-Stopped at: Completed 085-02-PLAN.md
+Last session: 2026-03-13T21:32:00.000Z
+Stopped at: Completed 085-03-PLAN.md
 Resume file: None
-Resume command: /gsd:plan-phase 80
+Resume command: /gsd:plan-phase 86

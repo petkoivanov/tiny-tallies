@@ -111,7 +111,7 @@
 - [ ] **Phase 82: Linear Equations Domain** - linear_equations domain handler, templates, bug patterns, word problems, tutor guidance (G8-9)
 - [x] **Phase 83: Coordinate Geometry Domain** - coordinate_geometry domain handler, templates, bug patterns, word problems, tutor guidance (G8-10) (completed 2026-03-13)
 - [x] **Phase 84: Sequences & Series Domain** - sequences_series domain handler, templates, bug patterns, word problems, tutor guidance (G9-11) (completed 2026-03-13)
-- [ ] **Phase 85: Statistics Extensions Domain** - statistics_hs domain handler, templates, bug patterns, word problems, tutor guidance (G9-11)
+- [x] **Phase 85: Statistics Extensions Domain** - statistics_hs domain handler, templates, bug patterns, word problems, tutor guidance (G9-11)
 - [ ] **Phase 86: Systems of Equations Domain** - systems_equations domain handler, templates, bug patterns, word problems, tutor guidance (G9-10)
 - [ ] **Phase 87: Quadratic Equations Domain** - quadratic_equations domain handler with MultiSelectAnswer, templates, bug patterns, word problems, tutor guidance (G9-10)
 - [ ] **Phase 88: Polynomial Operations Domain** - polynomials domain handler, templates, bug patterns, word problems, tutor guidance (G9-10)
@@ -307,9 +307,9 @@ Plans:
   4. AI tutor hints distinguish conceptual questions (normal distribution properties) from computational ones (z-score calculation) in their framing
 **Plans**: 3 plans
 Plans:
-- [ ] 085-01-PLAN.md — Wave 0 test stubs (statisticsHs, registry counts 21→22, skill counts 170→175, wordProblems)
-- [ ] 085-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap)
-- [ ] 085-03-PLAN.md — Word problem templates + manual AI tutor QA checkpoint
+- [x] 085-01-PLAN.md — Wave 0 test stubs (statisticsHs, registry counts 21→22, skill counts 170→175, wordProblems)
+- [x] 085-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap)
+- [x] 085-03-PLAN.md — Word problem templates + manual AI tutor QA checkpoint
 
 ### Phase 86: Systems of Equations Domain
 **Goal**: Students in grades 9-10 can practice solving 2×2 linear systems by substitution and elimination with integer solutions
