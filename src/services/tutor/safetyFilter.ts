@@ -96,6 +96,24 @@ export function checkAnswerLeak(
 }
 
 /**
+ * Checks if the LLM response leaks ANY value from a multi-root answer.
+ * Loops over each value and calls checkAnswerLeak.
+ * Returns { safe: false, leaked } on first leak found, or { safe: true }.
+ */
+export function checkMultiAnswerLeak(
+  response: string,
+  values: readonly number[],
+): { safe: boolean; leaked?: number } {
+  for (const value of values) {
+    const result = checkAnswerLeak(response, value);
+    if (!result.safe) {
+      return { safe: false, leaked: value };
+    }
+  }
+  return { safe: true };
+}
+
+/**
  * Validates that LLM output respects sentence length and vocabulary
  * constraints per age bracket.
  *

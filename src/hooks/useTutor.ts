@@ -13,6 +13,7 @@ import {
   runSafetyPipeline,
   parseHintLadder,
   validateHintLadder,
+  checkMultiAnswerLeak,
 } from '@/services/tutor/safetyFilter';
 import { getCannedFallback } from '@/services/tutor/safetyConstants';
 import { computeEscalation } from '@/services/tutor/escalationEngine';
@@ -26,7 +27,8 @@ import type {
 import { getMisconceptionsBySkill } from '@/store/slices/misconceptionSlice';
 import type { SessionProblem } from '@/services/session/sessionTypes';
 import type { CpaStage, ManipulativeType } from '@/services/cpa/cpaTypes';
-import { answerNumericValue } from '@/services/mathEngine/types';
+import { answerNumericValue, answerDisplayValue } from '@/services/mathEngine/types';
+import type { MultiSelectAnswer } from '@/services/mathEngine/types';
 
 /**
  * Derives the age bracket from child age for prompt templates.
@@ -283,7 +285,9 @@ export function useTutor(
       case 'boost':
         userPrompt = buildBoostPrompt({
           ...promptParams,
-          correctAnswer: answerNumericValue(currentProblem.problem.correctAnswer),
+          correctAnswer: currentProblem.problem.correctAnswer.type === 'multi_select'
+            ? answerDisplayValue(currentProblem.problem.correctAnswer)
+            : answerNumericValue(currentProblem.problem.correctAnswer),
         });
         break;
       case 'hint':
@@ -306,6 +310,10 @@ export function useTutor(
       // HINT MODE: generate ladder with one retry on parse failure
       if (currentMode === 'hint') {
         const correctAnswer = answerNumericValue(currentProblem.problem.correctAnswer);
+        const isMultiSelect = currentProblem.problem.correctAnswer.type === 'multi_select';
+        const multiValues = isMultiSelect
+          ? (currentProblem.problem.correctAnswer as MultiSelectAnswer).values
+          : null;
 
         for (let attempt = 0; attempt < 2; attempt++) {
           if (controller.signal.aborted) return;
@@ -330,7 +338,16 @@ export function useTutor(
 
           const parsed = parseHintLadder(responseText);
           if (parsed && parsed.length >= 2) {
-            const safeHints = validateHintLadder(parsed, correctAnswer, ageBracket);
+            // For multi-select answers, validate against all roots
+            let safeHints: string[];
+            if (multiValues) {
+              safeHints = parsed;
+              for (const v of multiValues) {
+                safeHints = validateHintLadder(safeHints, v, ageBracket);
+              }
+            } else {
+              safeHints = validateHintLadder(parsed, correctAnswer, ageBracket);
+            }
             if (safeHints.length >= 1) {
               setHintLadder({ hints: safeHints, nextIndex: 1 });
               incrementCallCount();
@@ -392,12 +409,26 @@ export function useTutor(
         return;
       }
 
-      const safetyResult = runSafetyPipeline(
-        responseText,
-        answerNumericValue(currentProblem.problem.correctAnswer),
-        ageBracket,
-        currentMode,
-      );
+      // For multi-select in non-boost modes, check all roots for leaks
+      const isMultiSelectTeach = currentProblem.problem.correctAnswer.type === 'multi_select' && currentMode !== 'boost';
+      let safetyResult: ReturnType<typeof runSafetyPipeline>;
+      if (isMultiSelectTeach) {
+        const multiVals = (currentProblem.problem.correctAnswer as MultiSelectAnswer).values;
+        const multiLeak = checkMultiAnswerLeak(responseText, multiVals);
+        if (!multiLeak.safe) {
+          safetyResult = { passed: false, fallbackCategory: 'answer_leaked', reason: 'answer_digit_leak' };
+        } else {
+          // Run content validation only (answer leak already checked above)
+          safetyResult = runSafetyPipeline(responseText, 0, ageBracket, 'boost');
+        }
+      } else {
+        safetyResult = runSafetyPipeline(
+          responseText,
+          answerNumericValue(currentProblem.problem.correctAnswer),
+          ageBracket,
+          currentMode,
+        );
+      }
 
       if (!safetyResult.passed) {
         if (!controller.signal.aborted) {

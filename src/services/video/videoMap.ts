@@ -38,7 +38,7 @@ export const videoMap: Partial<Record<MathDomain, string>> = {
   statistics_hs: 'h8EYEJ32oQ8',  // Khan Academy: Statistics HS (Phase 85)
   // Future domains (phases 86-90) — video IDs reserved for when those MathDomains land:
   systems_equations: 'nok99JOhcjo',  // Khan Academy: Systems of equations (Phase 86)
-  // quadratic_equations:   'IWigvJcCAJ0'  (Phase 87)
+  quadratic_equations: 'IWigvJcCAJ0',  // Khan Academy: Quadratic equations (Phase 87)
   // polynomials:           'Vm7H0VTlIco'  (Phase 88)
   // exponential_functions: '6WMZ7J0wwMI'  (Phase 89)
   // logarithms:            'Z5myJ8dg_rM'  (Phase 90)

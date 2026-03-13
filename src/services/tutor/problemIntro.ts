@@ -24,6 +24,7 @@ const INTROS: Record<MathDomain, string> = {
   sequences_series: "This is a sequences problem! Look at the pattern carefully and think about what rule connects the terms.",
   statistics_hs: "This is a statistics problem! Read the data carefully and think about what the numbers tell you.",
   systems_equations: "This is a systems of equations problem! Think about which method \u2014 substitution or elimination \u2014 makes this system easier to solve.",
+  quadratic_equations: "This is a quadratic equations problem! Find all the roots by factoring, using the quadratic formula, or completing the square.",
 };
 
 const DEFAULT_INTRO = "Let's think through this problem together!";

@@ -123,6 +123,11 @@ export const skillMapColors = {
     light: '#6366f1',
     lighter: '#a5b4fc',
   },
+  quadratic_equations: {
+    primary: '#9d174d',
+    light: '#ec4899',
+    lighter: '#f9a8d4',
+  },
   state: {
     lockedFill: '#374151',
     lockedRing: '#6b7280',

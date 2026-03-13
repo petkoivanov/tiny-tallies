@@ -34,6 +34,8 @@ import type { ManipulativeType } from '@/services/cpa/cpaTypes';
 import type { Problem } from '@/services/mathEngine/types';
 import type { FormattedProblem } from '@/services/mathEngine/answerFormats/types';
 import { parseIntegerInput, parseDecimalInput } from '@/services/mathEngine/answerFormats';
+import { MultiSelectMC } from './MultiSelectMC';
+import { answerNumericValue } from '@/services/mathEngine/types';
 
 /** Session-supported manipulative types (ten_frame excluded — sandbox only) */
 type SessionManipulative = Exclude<ManipulativeType, 'ten_frame'>;
@@ -414,8 +416,29 @@ export function CpaSessionContent({
     }
   };
 
+  // Multi-select: wrap boolean callback to numeric value for session system
+  const handleMultiSelectAnswer = (correct: boolean) => {
+    // When correct, pass the Elo-proxy value (values[0]) so session scoring matches.
+    // When incorrect, pass NaN which will never equal the correct answer.
+    const value = correct
+      ? answerNumericValue(problem.correctAnswer)
+      : NaN;
+    onAnswer(value);
+  };
+
   // Render answer input: NumberPad for free-text, MC buttons otherwise
   const renderAnswers = () => {
+    // Multi-select format: render MultiSelectMC component
+    if (presentation.format === 'multi_select') {
+      return (
+        <MultiSelectMC
+          options={presentation.options}
+          correctIndices={presentation.correctIndices}
+          onAnswer={handleMultiSelectAnswer}
+        />
+      );
+    }
+
     if (isFreeText) {
       return (
         <NumberPad

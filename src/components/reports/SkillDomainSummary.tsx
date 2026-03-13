@@ -38,6 +38,7 @@ const DOMAIN_LABELS: Record<MathDomain, string> = {
   sequences_series: 'Sequences & Series',
   statistics_hs: 'Statistics HS',
   systems_equations: 'Systems of Equations',
+  quadratic_equations: 'Quadratic Equations',
 };
 
 const DOMAIN_ORDER: MathDomain[] = [
@@ -64,6 +65,7 @@ const DOMAIN_ORDER: MathDomain[] = [
   'sequences_series',
   'statistics_hs',
   'systems_equations',
+  'quadratic_equations',
 ];
 
 interface DomainData {

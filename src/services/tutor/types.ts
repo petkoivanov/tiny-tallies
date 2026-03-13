@@ -53,7 +53,7 @@ export interface HintLadder {
  * that HINT/TEACH never see it.
  */
 export interface BoostPromptParams extends PromptParams {
-  correctAnswer: number;
+  correctAnswer: number | string;
 }
 
 /**
