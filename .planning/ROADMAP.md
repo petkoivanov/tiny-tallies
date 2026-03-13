@@ -305,7 +305,11 @@ Plans:
   2. Templates extend the existing data_analysis infrastructure and do not duplicate any existing K-8 statistics skills
   3. Word problem variants (survey and test-score contexts) generate correctly
   4. AI tutor hints distinguish conceptual questions (normal distribution properties) from computational ones (z-score calculation) in their framing
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 085-01-PLAN.md — Wave 0 test stubs (statisticsHs, registry counts 21→22, skill counts 170→175, wordProblems)
+- [ ] 085-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap)
+- [ ] 085-03-PLAN.md — Word problem templates + manual AI tutor QA checkpoint
 
 ### Phase 86: Systems of Equations Domain
 **Goal**: Students in grades 9-10 can practice solving 2×2 linear systems by substitution and elimination with integer solutions
@@ -442,7 +446,7 @@ Plans:
 | 82. Linear Equations Domain | v1.2 | 0/3 | Not started | - |
 | 83. Coordinate Geometry Domain | v1.2 | 1/3 | In progress | - |
 | 84. Sequences & Series Domain | v1.2 | 3/3 | Complete | 2026-03-13 |
-| 85. Statistics Extensions Domain | v1.2 | 0/? | Not started | - |
+| 85. Statistics Extensions Domain | v1.2 | 0/3 | Not started | - |
 | 86. Systems of Equations Domain | v1.2 | 0/? | Not started | - |
 | 87. Quadratic Equations Domain | v1.2 | 0/? | Not started | - |
 | 88. Polynomial Operations Domain | v1.2 | 0/? | Not started | - |
