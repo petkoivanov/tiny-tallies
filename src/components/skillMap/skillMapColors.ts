@@ -128,6 +128,11 @@ export const skillMapColors = {
     light: '#ec4899',
     lighter: '#f9a8d4',
   },
+  polynomials: {
+    primary: '#0e7490',
+    light: '#22d3ee',
+    lighter: '#a5f3fc',
+  },
   state: {
     lockedFill: '#374151',
     lockedRing: '#6b7280',

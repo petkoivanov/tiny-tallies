@@ -23,6 +23,7 @@ import { SEQUENCES_SERIES_BUGS } from './sequencesSeriesBugs';
 import { STATISTICS_HS_BUGS } from './statisticsHsBugs';
 import { SYSTEMS_EQUATIONS_BUGS } from './systemsEquationsBugs';
 import { QUADRATIC_EQUATIONS_BUGS } from './quadraticEquationsBugs';
+import { POLYNOMIALS_BUGS } from './polynomialsBugs';
 import { isValidDistractor, shuffleArray } from './validation';
 
 /** IDs of off-by-one patterns excluded from Phase 1 bug library lookup */
@@ -58,6 +59,7 @@ const BUGS_BY_OPERATION: Record<MathDomain, readonly BugPattern[]> = {
   statistics_hs: STATISTICS_HS_BUGS,
   systems_equations: SYSTEMS_EQUATIONS_BUGS,
   quadratic_equations: QUADRATIC_EQUATIONS_BUGS,
+  polynomials: POLYNOMIALS_BUGS,
 };
 
 /**

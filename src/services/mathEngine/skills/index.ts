@@ -26,6 +26,7 @@ import { SEQUENCES_SERIES_SKILLS } from './sequencesSeries';
 import { STATISTICS_HS_SKILLS } from './statisticsHs';
 import { SYSTEMS_EQUATIONS_SKILLS } from './systemsEquations';
 import { QUADRATIC_EQUATIONS_SKILLS } from './quadraticEquations';
+import { POLYNOMIALS_SKILLS } from './polynomials';
 
 export const SKILLS: readonly SkillDefinition[] = [
   ...ADDITION_SKILLS,
@@ -54,6 +55,7 @@ export const SKILLS: readonly SkillDefinition[] = [
   ...STATISTICS_HS_SKILLS,
   ...SYSTEMS_EQUATIONS_SKILLS,
   ...QUADRATIC_EQUATIONS_SKILLS,
+  ...POLYNOMIALS_SKILLS,
 ];
 
 export function getSkillById(id: string): SkillDefinition | undefined {
@@ -97,4 +99,5 @@ export {
   STATISTICS_HS_SKILLS,
   SYSTEMS_EQUATIONS_SKILLS,
   QUADRATIC_EQUATIONS_SKILLS,
+  POLYNOMIALS_SKILLS,
 };

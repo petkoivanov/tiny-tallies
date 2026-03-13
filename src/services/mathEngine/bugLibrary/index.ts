@@ -27,6 +27,7 @@ export { SEQUENCES_SERIES_BUGS } from './sequencesSeriesBugs';
 export { STATISTICS_HS_BUGS } from './statisticsHsBugs';
 export { SYSTEMS_EQUATIONS_BUGS } from './systemsEquationsBugs';
 export { QUADRATIC_EQUATIONS_BUGS } from './quadraticEquationsBugs';
+export { POLYNOMIALS_BUGS } from './polynomialsBugs';
 
 // Validation utilities
 export { isValidDistractor, shuffleArray } from './validation';
