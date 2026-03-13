@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
-status: completed
-stopped_at: Completed 086-01-PLAN.md
-last_updated: "2026-03-13T22:09:39.000Z"
-last_activity: 2026-03-13 — Phase 86 Plan 01 complete (RED test stubs for systems_equations domain)
+status: executing
+stopped_at: Completed 086-02-PLAN.md
+last_updated: "2026-03-13T22:17:45.970Z"
+last_activity: "2026-03-13 — Phase 86 Plan 02 complete (systems_equations domain: 6 files, 11 wiring touchpoints, 20 tests GREEN)"
 progress:
   total_phases: 19
   completed_phases: 7
-  total_plans: 27
-  completed_plans: 27
+  total_plans: 30
+  completed_plans: 28
 ---
 
 # Project State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 ## Current Position
 
 Phase: 86 of 91 (Systems of Equations Domain)
-Plan: 1 of 3 in current phase
-Status: In progress — Plan 01 complete (RED test stubs)
-Last activity: 2026-03-13 — Phase 86 Plan 01 complete (RED test stubs for systems_equations: 1 new test file + 3 count updates)
+Plan: 2 of 3 in current phase
+Status: In progress — Plan 02 complete (domain implementation + wiring)
+Last activity: 2026-03-13 — Phase 86 Plan 02 complete (systems_equations domain: 6 files, 11 wiring touchpoints, 20 tests GREEN)
 
 ```
 v1.2: [#...........] 8% (1/12 phases)
@@ -94,6 +94,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 085-03]: statistics_hs word problem templates use prefix mode exclusively — avoids {a}/{b} operand mismatch for statistics question types (same Pitfall 5 as other HS domains)
 - [Phase 085-03]: manual QA sign-off auto-approved per user pre-authorization; Phase 85 STATS-03 and STATS-04 complete
 - [Phase 086-01]: systems_equations gradeMap entry is 9 (Common Core HSA.REI standards start grade 9); SYSTEMS_EQUATIONS_BUGS import causes RED at module level
+- [Phase 086]: SkillDomainSummary.tsx and distractorGenerator.ts also need systems_equations entries (Record<MathDomain> exhaustiveness)
 
 ### Pending Todos
 
@@ -114,7 +115,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T22:09:39.000Z
-Stopped at: Completed 086-01-PLAN.md
+Last session: 2026-03-13T22:17:45.968Z
+Stopped at: Completed 086-02-PLAN.md
 Resume file: None
 Resume command: /gsd:execute-phase 086
