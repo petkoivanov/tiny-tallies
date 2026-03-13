@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: completed
-stopped_at: Completed 084-02-PLAN.md
-last_updated: "2026-03-13T20:40:47.879Z"
-last_activity: 2026-03-13 — Phase 83 Plan 03 complete (6 coordinate_geometry word problem prefix templates, manual QA sign-off on Socratic hints)
+stopped_at: Completed 084-03-PLAN.md
+last_updated: "2026-03-13T21:00:00.000Z"
+last_activity: 2026-03-13 — Phase 84 Plan 03 complete (6 sequences_series word problem prefix templates, manual QA sign-off on Socratic hints)
 progress:
   total_phases: 19
   completed_phases: 5
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 
 ## Current Position
 
-Phase: 83 of 91 (Coordinate Geometry Domain)
+Phase: 84 of 91 (Sequences & Series Domain)
 Plan: 3 of 3 in current phase
-Status: Phase complete — all 3 plans done, COORD-01 through COORD-04 satisfied
-Last activity: 2026-03-13 — Phase 83 Plan 03 complete (6 coordinate_geometry word problem prefix templates, manual QA sign-off on Socratic hints)
+Status: Phase complete — all 3 plans done, SEQ-01 through SEQ-04 satisfied
+Last activity: 2026-03-13 — Phase 84 Plan 03 complete (6 sequences_series word problem prefix templates, manual QA sign-off on Socratic hints)
 
 ```
 v1.2: [#...........] 8% (1/12 phases)
@@ -85,6 +85,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 084-01]: arithmetic_partial_sum deferred to Phase 85+ — sequences_series implements 5 skills not 6
 - [Phase 084-02]: Geometric generators cap r at intRange(2,3) and n at intRange(3,6) — max answer 5*3^5=1215 safely under 2000
 - [Phase 084-02]: seq_word_problem reuses generateArithmeticNthTerm — consistent with coord_word_problem reusing generateDistance
+- [Phase 084-03]: sequences_series word problem templates use prefix mode exclusively — arithmetic contexts (savings/growth/stacking) at minGrade 9, geometric (population/tiles/interest) at minGrade 10
+- [Phase 084-03]: manual QA sign-off given 2026-03-13; 10+ Socratic hints reviewed across arithmetic and geometric sequence types, none revealed common difference or ratio in HINT mode
 
 ### Pending Todos
 
@@ -98,12 +100,13 @@ Full decision log in PROJECT.md Key Decisions table.
 - Phase 81 (YouTube): react-native-youtube-iframe New Architecture compatibility not explicitly documented — run proof-of-concept on real device early in Phase 81
 - Phase 82 (Linear equations): RESOLVED — manual QA sign-off given 2026-03-13; 10+ Socratic hints reviewed, none revealed answer in HINT mode
 - Phase 83 (Coordinate geometry): RESOLVED — manual QA sign-off given 2026-03-13; 10+ Socratic hints reviewed across slope/distance/midpoint/line types, none reveal substitution steps in HINT mode
+- Phase 84 (Sequences & series): RESOLVED — manual QA sign-off given 2026-03-13; 10+ Socratic hints reviewed across arithmetic and geometric sequence types, none revealed common difference or ratio in HINT mode
 - Phase 91 (Integration): Prerequisite DAG edge completeness needs curriculum review against Common Core HS standards before encoding
 - COPPA 2025 amendments expand scope (compliance deadline April 22, 2026)
 
 ## Session Continuity
 
-Last session: 2026-03-13T20:40:47.876Z
-Stopped at: Completed 084-02-PLAN.md
+Last session: 2026-03-13T21:00:00.000Z
+Stopped at: Completed 084-03-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80

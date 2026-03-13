@@ -110,7 +110,7 @@
 - [ ] **Phase 81: YouTube Video Tutor** - react-native-youtube-iframe, COPPA consent gate, inline player, curated videoMap, vote system
 - [ ] **Phase 82: Linear Equations Domain** - linear_equations domain handler, templates, bug patterns, word problems, tutor guidance (G8-9)
 - [x] **Phase 83: Coordinate Geometry Domain** - coordinate_geometry domain handler, templates, bug patterns, word problems, tutor guidance (G8-10) (completed 2026-03-13)
-- [ ] **Phase 84: Sequences & Series Domain** - sequences_series domain handler, templates, bug patterns, word problems, tutor guidance (G9-11)
+- [x] **Phase 84: Sequences & Series Domain** - sequences_series domain handler, templates, bug patterns, word problems, tutor guidance (G9-11) (completed 2026-03-13)
 - [ ] **Phase 85: Statistics Extensions Domain** - statistics_hs domain handler, templates, bug patterns, word problems, tutor guidance (G9-11)
 - [ ] **Phase 86: Systems of Equations Domain** - systems_equations domain handler, templates, bug patterns, word problems, tutor guidance (G9-10)
 - [ ] **Phase 87: Quadratic Equations Domain** - quadratic_equations domain handler with MultiSelectAnswer, templates, bug patterns, word problems, tutor guidance (G9-10)
@@ -292,9 +292,9 @@ Plans:
   4. AI tutor hints for sequences use Socratic questioning about the common difference or ratio without revealing the formula
 **Plans**: 3 plans
 Plans:
-- [ ] 084-01-PLAN.md — Wave 0 test stubs (sequencesSeries, registry counts, wordProblems)
-- [ ] 084-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap)
-- [ ] 084-03-PLAN.md — Word problem templates + manual AI tutor QA checkpoint
+- [x] 084-01-PLAN.md — Wave 0 test stubs (sequencesSeries, registry counts, wordProblems)
+- [x] 084-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap)
+- [x] 084-03-PLAN.md — Word problem templates + manual AI tutor QA checkpoint
 
 ### Phase 85: Statistics Extensions Domain
 **Goal**: Students in grades 9-11 can practice standard deviation concepts, normal distribution properties, z-scores, and percentiles
@@ -441,7 +441,7 @@ Plans:
 | 81. YouTube Video Tutor | v1.2 | 0/4 | Not started | - |
 | 82. Linear Equations Domain | v1.2 | 0/3 | Not started | - |
 | 83. Coordinate Geometry Domain | v1.2 | 1/3 | In progress | - |
-| 84. Sequences & Series Domain | v1.2 | 0/3 | Not started | - |
+| 84. Sequences & Series Domain | v1.2 | 3/3 | Complete | 2026-03-13 |
 | 85. Statistics Extensions Domain | v1.2 | 0/? | Not started | - |
 | 86. Systems of Equations Domain | v1.2 | 0/? | Not started | - |
 | 87. Quadratic Equations Domain | v1.2 | 0/? | Not started | - |

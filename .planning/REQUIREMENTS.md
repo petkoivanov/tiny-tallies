@@ -148,7 +148,7 @@
 | VIDEO-01 through VIDEO-06 | Phase 81 | Pending |
 | LIN-01 through LIN-04 | Phase 82 | Pending |
 | COORD-01 through COORD-04 | Phase 83 | Pending |
-| SEQ-01 through SEQ-04 | Phase 84 | Pending |
+| SEQ-01 through SEQ-04 | Phase 84 | Complete |
 | STATS-01 through STATS-04 | Phase 85 | Pending |
 | SYS-01 through SYS-04 | Phase 86 | Pending |
 | QUAD-01 through QUAD-05 | Phase 87 | Pending |
