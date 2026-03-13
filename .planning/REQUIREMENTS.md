@@ -21,12 +21,12 @@
 
 ### YouTube Video Tutor
 
-- [ ] **VIDEO-01**: `react-native-youtube-iframe` + `react-native-webview` installed and working in Expo managed workflow build
+- [x] **VIDEO-01**: `react-native-youtube-iframe` + `react-native-webview` installed and working in Expo managed workflow build
 - [ ] **VIDEO-02**: "Watch a video" button appears in ChatPanel after hint ladder is exhausted (BOOST mode complete) — triggered by `ladderExhausted` signal from useTutor
 - [ ] **VIDEO-03**: Tapping "Watch a video" opens an inline YouTube player using youtube-nocookie.com for COPPA compliance
-- [ ] **VIDEO-04**: Static `videoMap.ts` curated lookup: `MathDomain → YouTube video ID` for all 27 domains (18 existing + 9 new), sourced from Khan Academy YouTube channel
-- [ ] **VIDEO-05**: Post-video vote: "Was this helpful?" with 👍 / 👎 buttons; vote stored per domain in tutorSlice
-- [ ] **VIDEO-06**: COPPA parental consent gate for YouTube — separate from AI tutor consent; parent must approve before first YouTube embed renders; stored in parental controls
+- [x] **VIDEO-04**: Static `videoMap.ts` curated lookup: `MathDomain → YouTube video ID` for all 27 domains (18 existing + 9 new), sourced from Khan Academy YouTube channel
+- [x] **VIDEO-05**: Post-video vote: "Was this helpful?" with 👍 / 👎 buttons; vote stored per domain in tutorSlice
+- [x] **VIDEO-06**: COPPA parental consent gate for YouTube — separate from AI tutor consent; parent must approve before first YouTube embed renders; stored in parental controls
 
 ### Linear Equations Domain
 

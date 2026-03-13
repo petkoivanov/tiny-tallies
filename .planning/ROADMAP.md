@@ -246,7 +246,7 @@ Plans:
   5. The video player does not render when the device is offline; a graceful offline message appears instead
 **Plans**: 4 plans
 Plans:
-- [ ] 081-01-PLAN.md
+- [x] 081-01-PLAN.md
 - [ ] 081-02-PLAN.md
 - [ ] 081-03-PLAN.md
 - [ ] 081-04-PLAN.md

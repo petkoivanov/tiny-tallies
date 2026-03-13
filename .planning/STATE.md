@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: completed
-stopped_at: Completed 080-05-PLAN.md
-last_updated: "2026-03-13T12:36:50.145Z"
+stopped_at: Completed 081-01-PLAN.md
+last_updated: "2026-03-13T13:18:39Z"
 last_activity: 2026-03-13 — Phase 80 complete (plans 01-05 executed, K-12 type system, safety, NumberPad, MultiSelectMC, and profile wizard scope all landed)
 progress:
   total_phases: 19
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 
 ## Current Position
 
-Phase: 80 of 91 (Foundation)
-Plan: 5 of 5 in current phase
-Status: Phase complete — ready for Phase 81
-Last activity: 2026-03-13 — Phase 80 complete (plans 01-05 executed, K-12 type system, safety, NumberPad, MultiSelectMC, and profile wizard scope all landed)
+Phase: 81 of 91 (YouTube Video Tutor)
+Plan: 1 of 4 in current phase
+Status: In progress — Plan 01 complete
+Last activity: 2026-03-13 — Phase 81 Plan 01 complete (video libraries installed, videoMap, store extensions, v23 migration)
 
 ```
 v1.2: [#...........] 8% (1/12 phases)
@@ -65,6 +65,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 080-04]: MultiSelectMC uses named export to match test stub import pattern; ChoiceOption extended with optional label for display fallback
 - [Phase 080-04]: RNTL 13.x getByText and getByTestId both filter by accessibility — test stubs fixed to use getByTestId for digit key presses that collide with display value
 - [Phase 080-05]: ProfileCreationWizard age/grade chip tests use getAllByText(n)[0] — GRADES K-12 introduces labels 5-12 that overlap AGES 5-12; age chip is always first in DOM order
+- [Phase 081-01]: youtubeConsentGranted defaults false (explicit parent opt-in for COPPA); contrasts with tutorConsentGranted which defaults true
+- [Phase 081-01]: videoVotes excluded from resetProblemTutor and resetSessionTutor — child feedback on video quality persists permanently
+- [Phase 081-01]: react-native-youtube-iframe installed via npm (not expo install) — not in Expo SDK 54 verified packages list
 
 ### Pending Todos
 
