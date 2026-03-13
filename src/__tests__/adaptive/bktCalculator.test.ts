@@ -101,6 +101,33 @@ describe('BKT constants', () => {
   });
 });
 
+describe('getBktParams - ages 10-18 (HS extension)', () => {
+  it('returns explicit params for age 10 (pT=0.38, pS=0.06, pG=0.18)', () => {
+    const params = getBktParams(10);
+    expect(params).toEqual({ pL0: 0.1, pT: 0.38, pS: 0.06, pG: 0.18 });
+  });
+
+  it('returns explicit params for age 16 (pT=0.40, pS=0.05, pG=0.15)', () => {
+    const params = getBktParams(16);
+    expect(params).toEqual({ pL0: 0.1, pT: 0.40, pS: 0.05, pG: 0.15 });
+  });
+
+  it('returns params for age 13 (pT=0.39, pS=0.06, pG=0.17)', () => {
+    const params = getBktParams(13);
+    expect(params).toEqual({ pL0: 0.1, pT: 0.39, pS: 0.06, pG: 0.17 });
+  });
+
+  it('returns params for age 18 (same as 14-18 bracket)', () => {
+    const params = getBktParams(18);
+    expect(params).toEqual({ pL0: 0.1, pT: 0.40, pS: 0.05, pG: 0.15 });
+  });
+
+  it('age 20 falls back to DEFAULT_BKT_PARAMS (out of range)', () => {
+    const params = getBktParams(20);
+    expect(params).toEqual(DEFAULT_BKT_PARAMS);
+  });
+});
+
 describe('applySoftMasteryLock', () => {
   it('protects mastery when locked and fewer than 3 consecutive wrong', () => {
     const bktResult = { newPL: 0.80, isMastered: false, needsReteaching: false };

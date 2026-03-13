@@ -86,12 +86,23 @@ export const DEFAULT_BKT_PARAMS: BktParams = {
  * - Ages 6-7 (childAge 6 or 7): higher guess/slip, lower learn rate
  * - Ages 7-8 (childAge 8): research defaults
  * - Ages 8-9 (childAge 9): lower guess/slip, higher learn rate
+ * - Ages 10-18: extrapolated values (LOW confidence per research)
+ *   The existing fallback DEFAULT_BKT_PARAMS applies for ages outside 6-18.
  */
 const AGE_BRACKET_PARAMS: Record<number, BktParams> = {
   6: { pL0: 0.1, pT: 0.25, pS: 0.15, pG: 0.30 },
   7: { pL0: 0.1, pT: 0.25, pS: 0.15, pG: 0.30 },
   8: { pL0: 0.1, pT: 0.30, pS: 0.10, pG: 0.25 },
   9: { pL0: 0.1, pT: 0.35, pS: 0.08, pG: 0.20 },
+  10: { pL0: 0.1, pT: 0.38, pS: 0.06, pG: 0.18 },
+  11: { pL0: 0.1, pT: 0.38, pS: 0.06, pG: 0.18 },
+  12: { pL0: 0.1, pT: 0.38, pS: 0.06, pG: 0.18 },
+  13: { pL0: 0.1, pT: 0.39, pS: 0.06, pG: 0.17 },
+  14: { pL0: 0.1, pT: 0.40, pS: 0.05, pG: 0.15 },
+  15: { pL0: 0.1, pT: 0.40, pS: 0.05, pG: 0.15 },
+  16: { pL0: 0.1, pT: 0.40, pS: 0.05, pG: 0.15 },
+  17: { pL0: 0.1, pT: 0.40, pS: 0.05, pG: 0.15 },
+  18: { pL0: 0.1, pT: 0.40, pS: 0.05, pG: 0.15 },
 };
 
 /**

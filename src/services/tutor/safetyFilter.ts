@@ -20,6 +20,21 @@ import {
 } from './safetyConstants';
 
 /**
+ * Build a regex that matches answerStr as a standalone number.
+ * \b fails for negative numbers (the '-' is \W, so no word boundary before the digit).
+ * For negative answers, use look-behind/look-ahead instead.
+ */
+function buildNumberPattern(answerStr: string): RegExp {
+  const escaped = escapeRegex(answerStr);
+  if (answerStr.startsWith('-')) {
+    // Negative: match only when not preceded or followed by another digit
+    return new RegExp(`(?<![0-9])${escaped}(?![0-9])`);
+  }
+  // Positive: word boundary works correctly
+  return new RegExp(`\\b${escaped}\\b`);
+}
+
+/**
  * Checks if the LLM response leaks the correct answer.
  * Uses deterministic regex + rule engine, NOT LLM self-policing.
  *
@@ -36,8 +51,9 @@ export function checkAnswerLeak(
   const answerStr = String(correctAnswer);
   const answerWord = numberToWord(correctAnswer);
 
-  // Pattern 1: Digit appears as standalone number (word boundary)
-  const digitPattern = new RegExp(`\\b${escapeRegex(answerStr)}\\b`);
+  // Pattern 1: Digit appears as standalone number
+  // Uses look-around for negative numbers (word boundary fails on '-')
+  const digitPattern = buildNumberPattern(answerStr);
   if (digitPattern.test(text)) {
     return { safe: false, reason: 'answer_digit_leak' };
   }
@@ -53,9 +69,13 @@ export function checkAnswerLeak(
   // Pattern 3: Indirect reveal phrases
   const phrases = ['equals', 'is', 'get', 'gets', 'makes', 'gives'];
   for (const phrase of phrases) {
-    // Check digit form: "equals 7"
+    // Check digit form: "equals 7" or "equals -3"
+    // For negative answers, use look-around after the phrase+space
+    const digitIndirectSuffix = answerStr.startsWith('-')
+      ? `(?<![0-9])${escapeRegex(answerStr)}(?![0-9])`
+      : `${escapeRegex(answerStr)}\\b`;
     const digitIndirect = new RegExp(
-      `\\b${escapeRegex(phrase)}\\s+${escapeRegex(answerStr)}\\b`,
+      `\\b${escapeRegex(phrase)}\\s+${digitIndirectSuffix}`,
     );
     if (digitIndirect.test(text)) {
       return { safe: false, reason: 'answer_indirect_leak' };

@@ -21,20 +21,61 @@ describe('LEITNER_INTERVALS constant', () => {
     expect(LEITNER_INTERVALS).toHaveProperty('default');
   });
 
+  it('has entries for HS extension brackets', () => {
+    expect(LEITNER_INTERVALS).toHaveProperty('10-11');
+    expect(LEITNER_INTERVALS).toHaveProperty('12-13');
+    expect(LEITNER_INTERVALS).toHaveProperty('14-18');
+  });
+
   it('each bracket has exactly 6 entries (one per box)', () => {
-    for (const key of ['6-7', '7-8', '8-9', 'default']) {
+    for (const key of ['6-7', '7-8', '8-9', 'default', '10-11', '12-13', '14-18']) {
       expect(LEITNER_INTERVALS[key]).toHaveLength(6);
     }
   });
 
   it('Box 1 is always 0ms (same session) for all brackets', () => {
-    for (const key of ['6-7', '7-8', '8-9', 'default']) {
+    for (const key of ['6-7', '7-8', '8-9', 'default', '10-11', '12-13', '14-18']) {
       expect(LEITNER_INTERVALS[key][0]).toBe(0);
     }
   });
 
   it('default bracket matches 7-8 bracket', () => {
     expect(LEITNER_INTERVALS['default']).toEqual(LEITNER_INTERVALS['7-8']);
+  });
+
+  it('14-18 bracket Box 6 is 45 days', () => {
+    const fortyFiveDays = 45 * 24 * 60 * 60 * 1000;
+    expect(LEITNER_INTERVALS['14-18'][5]).toBe(fortyFiveDays);
+  });
+});
+
+describe('getAgeIntervalBracket - HS extension ages 10-18', () => {
+  it('maps age 10 to "10-11"', () => {
+    expect(getAgeIntervalBracket(10)).toBe('10-11');
+  });
+
+  it('maps age 11 to "10-11"', () => {
+    expect(getAgeIntervalBracket(11)).toBe('10-11');
+  });
+
+  it('maps age 12 to "12-13"', () => {
+    expect(getAgeIntervalBracket(12)).toBe('12-13');
+  });
+
+  it('maps age 13 to "12-13"', () => {
+    expect(getAgeIntervalBracket(13)).toBe('12-13');
+  });
+
+  it('maps age 14 to "14-18"', () => {
+    expect(getAgeIntervalBracket(14)).toBe('14-18');
+  });
+
+  it('maps age 18 to "14-18"', () => {
+    expect(getAgeIntervalBracket(18)).toBe('14-18');
+  });
+
+  it('age 9 still returns "8-9" (no regression)', () => {
+    expect(getAgeIntervalBracket(9)).toBe('8-9');
   });
 });
 

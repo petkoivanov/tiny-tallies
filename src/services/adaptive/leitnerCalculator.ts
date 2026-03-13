@@ -16,6 +16,7 @@ const ONE_DAY_MS = 24 * ONE_HOUR_MS;
  *
  * Index 0 = Box 1, index 5 = Box 6.
  * "default" maps to the "7-8" bracket (research defaults).
+ * Ages 10-18 use longer intervals based on spacing-effect research.
  */
 export const LEITNER_INTERVALS: Record<string, readonly number[]> = {
   '6-7': [
@@ -42,6 +43,33 @@ export const LEITNER_INTERVALS: Record<string, readonly number[]> = {
     14 * ONE_DAY_MS,    // Box 5: 14 days
     30 * ONE_DAY_MS,    // Box 6: 30 days
   ],
+  // Ages 10-11: ~20% longer than 8-9 bracket (spacing effect research)
+  '10-11': [
+    0,                  // Box 1: same session
+    1 * ONE_DAY_MS,     // Box 2: next day
+    4 * ONE_DAY_MS,     // Box 3: 4 days
+    8 * ONE_DAY_MS,     // Box 4: 8 days
+    17 * ONE_DAY_MS,    // Box 5: 17 days
+    36 * ONE_DAY_MS,    // Box 6: 36 days
+  ],
+  // Ages 12-13: ~35% longer than 8-9 bracket
+  '12-13': [
+    0,                  // Box 1: same session
+    1 * ONE_DAY_MS,     // Box 2: next day
+    4 * ONE_DAY_MS,     // Box 3: 4 days
+    9 * ONE_DAY_MS,     // Box 4: 9 days
+    19 * ONE_DAY_MS,    // Box 5: 19 days
+    41 * ONE_DAY_MS,    // Box 6: 41 days
+  ],
+  // Ages 14-18: longest retention window, Box 6 = 45 days
+  '14-18': [
+    0,                  // Box 1: same session
+    1 * ONE_DAY_MS,     // Box 2: next day
+    5 * ONE_DAY_MS,     // Box 3: 5 days
+    10 * ONE_DAY_MS,    // Box 4: 10 days
+    21 * ONE_DAY_MS,    // Box 5: 21 days
+    45 * ONE_DAY_MS,    // Box 6: 45 days
+  ],
   default: [
     0,                  // Box 1: same session
     1 * ONE_DAY_MS,     // Box 2: next day
@@ -62,13 +90,17 @@ export const GRADUATED_REVIEW_INTERVAL_MS = 30 * ONE_DAY_MS;
 /**
  * Maps a child's age to the interval bracket key.
  *
- * @param childAge - Integer age (6-9), or null for default bracket
+ * @param childAge - Integer age (6-18), or null for default bracket
  * @returns Bracket key for LEITNER_INTERVALS lookup
  */
 export function getAgeIntervalBracket(childAge: number | null): string {
   if (childAge === null) return 'default';
   if (childAge <= 7) return '6-7';
   if (childAge === 8) return '7-8';
+  if (childAge === 9) return '8-9';
+  if (childAge >= 14) return '14-18';
+  if (childAge >= 12) return '12-13';
+  if (childAge >= 10) return '10-11';
   return '8-9';
 }
 
