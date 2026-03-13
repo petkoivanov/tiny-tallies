@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: executing
-stopped_at: Completed 081-02-PLAN.md
-last_updated: "2026-03-13T13:26:44.426Z"
-last_activity: 2026-03-13 — Phase 81 Plan 01 complete (video libraries installed, videoMap, store extensions, v23 migration)
+stopped_at: Completed 081-03-PLAN.md
+last_updated: "2026-03-13T13:33:21.212Z"
+last_activity: 2026-03-13 — Phase 81 Plan 03 complete (ChatPanel video section, useChatOrchestration video props, SessionScreen wiring)
 progress:
   total_phases: 19
   completed_phases: 2
   total_plans: 15
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State
@@ -25,8 +25,8 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 ## Current Position
 
 Phase: 81 of 91 (YouTube Video Tutor)
-Plan: 2 of 4 in current phase
-Status: In progress — Plan 02 complete
+Plan: 3 of 4 in current phase
+Status: In progress — Plan 03 complete
 Last activity: 2026-03-13 — Phase 81 Plan 02 complete (VideoPlayer, VideoVoteButtons, buildNocookieHtml, YoutubePlayer tests)
 
 ```
@@ -70,6 +70,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 081-01]: react-native-youtube-iframe installed via npm (not expo install) — not in Expo SDK 54 verified packages list
 - [Phase 081-02]: ThemeColors uses surfaceLight/textPrimary/incorrect — no border/text/error properties
 - [Phase 081-02]: VideoVoteButtons accepts domain prop for Plan 03 call-site contract, not used in rendering
+- [Phase 081]: showVideoSection requires all four conditions (ladderExhausted, youtubeConsentGranted, isOnline, valid videoId) — enforcing explicit parent opt-in and network gating
+- [Phase 081]: Video props are all optional on ChatPanelProps to avoid breaking existing render sites; videoOpen/voteDone are local ChatPanel state (not store) — transient UI state, not persisted
 
 ### Pending Todos
 
@@ -87,7 +89,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T13:26:44.423Z
-Stopped at: Completed 081-02-PLAN.md
+Last session: 2026-03-13T13:33:17.159Z
+Stopped at: Completed 081-03-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80
