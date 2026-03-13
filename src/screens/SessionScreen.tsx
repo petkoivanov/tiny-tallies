@@ -81,6 +81,10 @@ export default function SessionScreen() {
     handleResponse,
     handleCloseChat,
     handleBannerTap,
+    youtubeConsentGranted,
+    videoVotes,
+    setVideoVote,
+    currentDomain,
   } = useChatOrchestration({
     tutor,
     currentProblem,
@@ -260,6 +264,11 @@ export default function SessionScreen() {
         onResponse={handleResponse}
         responseMode={responseMode}
         moreDisabled={moreDisabled}
+        ladderExhausted={tutor.ladderExhausted}
+        youtubeConsentGranted={youtubeConsentGranted}
+        currentDomain={currentDomain}
+        videoVotes={videoVotes}
+        onVideoVote={setVideoVote}
       />
       {/* Quit confirmation dialog */}
       <AppDialog
