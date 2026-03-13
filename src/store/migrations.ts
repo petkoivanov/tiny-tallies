@@ -17,7 +17,7 @@ export function migrateStore(
   const state = (persistedState ?? {}) as Record<string, unknown>;
 
   // Fast path: skip all checks when store is already current
-  if (version >= 21) return state;
+  if (version >= 22) return state;
 
   if (version < 2) {
     // v1 -> v2: First persistence enablement.
@@ -188,8 +188,14 @@ export function migrateStore(
     state.reminderTime ??= '17:00';
   }
 
-  // Future migrations chain here:
-  // if (version < 22) { ... }
+  if (version < 22) {
+    // v21 -> v22: Grade type expanded to 1-12 (K-12 repositioning).
+    // No data shape change — childGrade is stored as number and already valid.
+    // Migration is intentionally a no-op; this block exists to satisfy the
+    // CLAUDE.md guardrail and document the schema version boundary.
+    // Sentinel field confirms this migration block has run.
+    state.childGradeV22Migrated = true;
+  }
 
   return state;
 }

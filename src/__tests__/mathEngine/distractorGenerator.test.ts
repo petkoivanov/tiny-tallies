@@ -2,6 +2,7 @@ import { generateDistractors } from '../../services/mathEngine/bugLibrary/distra
 import { createRng } from '../../services/mathEngine/seededRng';
 import { generateProblem } from '../../services/mathEngine/generator';
 import { answerNumericValue, numericAnswer, type Problem } from '../../services/mathEngine/types';
+import type { DistractorStrategy } from '../../services/mathEngine/types';
 
 // Helper to create a minimal Problem for testing
 function makeProblem(overrides: Partial<Problem>): Problem {
@@ -125,6 +126,57 @@ describe('generateDistractors', () => {
       const distractors = generateDistractors(problem, rng);
       const bugLibrary = distractors.filter((d) => d.source === 'bug_library');
       expect(bugLibrary.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('DistractorStrategy - domain_specific skips Phase 2 adjacent', () => {
+    it('domain_specific strategy returns 3 distractors (no crash)', () => {
+      const problem = makeProblem({
+        operation: 'addition',
+        operands: [27, 18],
+        correctAnswer: numericAnswer(45),
+        metadata: { digitCount: 2, requiresCarry: true, requiresBorrow: false },
+      });
+      const rng = createRng(42);
+      const strategy: DistractorStrategy = 'domain_specific';
+      const distractors = generateDistractors(problem, rng, 3, strategy);
+      expect(distractors).toHaveLength(3);
+    });
+
+    it('domain_specific strategy skips Phase 2 adjacent distractors', () => {
+      // Use a problem with no bug library matches (geometry) to isolate Phase 2
+      const problem = makeProblem({
+        operation: 'addition',
+        operands: [100, 200],
+        correctAnswer: numericAnswer(300),
+        metadata: { digitCount: 3, requiresCarry: false, requiresBorrow: false },
+      });
+      const rng1 = createRng(99);
+      const rng2 = createRng(99);
+      const defaultDistractors = generateDistractors(problem, rng1, 3, 'default');
+      const domainDistractors = generateDistractors(problem, rng2, 3, 'domain_specific');
+
+      // With domain_specific, Phase 2 (adjacent ±1) is skipped
+      const defaultAdjacent = defaultDistractors.filter((d) => d.source === 'adjacent');
+      const domainAdjacent = domainDistractors.filter((d) => d.source === 'adjacent');
+      // domain_specific must have fewer adjacent distractors than default (or none)
+      expect(domainAdjacent.length).toBeLessThanOrEqual(defaultAdjacent.length);
+      // And specifically domain_specific produces 0 adjacent
+      expect(domainAdjacent.length).toBe(0);
+    });
+
+    it('default strategy (no 4th arg) runs all 3 phases (existing behavior unchanged)', () => {
+      const problem = makeProblem({
+        operation: 'addition',
+        operands: [27, 18],
+        correctAnswer: numericAnswer(45),
+        metadata: { digitCount: 2, requiresCarry: true, requiresBorrow: false },
+      });
+      const rng1 = createRng(42);
+      const rng2 = createRng(42);
+      const d1 = generateDistractors(problem, rng1, 3);
+      const d2 = generateDistractors(problem, rng2, 3, 'default');
+      expect(d1).toEqual(d2);
     });
   });
 

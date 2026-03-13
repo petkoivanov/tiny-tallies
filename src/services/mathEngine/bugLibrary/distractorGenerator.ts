@@ -1,5 +1,5 @@
 import { answerNumericValue } from '../types';
-import type { MathDomain, Problem } from '../types';
+import type { DistractorStrategy, MathDomain, Problem } from '../types';
 import type { SeededRng } from '../seededRng';
 import type { BugPattern, DistractorResult } from './types';
 import { ADDITION_BUGS } from './additionBugs';
@@ -88,6 +88,8 @@ const MAX_RANDOM_ITERATIONS = 50;
  * Phase 2: Adjacent -- off-by-N from correct answer (target 1)
  *          N=5 for bar graphs (chart resolution makes ±1 indistinguishable)
  *          N=1 for all other problem types
+ *          Skipped when distractorStrategy='domain_specific' (domain provides
+ *          meaningful distractors; adjacent numbers are less pedagogically useful)
  * Phase 3: Random fallback -- fill remaining slots
  *
  * Returns exactly `count` unique, valid distractors (default 3).
@@ -96,6 +98,7 @@ export function generateDistractors(
   problem: Problem,
   rng: SeededRng,
   count: number = 3,
+  distractorStrategy: DistractorStrategy = 'default',
 ): DistractorResult[] {
   const { operation } = problem;
   const correctAnswer = answerNumericValue(problem.correctAnswer);
@@ -128,7 +131,8 @@ export function generateDistractors(
   // Phase 2: Adjacent (target 1)
   // Bar graphs use step=5 — you can't distinguish adjacent values on a bar chart.
   // All other types use step=1 (off-by-one).
-  if (results.length < count) {
+  // Skipped when domain_specific — domain provides meaningful distractors.
+  if (distractorStrategy === 'default' && results.length < count) {
     const step = isBarGraph(problem) ? 5 : 1;
     const plus = correctAnswer + step;
     const minus = correctAnswer - step;
