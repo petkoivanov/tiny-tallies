@@ -1,4 +1,4 @@
-import { migrateStore } from '../../store/migrations';
+import { migrateStore } from '@/store/migrations';
 
 // Mock expo-crypto
 jest.mock('expo-crypto', () => ({
@@ -134,5 +134,45 @@ describe('migrateStore v12 -> v13', () => {
     expect(result.earnedBadges).toEqual({});
     expect(result.challengeCompletions).toEqual({});
     expect(result.themeId).toBe('dark');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Wave 0 stubs: v21 fast-path and v21 -> v22 migration (PLAN 080-01)
+// These tests FAIL in RED state because migrateStore has no v22 block yet.
+// ---------------------------------------------------------------------------
+
+describe('fast-path', () => {
+  it('migrateStore({}, 21) returns state unchanged', () => {
+    const state = {};
+    const result = migrateStore(state, 21);
+    expect(result).toBe(state);
+  });
+});
+
+describe('v21 -> v22 migration', () => {
+  it('runs v21->v22 migration without error and childGrade survives', () => {
+    const state = {
+      children: { c1: { childGrade: 8 } },
+    };
+    // v22 migration does not exist yet — this call runs fast-path (version >= 21)
+    // and returns state. Test asserts round-trip integrity of childGrade.
+    // Once v22 is added this test will verify the migration does not drop childGrade.
+    const result = migrateStore(state, 20);
+    const children = result.children as Record<string, Record<string, unknown>>;
+    expect(children.c1.childGrade).toBe(8);
+    // Sentinel: assert a field that v22 migration must add (does not exist until Plan 03)
+    expect((result as Record<string, unknown>).childGradeV22Migrated).toBe(true);
+  });
+});
+
+describe('full migration chain', () => {
+  it('migrateStore({}, 19) runs through all migrations up to v22 without throwing', () => {
+    // v22 migration block not yet added — expect it to be present after Plan 03.
+    // For now this asserts the chain runs without runtime error.
+    expect(() => migrateStore({}, 19)).not.toThrow();
+    const result = migrateStore({}, 19);
+    // Sentinel: v22 must add this field (will fail until Plan 03 adds the migration)
+    expect((result as Record<string, unknown>).childGradeV22Migrated).toBe(true);
   });
 });
