@@ -21,6 +21,7 @@ import { LINEAR_EQUATIONS_BUGS } from './linearEquationsBugs';
 import { COORDINATE_GEOMETRY_BUGS } from './coordinateGeometryBugs';
 import { SEQUENCES_SERIES_BUGS } from './sequencesSeriesBugs';
 import { STATISTICS_HS_BUGS } from './statisticsHsBugs';
+import { SYSTEMS_EQUATIONS_BUGS } from './systemsEquationsBugs';
 import { isValidDistractor, shuffleArray } from './validation';
 
 /** IDs of off-by-one patterns excluded from Phase 1 bug library lookup */
@@ -54,6 +55,7 @@ const BUGS_BY_OPERATION: Record<MathDomain, readonly BugPattern[]> = {
   coordinate_geometry: COORDINATE_GEOMETRY_BUGS,
   sequences_series: SEQUENCES_SERIES_BUGS,
   statistics_hs: STATISTICS_HS_BUGS,
+  systems_equations: SYSTEMS_EQUATIONS_BUGS,
 };
 
 /**

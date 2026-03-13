@@ -24,6 +24,7 @@ import { linearEquationsHandler } from './linearEquations';
 import { coordinateGeometryHandler } from './coordinateGeometry';
 import { sequencesSeriesHandler } from './sequencesSeries';
 import { statisticsHsHandler } from './statisticsHs';
+import { systemsEquationsHandler } from './systemsEquations';
 
 const HANDLERS: Record<MathDomain, DomainHandler> = {
   addition: arithmeticHandler,
@@ -48,6 +49,7 @@ const HANDLERS: Record<MathDomain, DomainHandler> = {
   coordinate_geometry: coordinateGeometryHandler,
   sequences_series: sequencesSeriesHandler,
   statistics_hs: statisticsHsHandler,
+  systems_equations: systemsEquationsHandler,
 };
 
 /** Get the domain handler for a given operation */

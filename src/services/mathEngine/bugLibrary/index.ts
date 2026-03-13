@@ -25,6 +25,7 @@ export { LINEAR_EQUATIONS_BUGS } from './linearEquationsBugs';
 export { COORDINATE_GEOMETRY_BUGS } from './coordinateGeometryBugs';
 export { SEQUENCES_SERIES_BUGS } from './sequencesSeriesBugs';
 export { STATISTICS_HS_BUGS } from './statisticsHsBugs';
+export { SYSTEMS_EQUATIONS_BUGS } from './systemsEquationsBugs';
 
 // Validation utilities
 export { isValidDistractor, shuffleArray } from './validation';
