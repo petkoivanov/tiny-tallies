@@ -617,4 +617,35 @@ export const WORD_PROBLEM_TEMPLATES: readonly WordProblemTemplate[] = [
     question: '',
     minGrade: 10,
   },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // QUADRATIC EQUATIONS — grades 9-10 (prefix mode)
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'wp_quad_area',
+    operations: ['quadratic_equations'],
+    mode: 'prefix',
+    template:
+      '{name} is designing a rectangular garden where one side is {a} meters longer than the other.',
+    question: '',
+    minGrade: 9,
+  },
+  {
+    id: 'wp_quad_projectile',
+    operations: ['quadratic_equations'],
+    mode: 'prefix',
+    template:
+      '{name} launches a ball into the air from the roof of a building.',
+    question: '',
+    minGrade: 10,
+  },
+  {
+    id: 'wp_quad_number',
+    operations: ['quadratic_equations'],
+    mode: 'prefix',
+    template:
+      '{name} is thinking of two numbers whose product and sum have a special relationship.',
+    question: '',
+    minGrade: 9,
+  },
 ];
