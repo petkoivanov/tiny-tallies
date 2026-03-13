@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
-status: completed
-stopped_at: Completed 081-01-PLAN.md
-last_updated: "2026-03-13T13:18:39Z"
-last_activity: 2026-03-13 — Phase 80 complete (plans 01-05 executed, K-12 type system, safety, NumberPad, MultiSelectMC, and profile wizard scope all landed)
+status: executing
+stopped_at: Completed 081-02-PLAN.md
+last_updated: "2026-03-13T13:26:44.426Z"
+last_activity: 2026-03-13 — Phase 81 Plan 01 complete (video libraries installed, videoMap, store extensions, v23 migration)
 progress:
   total_phases: 19
   completed_phases: 2
-  total_plans: 11
-  completed_plans: 10
+  total_plans: 15
+  completed_plans: 12
 ---
 
 # Project State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 ## Current Position
 
 Phase: 81 of 91 (YouTube Video Tutor)
-Plan: 1 of 4 in current phase
-Status: In progress — Plan 01 complete
-Last activity: 2026-03-13 — Phase 81 Plan 01 complete (video libraries installed, videoMap, store extensions, v23 migration)
+Plan: 2 of 4 in current phase
+Status: In progress — Plan 02 complete
+Last activity: 2026-03-13 — Phase 81 Plan 02 complete (VideoPlayer, VideoVoteButtons, buildNocookieHtml, YoutubePlayer tests)
 
 ```
 v1.2: [#...........] 8% (1/12 phases)
@@ -68,6 +68,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 081-01]: youtubeConsentGranted defaults false (explicit parent opt-in for COPPA); contrasts with tutorConsentGranted which defaults true
 - [Phase 081-01]: videoVotes excluded from resetProblemTutor and resetSessionTutor — child feedback on video quality persists permanently
 - [Phase 081-01]: react-native-youtube-iframe installed via npm (not expo install) — not in Expo SDK 54 verified packages list
+- [Phase 081-02]: ThemeColors uses surfaceLight/textPrimary/incorrect — no border/text/error properties
+- [Phase 081-02]: VideoVoteButtons accepts domain prop for Plan 03 call-site contract, not used in rendering
 
 ### Pending Todos
 
@@ -85,7 +87,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T12:31:44Z
-Stopped at: Completed 080-05-PLAN.md
+Last session: 2026-03-13T13:26:44.423Z
+Stopped at: Completed 081-02-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80

@@ -5,3 +5,5 @@ export { HelpButton } from './HelpButton';
 export { ResponseButtons } from './ResponseButtons';
 export { ChatPanel } from './ChatPanel';
 export { ChatBanner } from './ChatBanner';
+export { VideoPlayer } from './VideoPlayer';
+export { VideoVoteButtons } from './VideoVoteButtons';
