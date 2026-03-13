@@ -404,4 +404,56 @@ export const WORD_PROBLEM_TEMPLATES: readonly WordProblemTemplate[] = [
     question: '',
     minGrade: 5,
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LINEAR EQUATIONS — grades 6-9 (prefix mode)
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'wp_lin_age_1',
+    operations: ['linear_equations'],
+    mode: 'prefix',
+    template: '{name} is working on an age puzzle.',
+    question: '',
+    minGrade: 6,
+  },
+  {
+    id: 'wp_lin_age_2',
+    operations: ['linear_equations'],
+    mode: 'prefix',
+    template: '{name} is trying to find a mystery number using clues about ages.',
+    question: '',
+    minGrade: 6,
+  },
+  {
+    id: 'wp_lin_distance_1',
+    operations: ['linear_equations'],
+    mode: 'prefix',
+    template: '{name} is solving a distance problem for a trip.',
+    question: '',
+    minGrade: 6,
+  },
+  {
+    id: 'wp_lin_distance_2',
+    operations: ['linear_equations'],
+    mode: 'prefix',
+    template: '{name} is calculating how far two trains will travel.',
+    question: '',
+    minGrade: 6,
+  },
+  {
+    id: 'wp_lin_money_1',
+    operations: ['linear_equations'],
+    mode: 'prefix',
+    template: '{name} is figuring out the cost of items at {place}.',
+    question: '',
+    minGrade: 6,
+  },
+  {
+    id: 'wp_lin_money_2',
+    operations: ['linear_equations'],
+    mode: 'prefix',
+    template: '{name} is working out how much money to save each week.',
+    question: '',
+    minGrade: 6,
+  },
 ];
