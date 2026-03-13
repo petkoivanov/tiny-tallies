@@ -105,6 +105,7 @@ jest.mock('@/services/api/apiClient', () => ({
 const mockSetAuth = jest.fn();
 const mockClearAuth = jest.fn();
 const mockSetTutorConsentGranted = jest.fn();
+const mockSetYoutubeConsentGranted = jest.fn();
 let mockStoreState: Record<string, unknown> = {};
 
 jest.mock('@/store/appStore', () => ({
@@ -119,6 +120,8 @@ function setMockState(overrides: Record<string, unknown> = {}) {
     authProvider: null,
     tutorConsentGranted: true,
     setTutorConsentGranted: mockSetTutorConsentGranted,
+    youtubeConsentGranted: false,
+    setYoutubeConsentGranted: mockSetYoutubeConsentGranted,
     setAuth: mockSetAuth,
     clearAuth: mockClearAuth,
     wrongAnswerHistory: [],
@@ -253,6 +256,51 @@ describe('ParentalControlsScreen', () => {
       const toggle = await findByTestId('tutor-toggle');
       fireEvent(toggle, 'valueChange', true);
       expect(mockSetTutorConsentGranted).toHaveBeenCalledWith(true);
+    });
+  });
+
+  describe('YouTube Videos', () => {
+    it('shows YouTube Videos section heading', async () => {
+      const { findByText } = render(<ParentalControlsScreen />);
+      expect(await findByText('YouTube Videos')).toBeTruthy();
+    });
+
+    it('shows youtube-consent-toggle defaulting to OFF (false)', async () => {
+      setMockState({ youtubeConsentGranted: false, setYoutubeConsentGranted: mockSetYoutubeConsentGranted });
+      const { findByTestId } = render(<ParentalControlsScreen />);
+      const toggle = await findByTestId('youtube-consent-toggle');
+      expect(toggle.props.value).toBe(false);
+    });
+
+    it('shows youtube-consent-toggle as ON when consent is granted', async () => {
+      setMockState({ youtubeConsentGranted: true, setYoutubeConsentGranted: mockSetYoutubeConsentGranted });
+      const { findByTestId } = render(<ParentalControlsScreen />);
+      const toggle = await findByTestId('youtube-consent-toggle');
+      expect(toggle.props.value).toBe(true);
+    });
+
+    it('calls setYoutubeConsentGranted when toggled', async () => {
+      setMockState({ youtubeConsentGranted: false, setYoutubeConsentGranted: mockSetYoutubeConsentGranted });
+      const { findByTestId } = render(<ParentalControlsScreen />);
+      const toggle = await findByTestId('youtube-consent-toggle');
+      fireEvent(toggle, 'valueChange', true);
+      expect(mockSetYoutubeConsentGranted).toHaveBeenCalledWith(true);
+    });
+
+    it('shows off sublabel when consent not granted', async () => {
+      setMockState({ youtubeConsentGranted: false, setYoutubeConsentGranted: mockSetYoutubeConsentGranted });
+      const { findByText } = render(<ParentalControlsScreen />);
+      expect(
+        await findByText('YouTube videos are turned off. Turn on to allow instructional video access after hints are exhausted.'),
+      ).toBeTruthy();
+    });
+
+    it('shows on sublabel when consent is granted', async () => {
+      setMockState({ youtubeConsentGranted: true, setYoutubeConsentGranted: mockSetYoutubeConsentGranted });
+      const { findByText } = render(<ParentalControlsScreen />);
+      expect(
+        await findByText('Your child can watch curated math videos when they need extra help.'),
+      ).toBeTruthy();
     });
   });
 });
