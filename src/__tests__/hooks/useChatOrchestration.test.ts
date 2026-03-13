@@ -10,6 +10,7 @@ jest.mock('@react-navigation/native', () => ({
 // Mock appStore
 const mockAddTutorMessage = jest.fn();
 const mockIncrementWrongAnswerCount = jest.fn();
+const mockSetVideoVote = jest.fn();
 let mockTutorConsentGranted = true;
 jest.mock('@/store/appStore', () => ({
   useAppStore: (selector: any) => {
@@ -17,6 +18,9 @@ jest.mock('@/store/appStore', () => ({
       addTutorMessage: mockAddTutorMessage,
       incrementWrongAnswerCount: mockIncrementWrongAnswerCount,
       tutorConsentGranted: mockTutorConsentGranted,
+      youtubeConsentGranted: false,
+      videoVotes: {},
+      setVideoVote: mockSetVideoVote,
     };
     return selector(state);
   },

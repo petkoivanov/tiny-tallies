@@ -9,6 +9,7 @@ import type { FeedbackState } from '@/hooks/useSession';
 import type { SessionProblem } from '@/services/session';
 import type { SessionPhase } from '@/services/session';
 import type { RootStackParamList } from '@/navigation/types';
+import type { MathDomain } from '@/services/mathEngine/types';
 
 type SessionNavProp = NativeStackNavigationProp<RootStackParamList, 'Session'>;
 
@@ -48,6 +49,10 @@ export interface ChatOrchestrationReturn {
   ) => void;
   handleCloseChat: () => void;
   handleBannerTap: () => void;
+  youtubeConsentGranted: boolean;
+  videoVotes: Partial<Record<string, 'helpful' | 'not_helpful'>>;
+  setVideoVote: (domain: MathDomain, vote: 'helpful' | 'not_helpful') => void;
+  currentDomain: MathDomain | null;
 }
 
 export function useChatOrchestration(
@@ -72,6 +77,9 @@ export function useChatOrchestration(
     (s) => s.incrementWrongAnswerCount,
   );
   const tutorConsentGranted = useAppStore((s) => s.tutorConsentGranted);
+  const youtubeConsentGranted = useAppStore((s) => s.youtubeConsentGranted);
+  const videoVotes = useAppStore((s) => s.videoVotes);
+  const setVideoVote = useAppStore((s) => s.setVideoVote);
 
   // Chat UI state
   const [chatOpen, setChatOpen] = useState(false);
@@ -244,6 +252,9 @@ export function useChatOrchestration(
   // Disable "Tell me more" once the hint ladder is fully delivered
   const moreDisabled = tutor.tutorMode === 'hint' && tutor.ladderExhausted;
 
+  // Current math domain — used by ChatPanel to look up video IDs
+  const currentDomain = currentProblem?.problem.operation ?? null;
+
   // Handle response buttons (including gotit for BOOST)
   const handleResponse = useCallback(
     (type: 'understand' | 'more' | 'confused' | 'retry' | 'gotit') => {
@@ -346,5 +357,9 @@ export function useChatOrchestration(
     handleResponse,
     handleCloseChat,
     handleBannerTap,
+    youtubeConsentGranted,
+    videoVotes,
+    setVideoVote,
+    currentDomain,
   };
 }
