@@ -508,4 +508,56 @@ export const WORD_PROBLEM_TEMPLATES: readonly WordProblemTemplate[] = [
     question: '',
     minGrade: 6,
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SEQUENCES & SERIES — grades 9-10 (prefix mode)
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'wp_seq_savings',
+    operations: ['sequences_series'],
+    mode: 'prefix',
+    template: '{name} is saving the same amount of money each week toward a new bike.',
+    question: '',
+    minGrade: 9,
+  },
+  {
+    id: 'wp_seq_growth',
+    operations: ['sequences_series'],
+    mode: 'prefix',
+    template: '{name} is tracking how a plant grows the same number of centimeters each day.',
+    question: '',
+    minGrade: 9,
+  },
+  {
+    id: 'wp_seq_stacking',
+    operations: ['sequences_series'],
+    mode: 'prefix',
+    template: '{name} is stacking boxes where each row has the same number of boxes more than the row below it.',
+    question: '',
+    minGrade: 9,
+  },
+  {
+    id: 'wp_seq_population',
+    operations: ['sequences_series'],
+    mode: 'prefix',
+    template: '{name} is studying how a bacteria colony doubles in size each hour in a science experiment.',
+    question: '',
+    minGrade: 10,
+  },
+  {
+    id: 'wp_seq_tiles',
+    operations: ['sequences_series'],
+    mode: 'prefix',
+    template: '{name} is tiling a patio where each new row has three times as many tiles as the previous row.',
+    question: '',
+    minGrade: 10,
+  },
+  {
+    id: 'wp_seq_interest',
+    operations: ['sequences_series'],
+    mode: 'prefix',
+    template: '{name} is tracking how an investment grows by the same percentage each year.',
+    question: '',
+    minGrade: 10,
+  },
 ];
