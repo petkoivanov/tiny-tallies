@@ -1,0 +1,1 @@
+export { statisticsHsHandler } from './statisticsHsHandler';
