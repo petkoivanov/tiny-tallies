@@ -320,7 +320,11 @@ Plans:
   2. Distractors reflect algebra-specific bug patterns (swapped-variable, sign-error) rather than generic ±1 adjacency
   3. Word problem variants (two-variable real-world scenarios) generate correctly
   4. AI tutor hints guide students to choose a method (substitution or elimination) using Socratic prompts without prescribing the next step
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 086-01-PLAN.md — Wave 0 RED test stubs (systemsEquations, registry counts 22→23, skill counts 175→180, wordProblems)
+- [ ] 086-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap)
+- [ ] 086-03-PLAN.md — Word problem prefix templates + manual AI tutor QA (auto-approved)
 
 ### Phase 87: Quadratic Equations Domain
 **Goal**: Students in grades 9-10 can practice factoring and solving quadratic equations with two roots using the multi-select answer format
