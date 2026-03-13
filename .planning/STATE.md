@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: completed
-stopped_at: Completed 082-03-PLAN.md
-last_updated: "2026-03-13T18:17:27.480Z"
-last_activity: 2026-03-13 — Phase 82 Plan 03 complete (6 word problem templates, manual QA sign-off, Phase 82 fully done)
+stopped_at: Completed 083-01-PLAN.md
+last_updated: "2026-03-13T19:03:00Z"
+last_activity: 2026-03-13 — Phase 83 Plan 01 complete (Wave 0 RED test stubs for coordinate_geometry domain, 4 test files updated)
 progress:
   total_phases: 19
   completed_phases: 4
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 
 ## Current Position
 
-Phase: 82 of 91 (Linear Equations Domain)
-Plan: 3 of 3 in current phase
-Status: Phase complete — Plan 03 done
-Last activity: 2026-03-13 — Phase 82 Plan 03 complete (6 word problem templates, manual QA sign-off, Phase 82 fully done)
+Phase: 83 of 91 (Coordinate Geometry Domain)
+Plan: 1 of 3 in current phase
+Status: In progress — Plan 01 done
+Last activity: 2026-03-13 — Phase 83 Plan 01 complete (Wave 0 RED test stubs for coordinate_geometry domain, 4 test files updated)
 
 ```
 v1.2: [#...........] 8% (1/12 phases)
@@ -76,6 +76,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 082]: Skill IDs use bare names (one_step_addition) not namespaced - matches Wave 0 test stubs
 - [Phase 082]: lin_sign_flip uses operands[0] (wrong-op) and operands[1] (constant b) per distractorGenerator call convention
 - [Phase 082-linear-equations-domain]: prefix mode word problems: mode='prefix' prepends context sentence before equation text to avoid {a}/{b} operand mismatch (Pitfall 5)
+- [Phase 083-01]: coordinateGeometry.test.ts uses inline gcd helper — avoids importing from fractions/utils for test-only utility; keeps test self-contained
+- [Phase 083-01]: prerequisiteGating count resolved 151→165 in one step — Phase 82 did not update it, this plan jumps directly to post-Phase-83 value
+- [Phase 083-01]: slope distractor test uses distance skill (integer answer) — FractionAnswer has different generateDistractors path, numeric path is cleaner for Wave 0 stubs
 
 ### Pending Todos
 
@@ -93,7 +96,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T18:09:17.682Z
-Stopped at: Completed 082-03-PLAN.md
+Last session: 2026-03-13T19:03:00Z
+Stopped at: Completed 083-01-PLAN.md
 Resume file: None
 Resume command: /gsd:plan-phase 80

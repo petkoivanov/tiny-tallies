@@ -277,7 +277,7 @@ Plans:
   4. AI tutor hints for coordinate geometry guide students toward the relevant formula without revealing substitution steps
 **Plans**: 3 plans
 Plans:
-- [ ] 083-01-PLAN.md — Wave 0 test stubs (coordinateGeometry, registry counts, prerequisiteGating fix, wordProblems)
+- [x] 083-01-PLAN.md — Wave 0 test stubs (coordinateGeometry, registry counts, prerequisiteGating fix, wordProblems)
 - [ ] 083-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring)
 - [ ] 083-03-PLAN.md — Word problem templates + manual AI tutor QA checkpoint
 
@@ -436,7 +436,7 @@ Plans:
 | 80. Foundation | v1.2 | 0/? | Not started | - |
 | 81. YouTube Video Tutor | v1.2 | 0/4 | Not started | - |
 | 82. Linear Equations Domain | v1.2 | 0/3 | Not started | - |
-| 83. Coordinate Geometry Domain | v1.2 | 0/3 | Not started | - |
+| 83. Coordinate Geometry Domain | v1.2 | 1/3 | In progress | - |
 | 84. Sequences & Series Domain | v1.2 | 0/? | Not started | - |
 | 85. Statistics Extensions Domain | v1.2 | 0/? | Not started | - |
 | 86. Systems of Equations Domain | v1.2 | 0/? | Not started | - |
