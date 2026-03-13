@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: in-progress
-stopped_at: Completed 087-01-PLAN.md
+stopped_at: Completed 087-02-PLAN.md
 last_updated: "2026-03-13T22:44:03.000Z"
-last_activity: 2026-03-13 — Phase 87 Plan 01 complete (RED test stubs for quadratic_equations domain + multiSelect formatter)
+last_activity: 2026-03-13 — Phase 87 Plan 02 complete (quadratic_equations domain handler + multi-select pipeline + tutor safety)
 progress:
   total_phases: 19
   completed_phases: 8
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 ## Current Position
 
 Phase: 87 of 91 (Quadratic Equations Domain)
-Plan: 1 of 3 in current phase
-Status: Phase 087 in progress — Plan 01 done (RED test stubs), Plans 02-03 remaining
-Last activity: 2026-03-13 — Phase 87 Plan 01 complete (RED test stubs for quadratic_equations domain + multiSelect formatter)
+Plan: 2 of 3 in current phase
+Status: Phase 087 in progress — Plan 02 done (domain handler + multi-select pipeline), Plan 03 remaining
+Last activity: 2026-03-13 — Phase 87 Plan 02 complete (quadratic_equations domain handler, formatAsMultiSelect pipeline, tutor safety for multi-root)
 
 ```
 v1.2: [#...........] 8% (1/12 phases)
@@ -99,6 +99,12 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 087-01]: QUADRATIC_EQUATIONS_BUGS import causes RED at module level -- same pattern as prior domains
 - [Phase 087-01]: quadratic_equations gradeMap entry is 9 (Common Core HSA-REI standards start grade 9)
 - [Phase 087-01]: quadratic_equations expectedTypes uses ['multi_select'] -- first domain to exclusively use non-numeric answer type
+- [Phase 087-02]: quad_word_problem skill ID avoids collision with linear_equations bare word_problem ID (same convention as coord_word_problem, sys_word_problem)
+- [Phase 087-02]: formatAsMultiSelect early-return in selectAndFormatAnswer bypasses MC/free-text probability split for multi_select answers
+- [Phase 087-02]: CpaSessionContent multi-select wraps boolean onAnswer: answerNumericValue on correct, NaN on incorrect
+- [Phase 087-02]: checkMultiAnswerLeak loops over all roots, delegates to checkAnswerLeak per value
+- [Phase 087-02]: BoostPromptParams.correctAnswer widened to number | string for answerDisplayValue multi-root output
+- [Phase 087-02]: useTutor TEACH multi-select safety: checkMultiAnswerLeak first, then content-only validation via runSafetyPipeline(mode=boost)
 
 ### Pending Todos
 
@@ -119,7 +125,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T22:44:03.000Z
-Stopped at: Completed 087-01-PLAN.md
+Last session: 2026-03-13T22:56:00.000Z
+Stopped at: Completed 087-02-PLAN.md
 Resume file: None
 Resume command: /gsd:execute-phase 087

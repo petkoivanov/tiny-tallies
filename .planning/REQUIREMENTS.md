@@ -69,7 +69,7 @@
 - [x] **QUAD-02**: Quadratic templates use `MultiSelectAnswer` + `MultiSelectPresentation` — student selects both roots from 4 options
 - [x] **QUAD-03**: Distractor generation for quadratic roots (wrong-sign roots, sum/product confusion bug patterns)
 - [ ] **QUAD-04**: Word problem variants for quadratics (area, projectile contexts)
-- [ ] **QUAD-05**: AI tutor prompt guidance for quadratic equations
+- [x] **QUAD-05**: AI tutor prompt guidance for quadratic equations
 
 ### Polynomial Operations Domain
 

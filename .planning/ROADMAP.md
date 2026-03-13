@@ -339,7 +339,7 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 087-01-PLAN.md — Wave 0 RED test stubs (quadraticEquations, multiSelect, registry counts 23→24, skill counts 180→186, wordProblems)
-- [ ] 087-02-PLAN.md — Core domain + multi-select pipeline (types, skills, templates, bugs, handler, formatAsMultiSelect, CpaSessionContent, tutor safety, wiring)
+- [x] 087-02-PLAN.md — Core domain + multi-select pipeline (types, skills, templates, bugs, handler, formatAsMultiSelect, CpaSessionContent, tutor safety, wiring)
 - [ ] 087-03-PLAN.md — Word problem prefix templates + manual AI tutor QA (auto-approved)
 
 ### Phase 88: Polynomial Operations Domain
