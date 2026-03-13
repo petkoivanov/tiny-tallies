@@ -16,6 +16,7 @@ const ALL_OPERATIONS: MathDomain[] = [
   'data_analysis',
   'linear_equations',
   'coordinate_geometry',
+  'sequences_series',
 ];
 
 describe('Word Problem System', () => {
@@ -284,6 +285,7 @@ describe('Word Problem System', () => {
         data_analysis: 4,
         linear_equations: 6,
         coordinate_geometry: 8,
+        sequences_series: 9,
       };
 
       for (const op of WP_OPERATIONS) {
