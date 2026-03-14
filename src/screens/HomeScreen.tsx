@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Flame, Check, Focus, GitBranch, Palette, Settings, Award, Target, RefreshCw, Star, Compass } from 'lucide-react-native';
+import { Check, Focus, GitBranch, Palette, Settings, Award, Target, RefreshCw, Star, Compass } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { AVATARS, DEFAULT_AVATAR_ID, SPECIAL_AVATARS, FRAMES, resolveAvatar } from '@/store/constants/avatars';
@@ -13,7 +13,7 @@ import { eloToLevel } from '@/services/adaptive/levelMapping';
 import { isSameISOWeek } from '@/services/gamification/weeklyStreak';
 import { BADGES } from '@/services/achievement';
 import { getConfirmedMisconceptions } from '@/store/slices/misconceptionSlice';
-import { DailyChallengeCard } from '@/components/home';
+import { DailyChallengeCard, AnimatedFlame, AnimatedXpBar, AnimatedAvatar, AnimatedChallengeGlow } from '@/components/home';
 import { AppDialog } from '@/components/AppDialog';
 import { useAbsenceCheck } from '@/hooks/useAbsenceCheck';
 import { useTimeControls } from '@/hooks/useTimeControls';
@@ -143,30 +143,6 @@ export default function HomeScreen() {
       fontSize: typography.fontSize.md,
       color: colors.primaryLight,
       marginTop: spacing.xs,
-    },
-    xpBarContainer: {
-      width: '100%',
-      paddingHorizontal: spacing.xl,
-      marginTop: spacing.xs,
-      marginBottom: spacing.xs,
-      gap: spacing.xs,
-    },
-    xpBarTrack: {
-      height: 10,
-      borderRadius: 5,
-      backgroundColor: colors.surface,
-      overflow: 'hidden' as const,
-    },
-    xpBarFill: {
-      height: '100%',
-      borderRadius: 5,
-      backgroundColor: colors.primary,
-    },
-    xpBarLabel: {
-      fontFamily: typography.fontFamily.medium,
-      fontSize: typography.fontSize.xs,
-      color: colors.textSecondary,
-      textAlign: 'center' as const,
     },
     statsRowBadgeText: {
       fontFamily: typography.fontFamily.semiBold,
@@ -349,35 +325,29 @@ export default function HomeScreen() {
 
       {/* Profile Section */}
       <View style={styles.profileSection}>
-        <View style={styles.avatarContainer}>
-          <AvatarCircle
-            emoji={avatar.emoji}
-            size={AVATAR_SIZE}
-            frameColor={frameColor}
-            isSpecial={isSpecial}
-            onPress={() => {
-              if (!isSessionActive) {
-                setSwitcherVisible(true);
-              }
-            }}
-          />
-        </View>
+        <AnimatedAvatar>
+          <View style={styles.avatarContainer}>
+            <AvatarCircle
+              emoji={avatar.emoji}
+              size={AVATAR_SIZE}
+              frameColor={frameColor}
+              isSpecial={isSpecial}
+              onPress={() => {
+                if (!isSessionActive) {
+                  setSwitcherVisible(true);
+                }
+              }}
+            />
+          </View>
+        </AnimatedAvatar>
         <Text style={styles.greeting}>{greeting}</Text>
         {/* Level + XP progress bar */}
         <Text style={styles.statsRowLevel}>Level {level}</Text>
-        <View style={styles.xpBarContainer}>
-          <View style={styles.xpBarTrack}>
-            <View
-              style={[
-                styles.xpBarFill,
-                { width: `${Math.min((xpIntoCurrentLevel / xpNeededForNextLevel) * 100, 100)}%` },
-              ]}
-            />
-          </View>
-          <Text style={styles.xpBarLabel}>
-            {xpIntoCurrentLevel}/{xpNeededForNextLevel} XP
-          </Text>
-        </View>
+        <AnimatedXpBar
+          current={xpIntoCurrentLevel}
+          total={xpNeededForNextLevel}
+          colors={colors}
+        />
         {/* Badge count — motivational when empty */}
         <Text style={styles.statsRowBadgeText}>
           {earnedBadgeCount > 0
@@ -390,11 +360,7 @@ export default function HomeScreen() {
       <View style={styles.statsSection}>
         <View style={styles.streakContainer}>
           <View style={styles.streakRow}>
-            <Flame
-              size={20}
-              color={colors.primaryLight}
-              strokeWidth={2}
-            />
+            <AnimatedFlame size={20} color={colors.primaryLight} />
             <Text style={styles.streakText}>{streakLabel}</Text>
             {practicedThisWeek && (
               <Check size={18} color={colors.correct} strokeWidth={3} />
@@ -523,7 +489,9 @@ export default function HomeScreen() {
 
       {/* Daily Challenge */}
       <View style={styles.challengeSection}>
-        <DailyChallengeCard />
+        <AnimatedChallengeGlow color={colors.primary}>
+          <DailyChallengeCard />
+        </AnimatedChallengeGlow>
       </View>
 
     </ScrollView>

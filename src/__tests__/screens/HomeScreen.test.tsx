@@ -60,10 +60,16 @@ jest.mock('@/services/achievement', () => ({
 
 // Mock ExploreGrid as a simple View with testID
 jest.mock('@/components/home', () => {
-  const { View } = require('react-native');
+  const { View, Text } = require('react-native');
   return {
     ExploreGrid: () => <View testID="explore-grid" />,
     DailyChallengeCard: () => <View testID="daily-challenge-card" />,
+    AnimatedFlame: ({ size, color }: any) => <View testID="animated-flame" />,
+    AnimatedXpBar: ({ current, total }: any) => (
+      <View testID="animated-xp-bar"><Text>{current}/{total} XP</Text></View>
+    ),
+    AnimatedAvatar: ({ children }: any) => <View testID="animated-avatar">{children}</View>,
+    AnimatedChallengeGlow: ({ children }: any) => <View testID="animated-glow">{children}</View>,
   };
 });
 
