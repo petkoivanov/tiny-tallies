@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
 status: completed
-stopped_at: Completed 089-02-PLAN.md
-last_updated: "2026-03-14T02:24:27.000Z"
-last_activity: 2026-03-14 — Phase 89 Plan 02 complete (exponential_functions domain implementation)
+stopped_at: Completed 089-03-PLAN.md
+last_updated: "2026-03-14T02:29:09.538Z"
+last_activity: 2026-03-14 — Phase 89 Plan 02 complete (26th MathDomain, 5 skills, 197 total skills, all tests GREEN)
 progress:
   total_phases: 19
-  completed_phases: 10
-  total_plans: 36
-  completed_plans: 37
+  completed_phases: 11
+  total_plans: 39
+  completed_plans: 38
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 ## Current Position
 
 Phase: 89 of 91 (Exponential Functions Domain)
-Plan: 2 of 3 in current phase
-Status: Plan 089-02 complete — exponential_functions domain implemented with 5 generators, handler, templates, bugs
-Last activity: 2026-03-14 — Phase 89 Plan 02 complete (26th MathDomain, 5 skills, 197 total skills, all tests GREEN)
+Plan: 3 of 3 in current phase (PHASE COMPLETE)
+Status: Phase 89 complete — exponential_functions domain with 5 skills, 3 word problem templates, all EXP requirements satisfied
+Last activity: 2026-03-14 — Phase 89 Plan 03 complete (3 word problem prefix templates, Phase 89 done)
 
 ```
-v1.2: [██████████] 96% (54/56 plans)
+v1.2: [██████████] 98% (55/56 plans)
 ```
 
 ## Performance Metrics
@@ -121,6 +121,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 089-02]: decay_factor uses power-of-2 initial values [64, 128, 256, 512, 1024] to guarantee integer halving at all periods
 - [Phase 089-02]: growth_factor capped at initial [2,5], factor [2,3], periods [2,3] -- max answer 135, well under 2000 bound
 - [Phase 089-02]: exp_word_problem reuses generateGrowthFactor -- Plan 03 prefix templates add contextual text
+- [Phase 089]: exponential_functions word problem templates use prefix mode exclusively (same Pitfall 5 pattern as all HS domains)
+- [Phase 089]: manual QA auto-approved per user pre-authorization; Phase 89 EXP-03 and EXP-04 complete
 
 ### Pending Todos
 
@@ -141,7 +143,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-14T02:24:27.000Z
-Stopped at: Completed 089-02-PLAN.md
+Last session: 2026-03-14T02:29:09.535Z
+Stopped at: Completed 089-03-PLAN.md
 Resume file: None
 Resume command: /gsd:execute-phase 089
