@@ -2,29 +2,56 @@ import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Check } from 'lucide-react-native';
+import LottieView from 'lottie-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { getTodaysChallenge, getTodayDateKey } from '@/services/challenge';
 import type { ChallengeCompletion } from '@/services/challenge';
 import type { ThemeColors } from '@/theme';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const rocketAnim = require('../../../assets/animations/rocket.json');
+
 function ActiveChallengeContent({
-  emoji,
   name,
   accuracyTarget,
   streakTarget,
   styles,
+  colors,
 }: {
-  emoji: string;
   name: string;
   accuracyTarget: number;
   streakTarget: number;
   styles: ReturnType<typeof createStyles>;
+  colors: ThemeColors;
 }) {
   return (
     <>
       <View style={styles.headerRow}>
-        <Text style={styles.emoji}>{emoji}</Text>
+        <LottieView
+          source={rocketAnim}
+          autoPlay
+          loop
+          style={styles.rocketIcon}
+          colorFilters={[
+            { keypath: 'Layer 2', color: colors.primary },
+            { keypath: 'Layer 5', color: colors.primary },
+            { keypath: 'Layer 2.Group 3', color: colors.primaryLight },
+            { keypath: 'Layer 2.Group 5', color: colors.primaryLight },
+            { keypath: 'Layer 2.Group 7', color: colors.primaryLight },
+            { keypath: 'Layer 5.Group 1.Group 1', color: colors.primaryLight },
+            { keypath: 'Layer 2.Group 10', color: colors.primaryDark },
+            { keypath: 'Shape Layer 26', color: colors.primaryLight },
+            { keypath: 'Shape Layer 23', color: colors.primaryLight },
+            { keypath: 'Shape Layer 22', color: colors.primaryLight },
+            { keypath: 'Shape Layer 18', color: colors.primaryLight },
+            { keypath: 'Shape Layer 14', color: colors.primaryLight },
+            { keypath: 'Shape Layer 6', color: colors.primaryLight },
+            { keypath: 'Shape Layer 13', color: colors.primaryLight },
+            { keypath: 'Shape Layer 11', color: colors.primaryLight },
+            { keypath: 'Shape Layer 10', color: colors.primaryLight },
+          ]}
+        />
         <View style={styles.headerText}>
           <Text style={styles.title}>{name}</Text>
           <Text style={styles.subtitle}>Daily Challenge</Text>
@@ -122,6 +149,10 @@ function createStyles(colors: ThemeColors) {
     },
     emoji: {
       fontSize: 32,
+    },
+    rocketIcon: {
+      width: 48,
+      height: 48,
     },
     headerText: {
       flex: 1,
@@ -237,11 +268,11 @@ export function DailyChallengeCard() {
         />
       ) : (
         <ActiveChallengeContent
-          emoji={theme.emoji}
           name={theme.name}
           accuracyTarget={theme.goals.accuracyTarget}
           streakTarget={theme.goals.streakTarget}
           styles={styles}
+          colors={colors}
         />
       )}
     </Pressable>

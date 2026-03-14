@@ -14,10 +14,13 @@ import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AppNavigator from '@/navigation/AppNavigator';
 import { ThemeProvider } from '@/theme';
+import { useAppStore } from '@/store/appStore';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { useSyncTrigger } from '@/hooks/useSyncTrigger';
 import { useReminderInit } from '@/hooks/useReminderInit';
 import { initSentry } from '@/services/sentry/sentryService';
+
+const LIGHT_THEMES = new Set(['candy', 'sky']);
 
 // Initialize Sentry before Sentry.wrap() — must be synchronous at module level
 initSentry();
@@ -32,6 +35,9 @@ function App() {
     Lexend_600SemiBold,
     Lexend_700Bold,
   });
+
+  const themeId = useAppStore((s) => s.themeId) ?? 'candy';
+  const statusBarStyle = LIGHT_THEMES.has(themeId) ? 'dark' : 'light';
 
   useAutoSave();
   useSyncTrigger();
@@ -52,7 +58,7 @@ function App() {
       <SafeAreaProvider>
         <ThemeProvider>
           <NavigationContainer>
-            <StatusBar style="light" />
+            <StatusBar style={statusBarStyle} />
             <AppNavigator />
           </NavigationContainer>
         </ThemeProvider>
