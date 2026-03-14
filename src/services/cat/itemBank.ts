@@ -51,6 +51,15 @@ const DOMAIN_DISCRIMINATION: Record<string, number> = {
   number_theory: 1.1,
   basic_graphs: 0.8,
   data_analysis: 1.0,
+  linear_equations: 1.3,
+  coordinate_geometry: 1.1,
+  sequences_series: 1.2,
+  statistics_hs: 1.0,
+  systems_equations: 1.3,
+  quadratic_equations: 1.4,
+  polynomials: 1.3,
+  exponential_functions: 1.2,
+  logarithms: 1.2,
 };
 
 /**

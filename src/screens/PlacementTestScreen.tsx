@@ -21,7 +21,7 @@ import { generateProblem } from '@/services/mathEngine/generator';
 import { getTemplatesBySkill } from '@/services/mathEngine/templates';
 import { getSkillsByGrade } from '@/services/mathEngine/skills';
 import type { Problem } from '@/services/mathEngine/types';
-import { answerNumericValue } from '@/services/mathEngine/types';
+import { answerNumericValue, MAX_GRADE } from '@/services/mathEngine/types';
 import type { Grade } from '@/services/mathEngine/types';
 import { CharacterReaction } from '@/components/animations/CharacterReaction';
 import { GraphDisplay } from '@/components/session/graphs';
@@ -34,9 +34,6 @@ type PlacementPhase = 'intro' | 'testing' | 'complete';
 
 /** Max questions at a single grade before settling */
 const GRADE_SETTLE_COUNT = 5;
-
-/** Max grade we support */
-const MAX_GRADE = 8;
 
 /** Staircase state — tracks progress through the grade-climbing algorithm */
 interface StaircaseState {
