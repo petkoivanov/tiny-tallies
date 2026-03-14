@@ -7,7 +7,7 @@
  * components positioned over each node (avoids unreliable SVG touch events).
  */
 import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Svg, { Text as SvgText } from 'react-native-svg';
 
 import { SKILLS } from '@/services/mathEngine/skills';
@@ -50,8 +50,8 @@ export function SkillMapGraph({
     [outerFringeIds],
   );
 
-  // Compute node positions
-  const nodePositions = useMemo(
+  // Compute node positions and content width
+  const { nodes: nodePositions, contentWidth } = useMemo(
     () => computeNodePositions(width, height, HEADER_HEIGHT),
     [width, height],
   );
@@ -121,9 +121,10 @@ export function SkillMapGraph({
   const tapSize = Math.max(layout.minTouchTarget, NODE_RADIUS * 2 + 8);
 
   return (
-    <View style={styles.container}>
+    <ScrollView horizontal showsHorizontalScrollIndicator style={styles.scrollContainer}>
+    <View style={[styles.container, { width: contentWidth }]}>
       {/* Background SVG for column headers and grade labels */}
-      <Svg width={width} height={height} style={styles.svgBackground}>
+      <Svg width={contentWidth} height={height} style={styles.svgBackground}>
         {/* Column headers */}
         {Array.from(columnInfo.entries()).map(([col, colX]) => {
           const colColors = (skillMapColors as unknown as Record<string, { light: string }>)[col];
@@ -190,7 +191,7 @@ export function SkillMapGraph({
           isCrossColumn={edge.isCrossColumn}
           isOuterFringeEdge={edge.isOuterFringeEdge}
           entranceDelay={EDGE_BASE_DELAY + index * 15}
-          graphWidth={width}
+          graphWidth={contentWidth}
           graphHeight={height}
         />
       ))}
@@ -234,13 +235,17 @@ export function SkillMapGraph({
         />
       ))}
     </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollContainer: {
     flex: 1,
+  },
+  container: {
     position: 'relative',
+    minHeight: '100%',
   },
   svgBackground: {
     position: 'absolute',

@@ -7,6 +7,9 @@ import type { NodePosition, NodeState, EdgeData } from './skillMapTypes';
 /** Radius of each skill node circle in the SVG. */
 export const NODE_RADIUS = 24;
 
+/** Minimum horizontal spacing between column centers (2 * NODE_RADIUS + 16px gap). */
+export const MIN_COLUMN_SPACING = 64;
+
 /** All unique operations present in the SKILLS array, in display order. */
 const OPERATIONS = (() => {
   const seen = new Set<string>();
@@ -44,18 +47,24 @@ export function getNodeState(
  * Within each column, skills are arranged vertically by their order in the
  * SKILLS array.
  */
+export interface LayoutResult {
+  nodes: NodePosition[];
+  contentWidth: number;
+}
+
 export function computeNodePositions(
   width: number,
   height: number,
   headerHeight: number,
-): NodePosition[] {
+): LayoutResult {
   const positions: NodePosition[] = [];
   const numColumns = OPERATIONS.length;
+  const contentWidth = Math.max(width, (numColumns + 1) * MIN_COLUMN_SPACING);
 
   for (let colIdx = 0; colIdx < numColumns; colIdx++) {
     const operation = OPERATIONS[colIdx];
     const columnSkills = SKILLS.filter((s) => s.operation === operation);
-    const colX = (width * (colIdx + 1)) / (numColumns + 1);
+    const colX = (contentWidth * (colIdx + 1)) / (numColumns + 1);
     const availableHeight = height - headerHeight;
     const rowSpacing = availableHeight / (columnSkills.length + 1);
     const startY = headerHeight + rowSpacing;
@@ -72,7 +81,7 @@ export function computeNodePositions(
     });
   }
 
-  return positions;
+  return { nodes: positions, contentWidth };
 }
 
 /**

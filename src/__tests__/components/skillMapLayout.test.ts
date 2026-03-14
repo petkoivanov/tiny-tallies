@@ -29,6 +29,7 @@ import {
   computeNodePositions,
   computeEdgePaths,
   NODE_RADIUS,
+  MIN_COLUMN_SPACING,
 } from '@/components/skillMap/skillMapLayout';
 import { SKILLS } from '@/services/mathEngine/skills';
 import type { SkillState } from '@/store/slices/skillStatesSlice';
@@ -123,12 +124,12 @@ describe('skillMapLayout', () => {
     const HEADER_HEIGHT = 80;
 
     it('returns one NodePosition per skill', () => {
-      const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
+      const { nodes } = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
       expect(nodes).toHaveLength(SKILLS.length);
     });
 
     it('places addition nodes in a column', () => {
-      const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
+      const { nodes } = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
       const additionSkillCount = SKILLS.filter((s) => s.operation === 'addition').length;
       const additionNodes = nodes.filter((n) => n.column === 'addition');
       expect(additionNodes).toHaveLength(additionSkillCount);
@@ -138,7 +139,7 @@ describe('skillMapLayout', () => {
     });
 
     it('places subtraction nodes in a column', () => {
-      const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
+      const { nodes } = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
       const subSkillCount = SKILLS.filter((s) => s.operation === 'subtraction').length;
       const subtractionNodes = nodes.filter(
         (n) => n.column === 'subtraction',
@@ -150,7 +151,7 @@ describe('skillMapLayout', () => {
     });
 
     it('assigns correct row indices to each column', () => {
-      const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
+      const { nodes } = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
 
       // Addition nodes should have sequential rows
       const additionNodes = nodes
@@ -161,7 +162,7 @@ describe('skillMapLayout', () => {
     });
 
     it('spaces nodes evenly vertically within each column', () => {
-      const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
+      const { nodes } = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
       const additionNodes = nodes
         .filter((n) => n.column === 'addition')
         .sort((a, b) => a.row - b.row);
@@ -177,6 +178,36 @@ describe('skillMapLayout', () => {
         );
       }
     });
+
+    it('content width expands for 27 columns on narrow screen', () => {
+      const narrowWidth = 400;
+      const { nodes, contentWidth } = computeNodePositions(narrowWidth, HEIGHT, HEADER_HEIGHT);
+      const numColumns = new Set(nodes.map((n) => n.column)).size;
+      // Content width must be at least numColumns * MIN_COLUMN_SPACING
+      expect(contentWidth).toBeGreaterThanOrEqual(numColumns * MIN_COLUMN_SPACING);
+      expect(contentWidth).toBeGreaterThan(narrowWidth);
+    });
+
+    it('no two nodes in the same row overlap horizontally', () => {
+      const narrowWidth = 400;
+      const { nodes } = computeNodePositions(narrowWidth, HEIGHT, HEADER_HEIGHT);
+      // Group by row index — nodes with different columns but same row index
+      // should not overlap. Since each column has its own row indices, we check
+      // that no two nodes at the same Y position overlap in X.
+      const byY = new Map<number, number[]>();
+      for (const node of nodes) {
+        const yKey = Math.round(node.y);
+        if (!byY.has(yKey)) byY.set(yKey, []);
+        byY.get(yKey)!.push(node.x);
+      }
+      for (const [, xPositions] of byY) {
+        if (xPositions.length < 2) continue;
+        xPositions.sort((a, b) => a - b);
+        for (let i = 1; i < xPositions.length; i++) {
+          expect(xPositions[i] - xPositions[i - 1]).toBeGreaterThanOrEqual(2 * NODE_RADIUS);
+        }
+      }
+    });
   });
 
   describe('computeEdgePaths', () => {
@@ -185,14 +216,14 @@ describe('skillMapLayout', () => {
     const HEADER_HEIGHT = 80;
 
     it('returns correct total number of edges', () => {
-      const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
+      const { nodes } = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
       const edges = computeEdgePaths(nodes, NODE_RADIUS);
       const expected = countPrerequisiteEdges();
       expect(edges).toHaveLength(expected.total);
     });
 
     it('has correct same-column and cross-column edge counts', () => {
-      const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
+      const { nodes } = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
       const edges = computeEdgePaths(nodes, NODE_RADIUS);
       const sameColumn = edges.filter((e) => !e.isCrossColumn);
       const crossColumn = edges.filter((e) => e.isCrossColumn);
@@ -202,7 +233,7 @@ describe('skillMapLayout', () => {
     });
 
     it('each edge has valid fromPos/toPos and SVG path string', () => {
-      const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
+      const { nodes } = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
       const edges = computeEdgePaths(nodes, NODE_RADIUS);
       edges.forEach((edge) => {
         expect(edge.fromPos).toHaveProperty('x');
@@ -216,7 +247,7 @@ describe('skillMapLayout', () => {
     });
 
     it('same-column edges use straight lines (L command)', () => {
-      const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
+      const { nodes } = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
       const edges = computeEdgePaths(nodes, NODE_RADIUS);
       const sameColumn = edges.filter((e) => !e.isCrossColumn);
       sameColumn.forEach((edge) => {
@@ -225,7 +256,7 @@ describe('skillMapLayout', () => {
     });
 
     it('cross-column edges use quadratic bezier (Q command)', () => {
-      const nodes = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
+      const { nodes } = computeNodePositions(WIDTH, HEIGHT, HEADER_HEIGHT);
       const edges = computeEdgePaths(nodes, NODE_RADIUS);
       const crossColumn = edges.filter((e) => e.isCrossColumn);
       crossColumn.forEach((edge) => {

@@ -7,8 +7,10 @@ export type {
 
 export { skillMapColors, getNodeColor } from './skillMapColors';
 
+export type { LayoutResult } from './skillMapLayout';
 export {
   NODE_RADIUS,
+  MIN_COLUMN_SPACING,
   getNodeState,
   computeNodePositions,
   computeEdgePaths,
