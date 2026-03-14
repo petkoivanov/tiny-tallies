@@ -27,6 +27,7 @@ import { STATISTICS_HS_SKILLS } from './statisticsHs';
 import { SYSTEMS_EQUATIONS_SKILLS } from './systemsEquations';
 import { QUADRATIC_EQUATIONS_SKILLS } from './quadraticEquations';
 import { POLYNOMIALS_SKILLS } from './polynomials';
+import { EXPONENTIAL_FUNCTIONS_SKILLS } from './exponentialFunctions';
 
 export const SKILLS: readonly SkillDefinition[] = [
   ...ADDITION_SKILLS,
@@ -56,6 +57,7 @@ export const SKILLS: readonly SkillDefinition[] = [
   ...SYSTEMS_EQUATIONS_SKILLS,
   ...QUADRATIC_EQUATIONS_SKILLS,
   ...POLYNOMIALS_SKILLS,
+  ...EXPONENTIAL_FUNCTIONS_SKILLS,
 ];
 
 export function getSkillById(id: string): SkillDefinition | undefined {
@@ -100,4 +102,5 @@ export {
   SYSTEMS_EQUATIONS_SKILLS,
   QUADRATIC_EQUATIONS_SKILLS,
   POLYNOMIALS_SKILLS,
+  EXPONENTIAL_FUNCTIONS_SKILLS,
 };

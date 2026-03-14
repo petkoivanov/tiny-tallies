@@ -28,6 +28,7 @@ export { STATISTICS_HS_BUGS } from './statisticsHsBugs';
 export { SYSTEMS_EQUATIONS_BUGS } from './systemsEquationsBugs';
 export { QUADRATIC_EQUATIONS_BUGS } from './quadraticEquationsBugs';
 export { POLYNOMIALS_BUGS } from './polynomialsBugs';
+export { EXPONENTIAL_FUNCTIONS_BUGS } from './exponentialFunctionsBugs';
 
 // Validation utilities
 export { isValidDistractor, shuffleArray } from './validation';

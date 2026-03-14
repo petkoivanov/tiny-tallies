@@ -40,6 +40,7 @@ const DOMAIN_LABELS: Record<MathDomain, string> = {
   systems_equations: 'Systems of Equations',
   quadratic_equations: 'Quadratic Equations',
   polynomials: 'Polynomials',
+  exponential_functions: 'Exponential Functions',
 };
 
 const DOMAIN_ORDER: MathDomain[] = [
@@ -68,6 +69,7 @@ const DOMAIN_ORDER: MathDomain[] = [
   'systems_equations',
   'quadratic_equations',
   'polynomials',
+  'exponential_functions',
 ];
 
 interface DomainData {
