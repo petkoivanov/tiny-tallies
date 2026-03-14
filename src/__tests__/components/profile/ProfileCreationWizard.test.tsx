@@ -10,6 +10,9 @@ jest.mock('lucide-react-native', () => {
     Check: (props: any) => <View testID="check-icon" {...props} />,
     X: (props: any) => <View testID="x-icon" {...props} />,
     PlayCircle: (props: any) => <View testID="play-circle-icon" {...props} />,
+    BookOpen: (props: any) => <View testID="book-open-icon" {...props} />,
+    Shield: (props: any) => <View testID="shield-icon" {...props} />,
+    BarChart3: (props: any) => <View testID="bar-chart-icon" {...props} />,
   };
 });
 
@@ -274,7 +277,7 @@ describe('ProfileCreationWizard', () => {
       goToAvatar(getByPlaceholderText, getByText, getAllByText);
       fireEvent.press(getByText('Next'));
 
-      expect(getByText(/unlock video/i)).toBeTruthy();
+      expect(getByText(/secret weapon/i)).toBeTruthy();
     });
 
     it('calls onComplete with null avatarId and stateCode when skipped', () => {
@@ -349,7 +352,7 @@ describe('ProfileCreationWizard', () => {
 
       goToYoutube(getByPlaceholderText, getByText, getAllByText);
 
-      expect(getByText(/unlock video/i)).toBeTruthy();
+      expect(getByText(/secret weapon/i)).toBeTruthy();
       const toggle = getByTestId('youtube-consent-onboarding');
       expect(toggle.props.value).toBe(false);
     });

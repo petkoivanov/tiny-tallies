@@ -1,16 +1,9 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { Linking } from 'react-native';
+import { render, fireEvent, act } from '@testing-library/react-native';
 
-// Mock react-native-webview (native module)
-jest.mock('react-native-webview', () => {
-  const React = require('react');
-  const { View } = require('react-native');
-  return {
-    __esModule: true,
-    default: ({ testID }: { testID?: string }) =>
-      React.createElement(View, { testID: testID ?? 'webview' }),
-  };
-});
+// Mock Linking.openURL
+jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
 
 // Mock videoMap so tests control which domains have videos
 jest.mock('@/services/video/videoMap', () => ({
@@ -18,11 +11,6 @@ jest.mock('@/services/video/videoMap', () => ({
     addition: 'abc123',
     // all other domains intentionally absent — tests use 'addition' or 'fractions'
   },
-}));
-
-// Mock youtubeHtml service (used by VideoPlayer)
-jest.mock('@/services/video/youtubeHtml', () => ({
-  buildNocookieHtml: (videoId: string) => `<html>${videoId}</html>`,
 }));
 
 // Mock lucide-react-native icons used by VideoVoteButtons
@@ -100,6 +88,7 @@ const BASE_PROPS = {
 describe('ChatPanel video section — button visibility (VIDEO-02)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (Linking.openURL as jest.Mock).mockResolvedValue(true);
   });
 
   it('does NOT show watch button when ladderExhausted=false', () => {
@@ -163,7 +152,7 @@ describe('ChatPanel video section — button visibility (VIDEO-02)', () => {
     expect(getByTestId('chat-watch-video-button')).toBeTruthy();
   });
 
-  it('shows VideoPlayer after pressing watch button', () => {
+  it('opens YouTube via Linking and shows done button after pressing watch', async () => {
     const { getByTestId } = render(
       <ChatPanel
         {...BASE_PROPS}
@@ -172,11 +161,14 @@ describe('ChatPanel video section — button visibility (VIDEO-02)', () => {
         currentDomain="addition"
       />,
     );
-    fireEvent.press(getByTestId('chat-watch-video-button'));
-    expect(getByTestId('youtube-webview')).toBeTruthy();
+    await act(async () => {
+      fireEvent.press(getByTestId('chat-watch-video-button'));
+    });
+    expect(Linking.openURL).toHaveBeenCalledWith('https://www.youtube.com/watch?v=abc123');
+    expect(getByTestId('youtube-done-button')).toBeTruthy();
   });
 
-  it('shows VideoVoteButtons after pressing Done watching', () => {
+  it('shows VideoVoteButtons after pressing Done watching', async () => {
     const { getByTestId, queryByTestId } = render(
       <ChatPanel
         {...BASE_PROPS}
@@ -186,13 +178,15 @@ describe('ChatPanel video section — button visibility (VIDEO-02)', () => {
         onVideoVote={jest.fn()}
       />,
     );
-    fireEvent.press(getByTestId('chat-watch-video-button'));
+    await act(async () => {
+      fireEvent.press(getByTestId('chat-watch-video-button'));
+    });
     fireEvent.press(getByTestId('youtube-done-button'));
     expect(getByTestId('video-vote-helpful')).toBeTruthy();
-    expect(queryByTestId('youtube-webview')).toBeNull();
+    expect(queryByTestId('youtube-done-button')).toBeNull();
   });
 
-  it('fires onVideoVote with domain and vote when vote button pressed', () => {
+  it('fires onVideoVote with domain and vote when vote button pressed', async () => {
     const onVideoVote = jest.fn();
     const { getByTestId } = render(
       <ChatPanel
@@ -203,7 +197,9 @@ describe('ChatPanel video section — button visibility (VIDEO-02)', () => {
         onVideoVote={onVideoVote}
       />,
     );
-    fireEvent.press(getByTestId('chat-watch-video-button'));
+    await act(async () => {
+      fireEvent.press(getByTestId('chat-watch-video-button'));
+    });
     fireEvent.press(getByTestId('youtube-done-button'));
     fireEvent.press(getByTestId('video-vote-helpful'));
     expect(onVideoVote).toHaveBeenCalledWith('addition', 'helpful');

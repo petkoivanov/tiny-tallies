@@ -8,7 +8,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { ChevronLeft, ChevronRight, Check, PlayCircle } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Check, PlayCircle, BookOpen, Shield, BarChart3 } from 'lucide-react-native';
 import { useTheme } from '@/theme';
 import { AvatarCircle } from '@/components/avatars';
 import { StateSelector } from '@/components/shared/StateSelector';
@@ -381,24 +381,41 @@ export function ProfileCreationWizard({
 
       {step === 'youtube' && (
         <View style={styles.stepContainer}>
-          <PlayCircle size={48} color={colors.primary} style={{ marginBottom: 16 }} />
-          <Text style={[styles.heading, { color: colors.textPrimary }]}>
-            Unlock video support
+          <PlayCircle size={48} color={colors.primary} style={{ marginBottom: 12 }} />
+          <Text style={[styles.heading, { color: colors.textPrimary, marginBottom: 8 }]}>
+            Give {trimmedName} a secret weapon
           </Text>
-          <Text style={[styles.locationSubtext, { color: colors.textSecondary, marginBottom: 24, paddingHorizontal: 8 }]}>
-            When {trimmedName} gets stuck, we can show a short educational video
-            from Khan Academy — hand-picked for the exact topic they're struggling
-            with.{'\n\n'}
-            You'll see which videos were watched and whether they helped in your
-            Parent Report. You're always in control.
+          <Text style={[styles.locationSubtext, { color: colors.textSecondary, marginBottom: 20 }]}>
+            When {trimmedName} gets stuck, a short Khan Academy video
+            — matched to the exact topic — can turn confusion into an "aha!" moment.
           </Text>
-          <View style={[styles.youtubeToggleRow, { backgroundColor: colors.surface, borderRadius: 12 }]}>
+          <View style={[styles.benefitList, { backgroundColor: colors.surface, borderRadius: 12 }]}>
+            <View style={styles.benefitRow}>
+              <BookOpen size={20} color={colors.primary} />
+              <Text style={[styles.benefitText, { color: colors.textPrimary }]}>
+                Curated from Khan Academy — trusted by millions of parents
+              </Text>
+            </View>
+            <View style={styles.benefitRow}>
+              <BarChart3 size={20} color={colors.primary} />
+              <Text style={[styles.benefitText, { color: colors.textPrimary }]}>
+                See what {trimmedName} watched and if it helped in your Parent Report
+              </Text>
+            </View>
+            <View style={styles.benefitRow}>
+              <Shield size={20} color={colors.primary} />
+              <Text style={[styles.benefitText, { color: colors.textPrimary }]}>
+                No ads, no recommendations — just the lesson they need
+              </Text>
+            </View>
+          </View>
+          <View style={[styles.youtubeToggleRow, { backgroundColor: youtubeConsent ? `${colors.primaryLight}20` : colors.surface, borderRadius: 12 }]}>
             <View style={{ flex: 1 }}>
               <Text style={[styles.navButtonText, { color: colors.textPrimary, fontSize: 16 }]}>
-                Enable instructional videos
+                Enable video lessons
               </Text>
               <Text style={[styles.charCount, { color: colors.textSecondary, marginTop: 2 }]}>
-                Can be changed anytime in Parental Controls
+                Change anytime in Parental Controls
               </Text>
             </View>
             <Switch
@@ -458,6 +475,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center', gap: 12, marginBottom: 24,
   },
   avatarCell: { padding: 4, alignItems: 'center', justifyContent: 'center' },
+  benefitList: {
+    width: '100%', padding: 16, gap: 14, marginBottom: 16,
+  },
+  benefitRow: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 12,
+  },
+  benefitText: {
+    fontSize: 14, lineHeight: 20, flex: 1,
+  },
   youtubeToggleRow: {
     flexDirection: 'row', alignItems: 'center',
     padding: 16, gap: 12, width: '100%', marginBottom: 24,
