@@ -28,6 +28,7 @@ import { systemsEquationsHandler } from './systemsEquations';
 import { quadraticEquationsHandler } from './quadraticEquations';
 import { polynomialsHandler } from './polynomials';
 import { exponentialFunctionsHandler } from './exponentialFunctions';
+import { logarithmsHandler } from './logarithms';
 
 const HANDLERS: Record<MathDomain, DomainHandler> = {
   addition: arithmeticHandler,
@@ -56,6 +57,7 @@ const HANDLERS: Record<MathDomain, DomainHandler> = {
   quadratic_equations: quadraticEquationsHandler,
   polynomials: polynomialsHandler,
   exponential_functions: exponentialFunctionsHandler,
+  logarithms: logarithmsHandler,
 };
 
 /** Get the domain handler for a given operation */

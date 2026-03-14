@@ -1,0 +1,48 @@
+import type { ProblemTemplate } from '../types';
+
+export const LOGARITHMS_TEMPLATES: readonly ProblemTemplate[] = [
+  {
+    id: 'log10_eval_template',
+    operation: 'logarithms',
+    skillId: 'log10_eval',
+    grades: [10],
+    baseElo: 1000,
+    digitCount: 1,
+    distractorStrategy: 'domain_specific',
+    standards: ['HSF-BF.B.5'],
+    domainConfig: { type: 'log10_eval' },
+  },
+  {
+    id: 'log2_eval_template',
+    operation: 'logarithms',
+    skillId: 'log2_eval',
+    grades: [10],
+    baseElo: 1050,
+    digitCount: 1,
+    distractorStrategy: 'domain_specific',
+    standards: ['HSF-BF.B.5'],
+    domainConfig: { type: 'log2_eval' },
+  },
+  {
+    id: 'ln_eval_template',
+    operation: 'logarithms',
+    skillId: 'ln_eval',
+    grades: [11],
+    baseElo: 1100,
+    digitCount: 1,
+    distractorStrategy: 'domain_specific',
+    standards: ['HSF-BF.B.5'],
+    domainConfig: { type: 'ln_eval' },
+  },
+  {
+    id: 'log_word_problem_template',
+    operation: 'logarithms',
+    skillId: 'log_word_problem',
+    grades: [10],
+    baseElo: 1150,
+    digitCount: 1,
+    distractorStrategy: 'domain_specific',
+    standards: ['HSF-BF.B.5'],
+    domainConfig: { type: 'word_problem' },
+  },
+] as const;

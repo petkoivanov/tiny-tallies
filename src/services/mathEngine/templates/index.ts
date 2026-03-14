@@ -27,6 +27,7 @@ import { SYSTEMS_EQUATIONS_TEMPLATES } from './systemsEquations';
 import { QUADRATIC_EQUATIONS_TEMPLATES } from './quadraticEquations';
 import { POLYNOMIALS_TEMPLATES } from './polynomials';
 import { EXPONENTIAL_FUNCTIONS_TEMPLATES } from './exponentialFunctions';
+import { LOGARITHMS_TEMPLATES } from './logarithms';
 
 export const ALL_TEMPLATES: readonly ProblemTemplate[] = [
   ...ADDITION_TEMPLATES,
@@ -57,6 +58,7 @@ export const ALL_TEMPLATES: readonly ProblemTemplate[] = [
   ...QUADRATIC_EQUATIONS_TEMPLATES,
   ...POLYNOMIALS_TEMPLATES,
   ...EXPONENTIAL_FUNCTIONS_TEMPLATES,
+  ...LOGARITHMS_TEMPLATES,
 ];
 
 export function findTemplate(templateId: string): ProblemTemplate {
@@ -107,3 +109,4 @@ export { SYSTEMS_EQUATIONS_TEMPLATES } from './systemsEquations';
 export { QUADRATIC_EQUATIONS_TEMPLATES } from './quadraticEquations';
 export { POLYNOMIALS_TEMPLATES } from './polynomials';
 export { EXPONENTIAL_FUNCTIONS_TEMPLATES } from './exponentialFunctions';
+export { LOGARITHMS_TEMPLATES } from './logarithms';
