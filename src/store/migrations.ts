@@ -17,7 +17,7 @@ export function migrateStore(
   const state = (persistedState ?? {}) as Record<string, unknown>;
 
   // Fast path: skip all checks when store is already current
-  if (version >= 23) return state;
+  if (version >= 24) return state;
 
   if (version < 2) {
     // v1 -> v2: First persistence enablement.
@@ -201,6 +201,17 @@ export function migrateStore(
     // v22 -> v23: YouTube video tutor — add per-child consent and vote tracking
     state.youtubeConsentGranted ??= false;  // explicit parent opt-in required
     state.videoVotes ??= {};
+  }
+
+  if (version < 24) {
+    // v23 -> v24: HS placement re-assessment for grade-8 users.
+    // Users whose placement capped at grade 8 can now be placed into grades 9-12.
+    // Reset placementComplete so they get a re-assessment prompt covering HS content.
+    const pg = state.placementGrade as number | null;
+    if (pg !== null && pg >= 8) {
+      state.placementComplete = false;
+      // Keep placementGrade as a hint for the staircase start point
+    }
   }
 
   return state;

@@ -82,8 +82,8 @@ describe('appStore composition', () => {
     expect(useAppStore.getState().xp).toBe(35);
   });
 
-  it('STORE_VERSION equals 23', () => {
-    expect(STORE_VERSION).toBe(23);
+  it('STORE_VERSION equals 24', () => {
+    expect(STORE_VERSION).toBe(24);
   });
 });
 
@@ -402,6 +402,38 @@ describe('store migrations', () => {
     expect(result.childName).toBe('Luna');
     expect(result.xp).toBe(100);
     expect(result.skillStates).toEqual({});
+  });
+
+  it('v24 migration resets placementComplete for grade-8 users', () => {
+    const input = {
+      placementGrade: 8,
+      placementComplete: true,
+      placementTheta: 1.5,
+    };
+    const result = migrateStore(input, 23);
+    expect(result.placementComplete).toBe(false);
+    expect(result.placementGrade).toBe(8);
+  });
+
+  it('v24 migration does not affect grade-6 users', () => {
+    const input = {
+      placementGrade: 6,
+      placementComplete: true,
+      placementTheta: 0.5,
+    };
+    const result = migrateStore(input, 23);
+    expect(result.placementComplete).toBe(true);
+    expect(result.placementGrade).toBe(6);
+  });
+
+  it('v24 migration is no-op for null placementGrade', () => {
+    const input = {
+      placementGrade: null,
+      placementComplete: false,
+    };
+    const result = migrateStore(input, 23);
+    expect(result.placementComplete).toBe(false);
+    expect(result.placementGrade).toBeNull();
   });
 
   it('migrateStore handles null persistedState', () => {
