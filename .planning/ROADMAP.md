@@ -381,7 +381,11 @@ Plans:
   2. Templates cover log₁₀, log₂, and ln at integer powers without requiring log-law symbolic manipulation
   3. Word problem variants (pH, decibel, Richter scale contexts) generate correctly
   4. AI tutor hints guide students to reason about "what power gives this result" using Socratic questioning
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 090-01-PLAN.md — Wave 0 RED test stubs (logarithms, registry counts 26→27, skill counts 197→201, wordProblems)
+- [ ] 090-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap)
+- [ ] 090-03-PLAN.md — Word problem prefix templates + manual AI tutor QA (auto-approved)
 
 ### Phase 91: Integration & Placement
 **Goal**: All 9 new high school domains are reachable through the placement staircase and prerequisite graph, and existing users capped at grade 8 can be re-assessed into grade 9-12 content
@@ -467,5 +471,5 @@ Plans:
 | 87. Quadratic Equations Domain | v1.2 | 0/3 | Not started | - |
 | 88. Polynomial Operations Domain | v1.2 | 0/3 | Not started | - |
 | 89. Exponential Functions Domain | v1.2 | 2/3 | In progress | - |
-| 90. Logarithms Domain | v1.2 | 0/? | Not started | - |
+| 90. Logarithms Domain | v1.2 | 0/3 | Not started | - |
 | 91. Integration & Placement | v1.2 | 0/? | Not started | - |
