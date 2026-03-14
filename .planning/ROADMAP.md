@@ -117,7 +117,7 @@
 - [ ] **Phase 88: Polynomial Operations Domain** - polynomials domain handler, templates, bug patterns, word problems, tutor guidance (G9-10)
 - [ ] **Phase 89: Exponential Functions Domain** - exponential_functions domain handler, templates, bug patterns, word problems, tutor guidance (G9-11)
 - [ ] **Phase 90: Logarithms Domain** - logarithms domain handler, templates, bug patterns, word problems, tutor guidance (G10-11)
-- [ ] **Phase 91: Integration & Placement** - Placement staircase to grade 12, prerequisite DAG HS edges, skill map layout, existing-user migration, domain intro strings
+- [x] **Phase 91: Integration & Placement** - Placement staircase to grade 12, prerequisite DAG HS edges, skill map layout, existing-user migration, domain intro strings
 
 ## Phase Details
 
@@ -400,7 +400,7 @@ Plans:
 **Plans**: 2 plans
 Plans:
 - [x] 091-01-PLAN.md — Placement staircase to grade 12, store migration v24, intro string verification
-- [ ] 091-02-PLAN.md — Prerequisite DAG HS edges, skill map 27-column horizontal scroll layout
+- [x] 091-02-PLAN.md — Prerequisite DAG HS edges, skill map 27-column horizontal scroll layout
 
 ## Progress
 
@@ -475,4 +475,4 @@ Plans:
 | 88. Polynomial Operations Domain | v1.2 | 0/3 | Not started | - |
 | 89. Exponential Functions Domain | v1.2 | 2/3 | In progress | - |
 | 90. Logarithms Domain | v1.2 | 0/3 | Not started | - |
-| 91. Integration & Placement | v1.2 | 0/2 | Not started | - |
+| 91. Integration & Placement | v1.2 | 2/2 | Complete | 2026-03-14 |

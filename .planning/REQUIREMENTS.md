@@ -95,8 +95,8 @@
 ### Integration & Placement
 
 - [x] **INT-01**: Placement staircase extended to grade 12 — `MAX_GRADE = 12`, HS skills registered so staircase can sample them
-- [ ] **INT-02**: Prerequisite DAG edges wired for HS skills (linear_equations → systems_equations → quadratic_equations → polynomials)
-- [ ] **INT-03**: Skill map layout updated to accommodate 27 total domains without overflow
+- [x] **INT-02**: Prerequisite DAG edges wired for HS skills (linear_equations → systems_equations → quadratic_equations → polynomials)
+- [x] **INT-03**: Skill map layout updated to accommodate 27 total domains without overflow
 - [x] **INT-04**: Existing-user store migration — users previously capped at grade 8 can be placed into grade 9-12 via re-assessment trigger
 - [x] **INT-05**: `problemIntro.ts` updated with domain intro strings for all 9 new HS domains
 

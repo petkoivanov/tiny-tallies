@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
-status: in-progress
-stopped_at: Completed 091-01-PLAN.md
-last_updated: "2026-03-13T21:32:30Z"
-last_activity: 2026-03-13 — Phase 91 Plan 01 complete (placement staircase grade 12, v24 migration, problemIntro coverage)
+status: completed
+stopped_at: Completed 091-02-PLAN.md
+last_updated: "2026-03-14T03:12:00Z"
+last_activity: 2026-03-14 — Phase 91 Plan 02 complete (HS prerequisite DAG, skill map 27-column layout)
 progress:
   total_phases: 19
-  completed_phases: 12
+  completed_phases: 13
   total_plans: 44
-  completed_plans: 42
+  completed_plans: 43
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 ## Current Position
 
 Phase: 91 of 91 (Integration & Placement)
-Plan: 1 of 2 in current phase
-Status: Plan 01 complete — placement staircase extended to grade 12, v24 migration, problemIntro verified
-Last activity: 2026-03-13 — Phase 91 Plan 01 complete (placement staircase grade 12, v24 migration, problemIntro coverage)
+Plan: 2 of 2 in current phase (COMPLETE)
+Status: Phase 91 complete — cross-domain prerequisite edges wired, skill map 27-column horizontal scroll
+Last activity: 2026-03-14 — Phase 91 Plan 02 complete (HS prerequisite DAG, skill map 27-column layout)
 
 ```
-v1.2: [██████████] 97% (59/61 plans)
+v1.2: [██████████] 100% (61/61 plans)
 ```
 
 ## Performance Metrics
@@ -131,6 +131,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 090-02]: log_word_problem reuses generateLog10Eval -- Plan 03 prefix templates add contextual text
 - [Phase 090]: logarithms word problem templates use prefix mode exclusively (same Pitfall 5 pattern as all HS domains)
 - [Phase 090]: manual QA auto-approved per user pre-authorization; Phase 90 LOG-03 and LOG-04 complete
+- [Phase 091-02]: Used exponents.evaluate (not plan's exponents.integer-exponent) as prerequisite for exp_evaluate -- plan referenced non-existent skill ID
+- [Phase 091-02]: computeNodePositions returns LayoutResult { nodes, contentWidth } -- enables dynamic SVG width for horizontal scrolling
 - [Phase 091-01]: v24 migration conditionally resets placementComplete for placementGrade >= 8; preserves placementGrade as staircase start hint
 
 ### Pending Todos
@@ -152,7 +154,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T21:32:30Z
-Stopped at: Completed 091-01-PLAN.md
+Last session: 2026-03-14T03:12:00Z
+Stopped at: Completed 091-02-PLAN.md
 Resume file: None
 Resume command: /gsd:execute-phase 091
