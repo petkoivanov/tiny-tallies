@@ -384,7 +384,7 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 090-01-PLAN.md — Wave 0 RED test stubs (logarithms, registry counts 26→27, skill counts 197→201, wordProblems)
-- [ ] 090-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap)
+- [x] 090-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap)
 - [ ] 090-03-PLAN.md — Word problem prefix templates + manual AI tutor QA (auto-approved)
 
 ### Phase 91: Integration & Placement
