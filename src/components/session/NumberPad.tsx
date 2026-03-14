@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -37,9 +37,12 @@ export function NumberPad({
 }: NumberPadProps) {
   const { colors } = useTheme();
   const [value, setValue] = useState('');
+  const [locked, setLocked] = useState(false);
+  const submittedRef = useRef(false);
 
   const handlePress = useCallback(
     (key: string) => {
+      if (submittedRef.current) return;
       if (key === '⌫') {
         setValue((prev) => prev.slice(0, -1));
         return;
@@ -66,16 +69,17 @@ export function NumberPad({
   );
 
   const handleSubmit = useCallback(() => {
-    if (value.length > 0) {
+    if (value.length > 0 && !submittedRef.current) {
+      submittedRef.current = true;
+      setLocked(true);
       onSubmit(value);
-      setValue('');
     }
   }, [value, onSubmit]);
 
   const hasValue = value.length > 0;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, locked && { opacity: 0.5 }]}>
       {/* Display row: [display] [⌫] [✓] */}
       <View style={styles.displayRow}>
         <View

@@ -449,6 +449,7 @@ export function CpaSessionContent({
     if (isFreeText) {
       return (
         <NumberPad
+          key={currentIndex}
           onSubmit={handleFreeTextSubmit}
           maxDigits={presentation.format === 'free_text' ? presentation.maxDigits : 5}
           showDecimal={presentation.format === 'free_text' && presentation.allowDecimal}

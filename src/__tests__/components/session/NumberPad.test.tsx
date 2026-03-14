@@ -85,12 +85,20 @@ describe('NumberPad allowNegative', () => {
     expect(getByTestId('numberpad-display').props.children).toBe('5');
   });
 
-  it('pressing ± on empty value is a no-op', () => {
+  it('pressing ± on empty value starts negative entry', () => {
     const { getByText, getByTestId } = render(
       <NumberPad onSubmit={onSubmit} allowNegative={true} />,
     );
     fireEvent.press(getByText('±'));
-    // Display should remain the placeholder '?'
+    expect(getByTestId('numberpad-display').props.children).toBe('-');
+  });
+
+  it('pressing ± twice on empty value toggles back to placeholder', () => {
+    const { getByText, getByTestId } = render(
+      <NumberPad onSubmit={onSubmit} allowNegative={true} />,
+    );
+    fireEvent.press(getByText('±'));
+    fireEvent.press(getByText('±'));
     expect(getByTestId('numberpad-display').props.children).toBe('?');
   });
 
@@ -116,5 +124,26 @@ describe('NumberPad allowNegative', () => {
     // Try to append another digit
     fireEvent.press(getByTestId('numpad-key-1'));
     expect(getByTestId('numberpad-display').props.children).toBe('-99');
+  });
+
+  it('keeps submitted value visible in display after submit', () => {
+    const { getByTestId } = render(
+      <NumberPad onSubmit={onSubmit} />,
+    );
+    fireEvent.press(getByTestId('numpad-key-4'));
+    fireEvent.press(getByTestId('numpad-key-2'));
+    fireEvent.press(getByTestId('numpad-submit'));
+    expect(onSubmit).toHaveBeenCalledWith('42');
+    expect(getByTestId('numberpad-display').props.children).toBe('42');
+  });
+
+  it('ignores key presses after submit', () => {
+    const { getByTestId } = render(
+      <NumberPad onSubmit={onSubmit} />,
+    );
+    fireEvent.press(getByTestId('numpad-key-7'));
+    fireEvent.press(getByTestId('numpad-submit'));
+    fireEvent.press(getByTestId('numpad-key-3'));
+    expect(getByTestId('numberpad-display').props.children).toBe('7');
   });
 });

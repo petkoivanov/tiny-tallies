@@ -188,95 +188,39 @@ describe('CpaSessionContent', () => {
       expect(queryByTestId('pictorial-diagram')).toBeNull();
       expect(queryByTestId('compact-answer-row')).toBeNull();
 
-      // "Need help?" is available (resolves via getPrimaryManipulative)
-      expect(getByTestId('need-help-button')).toBeTruthy();
+      // "Need help?" / "Show me!" is currently disabled (SHOW_ME_ENABLED = false)
+      expect(queryByTestId('need-help-button')).toBeNull();
     });
   });
 
   describe('concrete mode', () => {
-    it('shows "Need help?" and no panel by default', () => {
+    it('shows no panel by default (Show Me disabled)', () => {
       mockCpaModeResult = { stage: 'concrete', manipulativeType: 'counters' };
 
-      const { getByTestId, queryByTestId } = render(
+      const { queryByTestId } = render(
         <CpaSessionContent {...baseProps} />,
       );
 
-      // Panel not visible until help requested
+      // Panel and "Need help?" hidden while SHOW_ME_ENABLED = false
       expect(queryByTestId('manipulative-panel')).toBeNull();
-      expect(getByTestId('need-help-button')).toBeTruthy();
-    });
-
-    it('"Need help?" expands ManipulativePanel and shows CompactAnswerRow', () => {
-      mockCpaModeResult = { stage: 'concrete', manipulativeType: 'counters' };
-
-      const { getByTestId, queryAllByTestId } = render(
-        <CpaSessionContent {...baseProps} />,
-      );
-
-      fireEvent.press(getByTestId('need-help-button'));
-
-      expect(getByTestId('manipulative-panel')).toBeTruthy();
-      expect(getByTestId('panel-expanded').props.children).toBe('true');
-      expect(getByTestId('compact-answer-row')).toBeTruthy();
-      expect(queryAllByTestId(/^answer-option-/)).toHaveLength(0);
+      expect(queryByTestId('need-help-button')).toBeNull();
     });
   });
 
   describe('pictorial mode', () => {
-    it('renders PictorialDiagram and "Need help?" button', () => {
+    it('renders PictorialDiagram for supported operations', () => {
       mockCpaModeResult = {
         stage: 'pictorial',
         manipulativeType: 'counters',
       };
 
-      const { getByTestId, getByText } = render(
+      const { getByTestId, queryByTestId } = render(
         <CpaSessionContent {...baseProps} />,
       );
 
       expect(getByTestId('pictorial-diagram')).toBeTruthy();
-      expect(getByText('Show me!')).toBeTruthy();
-      expect(getByTestId('need-help-button')).toBeTruthy();
-    });
-
-    it('"Need help?" button triggers panel expansion', () => {
-      mockCpaModeResult = {
-        stage: 'pictorial',
-        manipulativeType: 'counters',
-      };
-
-      const { getByTestId, queryByTestId } = render(
-        <CpaSessionContent {...baseProps} />,
-      );
-
-      // Panel should not be visible initially
-      expect(queryByTestId('manipulative-panel')).toBeNull();
-
-      // Tap "Need help?"
-      fireEvent.press(getByTestId('need-help-button'));
-
-      // Now panel should be visible and expanded
-      expect(getByTestId('manipulative-panel')).toBeTruthy();
-      expect(getByTestId('panel-expanded').props.children).toBe('true');
-    });
-
-    it('shows CompactAnswerRow after "Need help?" activates panel', () => {
-      mockCpaModeResult = {
-        stage: 'pictorial',
-        manipulativeType: 'counters',
-      };
-
-      const { getByTestId, queryByTestId } = render(
-        <CpaSessionContent {...baseProps} />,
-      );
-
-      // Standard grid before help
-      expect(queryByTestId('compact-answer-row')).toBeNull();
-
-      // Tap "Need help?"
-      fireEvent.press(getByTestId('need-help-button'));
-
-      // CompactAnswerRow appears
-      expect(getByTestId('compact-answer-row')).toBeTruthy();
+      // "Show me!" and "Need help?" hidden while SHOW_ME_ENABLED = false
+      expect(queryByTestId('need-help-button')).toBeNull();
     });
   });
 
