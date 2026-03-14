@@ -7,7 +7,7 @@ export const POLYNOMIALS_SKILLS: readonly SkillDefinition[] = [
     operation: 'polynomials',
     grade: 9,
     standards: ['HSA-APR.A.1'],
-    prerequisites: [],
+    prerequisites: ['multi_step'],
   },
   {
     id: 'poly_evaluation',

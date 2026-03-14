@@ -7,7 +7,7 @@ export const EXPONENTIAL_FUNCTIONS_SKILLS: readonly SkillDefinition[] = [
     operation: 'exponential_functions',
     grade: 9,
     standards: ['HSF-LE.A.1'],
-    prerequisites: [],
+    prerequisites: ['exponents.evaluate'],
   },
   {
     id: 'growth_factor',

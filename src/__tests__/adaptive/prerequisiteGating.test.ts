@@ -118,6 +118,42 @@ describe('DAG validation', () => {
     expect(skill?.prerequisites).toContain('subtraction.three-digit.no-borrow');
     expect(skill?.prerequisites).toContain('addition.three-digit.with-carry');
   });
+
+  it('HS cross-domain: polynomials depends on linear_equations via multi_step', () => {
+    const skill = SKILLS.find((s) => s.id === 'foil_expansion');
+    expect(skill).toBeDefined();
+    expect(skill?.prerequisites).toContain('multi_step');
+  });
+
+  it('HS cross-domain: exponential_functions depends on exponents via exponents.evaluate', () => {
+    const skill = SKILLS.find((s) => s.id === 'exp_evaluate');
+    expect(skill).toBeDefined();
+    expect(skill?.prerequisites).toContain('exponents.evaluate');
+  });
+
+  it('HS cross-domain: systems_equations depends on linear_equations via one_step_addition', () => {
+    const skill = SKILLS.find((s) => s.id === 'substitution_simple');
+    expect(skill).toBeDefined();
+    expect(skill?.prerequisites).toContain('one_step_addition');
+  });
+
+  it('HS cross-domain: quadratic_equations depends on linear_equations via multi_step', () => {
+    const skill = SKILLS.find((s) => s.id === 'factoring_monic');
+    expect(skill).toBeDefined();
+    expect(skill?.prerequisites).toContain('multi_step');
+  });
+
+  it('HS cross-domain: logarithms depends on exponential_functions via exp_evaluate', () => {
+    const skill = SKILLS.find((s) => s.id === 'log10_eval');
+    expect(skill).toBeDefined();
+    expect(skill?.prerequisites).toContain('exp_evaluate');
+  });
+
+  it('HS cross-domain: statistics_hs depends on data_analysis via data-analysis.scatter-trend', () => {
+    const skill = SKILLS.find((s) => s.id === 'stats_stddev_concept');
+    expect(skill).toBeDefined();
+    expect(skill?.prerequisites).toContain('data-analysis.scatter-trend');
+  });
 });
 
 describe('isSkillUnlocked (BKT mastery)', () => {
