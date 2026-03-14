@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.8
 milestone_name: Social & Subscription
-status: completed
-stopped_at: Completed 090-03-PLAN.md
-last_updated: "2026-03-14T02:57:52.044Z"
-last_activity: 2026-03-14 — Phase 90 Plan 03 complete (logarithms word problems, Phase 90 done)
+status: in-progress
+stopped_at: Completed 091-01-PLAN.md
+last_updated: "2026-03-13T21:32:30Z"
+last_activity: 2026-03-13 — Phase 91 Plan 01 complete (placement staircase grade 12, v24 migration, problemIntro coverage)
 progress:
   total_phases: 19
   completed_phases: 12
-  total_plans: 42
-  completed_plans: 41
+  total_plans: 44
+  completed_plans: 42
 ---
 
 # Project State
@@ -24,13 +24,13 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 
 ## Current Position
 
-Phase: 90 of 91 (Logarithms Domain)
-Plan: 3 of 3 in current phase (COMPLETE)
-Status: Phase 90 complete — logarithms domain fully wired with word problems and AI tutor QA
-Last activity: 2026-03-14 — Phase 90 Plan 03 complete (logarithms word problems, Phase 90 done)
+Phase: 91 of 91 (Integration & Placement)
+Plan: 1 of 2 in current phase
+Status: Plan 01 complete — placement staircase extended to grade 12, v24 migration, problemIntro verified
+Last activity: 2026-03-13 — Phase 91 Plan 01 complete (placement staircase grade 12, v24 migration, problemIntro coverage)
 
 ```
-v1.2: [██████████] 98% (58/59 plans)
+v1.2: [██████████] 97% (59/61 plans)
 ```
 
 ## Performance Metrics
@@ -131,6 +131,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 090-02]: log_word_problem reuses generateLog10Eval -- Plan 03 prefix templates add contextual text
 - [Phase 090]: logarithms word problem templates use prefix mode exclusively (same Pitfall 5 pattern as all HS domains)
 - [Phase 090]: manual QA auto-approved per user pre-authorization; Phase 90 LOG-03 and LOG-04 complete
+- [Phase 091-01]: v24 migration conditionally resets placementComplete for placementGrade >= 8; preserves placementGrade as staircase start hint
 
 ### Pending Todos
 
@@ -151,7 +152,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-14T02:55:04.055Z
-Stopped at: Completed 090-03-PLAN.md
+Last session: 2026-03-13T21:32:30Z
+Stopped at: Completed 091-01-PLAN.md
 Resume file: None
-Resume command: /gsd:execute-phase 090
+Resume command: /gsd:execute-phase 091

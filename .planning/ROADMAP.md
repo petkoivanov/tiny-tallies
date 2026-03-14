@@ -399,7 +399,7 @@ Plans:
   5. All 9 new domains display correct intro strings when a skill is first encountered in session
 **Plans**: 2 plans
 Plans:
-- [ ] 091-01-PLAN.md — Placement staircase to grade 12, store migration v24, intro string verification
+- [x] 091-01-PLAN.md — Placement staircase to grade 12, store migration v24, intro string verification
 - [ ] 091-02-PLAN.md — Prerequisite DAG HS edges, skill map 27-column horizontal scroll layout
 
 ## Progress
