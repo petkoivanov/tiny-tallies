@@ -369,7 +369,7 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 089-01-PLAN.md — Wave 0 RED test stubs (exponentialFunctions, registry counts 25→26, skill counts 192→197, wordProblems)
-- [ ] 089-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap)
+- [x] 089-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap)
 - [ ] 089-03-PLAN.md — Word problem prefix templates + manual AI tutor QA (auto-approved)
 
 ### Phase 90: Logarithms Domain
@@ -466,6 +466,6 @@ Plans:
 | 86. Systems of Equations Domain | v1.2 | 0/? | Not started | - |
 | 87. Quadratic Equations Domain | v1.2 | 0/3 | Not started | - |
 | 88. Polynomial Operations Domain | v1.2 | 0/3 | Not started | - |
-| 89. Exponential Functions Domain | v1.2 | 0/3 | Not started | - |
+| 89. Exponential Functions Domain | v1.2 | 2/3 | In progress | - |
 | 90. Logarithms Domain | v1.2 | 0/? | Not started | - |
 | 91. Integration & Placement | v1.2 | 0/? | Not started | - |

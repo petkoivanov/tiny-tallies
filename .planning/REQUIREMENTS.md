@@ -83,7 +83,7 @@
 - [x] **EXP-01**: `exponential_functions` domain handler — evaluate exponential expressions, growth/decay factor identification, half-life/doubling-time (G9-11, 5 skills)
 - [x] **EXP-02**: Exponential templates with numeric answers (integer exponents, simple base values)
 - [ ] **EXP-03**: Word problem variants for exponential functions (population, bacteria, investment contexts)
-- [ ] **EXP-04**: AI tutor prompt guidance for exponential functions
+- [x] **EXP-04**: AI tutor prompt guidance for exponential functions
 
 ### Logarithms Domain
 
@@ -153,7 +153,7 @@
 | SYS-01 through SYS-04 | Phase 86 | Pending |
 | QUAD-01 through QUAD-05 | Phase 87 | Pending |
 | POLY-01 through POLY-04 | Phase 88 | Pending |
-| EXP-01 through EXP-04 | Phase 89 | Pending |
+| EXP-01 through EXP-04 | Phase 89 | Partial (EXP-01, EXP-02, EXP-04 complete) |
 | LOG-01 through LOG-04 | Phase 90 | Pending |
 | INT-01 through INT-05 | Phase 91 | Pending |
 
