@@ -87,8 +87,8 @@
 
 ### Logarithms Domain
 
-- [ ] **LOG-01**: `logarithms` domain handler — evaluate log at special values (log₁₀, log₂, ln of integer powers), basic log rules (G10-11, 4 skills)
-- [ ] **LOG-02**: Logarithm templates with integer numeric answers only (special values — no floating point)
+- [x] **LOG-01**: `logarithms` domain handler — evaluate log at special values (log₁₀, log₂, ln of integer powers), basic log rules (G10-11, 4 skills)
+- [x] **LOG-02**: Logarithm templates with integer numeric answers only (special values — no floating point)
 - [ ] **LOG-03**: Word problem variants for logarithms (pH, decibel, Richter scale contexts)
 - [ ] **LOG-04**: AI tutor prompt guidance for logarithms
 
