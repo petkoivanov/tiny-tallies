@@ -132,7 +132,13 @@ export function generateDotPlot(
   const max = ranges[0].max;
   const step = max - min <= 10 ? 1 : 2;
   const dataCount = rng.intRange(10, 18);
-  const values = generateDataSet(rng, dataCount, min, max);
+  // Constrain values to tick positions so every dot is visible on the plot
+  const ticks: number[] = [];
+  for (let v = min; v <= max; v += step) ticks.push(v);
+  const values: number[] = [];
+  for (let i = 0; i < dataCount; i++) {
+    values.push(ticks[rng.intRange(0, ticks.length - 1)]);
+  }
 
   const titleIdx = rng.intRange(0, DOT_PLOT_TITLES.length - 1);
   const title = DOT_PLOT_TITLES[titleIdx];
