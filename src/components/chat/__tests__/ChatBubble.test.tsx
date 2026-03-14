@@ -33,7 +33,7 @@ describe('ChatBubble', () => {
     const bubble = getByTestId('chat-bubble-t1');
     const flatStyle = Object.assign({}, ...([].concat(bubble.props.style)));
     expect(flatStyle.alignSelf).toBe('flex-start');
-    expect(flatStyle.backgroundColor).toBe('#4338ca');
+    expect(flatStyle.backgroundColor).toBe('#D6336C');
   });
 
   it('applies child styling with right alignment', () => {
@@ -41,6 +41,6 @@ describe('ChatBubble', () => {
     const bubble = getByTestId('chat-bubble-c1');
     const flatStyle = Object.assign({}, ...([].concat(bubble.props.style)));
     expect(flatStyle.alignSelf).toBe('flex-end');
-    expect(flatStyle.backgroundColor).toBe('#166534');
+    expect(flatStyle.backgroundColor).toBe('#22C55E');
   });
 });

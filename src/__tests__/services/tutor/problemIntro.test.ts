@@ -22,7 +22,7 @@ describe('problemIntro domain coverage', () => {
   });
 
   it('every domain has a non-empty intro string', () => {
-    const defaultIntro = "Let's think through this problem together!";
+    const defaultIntro = "Think about what numbers are given and the relationship between them.";
     for (const domain of uniqueDomains) {
       const intro = getProblemIntro(domain);
       expect(intro).toBeTruthy();
@@ -32,7 +32,7 @@ describe('problemIntro domain coverage', () => {
   });
 
   it.each(HS_DOMAINS)('HS domain "%s" has a custom intro string', (domain) => {
-    const defaultIntro = "Let's think through this problem together!";
+    const defaultIntro = "Think about what numbers are given and the relationship between them.";
     const intro = getProblemIntro(domain);
     expect(intro).toBeTruthy();
     expect(intro).not.toBe(defaultIntro);

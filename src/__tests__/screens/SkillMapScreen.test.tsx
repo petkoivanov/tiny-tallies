@@ -1,58 +1,15 @@
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react-native';
-import { InteractionManager } from 'react-native';
 
 // Mock navigation
 const mockGoBack = jest.fn();
+const mockNavigate = jest.fn();
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({
     goBack: mockGoBack,
+    navigate: mockNavigate,
   }),
 }));
-
-// Mock reanimated
-jest.mock('react-native-reanimated', () => {
-  const { View } = require('react-native');
-  return {
-    __esModule: true,
-    default: {
-      View,
-      Text: require('react-native').Text,
-      createAnimatedComponent: (c: any) => c,
-      call: jest.fn(),
-    },
-    useSharedValue: (init: any) => ({ value: init }),
-    useAnimatedStyle: (fn: () => any) => fn(),
-    withTiming: (v: any) => v,
-    withSpring: (v: any) => v,
-    withDelay: (_d: number, v: any) => v,
-    withRepeat: (v: any) => v,
-    withSequence: (...args: any[]) => args[args.length - 1],
-    Easing: {
-      in: (e: any) => e,
-      inOut: (e: any) => e,
-      ease: (v: any) => v,
-      quad: (v: any) => v,
-      linear: (v: any) => v,
-    },
-    useReducedMotion: jest.fn(() => false),
-  };
-});
-
-// Mock react-native-svg
-jest.mock('react-native-svg', () => {
-  const { View, Text } = require('react-native');
-  return {
-    __esModule: true,
-    default: (props: any) => <View {...props} />,
-    Svg: (props: any) => <View {...props} />,
-    Circle: (props: any) => <View {...props} />,
-    Path: (props: any) => <View {...props} />,
-    G: (props: any) => <View {...props} />,
-    Text: (props: any) => <Text {...props} />,
-    Line: (props: any) => <View {...props} />,
-  };
-});
 
 // Mock safe area
 jest.mock('react-native-safe-area-context', () => ({
@@ -65,6 +22,9 @@ jest.mock('lucide-react-native', () => {
   return {
     ChevronLeft: (props: any) => (
       <View testID="chevron-left-icon" {...props} />
+    ),
+    ChevronRight: (props: any) => (
+      <View testID="chevron-right-icon" {...props} />
     ),
     Star: (props: any) => <View testID="star-icon" {...props} />,
   };
@@ -104,7 +64,6 @@ jest.mock('@/store/appStore', () => ({
 }));
 
 import SkillMapScreen from '@/screens/SkillMapScreen';
-import { SKILLS } from '@/services/mathEngine/skills';
 
 function setMockState(overrides: Record<string, unknown> = {}) {
   mockStoreState = {
@@ -117,19 +76,6 @@ describe('SkillMapScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockState();
-
-    // Ensure InteractionManager.runAfterInteractions runs callback synchronously
-    jest
-      .spyOn(InteractionManager, 'runAfterInteractions')
-      .mockImplementation((callback: any) => {
-        if (typeof callback === 'function') callback();
-        else if (callback?.gen) callback.gen();
-        return { cancel: jest.fn(), done: Promise.resolve() } as any;
-      });
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
   });
 
   it('renders Skill Map header', () => {
@@ -143,85 +89,31 @@ describe('SkillMapScreen', () => {
     expect(mockGoBack).toHaveBeenCalledTimes(1);
   });
 
-  it('renders skill map container after layout', () => {
-    const { getByTestId, queryByText, getAllByTestId } = render(
-      <SkillMapScreen />,
-    );
-
-    const container = getByTestId('skill-map-container');
-
-    // Trigger layout event to provide dimensions
-    act(() => {
-      fireEvent(container, 'layout', {
-        nativeEvent: { layout: { width: 400, height: 700 } },
-      });
-    });
-
-    // After layout + InteractionManager (mocked synchronous), graph should render
-    // Loading text should be gone
-    expect(queryByText('Loading skill map...')).toBeNull();
-
-    // Tap targets for all skill nodes should exist
-    const tapTargets = getAllByTestId(/^node-tap-/);
-    expect(tapTargets).toHaveLength(SKILLS.length);
+  it('renders domain category sections', () => {
+    const { getByText } = render(<SkillMapScreen />);
+    expect(getByText('Number Sense')).toBeTruthy();
+    expect(getByText('Measurement & Data')).toBeTruthy();
+    expect(getByText('Pre-Algebra')).toBeTruthy();
+    expect(getByText('Algebra & Beyond')).toBeTruthy();
   });
 
-  it('opens detail overlay when node is tapped', () => {
-    const { getByTestId, queryByText, getByText } = render(
-      <SkillMapScreen />,
-    );
-
-    const container = getByTestId('skill-map-container');
-
-    // Trigger layout event
-    act(() => {
-      fireEvent(container, 'layout', {
-        nativeEvent: { layout: { width: 400, height: 700 } },
-      });
-    });
-
-    // No overlay content visible initially
-    expect(queryByText('Add within 10')).toBeNull();
-
-    // Tap the first addition skill node
-    const tapTarget = getByTestId('node-tap-addition.single-digit.no-carry');
-    act(() => {
-      fireEvent.press(tapTarget);
-    });
-
-    // Overlay should now show the skill name
-    expect(getByText('Add within 10')).toBeTruthy();
+  it('renders domain cards with names', () => {
+    const { getByText } = render(<SkillMapScreen />);
+    expect(getByText('Addition')).toBeTruthy();
+    expect(getByText('Subtraction')).toBeTruthy();
+    expect(getByText('Fractions')).toBeTruthy();
+    expect(getByText('Geometry')).toBeTruthy();
   });
 
-  it('closes detail overlay when backdrop pressed', () => {
-    const { getByTestId, queryByText, getByText } = render(
-      <SkillMapScreen />,
-    );
+  it('navigates to DomainDetail when a domain card is pressed', () => {
+    const { getByText } = render(<SkillMapScreen />);
 
-    const container = getByTestId('skill-map-container');
-
-    // Trigger layout event
     act(() => {
-      fireEvent(container, 'layout', {
-        nativeEvent: { layout: { width: 400, height: 700 } },
-      });
+      fireEvent.press(getByText('Addition'));
     });
 
-    // Open the overlay
-    const tapTarget = getByTestId('node-tap-addition.single-digit.no-carry');
-    act(() => {
-      fireEvent.press(tapTarget);
+    expect(mockNavigate).toHaveBeenCalledWith('DomainDetail', {
+      domain: 'addition',
     });
-
-    expect(getByText('Add within 10')).toBeTruthy();
-
-    // Press backdrop to close
-    const backdrop = getByTestId('overlay-backdrop');
-    act(() => {
-      fireEvent.press(backdrop);
-    });
-
-    // Overlay should be dismissed
-    expect(queryByText('Add within 10')).toBeNull();
   });
 });

@@ -16,10 +16,10 @@ import type { SkillState } from '@/store/slices/skillStatesSlice';
 import { layout } from '@/theme';
 
 import { SkillMapNode } from './SkillMapNode';
-import { SkillMapEdge } from './SkillMapEdge';
+import { SkillMapEdges } from './SkillMapEdges';
 import { computeNodePositions, computeEdgePaths, getNodeState, NODE_RADIUS } from './skillMapLayout';
 import { skillMapColors } from './skillMapColors';
-import type { SkillNodeData, EdgeData } from './skillMapTypes';
+import type { EdgeData, SkillNodeData } from './skillMapTypes';
 
 /** Height reserved for column headers and grade labels above the graph. */
 const HEADER_HEIGHT = 65;
@@ -183,18 +183,13 @@ export function SkillMapGraph({
         </SvgText>
       </Svg>
 
-      {/* Edges layer (rendered before nodes so edges appear behind) */}
-      {edgesWithFringe.map((edge, index) => (
-        <SkillMapEdge
-          key={`edge-${edge.fromId}-${edge.toId}`}
-          path={edge.path}
-          isCrossColumn={edge.isCrossColumn}
-          isOuterFringeEdge={edge.isOuterFringeEdge}
-          entranceDelay={EDGE_BASE_DELAY + index * 15}
-          graphWidth={contentWidth}
-          graphHeight={height}
-        />
-      ))}
+      {/* Edges layer (single consolidated SVG instead of per-edge SVGs) */}
+      <SkillMapEdges
+        edges={edgesWithFringe}
+        graphWidth={contentWidth}
+        graphHeight={height}
+        entranceDelay={EDGE_BASE_DELAY}
+      />
 
       {/* Nodes layer */}
       {skillNodes.map((node) => (

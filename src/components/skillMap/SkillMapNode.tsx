@@ -54,7 +54,7 @@ const TWO_PI = 2 * Math.PI;
 const LABEL_OFFSET = 14;
 const SVG_PADDING = 8;
 
-export function SkillMapNode({
+export const SkillMapNode = React.memo(function SkillMapNode({
   name,
   operation,
   cx,
@@ -210,6 +210,6 @@ export function SkillMapNode({
       </Svg>
     </Animated.View>
   );
-}
+});
 
 export default SkillMapNode;

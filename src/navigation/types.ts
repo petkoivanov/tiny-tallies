@@ -6,6 +6,7 @@
  */
 
 import type { CpaStage, ManipulativeType } from '@/services/cpa/cpaTypes';
+import type { MathDomain } from '@/services/mathEngine/types';
 import type { SessionMode } from '@/services/session/sessionTypes';
 
 export type RootStackParamList = {
@@ -38,6 +39,7 @@ export type RootStackParamList = {
   Sandbox: { manipulativeType: ManipulativeType };
   BadgeCollection: undefined;
   SkillMap: undefined;
+  DomainDetail: { domain: MathDomain };
   AvatarPicker: undefined;
   ThemePicker: undefined;
   Consent: { returnTo?: 'Session' } | undefined;

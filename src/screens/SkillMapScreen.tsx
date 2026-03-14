@@ -1,90 +1,81 @@
-/**
- * Skill Map screen displaying the interactive skill tree visualization.
- *
- * Reads BKT skill states from Zustand, computes outer fringe IDs, and
- * renders the SkillMapGraph component after layout dimensions are known.
- * Uses InteractionManager to defer graph rendering until after the
- * navigation transition completes (prevents entrance animation conflicts).
- */
-import React, { useEffect, useMemo, useState } from 'react';
-import { InteractionManager, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ChevronLeft } from 'lucide-react-native';
 
 import { useAppStore } from '@/store/appStore';
-import { getOuterFringe } from '@/services/adaptive/prerequisiteGating';
 import { useTheme, spacing, typography, layout } from '@/theme';
-import { SkillMapGraph } from '@/components/skillMap/SkillMapGraph';
-import { SkillDetailOverlay } from '@/components/skillMap/SkillDetailOverlay';
+import { DOMAIN_CATEGORIES } from '@/components/skillMap/domainGroups';
+import { DomainCard } from '@/components/skillMap/DomainCard';
+import type { RootStackParamList } from '@/navigation/types';
+import type { MathDomain } from '@/services/mathEngine/types';
+
+type NavProp = NativeStackNavigationProp<RootStackParamList, 'SkillMap'>;
 
 export default function SkillMapScreen() {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavProp>();
   const { colors } = useTheme();
+  const skillStates = useAppStore((s) => s.skillStates);
 
-  const skillStates = useAppStore((state) => state.skillStates);
-
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
-  const [ready, setReady] = useState(false);
-
-  // Defer rendering until navigation transition completes
-  useEffect(() => {
-    const handle = InteractionManager.runAfterInteractions(() => {
-      setReady(true);
-    });
-    return () => handle.cancel();
-  }, []);
-
-  const outerFringeIds = useMemo(
-    () => getOuterFringe(skillStates),
-    [skillStates],
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: 1,
+          backgroundColor: colors.background,
+        },
+        header: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: spacing.md,
+          paddingVertical: spacing.sm,
+          height: 56,
+        },
+        backButton: {
+          width: layout.minTouchTarget,
+          height: layout.minTouchTarget,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        headerTitle: {
+          flex: 1,
+          fontFamily: typography.fontFamily.semiBold,
+          fontSize: typography.fontSize.xl,
+          color: colors.textPrimary,
+          textAlign: 'center',
+        },
+        headerSpacer: {
+          width: layout.minTouchTarget,
+        },
+        scrollContent: {
+          paddingHorizontal: spacing.md,
+          paddingBottom: spacing.xxl,
+        },
+        sectionHeader: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: spacing.sm,
+          marginTop: spacing.lg,
+          marginBottom: spacing.sm,
+        },
+        sectionEmoji: {
+          fontSize: 20,
+        },
+        sectionTitle: {
+          fontFamily: typography.fontFamily.bold,
+          fontSize: typography.fontSize.lg,
+          color: colors.textPrimary,
+        },
+      }),
+    [colors],
   );
 
-  const hasDimensions = containerSize.width > 0 && containerSize.height > 0;
-  const canRender = hasDimensions && ready;
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
-      height: 56,
-    },
-    backButton: {
-      width: layout.minTouchTarget,
-      height: layout.minTouchTarget,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    headerTitle: {
-      flex: 1,
-      fontFamily: typography.fontFamily.semiBold,
-      fontSize: typography.fontSize.xl,
-      color: colors.textPrimary,
-      textAlign: 'center',
-    },
-    headerSpacer: {
-      width: layout.minTouchTarget,
-    },
-    graphContainer: {
-      flex: 1,
-      position: 'relative',
-    },
-    loadingText: {
-      fontFamily: typography.fontFamily.regular,
-      fontSize: typography.fontSize.md,
-      color: colors.textMuted,
-      textAlign: 'center',
-      marginTop: spacing.xxl,
-    },
-  }), [colors]);
+  const handleDomainPress = (domain: MathDomain) => {
+    navigation.navigate('DomainDetail', { domain });
+  };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -103,34 +94,31 @@ export default function SkillMapScreen() {
         <View style={styles.headerSpacer} />
       </View>
 
-      {/* Graph Container */}
-      <View
-        style={styles.graphContainer}
-        testID="skill-map-container"
-        onLayout={(e) => {
-          const { width, height } = e.nativeEvent.layout;
-          setContainerSize({ width, height });
-        }}
+      {/* Domain cards grouped by category */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        {!canRender ? (
-          <Text style={styles.loadingText}>Loading skill map...</Text>
-        ) : (
-          <SkillMapGraph
-            width={containerSize.width}
-            height={containerSize.height}
-            skillStates={skillStates}
-            outerFringeIds={outerFringeIds}
-            onNodePress={setSelectedSkillId}
-          />
-        )}
-      </View>
+        {DOMAIN_CATEGORIES.map((category) => (
+          <View key={category.title}>
+            {/* Section header */}
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionEmoji}>{category.emoji}</Text>
+              <Text style={styles.sectionTitle}>{category.title}</Text>
+            </View>
 
-      {/* Detail overlay (renders above everything via React Native Modal) */}
-      <SkillDetailOverlay
-        skillId={selectedSkillId}
-        skillStates={skillStates}
-        onClose={() => setSelectedSkillId(null)}
-      />
+            {/* Domain cards */}
+            {category.domains.map((meta) => (
+              <DomainCard
+                key={meta.domain}
+                meta={meta}
+                skillStates={skillStates}
+                onPress={() => handleDomainPress(meta.domain)}
+              />
+            ))}
+          </View>
+        ))}
+      </ScrollView>
     </View>
   );
 }

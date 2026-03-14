@@ -9,6 +9,7 @@ import SandboxScreen from '@/screens/SandboxScreen';
 import ConsentScreen from '@/screens/ConsentScreen';
 import BadgeCollectionScreen from '@/screens/BadgeCollectionScreen';
 import SkillMapScreen from '@/screens/SkillMapScreen';
+import DomainDetailScreen from '@/screens/DomainDetailScreen';
 import AvatarPickerScreen from '@/screens/AvatarPickerScreen';
 import ThemePickerScreen from '@/screens/ThemePickerScreen';
 import ProfileSetupScreen from '@/screens/ProfileSetupScreen';
@@ -46,6 +47,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Sandbox" component={SandboxScreen} />
       <Stack.Screen name="BadgeCollection" component={BadgeCollectionScreen} />
       <Stack.Screen name="SkillMap" component={SkillMapScreen} />
+      <Stack.Screen name="DomainDetail" component={DomainDetailScreen} />
       <Stack.Screen name="AvatarPicker" component={AvatarPickerScreen} options={{ title: 'Choose Avatar' }} />
       <Stack.Screen name="ThemePicker" component={ThemePickerScreen} options={{ title: 'Choose Theme' }} />
       <Stack.Screen

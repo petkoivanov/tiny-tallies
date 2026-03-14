@@ -7,9 +7,6 @@ interface ChatBubbleProps {
   message: TutorMessage;
 }
 
-const TUTOR_BG = '#4338ca';
-const CHILD_BG = '#166534';
-
 export function ChatBubble({ message }: ChatBubbleProps) {
   const { colors } = useTheme();
   const isTutor = message.role === 'tutor';
@@ -24,7 +21,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
     },
     tutorBubble: {
       alignSelf: 'flex-start',
-      backgroundColor: TUTOR_BG,
+      backgroundColor: colors.primaryDark,
       borderBottomLeftRadius: spacing.xs,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
@@ -34,11 +31,11 @@ export function ChatBubble({ message }: ChatBubbleProps) {
     },
     childBubble: {
       alignSelf: 'flex-end',
-      backgroundColor: CHILD_BG,
+      backgroundColor: colors.correct,
       borderBottomRightRadius: spacing.xs,
     },
     text: {
-      color: colors.textPrimary,
+      color: '#FFFFFF',
       fontFamily: typography.fontFamily.regular,
       fontSize: typography.fontSize.md,
     },
