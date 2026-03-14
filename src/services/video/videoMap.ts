@@ -40,6 +40,6 @@ export const videoMap: Partial<Record<MathDomain, string>> = {
   systems_equations: 'nok99JOhcjo',  // Khan Academy: Systems of equations (Phase 86)
   quadratic_equations: 'IWigvJcCAJ0',  // Khan Academy: Quadratic equations (Phase 87)
   polynomials: 'Vm7H0VTlIco',  // Khan Academy: Polynomials (Phase 88)
-  // exponential_functions: '6WMZ7J0wwMI'  (Phase 89)
+  exponential_functions: '6WMZ7J0wwMI',  // Khan Academy: Exponential functions (Phase 89)
   // logarithms:            'Z5myJ8dg_rM'  (Phase 90)
 };

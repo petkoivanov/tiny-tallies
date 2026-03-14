@@ -26,6 +26,7 @@ import { STATISTICS_HS_TEMPLATES } from './statisticsHs';
 import { SYSTEMS_EQUATIONS_TEMPLATES } from './systemsEquations';
 import { QUADRATIC_EQUATIONS_TEMPLATES } from './quadraticEquations';
 import { POLYNOMIALS_TEMPLATES } from './polynomials';
+import { EXPONENTIAL_FUNCTIONS_TEMPLATES } from './exponentialFunctions';
 
 export const ALL_TEMPLATES: readonly ProblemTemplate[] = [
   ...ADDITION_TEMPLATES,
@@ -55,6 +56,7 @@ export const ALL_TEMPLATES: readonly ProblemTemplate[] = [
   ...SYSTEMS_EQUATIONS_TEMPLATES,
   ...QUADRATIC_EQUATIONS_TEMPLATES,
   ...POLYNOMIALS_TEMPLATES,
+  ...EXPONENTIAL_FUNCTIONS_TEMPLATES,
 ];
 
 export function findTemplate(templateId: string): ProblemTemplate {
@@ -104,3 +106,4 @@ export { STATISTICS_HS_TEMPLATES } from './statisticsHs';
 export { SYSTEMS_EQUATIONS_TEMPLATES } from './systemsEquations';
 export { QUADRATIC_EQUATIONS_TEMPLATES } from './quadraticEquations';
 export { POLYNOMIALS_TEMPLATES } from './polynomials';
+export { EXPONENTIAL_FUNCTIONS_TEMPLATES } from './exponentialFunctions';
