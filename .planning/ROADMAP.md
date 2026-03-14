@@ -366,7 +366,11 @@ Plans:
   2. Growth vs. decay factor identification problems generate correctly as MC with base values above and below 1 as distractors
   3. Word problem variants (population, bacteria, investment contexts) generate correctly and pass reading level calibration
   4. AI tutor hints help students reason about the base value's relationship to growth/decay without stating the factor directly
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 089-01-PLAN.md — Wave 0 RED test stubs (exponentialFunctions, registry counts 25→26, skill counts 192→197, wordProblems)
+- [ ] 089-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap)
+- [ ] 089-03-PLAN.md — Word problem prefix templates + manual AI tutor QA (auto-approved)
 
 ### Phase 90: Logarithms Domain
 **Goal**: Students in grades 10-11 can practice evaluating logarithms at special values and applying basic log rules, with integer-only answers
@@ -462,6 +466,6 @@ Plans:
 | 86. Systems of Equations Domain | v1.2 | 0/? | Not started | - |
 | 87. Quadratic Equations Domain | v1.2 | 0/3 | Not started | - |
 | 88. Polynomial Operations Domain | v1.2 | 0/3 | Not started | - |
-| 89. Exponential Functions Domain | v1.2 | 0/? | Not started | - |
+| 89. Exponential Functions Domain | v1.2 | 0/3 | Not started | - |
 | 90. Logarithms Domain | v1.2 | 0/? | Not started | - |
 | 91. Integration & Placement | v1.2 | 0/? | Not started | - |
