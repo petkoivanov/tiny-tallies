@@ -22,6 +22,7 @@ const ALL_OPERATIONS: MathDomain[] = [
   'quadratic_equations',
   'polynomials',
   'exponential_functions',
+  'logarithms',
 ];
 
 describe('Word Problem System', () => {
@@ -296,6 +297,7 @@ describe('Word Problem System', () => {
         quadratic_equations: 9,
         polynomials: 9,
         exponential_functions: 9,
+        logarithms: 10,
       };
 
       for (const op of WP_OPERATIONS) {
