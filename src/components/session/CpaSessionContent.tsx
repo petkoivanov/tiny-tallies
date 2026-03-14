@@ -446,6 +446,7 @@ export function CpaSessionContent({
           onSubmit={handleFreeTextSubmit}
           maxDigits={presentation.format === 'free_text' ? presentation.maxDigits : 5}
           showDecimal={presentation.format === 'free_text' && presentation.allowDecimal}
+          allowNegative={presentation.format === 'free_text' && !!presentation.allowNegative}
           onShowMe={!needHelpActive && scaffoldManipulative ? handleNeedHelp : undefined}
         />
       );

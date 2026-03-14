@@ -17,7 +17,7 @@ export function migrateStore(
   const state = (persistedState ?? {}) as Record<string, unknown>;
 
   // Fast path: skip all checks when store is already current
-  if (version >= 24) return state;
+  if (version >= 25) return state;
 
   if (version < 2) {
     // v1 -> v2: First persistence enablement.
@@ -212,6 +212,11 @@ export function migrateStore(
       state.placementComplete = false;
       // Keep placementGrade as a hint for the staircase start point
     }
+  }
+
+  if (version < 25) {
+    // v24 -> v25: Add explore section toggle (enabled by default)
+    state.exploreEnabled ??= true;
   }
 
   return state;

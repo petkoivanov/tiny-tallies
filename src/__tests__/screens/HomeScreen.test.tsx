@@ -48,6 +48,7 @@ jest.mock('lucide-react-native', () => {
     Award: (props: any) => <View testID="award-icon" {...props} />,
     Target: (props: any) => <View testID="target-icon" {...props} />,
     RefreshCw: (props: any) => <View testID="refresh-icon" {...props} />,
+    Compass: (props: any) => <View testID="compass-icon" {...props} />,
   };
 });
 
@@ -106,6 +107,7 @@ function setMockState(overrides: Record<string, unknown> = {}) {
     frameId: null,
     isSessionActive: false,
     placementComplete: false,
+    exploreEnabled: true,
     children: {},
     activeChildId: null,
     switchChild: jest.fn(),
@@ -180,15 +182,19 @@ describe('HomeScreen', () => {
     });
   });
 
-  it('renders Explore section', () => {
+  it('renders Explore toolbar button when enabled', () => {
     const { getByTestId } = render(<HomeScreen />);
-    expect(getByTestId('explore-grid')).toBeTruthy();
+    expect(getByTestId('explore-button')).toBeTruthy();
   });
 
-  it('renders Start Practice button below explore section', () => {
-    const { getByLabelText, getByTestId } = render(<HomeScreen />);
-    // Both exist in the rendered tree
-    expect(getByTestId('explore-grid')).toBeTruthy();
+  it('hides Explore toolbar button when disabled', () => {
+    setMockState({ exploreEnabled: false });
+    const { queryByTestId } = render(<HomeScreen />);
+    expect(queryByTestId('explore-button')).toBeNull();
+  });
+
+  it('renders Start Practice button', () => {
+    const { getByLabelText } = render(<HomeScreen />);
     expect(getByLabelText('Start Practice')).toBeTruthy();
   });
 

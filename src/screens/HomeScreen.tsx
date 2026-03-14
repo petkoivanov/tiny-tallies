@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Flame, Check, Focus, GitBranch, Palette, Settings, Award, Target, RefreshCw } from 'lucide-react-native';
+import { Flame, Check, Focus, GitBranch, Palette, Settings, Award, Target, RefreshCw, Compass } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { AVATARS, DEFAULT_AVATAR_ID, SPECIAL_AVATARS, FRAMES, resolveAvatar } from '@/store/constants/avatars';
@@ -13,7 +13,7 @@ import { eloToLevel } from '@/services/adaptive/levelMapping';
 import { isSameISOWeek } from '@/services/gamification/weeklyStreak';
 import { BADGES } from '@/services/achievement';
 import { getConfirmedMisconceptions } from '@/store/slices/misconceptionSlice';
-import { ExploreGrid, DailyChallengeCard } from '@/components/home';
+import { DailyChallengeCard } from '@/components/home';
 import { AppDialog } from '@/components/AppDialog';
 import { useAbsenceCheck } from '@/hooks/useAbsenceCheck';
 import { useTimeControls } from '@/hooks/useTimeControls';
@@ -40,6 +40,7 @@ export default function HomeScreen() {
   const lastSessionDate = useAppStore((state) => state.lastSessionDate);
   const frameId = useAppStore((state) => state.frameId);
   const placementComplete = useAppStore((state) => state.placementComplete);
+  const exploreEnabled = useAppStore((state) => state.exploreEnabled);
   const earnedBadgeCount = useAppStore((state) => Object.keys(state.earnedBadges).length);
 
   // Select the stable record ref, then derive in useMemo to avoid
@@ -162,10 +163,6 @@ export default function HomeScreen() {
     statsSection: {
       paddingHorizontal: spacing.lg,
       gap: spacing.xl,
-    },
-    exploreSection: {
-      paddingHorizontal: spacing.lg,
-      paddingTop: spacing.lg,
     },
     streakContainer: {
       gap: spacing.xs,
@@ -297,6 +294,17 @@ export default function HomeScreen() {
         >
           <GitBranch size={20} color={colors.textMuted} />
         </Pressable>
+        {exploreEnabled && (
+          <Pressable
+            style={styles.toolbarButton}
+            onPress={() => navigation.navigate('Explore')}
+            accessibilityLabel="Explore manipulatives"
+            accessibilityRole="button"
+            testID="explore-button"
+          >
+            <Compass size={20} color={colors.textMuted} />
+          </Pressable>
+        )}
         <Pressable
           style={styles.toolbarButton}
           onPress={() => navigation.navigate('ThemePicker')}
@@ -414,6 +422,27 @@ export default function HomeScreen() {
         </Pressable>
       )}
 
+      {/* Retake Evaluation — always available after initial placement */}
+      {placementComplete && !suggestReassessment && (
+        <Pressable
+          style={styles.placementCard}
+          onPress={() => navigation.navigate('PlacementTest')}
+          accessibilityRole="button"
+          accessibilityLabel="Retake the level quiz"
+          testID="retake-evaluation-card"
+        >
+          <View style={styles.placementRow}>
+            <RefreshCw size={24} color={colors.primaryLight} />
+            <View style={styles.placementText}>
+              <Text style={styles.placementTitle}>Level Up Check</Text>
+              <Text style={styles.placementSubtitle}>
+                Think you've improved? Retake the quiz and prove it!
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+      )}
+
       {/* Start Practice Button */}
       <View style={styles.buttonSection}>
         <Pressable
@@ -466,10 +495,6 @@ export default function HomeScreen() {
         <DailyChallengeCard />
       </View>
 
-      {/* Explore Section */}
-      <View style={styles.exploreSection}>
-        <ExploreGrid />
-      </View>
     </ScrollView>
 
       <ProfileSwitcherSheet

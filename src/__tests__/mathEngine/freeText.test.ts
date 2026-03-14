@@ -34,8 +34,17 @@ describe('parseIntegerInput', () => {
     expect(parseIntegerInput('3.14')).toBeNull();
   });
 
-  it('rejects negative signs', () => {
-    expect(parseIntegerInput('-5')).toBeNull();
+  it('accepts negative integers', () => {
+    expect(parseIntegerInput('-5')).toBe(-5);
+    expect(parseIntegerInput('-123')).toBe(-123);
+  });
+
+  it('rejects bare minus sign', () => {
+    expect(parseIntegerInput('-')).toBeNull();
+  });
+
+  it('rejects negative values exceeding bound', () => {
+    expect(parseIntegerInput('-99999')).toBeNull();
   });
 
   it('rejects internal spaces', () => {

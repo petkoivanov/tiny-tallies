@@ -27,6 +27,7 @@ export interface ChildData {
   youtubeConsentGranted: boolean;
   videoVotes: Partial<Record<string, 'helpful' | 'not_helpful'>>;
   soundEnabled: boolean;
+  exploreEnabled: boolean;
   dailyLimitMinutes: number;
   bedtimeWindow: BedtimeWindow | null;
   breakReminderMinutes: number;
@@ -87,6 +88,7 @@ export const CHILD_DATA_KEYS: readonly (keyof ChildData)[] = [
   'youtubeConsentGranted',
   'videoVotes',
   'soundEnabled',
+  'exploreEnabled',
   'dailyLimitMinutes',
   'bedtimeWindow',
   'breakReminderMinutes',
@@ -125,6 +127,7 @@ export const DEFAULT_CHILD_DATA: ChildData = {
   youtubeConsentGranted: false,
   videoVotes: {},
   soundEnabled: true,
+  exploreEnabled: true,
   dailyLimitMinutes: 0,
   bedtimeWindow: null,
   breakReminderMinutes: 0,

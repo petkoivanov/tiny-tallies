@@ -409,6 +409,11 @@ export function ProfileCreationWizard({
               </Text>
             </View>
           </View>
+          <View style={[styles.optInNotice, { backgroundColor: `${colors.primary}15`, borderColor: `${colors.primary}40` }]}>
+            <Text style={[styles.optInText, { color: colors.textPrimary }]}>
+              You must opt-in for video lessons to have these recommendations be part of the app.
+            </Text>
+          </View>
           <View style={[styles.youtubeToggleRow, { backgroundColor: youtubeConsent ? `${colors.primaryLight}20` : colors.surface, borderRadius: 12 }]}>
             <View style={{ flex: 1 }}>
               <Text style={[styles.navButtonText, { color: colors.textPrimary, fontSize: 16 }]}>
@@ -475,6 +480,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center', gap: 12, marginBottom: 24,
   },
   avatarCell: { padding: 4, alignItems: 'center', justifyContent: 'center' },
+  optInNotice: {
+    width: '100%', padding: 12, borderRadius: 10, borderWidth: 1,
+    marginBottom: 12,
+  },
+  optInText: {
+    fontSize: 13, fontWeight: '700', textAlign: 'center', lineHeight: 18,
+  },
   benefitList: {
     width: '100%', padding: 16, gap: 14, marginBottom: 16,
   },

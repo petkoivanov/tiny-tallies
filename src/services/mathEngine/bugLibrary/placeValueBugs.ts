@@ -42,7 +42,7 @@ export const PLACE_VALUE_BUGS: readonly BugPattern[] = [
     description: 'Writes digits in reverse order (23 → 32)',
     minDigits: 1,
     compute(a) {
-      if (a < 10) return null;
+      if (!Number.isInteger(a) || a < 10) return null;
       const reversed = parseInt(
         String(a).split('').reverse().join(''),
         10,
@@ -56,6 +56,7 @@ export const PLACE_VALUE_BUGS: readonly BugPattern[] = [
     description: 'Omits zero in number (305 → 35)',
     minDigits: 1,
     compute(a) {
+      if (!Number.isInteger(a)) return null;
       const str = String(a);
       if (!str.includes('0')) return null;
       const noZero = parseInt(str.replace(/0/g, ''), 10);
@@ -70,8 +71,17 @@ export const PLACE_VALUE_BUGS: readonly BugPattern[] = [
     compute(a, b) {
       // operands: [number, roundTo] for rounding
       if (b !== 10 && b !== 100) return null;
+
+      // Decimal rounding: a is decimal and b is the scale (10 = tenths)
+      if (!Number.isInteger(a)) {
+        const correct = Math.round(a * b) / b;
+        const step = 1 / b; // 0.1 for tenths
+        const wrong = a >= correct ? correct - step : correct + step;
+        return wrong > 0 ? Math.round(wrong * b) / b : null;
+      }
+
+      // Integer rounding: round a to nearest b (10 or 100)
       const correct = Math.round(a / b) * b;
-      // Round the other way
       const wrong = a >= correct ? correct - b : correct + b;
       return wrong > 0 ? wrong : null;
     },
@@ -82,7 +92,8 @@ export const PLACE_VALUE_BUGS: readonly BugPattern[] = [
     description: 'Compares numbers by digit count only, not value',
     minDigits: 1,
     compute(a, b) {
-      // operands: [a, b] for compare
+      // operands: [a, b] for compare — integers only
+      if (!Number.isInteger(a) || !Number.isInteger(b)) return null;
       if (String(a).length === String(b).length) return null;
       // Picks the number with more digits even if it's smaller in value
       const wrong = String(a).length > String(b).length ? a : b;
@@ -96,8 +107,8 @@ export const PLACE_VALUE_BUGS: readonly BugPattern[] = [
     description: 'Uses wrong skip-counting step (e.g., counts by 5 instead of 10)',
     minDigits: 1,
     compute(a, b) {
-      // operands: [lastShown, step] for skip_count
-      if (b < 2) return null;
+      // operands: [lastShown, step] for skip_count — integers only
+      if (!Number.isInteger(a) || b < 2) return null;
       // Use a nearby step
       const wrongStep = b <= 2 ? b + 1 : b - 1;
       const wrong = a + wrongStep;
@@ -111,7 +122,8 @@ export const PLACE_VALUE_BUGS: readonly BugPattern[] = [
     description: 'Off by 1 in digit identification',
     minDigits: 1,
     compute(a, b) {
-      // Generic off-by-one: useful across problem types
+      // Integer digit identification only
+      if (!Number.isInteger(a)) return null;
       const digits = String(a).split('').reverse().map(Number);
       if (b >= 0 && b < digits.length) {
         const correct = digits[b];
@@ -126,7 +138,7 @@ export const PLACE_VALUE_BUGS: readonly BugPattern[] = [
     description: 'Adds digits instead of expanding (345 = 3+4+5 = 12)',
     minDigits: 1,
     compute(a) {
-      if (a < 10) return null;
+      if (!Number.isInteger(a) || a < 10) return null;
       const digitSum = String(a)
         .split('')
         .reduce((sum, d) => sum + Number(d), 0);

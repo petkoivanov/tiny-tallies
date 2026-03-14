@@ -68,7 +68,7 @@ export function generateArithmeticNextTerm(
  * Generate an arithmetic nth-term problem.
  * Gives first term and common difference, asks for the nth term.
  *
- * Overflow guards: a1 ∈ [1,20], d ∈ [1,10], n ∈ [3,8]
+ * Overflow guards: a1 ∈ [1,20], d ∈ [1,10], n ∈ [4,8]
  * Max answer: 20 + 7*10 = 90
  */
 export function generateArithmeticNthTerm(
@@ -77,7 +77,7 @@ export function generateArithmeticNthTerm(
 ): DomainProblemData {
   const a1 = rng.intRange(1, 20);
   const d = rng.intRange(1, 10);
-  const n = rng.intRange(3, 8);
+  const n = rng.intRange(4, 8); // must be > 3 since we show 3 terms
 
   // Answer: nth term = a1 + (n-1)*d
   const answer = a1 + (n - 1) * d;
@@ -139,7 +139,7 @@ export function generateGeometricNextTerm(
  * Gives first 3 terms, asks for the nth term.
  *
  * MANDATORY caps (Pitfall 1 from RESEARCH.md):
- *   a1 ∈ [1,5], r ∈ [2,3], n ∈ [3,6]
+ *   a1 ∈ [1,5], r ∈ [2,3], n ∈ [4,6]
  * Max answer: 5 * 3^5 = 1215 (safely under 2000 bound)
  */
 export function generateGeometricNthTerm(
@@ -148,7 +148,7 @@ export function generateGeometricNthTerm(
 ): DomainProblemData {
   const a1 = rng.intRange(1, 5);
   const r = rng.intRange(2, 3);
-  const n = rng.intRange(3, 6);
+  const n = rng.intRange(4, 6); // must be > 3 since we show 3 terms
 
   // Answer: nth term = a1 * r^(n-1)
   const answer = a1 * Math.pow(r, n - 1);

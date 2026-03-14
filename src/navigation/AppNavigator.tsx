@@ -4,6 +4,7 @@ import type { RootStackParamList } from './types';
 import HomeScreen from '@/screens/HomeScreen';
 import SessionScreen from '@/screens/SessionScreen';
 import ResultsScreen from '@/screens/ResultsScreen';
+import ExploreScreen from '@/screens/ExploreScreen';
 import SandboxScreen from '@/screens/SandboxScreen';
 import ConsentScreen from '@/screens/ConsentScreen';
 import BadgeCollectionScreen from '@/screens/BadgeCollectionScreen';
@@ -41,6 +42,7 @@ export default function AppNavigator() {
         options={{ gestureEnabled: false }}
       />
       <Stack.Screen name="Results" component={ResultsScreen} />
+      <Stack.Screen name="Explore" component={ExploreScreen} />
       <Stack.Screen name="Sandbox" component={SandboxScreen} />
       <Stack.Screen name="BadgeCollection" component={BadgeCollectionScreen} />
       <Stack.Screen name="SkillMap" component={SkillMapScreen} />

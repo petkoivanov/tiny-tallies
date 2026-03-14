@@ -1,6 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useRef, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import WebView from 'react-native-webview';
+import type { WebViewNavigation } from 'react-native-webview/lib/WebViewTypes';
 import { useTheme, spacing, typography } from '@/theme';
+import { buildNocookieHtml } from '@/services/video/youtubeHtml';
+
+/** Synthetic origin so YouTube receives a valid Referer header (fixes error 153). */
+const BASE_URL = 'https://tiny-tallies.app';
 
 interface VideoPlayerProps {
   videoId: string;
@@ -8,35 +14,39 @@ interface VideoPlayerProps {
   onDone: () => void;
 }
 
-function youtubeUrl(videoId: string): string {
-  return `https://www.youtube.com/watch?v=${videoId}`;
-}
-
 export function VideoPlayer({ videoId, isOnline, onDone }: VideoPlayerProps) {
   const { colors } = useTheme();
-  const [opened, setOpened] = useState(false);
+  const webViewRef = useRef<WebView>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
+  const html = buildNocookieHtml(videoId);
 
-  const openVideo = useCallback(async () => {
-    try {
-      await Linking.openURL(youtubeUrl(videoId));
-      setOpened(true);
-      setError(false);
-    } catch {
-      setError(true);
-    }
-  }, [videoId]);
+  const handleRetry = useCallback(() => {
+    setError(false);
+    setLoading(true);
+    setRetryKey((k) => k + 1);
+  }, []);
 
-  // Auto-open on mount
-  useEffect(() => {
-    if (isOnline) {
-      openVideo();
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  /** Only allow the youtube-nocookie embed URL — block all other navigation. */
+  const handleNavigationRequest = useCallback(
+    (request: WebViewNavigation) => {
+      // Allow initial about:blank and the embed URL
+      if (
+        request.url === 'about:blank' ||
+        request.url.startsWith('https://www.youtube-nocookie.com/embed/')
+      ) {
+        return true;
+      }
+      // Block everything else (related videos, channel links, etc.)
+      return false;
+    },
+    [],
+  );
 
   if (!isOnline) {
     return (
-      <View style={styles.container} testID="youtube-offline-message">
+      <View style={styles.messageContainer} testID="youtube-offline-message">
         <Text
           style={[
             styles.messageText,
@@ -55,7 +65,7 @@ export function VideoPlayer({ videoId, isOnline, onDone }: VideoPlayerProps) {
 
   if (error) {
     return (
-      <View style={styles.container} testID="youtube-error-message">
+      <View style={styles.messageContainer} testID="youtube-error-message">
         <Text
           style={[
             styles.messageText,
@@ -67,24 +77,28 @@ export function VideoPlayer({ videoId, isOnline, onDone }: VideoPlayerProps) {
             },
           ]}
         >
-          Couldn't open the video. Please try again.
+          Something went wrong loading the video. Please try again.
         </Text>
         <Pressable
           testID="youtube-retry-button"
-          onPress={openVideo}
-          style={[styles.button, { backgroundColor: colors.primary }]}
+          onPress={handleRetry}
+          style={[styles.actionButton, { backgroundColor: colors.primary }]}
           accessibilityRole="button"
         >
-          <Text style={[styles.buttonText, { color: colors.background }]}>
+          <Text
+            style={[styles.actionButtonText, { color: colors.background }]}
+          >
             Try again
           </Text>
         </Pressable>
         <Pressable
           onPress={onDone}
-          style={[styles.button, { backgroundColor: colors.surface }]}
+          style={[styles.actionButton, { backgroundColor: colors.surface }]}
           accessibilityRole="button"
         >
-          <Text style={[styles.buttonText, { color: colors.textPrimary }]}>
+          <Text
+            style={[styles.actionButtonText, { color: colors.textPrimary }]}
+          >
             Skip video
           </Text>
         </Pressable>
@@ -92,78 +106,83 @@ export function VideoPlayer({ videoId, isOnline, onDone }: VideoPlayerProps) {
     );
   }
 
-  if (opened) {
-    return (
-      <View style={styles.container} testID="youtube-opened-message">
+  return (
+    <View style={styles.container}>
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      )}
+      <WebView
+        ref={webViewRef}
+        key={retryKey}
+        testID="youtube-webview"
+        source={{ html, baseUrl: BASE_URL }}
+        originWhitelist={['*']}
+        javaScriptEnabled
+        domStorageEnabled
+        allowsInlineMediaPlayback
+        allowsFullscreenVideo
+        mediaPlaybackRequiresUserAction={false}
+        mixedContentMode="compatibility"
+        onShouldStartLoadWithRequest={handleNavigationRequest}
+        onLoadEnd={() => setLoading(false)}
+        onError={() => { setError(true); setLoading(false); }}
+        onHttpError={(e) => {
+          if (e.nativeEvent.statusCode >= 400) {
+            setError(true);
+            setLoading(false);
+          }
+        }}
+        style={styles.player}
+      />
+      <Pressable
+        testID="youtube-done-button"
+        onPress={onDone}
+        style={[styles.actionButton, { backgroundColor: colors.primary }]}
+        accessibilityRole="button"
+        accessibilityLabel="Done watching"
+      >
         <Text
-          style={[
-            styles.messageText,
-            {
-              color: colors.textSecondary,
-              fontFamily: typography.fontFamily.regular,
-              fontSize: typography.fontSize.md,
-              marginBottom: spacing.sm,
-            },
-          ]}
+          style={[styles.actionButtonText, { color: colors.background }]}
         >
-          Video opened in YouTube.
+          Done watching
         </Text>
-        <Text
-          style={[
-            styles.messageText,
-            {
-              color: colors.textSecondary,
-              fontFamily: typography.fontFamily.regular,
-              fontSize: typography.fontSize.sm,
-              marginBottom: spacing.lg,
-            },
-          ]}
-        >
-          Come back here when you're done watching!
-        </Text>
-        <Pressable
-          testID="youtube-done-button"
-          onPress={onDone}
-          style={[styles.button, { backgroundColor: colors.primary }]}
-          accessibilityRole="button"
-          accessibilityLabel="Done watching"
-        >
-          <Text style={[styles.buttonText, { color: colors.background }]}>
-            Done watching
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={openVideo}
-          style={[styles.button, { backgroundColor: colors.surface, marginTop: 0 }]}
-          accessibilityRole="button"
-        >
-          <Text style={[styles.buttonText, { color: colors.textPrimary }]}>
-            Reopen video
-          </Text>
-        </Pressable>
-      </View>
-    );
-  }
-
-  return null;
+      </Pressable>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  player: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: spacing.lg,
+    backgroundColor: '#000',
+    zIndex: 1,
   },
-  button: {
+  actionButton: {
     margin: spacing.sm,
+    marginHorizontal: spacing.md,
     padding: spacing.md,
     borderRadius: 8,
     alignItems: 'center',
-    width: '80%',
   },
-  buttonText: {
+  actionButtonText: {
     fontWeight: '600',
+  },
+  messageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
   },
   messageText: {
     textAlign: 'center',

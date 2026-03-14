@@ -1,9 +1,19 @@
 import React from 'react';
-import { Linking } from 'react-native';
-import { render, fireEvent, act } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 
-// Mock Linking.openURL
-jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+// Mock react-native-webview (native module)
+jest.mock('react-native-webview', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: React.forwardRef(({ testID, onLoadEnd }: any, _ref: any) => {
+      // Simulate successful load
+      React.useEffect(() => { onLoadEnd?.(); }, []);
+      return React.createElement(View, { testID: testID ?? 'webview' });
+    }),
+  };
+});
 
 // Mock videoMap so tests control which domains have videos
 jest.mock('@/services/video/videoMap', () => ({
@@ -11,6 +21,11 @@ jest.mock('@/services/video/videoMap', () => ({
     addition: 'abc123',
     // all other domains intentionally absent — tests use 'addition' or 'fractions'
   },
+}));
+
+// Mock youtubeHtml service (used by VideoPlayer)
+jest.mock('@/services/video/youtubeHtml', () => ({
+  buildNocookieHtml: (videoId: string) => `<html>${videoId}</html>`,
 }));
 
 // Mock lucide-react-native icons used by VideoVoteButtons
@@ -88,7 +103,6 @@ const BASE_PROPS = {
 describe('ChatPanel video section — button visibility (VIDEO-02)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (Linking.openURL as jest.Mock).mockResolvedValue(true);
   });
 
   it('does NOT show watch button when ladderExhausted=false', () => {
@@ -152,7 +166,7 @@ describe('ChatPanel video section — button visibility (VIDEO-02)', () => {
     expect(getByTestId('chat-watch-video-button')).toBeTruthy();
   });
 
-  it('opens YouTube via Linking and shows done button after pressing watch', async () => {
+  it('shows WebView video player after pressing watch button', () => {
     const { getByTestId } = render(
       <ChatPanel
         {...BASE_PROPS}
@@ -161,14 +175,11 @@ describe('ChatPanel video section — button visibility (VIDEO-02)', () => {
         currentDomain="addition"
       />,
     );
-    await act(async () => {
-      fireEvent.press(getByTestId('chat-watch-video-button'));
-    });
-    expect(Linking.openURL).toHaveBeenCalledWith('https://www.youtube.com/watch?v=abc123');
-    expect(getByTestId('youtube-done-button')).toBeTruthy();
+    fireEvent.press(getByTestId('chat-watch-video-button'));
+    expect(getByTestId('youtube-webview')).toBeTruthy();
   });
 
-  it('shows VideoVoteButtons after pressing Done watching', async () => {
+  it('shows VideoVoteButtons after pressing Done watching', () => {
     const { getByTestId, queryByTestId } = render(
       <ChatPanel
         {...BASE_PROPS}
@@ -178,15 +189,13 @@ describe('ChatPanel video section — button visibility (VIDEO-02)', () => {
         onVideoVote={jest.fn()}
       />,
     );
-    await act(async () => {
-      fireEvent.press(getByTestId('chat-watch-video-button'));
-    });
+    fireEvent.press(getByTestId('chat-watch-video-button'));
     fireEvent.press(getByTestId('youtube-done-button'));
     expect(getByTestId('video-vote-helpful')).toBeTruthy();
-    expect(queryByTestId('youtube-done-button')).toBeNull();
+    expect(queryByTestId('youtube-webview')).toBeNull();
   });
 
-  it('fires onVideoVote with domain and vote when vote button pressed', async () => {
+  it('fires onVideoVote with domain and vote when vote button pressed', () => {
     const onVideoVote = jest.fn();
     const { getByTestId } = render(
       <ChatPanel
@@ -197,9 +206,7 @@ describe('ChatPanel video section — button visibility (VIDEO-02)', () => {
         onVideoVote={onVideoVote}
       />,
     );
-    await act(async () => {
-      fireEvent.press(getByTestId('chat-watch-video-button'));
-    });
+    fireEvent.press(getByTestId('chat-watch-video-button'));
     fireEvent.press(getByTestId('youtube-done-button'));
     fireEvent.press(getByTestId('video-vote-helpful'));
     expect(onVideoVote).toHaveBeenCalledWith('addition', 'helpful');

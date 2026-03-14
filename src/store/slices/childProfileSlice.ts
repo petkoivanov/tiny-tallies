@@ -40,6 +40,8 @@ export interface ChildProfileSlice {
   benchmarkOptIn: boolean;
   /** Whether parent has granted consent for YouTube video playback */
   youtubeConsentGranted: boolean;
+  /** Whether the Explore manipulatives section is visible on the home screen */
+  exploreEnabled: boolean;
   setChildProfile: (
     profile: Partial<
       Pick<ChildProfileSlice, 'childName' | 'childAge' | 'childGrade' | 'avatarId' | 'frameId' | 'themeId'>
@@ -54,6 +56,7 @@ export interface ChildProfileSlice {
   setStateCode: (code: StateCode) => void;
   setBenchmarkOptIn: (optIn: boolean) => void;
   setYoutubeConsentGranted: (granted: boolean) => void;
+  setExploreEnabled: (enabled: boolean) => void;
 }
 
 export const createChildProfileSlice: StateCreator<
@@ -77,6 +80,7 @@ export const createChildProfileSlice: StateCreator<
   stateCode: null,
   benchmarkOptIn: false,
   youtubeConsentGranted: false,
+  exploreEnabled: true,
   setChildProfile: (profile) =>
     set((state) => ({
       ...state,
@@ -91,4 +95,5 @@ export const createChildProfileSlice: StateCreator<
   setStateCode: (code) => set({ stateCode: code }),
   setBenchmarkOptIn: (optIn) => set({ benchmarkOptIn: optIn }),
   setYoutubeConsentGranted: (granted) => set({ youtubeConsentGranted: granted }),
+  setExploreEnabled: (enabled) => set({ exploreEnabled: enabled }),
 });

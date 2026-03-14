@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Volume2,
   Youtube,
+  Compass,
 } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
@@ -62,6 +63,8 @@ export default function ParentalControlsScreen() {
   const setYoutubeConsentGranted = useAppStore((s) => s.setYoutubeConsentGranted);
   const soundEnabled = useAppStore((s) => s.soundEnabled);
   const setSoundEnabled = useAppStore((s) => s.setSoundEnabled);
+  const exploreEnabled = useAppStore((s) => s.exploreEnabled);
+  const setExploreEnabled = useAppStore((s) => s.setExploreEnabled);
   const setAuth = useAppStore((s) => s.setAuth);
   const clearAuth = useAppStore((s) => s.clearAuth);
 
@@ -507,6 +510,28 @@ export default function ParentalControlsScreen() {
                 {soundEnabled
                   ? 'Plays sounds for correct answers, celebrations, and feedback.'
                   : 'Sound effects are turned off.'}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Compass size={20} color={colors.primary} />
+              <Text style={styles.sectionTitle}>Explore</Text>
+            </View>
+            <View style={styles.card}>
+              <View style={styles.row}>
+                <Text style={styles.rowLabel}>Show Explore section</Text>
+                <Switch
+                  value={exploreEnabled}
+                  onValueChange={setExploreEnabled}
+                  testID="explore-toggle"
+                />
+              </View>
+              <Text style={styles.rowSublabel}>
+                {exploreEnabled
+                  ? 'Manipulatives (counters, blocks, number lines) are visible on the home screen.'
+                  : 'Explore section is hidden from the home screen.'}
               </Text>
             </View>
           </View>

@@ -34,6 +34,7 @@ export type RootStackParamList = {
     accuracyGoalMet?: boolean;
     streakGoalMet?: boolean;
   };
+  Explore: undefined;
   Sandbox: { manipulativeType: ManipulativeType };
   BadgeCollection: undefined;
   SkillMap: undefined;

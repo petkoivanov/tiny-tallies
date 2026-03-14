@@ -167,12 +167,25 @@ export function generateDistractors(
     }
   }
 
-  // Phase 3: Random fallback
   // Detect decimal precision from the correct answer
   const isDecimal = !Number.isInteger(correctAnswer);
   const decimalPlaces = isDecimal
     ? (correctAnswer.toString().split('.')[1]?.length ?? 0)
     : 0;
+
+  // Sanitize Phase 1+2 results: round to correct answer's decimal precision
+  // to eliminate floating point artifacts (e.g., 2.9000000000000004 → 2.9)
+  if (isDecimal) {
+    const scale = Math.pow(10, decimalPlaces);
+    for (let i = 0; i < results.length; i++) {
+      const rounded = Math.round(results[i].value * scale) / scale;
+      if (rounded !== results[i].value) {
+        results[i] = { ...results[i], value: rounded };
+      }
+    }
+  }
+
+  // Phase 3: Random fallback
   const step = isDecimal ? Math.pow(10, -decimalPlaces) : 1;
 
   const rangeHalf = Math.max(Math.floor(Math.abs(correctAnswer) * 0.4), 5);
