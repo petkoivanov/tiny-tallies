@@ -106,14 +106,14 @@ export default function ThemePickerScreen() {
   const navigation = useNavigation();
   const { colors } = useTheme();
 
-  const currentThemeId = useAppStore((s) => s.themeId) ?? 'dark';
+  const currentThemeId = useAppStore((s) => s.themeId) ?? 'candy';
   const earnedBadges = useAppStore((s) => s.earnedBadges);
   const setChildProfile = useAppStore((s) => s.setChildProfile);
 
   const [previewThemeId, setPreviewThemeId] = useState<ThemeId>(currentThemeId as ThemeId);
   const [detailItem, setDetailItem] = useState<DetailItem | null>(null);
 
-  const previewColors = THEMES[previewThemeId] ?? THEMES.dark;
+  const previewColors = THEMES[previewThemeId] ?? THEMES.candy;
 
   const handleEquip = (id: ThemeId) => {
     setChildProfile({ themeId: id });
@@ -234,27 +234,34 @@ export default function ThemePickerScreen() {
           <ThemePreview themeColors={previewColors} />
         </View>
 
-        {/* Default Theme */}
-        <Text style={styles.sectionHeader}>Default</Text>
-        <Pressable
-          testID="theme-card-dark"
-          style={[
-            styles.themeCard,
-            currentThemeId === 'dark' && styles.equippedCard,
-          ]}
-          onPress={() => handleEquip('dark')}
-        >
-          <Text style={styles.emoji}>{'\uD83C\uDF11'}</Text>
-          <View style={styles.cardContent}>
-            <Text style={styles.cardLabel}>Default Dark</Text>
-            <ThemeSwatches themeColors={THEMES.dark} />
-          </View>
-          {currentThemeId === 'dark' && (
-            <View testID="equipped-indicator-dark" style={styles.checkContainer}>
-              <Check size={20} color={colors.correct} strokeWidth={3} />
+        {/* Free Themes */}
+        <Text style={styles.sectionHeader}>Free Themes</Text>
+        {([
+          { id: 'candy' as const, emoji: '\uD83C\uDF6C', label: 'Candy' },
+          { id: 'sky' as const, emoji: '\u2601\uFE0F', label: 'Sky' },
+          { id: 'dark' as const, emoji: '\uD83C\uDF11', label: 'Dark' },
+        ] as const).map((theme) => (
+          <Pressable
+            key={theme.id}
+            testID={`theme-card-${theme.id}`}
+            style={[
+              styles.themeCard,
+              currentThemeId === theme.id && styles.equippedCard,
+            ]}
+            onPress={() => handleEquip(theme.id)}
+          >
+            <Text style={styles.emoji}>{theme.emoji}</Text>
+            <View style={styles.cardContent}>
+              <Text style={styles.cardLabel}>{theme.label}</Text>
+              <ThemeSwatches themeColors={THEMES[theme.id]} />
             </View>
-          )}
-        </Pressable>
+            {currentThemeId === theme.id && (
+              <View testID={`equipped-indicator-${theme.id}`} style={styles.checkContainer}>
+                <Check size={20} color={colors.correct} strokeWidth={3} />
+              </View>
+            )}
+          </Pressable>
+        ))}
 
         {/* Unlockable Themes */}
         <Text style={styles.sectionHeader}>Unlockable Themes</Text>

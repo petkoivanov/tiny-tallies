@@ -63,6 +63,7 @@ export type NewChildProfile = {
   childGrade: number;
   avatarId: AllAvatarId | null;
   stateCode?: StateCode;
+  themeId?: ThemeId;
 };
 
 /** Derive anonymous age range bucket from exact age (for peer benchmarking). */
@@ -122,7 +123,7 @@ export const DEFAULT_CHILD_DATA: ChildData = {
   childGrade: 0,
   avatarId: null,
   frameId: null,
-  themeId: 'dark',
+  themeId: 'candy',
   tutorConsentGranted: true,
   youtubeConsentGranted: false,
   videoVotes: {},
@@ -188,6 +189,7 @@ export function createDefaultChildData(profile: {
   childGrade: number;
   avatarId: AllAvatarId | null;
   stateCode?: StateCode;
+  themeId?: ThemeId;
   skillStates?: Record<string, SkillState>;
 }): ChildData {
   return {
@@ -198,6 +200,7 @@ export function createDefaultChildData(profile: {
     avatarId: profile.avatarId,
     ageRange: ageToAgeRange(profile.childAge),
     stateCode: profile.stateCode ?? null,
+    themeId: profile.themeId ?? DEFAULT_CHILD_DATA.themeId,
     skillStates: profile.skillStates ?? {},
   };
 }

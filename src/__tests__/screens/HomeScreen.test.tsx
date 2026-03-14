@@ -48,6 +48,7 @@ jest.mock('lucide-react-native', () => {
     Award: (props: any) => <View testID="award-icon" {...props} />,
     Target: (props: any) => <View testID="target-icon" {...props} />,
     RefreshCw: (props: any) => <View testID="refresh-icon" {...props} />,
+    Star: (props: any) => <View testID="star-icon" {...props} />,
     Compass: (props: any) => <View testID="compass-icon" {...props} />,
   };
 });

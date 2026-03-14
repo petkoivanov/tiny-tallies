@@ -70,7 +70,7 @@ export const createChildProfileSlice: StateCreator<
   childGrade: null,
   avatarId: null,
   frameId: null,
-  themeId: 'dark',
+  themeId: 'candy',
   tutorConsentGranted: true,
   soundEnabled: true,
   dailyLimitMinutes: 0,

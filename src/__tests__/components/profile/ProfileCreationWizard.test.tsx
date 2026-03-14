@@ -13,6 +13,7 @@ jest.mock('lucide-react-native', () => {
     BookOpen: (props: any) => <View testID="book-open-icon" {...props} />,
     Shield: (props: any) => <View testID="shield-icon" {...props} />,
     BarChart3: (props: any) => <View testID="bar-chart-icon" {...props} />,
+    Palette: (props: any) => <View testID="palette-icon" {...props} />,
   };
 });
 
@@ -269,7 +270,7 @@ describe('ProfileCreationWizard', () => {
       expect(getByTestId('avatar-B')).toBeTruthy();
     });
 
-    it('Next button on avatar step proceeds to youtube step', () => {
+    it('Next button on avatar step proceeds to theme step', () => {
       const { getByPlaceholderText, getByText, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
@@ -277,7 +278,7 @@ describe('ProfileCreationWizard', () => {
       goToAvatar(getByPlaceholderText, getByText, getAllByText);
       fireEvent.press(getByText('Next'));
 
-      expect(getByText(/secret weapon/i)).toBeTruthy();
+      expect(getByText(/pick a look/i)).toBeTruthy();
     });
 
     it('calls onComplete with null avatarId and stateCode when skipped', () => {
@@ -286,7 +287,8 @@ describe('ProfileCreationWizard', () => {
       );
 
       goToAvatar(getByPlaceholderText, getByText, getAllByText);
-      fireEvent.press(getByText('Next')); // avatar → youtube
+      fireEvent.press(getByText('Next')); // avatar → theme
+      fireEvent.press(getByText('Next')); // theme → youtube
       fireEvent.press(getByText('Done')); // youtube → complete
 
       expect(mockOnComplete).toHaveBeenCalledWith(
@@ -296,6 +298,7 @@ describe('ProfileCreationWizard', () => {
           childGrade: 2,
           avatarId: null,
           stateCode: null,
+          themeId: 'candy',
         },
         false,
       );
@@ -308,7 +311,8 @@ describe('ProfileCreationWizard', () => {
 
       goToAvatar(getByPlaceholderText, getByText, getAllByText);
       fireEvent.press(getByTestId('avatar-O'));
-      fireEvent.press(getByText('Next')); // avatar → youtube
+      fireEvent.press(getByText('Next')); // avatar → theme
+      fireEvent.press(getByText('Next')); // theme → youtube
       fireEvent.press(getByText('Done')); // youtube → complete
 
       expect(mockOnComplete).toHaveBeenCalledWith(
@@ -318,6 +322,7 @@ describe('ProfileCreationWizard', () => {
           childGrade: 2,
           avatarId: 'owl',
           stateCode: null,
+          themeId: 'candy',
         },
         false,
       );
@@ -335,14 +340,15 @@ describe('ProfileCreationWizard', () => {
     });
   });
 
-  describe('Step 5: YouTube consent', () => {
+  describe('Step 6: YouTube consent', () => {
     function goToYoutube(getByPlaceholderText: any, getByText: any, getAllByText: any) {
       fireEvent.changeText(getByPlaceholderText(/name/i), 'Alice');
       fireEvent.press(getByText('Next'));
       fireEvent.press(getAllByText('7')[0]);
       fireEvent.press(getByText('Next'));
       fireEvent.press(getByText('Skip'));
-      fireEvent.press(getByText('Next')); // avatar → youtube
+      fireEvent.press(getByText('Next')); // avatar → theme
+      fireEvent.press(getByText('Next')); // theme → youtube
     }
 
     it('renders youtube consent step with toggle off by default', () => {
@@ -386,7 +392,7 @@ describe('ProfileCreationWizard', () => {
       );
     });
 
-    it('Back button returns to avatar step', () => {
+    it('Back button returns to theme step', () => {
       const { getByPlaceholderText, getByText, getAllByText } = render(
         <ProfileCreationWizard onComplete={mockOnComplete} />,
       );
@@ -394,7 +400,7 @@ describe('ProfileCreationWizard', () => {
       goToYoutube(getByPlaceholderText, getByText, getAllByText);
       fireEvent.press(getByText('Back'));
 
-      expect(getByText(/avatar/i)).toBeTruthy();
+      expect(getByText(/pick a look/i)).toBeTruthy();
     });
   });
 
@@ -444,9 +450,10 @@ describe('ProfileCreationWizard', () => {
       goToAgeGrade(getByPlaceholderText, getByText);
       fireEvent.press(getByText('18'));
       fireEvent.press(getByText('Next'));
-      // Navigate through location, avatar, and youtube steps
+      // Navigate through location, avatar, theme, and youtube steps
       fireEvent.press(getByText('Skip'));
-      fireEvent.press(getByText('Next')); // avatar → youtube
+      fireEvent.press(getByText('Next')); // avatar → theme
+      fireEvent.press(getByText('Next')); // theme → youtube
       fireEvent.press(getByText('Done'));
 
       expect(mockOnComplete).toHaveBeenCalledWith(
@@ -464,7 +471,8 @@ describe('ProfileCreationWizard', () => {
       fireEvent.press(getAllByText('10')[0]);
       fireEvent.press(getByText('Next'));
       fireEvent.press(getByText('Skip'));
-      fireEvent.press(getByText('Next')); // avatar → youtube
+      fireEvent.press(getByText('Next')); // avatar → theme
+      fireEvent.press(getByText('Next')); // theme → youtube
       fireEvent.press(getByText('Done'));
 
       expect(mockOnComplete).toHaveBeenCalledWith(
@@ -482,7 +490,8 @@ describe('ProfileCreationWizard', () => {
       fireEvent.press(getAllByText('5')[0]);
       fireEvent.press(getByText('Next'));
       fireEvent.press(getByText('Skip'));
-      fireEvent.press(getByText('Next')); // avatar → youtube
+      fireEvent.press(getByText('Next')); // avatar → theme
+      fireEvent.press(getByText('Next')); // theme → youtube
       fireEvent.press(getByText('Done'));
 
       expect(mockOnComplete).toHaveBeenCalledWith(
@@ -505,7 +514,8 @@ describe('ProfileCreationWizard', () => {
       fireEvent.press(getByText('Next'));
       fireEvent.press(getByText('Skip'));
       fireEvent.press(getByTestId('avatar-B'));
-      fireEvent.press(getByText('Next')); // avatar → youtube
+      fireEvent.press(getByText('Next')); // avatar → theme
+      fireEvent.press(getByText('Next')); // theme → youtube
       fireEvent.press(getByText('Done'));
 
       expect(mockOnComplete).toHaveBeenCalledWith(
@@ -515,6 +525,7 @@ describe('ProfileCreationWizard', () => {
           childGrade: 4,
           avatarId: 'bear',
           stateCode: null,
+          themeId: 'candy',
         },
         false,
       );
@@ -533,7 +544,8 @@ describe('ProfileCreationWizard', () => {
       fireEvent.press(getByTestId('state-NY'));
       fireEvent.press(getByText('Next'));
       fireEvent.press(getByTestId('avatar-B'));
-      fireEvent.press(getByText('Next')); // avatar → youtube
+      fireEvent.press(getByText('Next')); // avatar → theme
+      fireEvent.press(getByText('Next')); // theme → youtube
       fireEvent.press(getByText('Done'));
 
       expect(mockOnComplete).toHaveBeenCalledWith(
@@ -543,6 +555,7 @@ describe('ProfileCreationWizard', () => {
           childGrade: 4,
           avatarId: 'bear',
           stateCode: 'NY',
+          themeId: 'candy',
         },
         false,
       );
@@ -558,7 +571,8 @@ describe('ProfileCreationWizard', () => {
       fireEvent.press(getAllByText('8')[0]);
       fireEvent.press(getByText('Next'));
       fireEvent.press(getByText('Skip'));
-      fireEvent.press(getByText('Next')); // avatar → youtube
+      fireEvent.press(getByText('Next')); // avatar → theme
+      fireEvent.press(getByText('Next')); // theme → youtube
       fireEvent(getByTestId('youtube-consent-onboarding'), 'valueChange', true);
       fireEvent.press(getByText('Done'));
 

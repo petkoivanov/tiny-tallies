@@ -15,11 +15,11 @@ export { THEMES } from './colors';
 export type { ThemeColors, ThemeId } from './colors';
 export { springConfigs, durations } from './animations';
 
-const ThemeContext = createContext<ThemeColors>(THEMES.dark);
+const ThemeContext = createContext<ThemeColors>(THEMES.candy);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const themeId = useAppStore((s) => s.themeId) ?? 'dark';
-  const colors = THEMES[themeId as ThemeId] ?? THEMES.dark;
+  const themeId = useAppStore((s) => s.themeId) ?? 'candy';
+  const colors = THEMES[themeId as ThemeId] ?? THEMES.candy;
   return React.createElement(ThemeContext.Provider, { value: colors }, children);
 }
 

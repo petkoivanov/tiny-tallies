@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Flame, Check, Focus, GitBranch, Palette, Settings, Award, Target, RefreshCw, Compass } from 'lucide-react-native';
+import { Flame, Check, Focus, GitBranch, Palette, Settings, Award, Target, RefreshCw, Star, Compass } from 'lucide-react-native';
 import { useTheme, spacing, typography, layout } from '@/theme';
 import { useAppStore } from '@/store/appStore';
 import { AVATARS, DEFAULT_AVATAR_ID, SPECIAL_AVATARS, FRAMES, resolveAvatar } from '@/store/constants/avatars';
@@ -110,11 +110,18 @@ export default function HomeScreen() {
       gap: spacing.xs,
     },
     toolbarButton: {
-      padding: spacing.sm,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.xs,
       minWidth: layout.minTouchTarget,
       minHeight: layout.minTouchTarget,
       justifyContent: 'center',
       alignItems: 'center',
+      gap: 2,
+    },
+    toolbarLabel: {
+      fontFamily: typography.fontFamily.medium,
+      fontSize: typography.fontSize.xs,
+      color: colors.textSecondary,
     },
     profileSection: {
       alignItems: 'center',
@@ -131,31 +138,41 @@ export default function HomeScreen() {
       textAlign: 'center',
       marginBottom: spacing.xs,
     },
-    statsRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-      marginTop: spacing.xs,
-      marginBottom: spacing.md,
-    },
     statsRowLevel: {
       fontFamily: typography.fontFamily.semiBold,
       fontSize: typography.fontSize.md,
       color: colors.primaryLight,
+      marginTop: spacing.xs,
     },
-    statsRowSeparator: {
-      fontSize: typography.fontSize.md,
-      color: colors.textMuted,
+    xpBarContainer: {
+      width: '100%',
+      paddingHorizontal: spacing.xl,
+      marginTop: spacing.xs,
+      marginBottom: spacing.xs,
+      gap: spacing.xs,
     },
-    statsRowXp: {
+    xpBarTrack: {
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.surface,
+      overflow: 'hidden' as const,
+    },
+    xpBarFill: {
+      height: '100%',
+      borderRadius: 5,
+      backgroundColor: colors.primary,
+    },
+    xpBarLabel: {
       fontFamily: typography.fontFamily.medium,
-      fontSize: typography.fontSize.md,
+      fontSize: typography.fontSize.xs,
       color: colors.textSecondary,
+      textAlign: 'center' as const,
     },
     statsRowBadgeText: {
       fontFamily: typography.fontFamily.semiBold,
-      fontSize: typography.fontSize.md,
-      color: colors.textPrimary,
+      fontSize: typography.fontSize.sm,
+      color: colors.textSecondary,
+      marginBottom: spacing.md,
     },
     scrollContent: {
       flexGrow: 1,
@@ -283,7 +300,8 @@ export default function HomeScreen() {
           accessibilityRole="button"
           testID="badge-count-button"
         >
-          <Award size={20} color={colors.textMuted} />
+          <Award size={24} color={colors.textSecondary} />
+          <Text style={styles.toolbarLabel}>Badges</Text>
         </Pressable>
         <Pressable
           style={styles.toolbarButton}
@@ -292,7 +310,8 @@ export default function HomeScreen() {
           accessibilityRole="button"
           testID="skill-map-button"
         >
-          <GitBranch size={20} color={colors.textMuted} />
+          <GitBranch size={24} color={colors.textSecondary} />
+          <Text style={styles.toolbarLabel}>Skills</Text>
         </Pressable>
         {exploreEnabled && (
           <Pressable
@@ -302,7 +321,8 @@ export default function HomeScreen() {
             accessibilityRole="button"
             testID="explore-button"
           >
-            <Compass size={20} color={colors.textMuted} />
+            <Compass size={24} color={colors.textSecondary} />
+            <Text style={styles.toolbarLabel}>Explore</Text>
           </Pressable>
         )}
         <Pressable
@@ -312,7 +332,8 @@ export default function HomeScreen() {
           accessibilityRole="button"
           testID="theme-picker-button"
         >
-          <Palette size={20} color={colors.textMuted} />
+          <Palette size={24} color={colors.textSecondary} />
+          <Text style={styles.toolbarLabel}>Theme</Text>
         </Pressable>
         <Pressable
           style={styles.toolbarButton}
@@ -321,7 +342,8 @@ export default function HomeScreen() {
           accessibilityRole="button"
           testID="settings-button"
         >
-          <Settings size={20} color={colors.textMuted} />
+          <Settings size={24} color={colors.textSecondary} />
+          <Text style={styles.toolbarLabel}>Settings</Text>
         </Pressable>
       </View>
 
@@ -341,18 +363,27 @@ export default function HomeScreen() {
           />
         </View>
         <Text style={styles.greeting}>{greeting}</Text>
-        {/* Level · XP · Badges — compact single row */}
-        <View style={styles.statsRow}>
-          <Text style={styles.statsRowLevel}>Level {level}</Text>
-          <Text style={styles.statsRowSeparator}>{'\u00B7'}</Text>
-          <Text style={styles.statsRowXp}>
+        {/* Level + XP progress bar */}
+        <Text style={styles.statsRowLevel}>Level {level}</Text>
+        <View style={styles.xpBarContainer}>
+          <View style={styles.xpBarTrack}>
+            <View
+              style={[
+                styles.xpBarFill,
+                { width: `${Math.min((xpIntoCurrentLevel / xpNeededForNextLevel) * 100, 100)}%` },
+              ]}
+            />
+          </View>
+          <Text style={styles.xpBarLabel}>
             {xpIntoCurrentLevel}/{xpNeededForNextLevel} XP
           </Text>
-          <Text style={styles.statsRowSeparator}>|</Text>
-          <Text style={styles.statsRowBadgeText}>
-            {earnedBadgeCount}/{BADGES.length} {'\uD83C\uDFC5'}
-          </Text>
         </View>
+        {/* Badge count — motivational when empty */}
+        <Text style={styles.statsRowBadgeText}>
+          {earnedBadgeCount > 0
+            ? `${earnedBadgeCount}/${BADGES.length} \uD83C\uDFC5`
+            : 'Earn your first badge! \uD83C\uDFC5'}
+        </Text>
       </View>
 
       {/* Streak Display */}
@@ -432,11 +463,11 @@ export default function HomeScreen() {
           testID="retake-evaluation-card"
         >
           <View style={styles.placementRow}>
-            <RefreshCw size={24} color={colors.primaryLight} />
+            <Star size={24} color={colors.primaryLight} fill={colors.primaryLight} />
             <View style={styles.placementText}>
-              <Text style={styles.placementTitle}>Level Up Check</Text>
+              <Text style={styles.placementTitle}>Ready to level up?</Text>
               <Text style={styles.placementSubtitle}>
-                Think you've improved? Retake the quiz and prove it!
+                Retake the quiz and prove it!
               </Text>
             </View>
           </View>

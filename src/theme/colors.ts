@@ -5,7 +5,7 @@
  * across all themes for instant feedback recognition.
  */
 
-export type ThemeId = 'dark' | 'ocean' | 'forest' | 'sunset' | 'space';
+export type ThemeId = 'candy' | 'sky' | 'dark' | 'ocean' | 'forest' | 'sunset' | 'space';
 
 export interface ThemeColors {
   background: string;
@@ -23,6 +23,34 @@ export interface ThemeColors {
 }
 
 export const THEMES: Record<ThemeId, ThemeColors> = {
+  candy: {
+    background: '#FFF5F7',
+    backgroundLight: '#FFF0F3',
+    surface: '#FFFFFF',
+    surfaceLight: '#FEE2E8',
+    primary: '#E8457C',
+    primaryLight: '#F472A8',
+    primaryDark: '#D6336C',
+    correct: '#22C55E',
+    incorrect: '#EF4444',
+    textPrimary: '#1E1E2E',
+    textSecondary: '#6B7280',
+    textMuted: '#9CA3AF',
+  },
+  sky: {
+    background: '#F0F7FF',
+    backgroundLight: '#E8F2FF',
+    surface: '#FFFFFF',
+    surfaceLight: '#DBEAFE',
+    primary: '#3B82F6',
+    primaryLight: '#60A5FA',
+    primaryDark: '#2563EB',
+    correct: '#22C55E',
+    incorrect: '#EF4444',
+    textPrimary: '#1E293B',
+    textSecondary: '#64748B',
+    textMuted: '#94A3B8',
+  },
   dark: {
     background: '#1a1a2e',
     backgroundLight: '#16213e',

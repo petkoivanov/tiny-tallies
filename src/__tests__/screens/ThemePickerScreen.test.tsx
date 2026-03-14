@@ -101,9 +101,11 @@ describe('ThemePickerScreen', () => {
     mockEarnedBadges = {};
   });
 
-  it('renders all 5 theme names', () => {
+  it('renders all 7 theme names', () => {
     const { getByText } = render(<ThemePickerScreen />);
-    expect(getByText('Default Dark')).toBeTruthy();
+    expect(getByText('Candy')).toBeTruthy();
+    expect(getByText('Sky')).toBeTruthy();
+    expect(getByText('Dark')).toBeTruthy();
     expect(getByText('Ocean')).toBeTruthy();
     expect(getByText('Forest')).toBeTruthy();
     expect(getByText('Sunset')).toBeTruthy();

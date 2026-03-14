@@ -8,8 +8,10 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { ChevronLeft, ChevronRight, Check, PlayCircle, BookOpen, Shield, BarChart3 } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Check, PlayCircle, BookOpen, Shield, BarChart3, Palette } from 'lucide-react-native';
 import { useTheme } from '@/theme';
+import { THEMES } from '@/theme/colors';
+import type { ThemeId, ThemeColors } from '@/theme/colors';
 import { AvatarCircle } from '@/components/avatars';
 import { StateSelector } from '@/components/shared/StateSelector';
 import { AVATARS } from '@/store/constants/avatars';
@@ -17,7 +19,13 @@ import type { AllAvatarId } from '@/store/constants/avatars';
 import type { NewChildProfile } from '@/store/helpers/childDataHelpers';
 import type { StateCode } from '@/store/slices/childProfileSlice';
 
-type WizardStep = 'name' | 'age-grade' | 'location' | 'avatar' | 'youtube';
+type WizardStep = 'name' | 'age-grade' | 'location' | 'avatar' | 'theme' | 'youtube';
+
+const FREE_THEMES: { id: ThemeId; emoji: string; label: string }[] = [
+  { id: 'candy', emoji: '\uD83C\uDF6C', label: 'Candy' },
+  { id: 'sky', emoji: '\u2601\uFE0F', label: 'Sky' },
+  { id: 'dark', emoji: '\uD83C\uDF11', label: 'Dark' },
+];
 
 export interface ProfileCreationWizardProps {
   onComplete: (profile: NewChildProfile, youtubeConsent: boolean) => void;
@@ -62,6 +70,7 @@ export function ProfileCreationWizard({
   const [stateCode, setStateCode] = useState<StateCode>(
     initialValues?.stateCode ?? null,
   );
+  const [themeId, setThemeId] = useState<ThemeId>(initialValues?.themeId ?? 'candy');
   const [youtubeConsent, setYoutubeConsent] = useState(false);
 
   const trimmedName = name.trim();
@@ -83,6 +92,8 @@ export function ProfileCreationWizard({
     } else if (step === 'location') {
       setStep('avatar');
     } else if (step === 'avatar') {
+      setStep('theme');
+    } else if (step === 'theme') {
       setStep('youtube');
     }
   }
@@ -91,7 +102,8 @@ export function ProfileCreationWizard({
     if (step === 'age-grade') setStep('name');
     else if (step === 'location') setStep('age-grade');
     else if (step === 'avatar') setStep('location');
-    else if (step === 'youtube') setStep('avatar');
+    else if (step === 'theme') setStep('avatar');
+    else if (step === 'youtube') setStep('theme');
   }
 
   function handleDone() {
@@ -102,6 +114,7 @@ export function ProfileCreationWizard({
         childGrade: grade!,
         avatarId,
         stateCode,
+        themeId,
       },
       youtubeConsent,
     );
@@ -379,6 +392,74 @@ export function ProfileCreationWizard({
         </View>
       )}
 
+      {step === 'theme' && (
+        <View style={styles.stepContainer}>
+          <Palette size={40} color={colors.primary} style={{ marginBottom: 12 }} />
+          <Text style={[styles.heading, { color: colors.textPrimary, marginBottom: 8 }]}>
+            Pick a look for {trimmedName}
+          </Text>
+          <Text style={[styles.locationSubtext, { color: colors.textSecondary }]}>
+            You can always change this later.
+          </Text>
+          <View style={styles.themeGrid}>
+            {FREE_THEMES.map((t) => {
+              const tc: ThemeColors = THEMES[t.id];
+              const selected = themeId === t.id;
+              return (
+                <Pressable
+                  key={t.id}
+                  testID={`theme-pick-${t.id}`}
+                  style={[
+                    styles.themeCard,
+                    {
+                      backgroundColor: tc.background,
+                      borderColor: selected ? tc.primary : tc.surfaceLight,
+                      borderWidth: selected ? 3 : 1,
+                    },
+                  ]}
+                  onPress={() => setThemeId(t.id)}
+                >
+                  <Text style={{ fontSize: 28 }}>{t.emoji}</Text>
+                  <Text style={[styles.themeCardLabel, { color: tc.textPrimary }]}>
+                    {t.label}
+                  </Text>
+                  <View style={styles.swatchRow}>
+                    {[tc.primary, tc.primaryLight, tc.surface, tc.textPrimary].map((c, i) => (
+                      <View key={i} style={[styles.swatchDot, { backgroundColor: c }]} />
+                    ))}
+                  </View>
+                  {selected && (
+                    <View style={[styles.themeCheck, { backgroundColor: tc.primary }]}>
+                      <Check size={14} color="#fff" strokeWidth={3} />
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
+          <View style={styles.buttonRow}>
+            <Pressable
+              style={[styles.navButton, { backgroundColor: colors.surface }]}
+              onPress={handleBack}
+            >
+              <ChevronLeft size={18} color={colors.textPrimary} />
+              <Text style={[styles.navButtonText, { color: colors.textPrimary }]}>
+                Back
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[styles.navButton, { backgroundColor: colors.primary }]}
+              onPress={handleNext}
+            >
+              <Text style={[styles.navButtonText, { color: '#fff' }]}>
+                Next
+              </Text>
+              <ChevronRight size={18} color="#fff" />
+            </Pressable>
+          </View>
+        </View>
+      )}
+
       {step === 'youtube' && (
         <View style={styles.stepContainer}>
           <PlayCircle size={48} color={colors.primary} style={{ marginBottom: 12 }} />
@@ -499,6 +580,21 @@ const styles = StyleSheet.create({
   youtubeToggleRow: {
     flexDirection: 'row', alignItems: 'center',
     padding: 16, gap: 12, width: '100%', marginBottom: 24,
+  },
+  themeGrid: {
+    flexDirection: 'row', gap: 12, marginBottom: 8, flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  themeCard: {
+    width: 100, alignItems: 'center', padding: 12, borderRadius: 16, gap: 6,
+  },
+  themeCardLabel: { fontSize: 14, fontWeight: '600' },
+  swatchRow: { flexDirection: 'row', gap: 4 },
+  swatchDot: { width: 12, height: 12, borderRadius: 6 },
+  themeCheck: {
+    position: 'absolute', top: 6, right: 6,
+    width: 22, height: 22, borderRadius: 11,
+    alignItems: 'center', justifyContent: 'center',
   },
   buttonRow: {
     flexDirection: 'row', justifyContent: 'space-between',
