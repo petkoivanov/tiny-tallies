@@ -6,3 +6,4 @@ export { AnimatedFlame } from './AnimatedFlame';
 export { AnimatedXpBar } from './AnimatedXpBar';
 export { AnimatedAvatar } from './AnimatedAvatar';
 export { AnimatedChallengeGlow } from './AnimatedChallengeGlow';
+export { AnimatedStartButton } from './AnimatedStartButton';

@@ -44,8 +44,8 @@ export function AnimatedXpBar({ current, total, colors }: AnimatedXpBarProps) {
           style={[styles.fill, { backgroundColor: colors.primary }, fillStyle]}
         />
       </View>
-      <Text style={[styles.label, { color: colors.textSecondary }]}>
-        {current}/{total} XP
+      <Text style={[styles.label, { color: colors.textPrimary }]}>
+        {current} ⭐ {total - current} more to level up!
       </Text>
     </View>
   );

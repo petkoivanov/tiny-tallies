@@ -13,7 +13,7 @@ import { eloToLevel } from '@/services/adaptive/levelMapping';
 import { isSameISOWeek } from '@/services/gamification/weeklyStreak';
 import { BADGES } from '@/services/achievement';
 import { getConfirmedMisconceptions } from '@/store/slices/misconceptionSlice';
-import { DailyChallengeCard, AnimatedFlame, AnimatedXpBar, AnimatedAvatar, AnimatedChallengeGlow } from '@/components/home';
+import { DailyChallengeCard, AnimatedFlame, AnimatedXpBar, AnimatedAvatar, AnimatedChallengeGlow, AnimatedStartButton } from '@/components/home';
 import { AppDialog } from '@/components/AppDialog';
 import { useAbsenceCheck } from '@/hooks/useAbsenceCheck';
 import { useTimeControls } from '@/hooks/useTimeControls';
@@ -351,7 +351,7 @@ export default function HomeScreen() {
         {/* Badge count — motivational when empty */}
         <Text style={styles.statsRowBadgeText}>
           {earnedBadgeCount > 0
-            ? `${earnedBadgeCount}/${BADGES.length} \uD83C\uDFC5`
+            ? `${earnedBadgeCount} of ${BADGES.length} badges \uD83C\uDFC5`
             : 'Earn your first badge! \uD83C\uDFC5'}
         </Text>
       </View>
@@ -433,7 +433,7 @@ export default function HomeScreen() {
             <View style={styles.placementText}>
               <Text style={styles.placementTitle}>Ready to level up?</Text>
               <Text style={styles.placementSubtitle}>
-                Retake the quiz and prove it!
+                Show what you know!
               </Text>
             </View>
           </View>
@@ -442,21 +442,13 @@ export default function HomeScreen() {
 
       {/* Start Practice Button */}
       <View style={styles.buttonSection}>
-        <Pressable
+        <AnimatedStartButton
           onPress={() =>
             handleStartSession({ sessionId: String(Date.now()) })
           }
-          style={({ pressed }) => [
-            styles.button,
-            pressed && styles.buttonPressed,
-            !canStartSession && { opacity: 0.5 },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="Start Practice"
-          testID="start-practice-button"
-        >
-          <Text style={styles.buttonText}>Start Practice</Text>
-        </Pressable>
+          disabled={!canStartSession}
+          colors={colors}
+        />
         {showRemediation && (
           <Pressable
             onPress={() =>

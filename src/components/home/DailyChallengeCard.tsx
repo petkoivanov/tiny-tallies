@@ -33,7 +33,7 @@ function ActiveChallengeContent({
       <Text style={styles.goalText}>
         Get {accuracyTarget}/10 correct and {streakTarget} in a row!
       </Text>
-      <Text style={styles.statusText}>Not started</Text>
+      <Text style={styles.statusText}>Let's go!</Text>
     </>
   );
 }
