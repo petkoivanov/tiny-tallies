@@ -222,6 +222,8 @@ export function ScatterPlot({
             cy={toSvgY(p.y)}
             r={DOT_RADIUS}
             fill={colors.primary}
+            stroke={colors.surface}
+            strokeWidth={1.5}
           />
         ))}
 

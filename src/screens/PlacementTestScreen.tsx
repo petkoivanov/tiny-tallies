@@ -24,6 +24,8 @@ import type { Problem } from '@/services/mathEngine/types';
 import { answerNumericValue, MAX_GRADE } from '@/services/mathEngine/types';
 import type { Grade } from '@/services/mathEngine/types';
 import { CharacterReaction } from '@/components/animations/CharacterReaction';
+import { AnalogClock, clockDetailForSkill } from '@/components/session/AnalogClock';
+import { CoinDisplay, shouldShowCoins } from '@/components/session/CoinDisplay';
 import { GraphDisplay } from '@/components/session/graphs';
 import { NarrateButton } from '@/components/session/NarrateButton';
 import { AppDialog } from '@/components/AppDialog';
@@ -561,6 +563,22 @@ export default function PlacementTestScreen() {
               resetKey={questionIndex}
               testID="test-character"
             />
+            {currentProblem.operation === 'time' &&
+              currentProblem.metadata.displayTime != null && (
+                <AnalogClock
+                  hours={currentProblem.metadata.displayTime.hours}
+                  minutes={currentProblem.metadata.displayTime.minutes}
+                  detail={clockDetailForSkill(currentProblem.skillId)}
+                  size={180}
+                />
+              )}
+            {shouldShowCoins(currentProblem.skillId) &&
+              currentProblem.metadata.coinSet != null && (
+                <CoinDisplay
+                  coinSet={currentProblem.metadata.coinSet}
+                  testID="placement-coins"
+                />
+              )}
             {currentProblem.metadata.graphData && (
               <GraphDisplay
                 data={currentProblem.metadata.graphData}
