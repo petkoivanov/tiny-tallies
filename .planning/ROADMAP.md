@@ -368,7 +368,7 @@ Plans:
   4. AI tutor hints help students reason about the base value's relationship to growth/decay without stating the factor directly
 **Plans**: 3 plans
 Plans:
-- [ ] 089-01-PLAN.md — Wave 0 RED test stubs (exponentialFunctions, registry counts 25→26, skill counts 192→197, wordProblems)
+- [x] 089-01-PLAN.md — Wave 0 RED test stubs (exponentialFunctions, registry counts 25→26, skill counts 192→197, wordProblems)
 - [ ] 089-02-PLAN.md — Core domain (types, skills, templates, bug patterns, handler, wiring, videoMap)
 - [ ] 089-03-PLAN.md — Word problem prefix templates + manual AI tutor QA (auto-approved)
 

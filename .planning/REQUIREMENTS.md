@@ -80,8 +80,8 @@
 
 ### Exponential Functions Domain
 
-- [ ] **EXP-01**: `exponential_functions` domain handler — evaluate exponential expressions, growth/decay factor identification, half-life/doubling-time (G9-11, 5 skills)
-- [ ] **EXP-02**: Exponential templates with numeric answers (integer exponents, simple base values)
+- [x] **EXP-01**: `exponential_functions` domain handler — evaluate exponential expressions, growth/decay factor identification, half-life/doubling-time (G9-11, 5 skills)
+- [x] **EXP-02**: Exponential templates with numeric answers (integer exponents, simple base values)
 - [ ] **EXP-03**: Word problem variants for exponential functions (population, bacteria, investment contexts)
 - [ ] **EXP-04**: AI tutor prompt guidance for exponential functions
 
