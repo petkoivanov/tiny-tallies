@@ -397,7 +397,10 @@ Plans:
   3. The skill map renders all 27 domains without overflow or node collisions at standard phone screen sizes
   4. An existing user previously capped at grade 8 is offered a re-assessment trigger on the home screen if their grade-8 BKT mastery exceeds 80%
   5. All 9 new domains display correct intro strings when a skill is first encountered in session
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 091-01-PLAN.md — Placement staircase to grade 12, store migration v24, intro string verification
+- [ ] 091-02-PLAN.md — Prerequisite DAG HS edges, skill map 27-column horizontal scroll layout
 
 ## Progress
 
@@ -472,4 +475,4 @@ Plans:
 | 88. Polynomial Operations Domain | v1.2 | 0/3 | Not started | - |
 | 89. Exponential Functions Domain | v1.2 | 2/3 | In progress | - |
 | 90. Logarithms Domain | v1.2 | 0/3 | Not started | - |
-| 91. Integration & Placement | v1.2 | 0/? | Not started | - |
+| 91. Integration & Placement | v1.2 | 0/2 | Not started | - |
