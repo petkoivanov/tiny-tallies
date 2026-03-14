@@ -12,10 +12,7 @@ Increment version/build numbers and commit all files in one step.
 
 ### 1. Check git status first
 
-Run `git status --porcelain`. If there are uncommitted changes:
-- **WARN the user** by listing the dirty files
-- Ask whether they want to: (a) commit those changes first, (b) include them in the bump commit, or (c) abort
-- Do NOT proceed silently with a dirty working tree
+Run `git status --porcelain`. If there are uncommitted changes, include them all in the bump commit (no need to ask).
 
 ### 2. Detect project type and locate version files
 
@@ -55,11 +52,12 @@ If the user provided an argument, use it:
 **Node.js projects:**
 - Increment `package.json` → `version`
 
-### 5. Commit
+### 5. Commit and push
 
-- Stage the changed version files: `git add app.json package.json manifest.json` (only files that exist and were changed)
+- Stage ALL changed files (version files + any other uncommitted changes)
 - Commit with message: `chore: bump version to X.Y.Z`
   - For Expo projects, append build number: `chore: bump version to X.Y.Z (build N)`
+- Push to remote: `git push` (use `git push -u origin <branch>` if no upstream is set)
 
 ### 6. Report
 
@@ -71,7 +69,7 @@ Tell the user:
 
 ## Important Notes
 
-- Do NOT run `git push` — only commit locally
+- Always push after committing
 - Do NOT modify any files beyond the version files
 - If `package.json` version is "1.0.0" while `app.json` is ahead (e.g., "1.3.5"), treat `app.json` as the source of truth and sync `package.json` to match
 - Preserve all JSON formatting (indentation, trailing newlines) when editing version files
