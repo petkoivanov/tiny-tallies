@@ -679,4 +679,35 @@ export const WORD_PROBLEM_TEMPLATES: readonly WordProblemTemplate[] = [
     question: '',
     minGrade: 10,
   },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // EXPONENTIAL FUNCTIONS — grades 9-10 (prefix mode)
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'wp_exp_population',
+    operations: ['exponential_functions'],
+    mode: 'prefix',
+    template:
+      'A scientist is studying a bacteria colony in a lab. The colony grows at a constant multiplicative rate each hour.',
+    question: '',
+    minGrade: 9,
+  },
+  {
+    id: 'wp_exp_decay',
+    operations: ['exponential_functions'],
+    mode: 'prefix',
+    template:
+      'A chemist is tracking a radioactive sample that loses half its mass at regular intervals.',
+    question: '',
+    minGrade: 10,
+  },
+  {
+    id: 'wp_exp_investment',
+    operations: ['exponential_functions'],
+    mode: 'prefix',
+    template:
+      'A financial planner is calculating how an investment grows when it doubles at fixed intervals.',
+    question: '',
+    minGrade: 10,
+  },
 ];
