@@ -37,6 +37,12 @@ import { parseIntegerInput, parseDecimalInput } from '@/services/mathEngine/answ
 import { MultiSelectMC } from './MultiSelectMC';
 import { answerNumericValue } from '@/services/mathEngine/types';
 
+/** Disable "Show me" buttons until UI bugs are resolved */
+const SHOW_ME_ENABLED = false;
+
+/** Pictorial diagrams only support these operations — others render misleadingly */
+const PICTORIAL_SUPPORTED_OPS = new Set(['addition', 'subtraction', 'fractions']);
+
 /** Session-supported manipulative types (ten_frame excluded — sandbox only) */
 type SessionManipulative = Exclude<ManipulativeType, 'ten_frame'>;
 
@@ -192,7 +198,7 @@ export function CpaSessionContent({
       minHeight: spacing.lg,
     },
     bottomSpacer: {
-      height: spacing.xl,
+      height: 100,
     },
     problemText: {
       fontFamily: typography.fontFamily.bold,
@@ -242,7 +248,7 @@ export function CpaSessionContent({
     optionsGrid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      justifyContent: 'center',
+      justifyContent: 'flex-start',
       gap: spacing.sm,
       width: '100%',
     },
@@ -447,7 +453,7 @@ export function CpaSessionContent({
           maxDigits={presentation.format === 'free_text' ? presentation.maxDigits : 5}
           showDecimal={presentation.format === 'free_text' && presentation.allowDecimal}
           allowNegative={presentation.format === 'free_text' && !!presentation.allowNegative}
-          onShowMe={!needHelpActive && scaffoldManipulative ? handleNeedHelp : undefined}
+          onShowMe={SHOW_ME_ENABLED && !needHelpActive && scaffoldManipulative ? handleNeedHelp : undefined}
         />
       );
     }
@@ -596,7 +602,7 @@ export function CpaSessionContent({
         )}
 
         {/* Pictorial Mode: inline diagram */}
-        {stage === 'pictorial' && scaffoldManipulative && (
+        {stage === 'pictorial' && scaffoldManipulative && PICTORIAL_SUPPORTED_OPS.has(problem.operation) && (
           <PictorialDiagram
             type={scaffoldManipulative}
             problem={problem}
@@ -644,7 +650,7 @@ export function CpaSessionContent({
         )}
 
         {/* "Show me!" button — all modes, before panel is activated */}
-        {!needHelpActive && !isFreeText && scaffoldManipulative && (
+        {SHOW_ME_ENABLED && !needHelpActive && !isFreeText && scaffoldManipulative && (
           <Pressable
             onPress={handleNeedHelp}
             style={styles.needHelpButton}

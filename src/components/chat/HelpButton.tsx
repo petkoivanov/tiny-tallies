@@ -10,7 +10,7 @@ import Animated, {
 import LottieView from 'lottie-react-native';
 import { useTheme, layout, spacing } from '@/theme';
 
-const LOTTIE_SIZE = 72;
+const LOTTIE_SIZE = 88;
 
 interface HelpButtonProps {
   visible: boolean;

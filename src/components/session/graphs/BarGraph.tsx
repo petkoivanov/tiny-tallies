@@ -159,6 +159,17 @@ export function BarGraph({
                 rx={3}
                 fill={color}
               />
+              {/* Value label above bar */}
+              <SvgText
+                x={x + barWidth / 2}
+                y={y - 4}
+                textAnchor="middle"
+                fontSize={10}
+                fontWeight="700"
+                fill={colors.textPrimary}
+              >
+                {cat.value}
+              </SvgText>
               <SvgText
                 x={x + barWidth / 2}
                 y={PADDING.top + chartH + 14}

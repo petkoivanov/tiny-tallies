@@ -47,7 +47,8 @@ export function NumberPad({
 
       if (key === '±') {
         setValue((prev) => {
-          if (prev === '' || prev === '-') return prev; // no-op on empty/bare minus
+          if (prev === '') return '-'; // start negative
+          if (prev === '-') return ''; // toggle back to empty
           return prev.startsWith('-') ? prev.slice(1) : '-' + prev;
         });
         return;

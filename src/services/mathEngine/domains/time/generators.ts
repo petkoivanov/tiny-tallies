@@ -61,7 +61,7 @@ export function generateReadClock(
     return {
       operands: [hour, minutes],
       correctAnswer: numericAnswer(hour),
-      questionText: `The clock shows ${hour}:${pad(minutes)}. What hour is it?`,
+      questionText: `What hour does the clock show?`,
       metadata: {
         displayTime: { hours: hour, minutes },
         answerDisplay: `${hour}:${pad(minutes)}`,
@@ -72,7 +72,7 @@ export function generateReadClock(
   return {
     operands: [hour, minutes],
     correctAnswer: numericAnswer(minutes),
-    questionText: `The clock shows ${hour}:${pad(minutes)}. What are the minutes?`,
+    questionText: `What do the minutes show on the clock?`,
     metadata: {
       displayTime: { hours: hour, minutes },
       answerDisplay: `${hour}:${pad(minutes)}`,
