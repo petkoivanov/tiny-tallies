@@ -710,4 +710,35 @@ export const WORD_PROBLEM_TEMPLATES: readonly WordProblemTemplate[] = [
     question: '',
     minGrade: 10,
   },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // LOGARITHMS — grade 10 (prefix mode)
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'wp_log_ph',
+    operations: ['logarithms'],
+    mode: 'prefix',
+    template:
+      'A chemist measures the hydrogen ion concentration of a solution. The pH is calculated using log base 10.',
+    question: '',
+    minGrade: 10,
+  },
+  {
+    id: 'wp_log_decibel',
+    operations: ['logarithms'],
+    mode: 'prefix',
+    template:
+      'A sound engineer is measuring noise levels. The decibel scale uses log base 10 to compare sound intensities.',
+    question: '',
+    minGrade: 10,
+  },
+  {
+    id: 'wp_log_richter',
+    operations: ['logarithms'],
+    mode: 'prefix',
+    template:
+      'A seismologist is analyzing earthquake data. The Richter scale uses log base 10 to measure earthquake magnitude.',
+    question: '',
+    minGrade: 10,
+  },
 ];
