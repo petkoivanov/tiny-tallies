@@ -25,6 +25,7 @@ import { SYSTEMS_EQUATIONS_BUGS } from './systemsEquationsBugs';
 import { QUADRATIC_EQUATIONS_BUGS } from './quadraticEquationsBugs';
 import { POLYNOMIALS_BUGS } from './polynomialsBugs';
 import { EXPONENTIAL_FUNCTIONS_BUGS } from './exponentialFunctionsBugs';
+import { LOGARITHMS_BUGS } from './logarithmsBugs';
 import { isValidDistractor, shuffleArray } from './validation';
 
 /** IDs of off-by-one patterns excluded from Phase 1 bug library lookup */
@@ -62,6 +63,7 @@ const BUGS_BY_OPERATION: Record<MathDomain, readonly BugPattern[]> = {
   quadratic_equations: QUADRATIC_EQUATIONS_BUGS,
   polynomials: POLYNOMIALS_BUGS,
   exponential_functions: EXPONENTIAL_FUNCTIONS_BUGS,
+  logarithms: LOGARITHMS_BUGS,
 };
 
 /**
