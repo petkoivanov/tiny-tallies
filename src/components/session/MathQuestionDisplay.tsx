@@ -7,7 +7,8 @@ import { FractionText } from './FractionText';
 /** A parsed segment of a math question string */
 type QuestionSegment =
   | { type: 'text'; value: string }
-  | { type: 'fraction'; numerator: string; denominator: string };
+  | { type: 'fraction'; numerator: string; denominator: string }
+  | { type: 'mixed'; whole: string; numerator: string; denominator: string };
 
 /**
  * Parses a question string and extracts fraction notation (e.g. "3/5", "?/12")
@@ -20,24 +21,35 @@ type QuestionSegment =
  *  - Operators and surrounding text preserved as-is
  */
 export function parseQuestionText(text: string): QuestionSegment[] {
-  // Match fractions: optional "?" or digits for numerator, "/" , digits for denominator
-  // Negative lookbehind for letter to avoid matching "parts" in "4 equal parts. 3/4"
-  const fractionPattern = /(\?|\d+)\/(\d+)/g;
+  // Match mixed numbers ("2 1/6") or standalone fractions ("1/6", "?/6").
+  // Mixed: whole number + space + fraction. Standalone: just fraction.
+  const pattern = /(\d+)\s+(\d+)\/(\d+)|(\?|\d+)\/(\d+)/g;
   const segments: QuestionSegment[] = [];
   let lastIndex = 0;
 
   let match: RegExpExecArray | null;
-  while ((match = fractionPattern.exec(text)) !== null) {
-    // Add any text before this fraction
+  while ((match = pattern.exec(text)) !== null) {
+    // Add any text before this match
     if (match.index > lastIndex) {
       segments.push({ type: 'text', value: text.slice(lastIndex, match.index) });
     }
 
-    segments.push({
-      type: 'fraction',
-      numerator: match[1],
-      denominator: match[2],
-    });
+    if (match[1] !== undefined) {
+      // Mixed number: "2 1/6"
+      segments.push({
+        type: 'mixed',
+        whole: match[1],
+        numerator: match[2],
+        denominator: match[3],
+      });
+    } else {
+      // Standalone fraction: "1/6" or "?/6"
+      segments.push({
+        type: 'fraction',
+        numerator: match[4],
+        denominator: match[5],
+      });
+    }
 
     lastIndex = match.index + match[0].length;
   }
@@ -91,20 +103,40 @@ export function MathQuestionDisplay({
         return (
           <View key={lineIdx} style={styles.container}>
             {segments.map((segment, i) => {
+              const segFontSize = lineIdx > 0 ? typography.fontSize.lg : fontSize;
+
               if (segment.type === 'text') {
                 return (
                   <Text
                     key={i}
                     style={[
                       styles.text,
-                      {
-                        fontSize: lineIdx > 0 ? typography.fontSize.lg : fontSize,
-                        color: colors.textPrimary,
-                      },
+                      { fontSize: segFontSize, color: colors.textPrimary },
                     ]}
                   >
                     {segment.value}
                   </Text>
+                );
+              }
+
+              if (segment.type === 'mixed') {
+                return (
+                  <View key={i} style={styles.mixedNumber}>
+                    <Text
+                      style={[
+                        styles.text,
+                        { fontSize: segFontSize, color: colors.textPrimary },
+                      ]}
+                    >
+                      {segment.whole}
+                    </Text>
+                    <FractionText
+                      numerator={segment.numerator}
+                      denominator={segment.denominator}
+                      fontSize={segFontSize}
+                      color={colors.textPrimary}
+                    />
+                  </View>
                 );
               }
 
@@ -113,7 +145,7 @@ export function MathQuestionDisplay({
                   key={i}
                   numerator={segment.numerator}
                   denominator={segment.denominator}
-                  fontSize={lineIdx > 0 ? typography.fontSize.lg : fontSize}
+                  fontSize={segFontSize}
                   color={colors.textPrimary}
                 />
               );
@@ -134,6 +166,10 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  mixedNumber: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   text: {
     fontFamily: typography.fontFamily.bold,

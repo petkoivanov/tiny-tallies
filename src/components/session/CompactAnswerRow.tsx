@@ -11,6 +11,12 @@ import Animated, {
 
 import { useTheme, spacing, typography, layout } from '@/theme';
 
+/** Format a numeric answer for display, preventing floating point artifacts. */
+function formatAnswerValue(value: number): string {
+  if (Number.isInteger(value)) return String(value);
+  return parseFloat(value.toPrecision(10)).toString();
+}
+
 interface AnswerOption {
   readonly value: number;
   readonly bugId?: string;
@@ -221,7 +227,7 @@ function CompactAnswerButton({
         accessibilityLabel={`Answer ${option.value}`}
         testID={`compact-answer-${index}`}
       >
-        <Text style={styles.buttonText}>{option.value}</Text>
+        <Text style={styles.buttonText}>{formatAnswerValue(option.value)}</Text>
       </Pressable>
     </Animated.View>
   );

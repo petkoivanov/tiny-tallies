@@ -26,8 +26,7 @@ describe('parseQuestionText', () => {
   it('parses mixed number conversion', () => {
     const segments = parseQuestionText('2 3/5 = ?/5');
     expect(segments).toEqual([
-      { type: 'text', value: '2 ' },
-      { type: 'fraction', numerator: '3', denominator: '5' },
+      { type: 'mixed', whole: '2', numerator: '3', denominator: '5' },
       { type: 'text', value: ' = ' },
       { type: 'fraction', numerator: '?', denominator: '5' },
     ]);

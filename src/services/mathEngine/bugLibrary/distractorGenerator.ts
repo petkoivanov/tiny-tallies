@@ -257,5 +257,17 @@ export function generateDistractors(
     }
   }
 
+  // Final sanitization: round ALL results to correct answer's decimal precision.
+  // Guards against floating point artifacts leaking from any phase.
+  if (isDecimal) {
+    const finalScale = Math.pow(10, decimalPlaces);
+    for (let i = 0; i < results.length; i++) {
+      const rounded = Math.round(results[i].value * finalScale) / finalScale;
+      if (rounded !== results[i].value) {
+        results[i] = { ...results[i], value: rounded };
+      }
+    }
+  }
+
   return results;
 }

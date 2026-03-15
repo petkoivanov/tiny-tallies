@@ -429,20 +429,38 @@ export function generatePracticeMix(
 
   // d. Ultimate fallback: fill remaining slots from unlocked skills,
   //    spreading across distinct skills before repeating any.
+  //    Prefer non-mastered skills so trivial mastered ones don't dominate.
   if (result.length < practiceCount) {
     const unlockedIds = getUnlockedSkills(skillStates);
-    const fallbackPool = unlockedIds.length > 0
+    const fallbackAll = unlockedIds.length > 0
       ? unlockedIds
       : SKILLS.filter((s) => s.prerequisites.length === 0).map((s) => s.id);
+
+    // Partition: non-mastered first, mastered last
+    const nonMastered = fallbackAll.filter(
+      (id) => !skillStates[id]?.masteryLocked,
+    );
+    const mastered = fallbackAll.filter(
+      (id) => skillStates[id]?.masteryLocked === true,
+    );
+    const fallbackPool = [...nonMastered, ...mastered];
 
     // Build a shuffled pool of unused skills first, then all skills
     const unused = fallbackPool.filter((id) => !usedSkillIds.has(id));
     const ordered = [...unused];
-    // Shuffle unused skills for variety
-    for (let j = ordered.length - 1; j > 0; j--) {
-      const k = rng.intRange(0, j);
-      [ordered[j], ordered[k]] = [ordered[k], ordered[j]];
-    }
+    // Shuffle non-mastered and mastered groups separately for variety
+    // while keeping non-mastered before mastered
+    const nonMasteredCount = ordered.filter(
+      (id) => !skillStates[id]?.masteryLocked,
+    ).length;
+    const shuffleRange = (start: number, end: number) => {
+      for (let j = end; j > start; j--) {
+        const k = rng.intRange(start, j);
+        [ordered[j], ordered[k]] = [ordered[k], ordered[j]];
+      }
+    };
+    shuffleRange(0, nonMasteredCount - 1);
+    shuffleRange(nonMasteredCount, ordered.length - 1);
 
     let fallbackIdx = 0;
     while (result.length < practiceCount) {

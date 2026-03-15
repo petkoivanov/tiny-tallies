@@ -37,6 +37,13 @@ import { parseIntegerInput, parseDecimalInput } from '@/services/mathEngine/answ
 import { MultiSelectMC } from './MultiSelectMC';
 import { answerNumericValue } from '@/services/mathEngine/types';
 
+/** Format a numeric answer for display, preventing floating point artifacts. */
+function formatAnswerValue(value: number): string {
+  if (Number.isInteger(value)) return String(value);
+  // Round to 10 decimal places to strip IEEE 754 noise, then let JS trim trailing zeros
+  return parseFloat(value.toPrecision(10)).toString();
+}
+
 /** Disable "Show me" buttons until UI bugs are resolved */
 const SHOW_ME_ENABLED = false;
 
@@ -514,7 +521,7 @@ export function CpaSessionContent({
                   accessibilityLabel={`Answer ${option.label ?? option.value}`}
                   testID={`answer-option-${index}`}
                 >
-                  <Text style={styles.optionText}>{option.label ?? String(option.value)}</Text>
+                  <Text style={styles.optionText}>{option.label ?? formatAnswerValue(option.value)}</Text>
                 </Pressable>
               </BoostHighlightWrapper>
             </AnswerFeedbackAnimation>
