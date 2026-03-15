@@ -142,7 +142,7 @@ export function generateCompareSameDenom(
     return {
       operands: [a, b],
       correctAnswer: numericAnswer(larger),
-      questionText: `Which is larger: ${a}/${denom} or ${b}/${denom}? Enter the larger numerator.`,
+      questionText: `Which is larger: ${a}/${denom} or ${b}/${denom}?\nEnter the larger numerator.`,
       metadata: {
         fractionDisplay: { numerator: larger, denominator: denom },
         answerDisplay: `${larger}/${denom}`,
@@ -154,7 +154,7 @@ export function generateCompareSameDenom(
   return {
     operands: [1, 3],
     correctAnswer: numericAnswer(3),
-    questionText: 'Which is larger: 1/4 or 3/4? Enter the larger numerator.',
+    questionText: 'Which is larger: 1/4 or 3/4?\nEnter the larger numerator.',
     metadata: {
       fractionDisplay: { numerator: 3, denominator: 4 },
       answerDisplay: '3/4',
@@ -189,7 +189,7 @@ export function generateCompareSameNumer(
     return {
       operands: [numer, smallerDenom],
       correctAnswer: numericAnswer(smallerDenom),
-      questionText: `Which is larger: ${numer}/${denomA} or ${numer}/${denomB}? Enter the denominator of the larger fraction.`,
+      questionText: `Which is larger: ${numer}/${denomA} or ${numer}/${denomB}?\nEnter the denominator of the larger fraction.`,
       metadata: {
         fractionDisplay: { numerator: numer, denominator: smallerDenom },
         answerDisplay: `${numer}/${smallerDenom}`,
@@ -201,7 +201,7 @@ export function generateCompareSameNumer(
     operands: [1, 3],
     correctAnswer: numericAnswer(3),
     questionText:
-      'Which is larger: 1/3 or 1/5? Enter the denominator of the larger fraction.',
+      'Which is larger: 1/3 or 1/5?\nEnter the denominator of the larger fraction.',
     metadata: {
       fractionDisplay: { numerator: 1, denominator: 3 },
       answerDisplay: '1/3',

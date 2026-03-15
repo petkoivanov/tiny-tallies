@@ -153,16 +153,18 @@ export const WORD_PROBLEM_TEMPLATES: readonly WordProblemTemplate[] = [
     id: 'wp_frac_compare',
     operations: ['fractions'],
     template:
-      '{name} ate {a} of a pie. {name2} ate {b} of the same pie.',
-    question: 'Who ate more?',
+      '{name} and {name2} are sharing a pie.',
+    question: '',
+    mode: 'prefix',
     minGrade: 3,
   },
   {
     id: 'wp_frac_add',
     operations: ['fractions'],
     template:
-      '{name} drank {a} of a bottle of juice in the morning and {b} of the bottle in the afternoon.',
-    question: 'How much juice did {name} drink in all?',
+      '{name} is drinking juice throughout the day.',
+    question: '',
+    mode: 'prefix',
     minGrade: 4,
   },
 

@@ -259,85 +259,87 @@ export function ChatPanel({
         </View>
       </GestureDetector>
 
-      {/* Body */}
-      {showOffline ? (
-        <View style={styles.offlineContainer}>
-          <Text style={styles.offlineText}>
-            I can&apos;t help right now because we&apos;re not connected to the
-            internet. Keep trying -- you&apos;ve got this!
-          </Text>
-          <Pressable
-            onPress={() => onResponse('retry')}
-            style={styles.retryButton}
-            accessibilityRole="button"
-          >
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </Pressable>
-        </View>
-      ) : (
-        <>
-          <ChatMessageList messages={messages} isLoading={isLoading} />
-          {offlineInline && (
-            <View style={styles.offlineInline}>
-              <Text style={styles.offlineInlineText}>
-                You&apos;re offline. Reconnect to continue chatting.
-              </Text>
-            </View>
-          )}
-        </>
-      )}
-
-      {/* Footer: Response Buttons or Try Again */}
-      {showRetry && (
-        <View style={styles.footer}>
-          <Pressable
-            onPress={() => onResponse('retry')}
-            style={styles.tryAgainButton}
-            accessibilityRole="button"
-          >
-            <Text style={styles.tryAgainText}>Try again</Text>
-          </Pressable>
-        </View>
-      )}
-      {showResponseButtons && (
-        <View style={styles.footer}>
-          <ResponseButtons
-            onResponse={onResponse}
-            disabled={isLoading}
-            moreDisabled={moreDisabled}
-            mode={responseMode}
-          />
-        </View>
-      )}
-
-      {/* Video section: Watch button, VideoPlayer, VideoVoteButtons */}
-      {!videoOpen && showVideoSection && (
-        <View style={styles.watchVideoContainer}>
-          <Pressable
-            testID="chat-watch-video-button"
-            onPress={() => setVideoOpen(true)}
-            style={[styles.watchVideoButton, { backgroundColor: colors.primary }]}
-            accessibilityRole="button"
-          >
-            <Text style={[styles.watchVideoText, { color: colors.background }]}>
-              Watch a video
-            </Text>
-          </Pressable>
-        </View>
-      )}
-      {videoOpen && videoId && !voteDone && (
+      {/* Body: video player takes over when open, otherwise show chat */}
+      {videoOpen && videoId && !voteDone ? (
         <VideoPlayer
           videoId={videoId}
           isOnline={isOnline}
           onDone={() => setVoteDone(true)}
         />
-      )}
-      {videoOpen && voteDone && currentDomain && (
+      ) : videoOpen && voteDone && currentDomain ? (
         <VideoVoteButtons
           domain={currentDomain}
           existingVote={videoVotes?.[currentDomain]}
           onVote={(vote) => onVideoVote?.(currentDomain, vote)}
         />
+      ) : (
+        <>
+          {showOffline ? (
+            <View style={styles.offlineContainer}>
+              <Text style={styles.offlineText}>
+                I can&apos;t help right now because we&apos;re not connected to the
+                internet. Keep trying -- you&apos;ve got this!
+              </Text>
+              <Pressable
+                onPress={() => onResponse('retry')}
+                style={styles.retryButton}
+                accessibilityRole="button"
+              >
+                <Text style={styles.retryButtonText}>Retry</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <>
+              <ChatMessageList messages={messages} isLoading={isLoading} />
+              {offlineInline && (
+                <View style={styles.offlineInline}>
+                  <Text style={styles.offlineInlineText}>
+                    You&apos;re offline. Reconnect to continue chatting.
+                  </Text>
+                </View>
+              )}
+            </>
+          )}
+
+          {/* Footer: Response Buttons or Try Again */}
+          {showRetry && (
+            <View style={styles.footer}>
+              <Pressable
+                onPress={() => onResponse('retry')}
+                style={styles.tryAgainButton}
+                accessibilityRole="button"
+              >
+                <Text style={styles.tryAgainText}>Try again</Text>
+              </Pressable>
+            </View>
+          )}
+          {showResponseButtons && (
+            <View style={styles.footer}>
+              <ResponseButtons
+                onResponse={onResponse}
+                disabled={isLoading}
+                moreDisabled={moreDisabled}
+                mode={responseMode}
+              />
+            </View>
+          )}
+
+          {/* Watch video button */}
+          {!videoOpen && showVideoSection && (
+            <View style={styles.watchVideoContainer}>
+              <Pressable
+                testID="chat-watch-video-button"
+                onPress={() => setVideoOpen(true)}
+                style={[styles.watchVideoButton, { backgroundColor: colors.primary }]}
+                accessibilityRole="button"
+              >
+                <Text style={[styles.watchVideoText, { color: colors.background }]}>
+                  Watch a video
+                </Text>
+              </Pressable>
+            </View>
+          )}
+        </>
       )}
     </Animated.View>
   );

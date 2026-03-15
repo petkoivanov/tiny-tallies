@@ -39,7 +39,7 @@ export function AnimatedStartButton({
         style={styles.lottie}
         autoPlay
         loop
-        speed={1}
+        speed={0.5}
         colorFilters={[
           { keypath: 'Shape Layer 1', color: colors.primary },
           { keypath: 'Shape Layer 2', color: colors.primary },

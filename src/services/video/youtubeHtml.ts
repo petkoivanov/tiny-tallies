@@ -50,13 +50,34 @@ export function buildNocookieHtml(videoId: string): string {
     <p>Video complete!<br><br>Tap <strong>Done watching</strong> below to continue.</p>
   </div>
   <script>
+    var notified = false;
+    function notifyUnavailable() {
+      if (notified) return;
+      notified = true;
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'video-unavailable' }));
+    }
+
     // YouTube IFrame API sends postMessage events with JSON payloads.
-    // State 0 = ended. Cover the iframe to block the related-videos end screen.
+    // - onError = video unavailable/private/deleted → notify RN to show error UI.
+    //   The embed returns HTTP 200 even for dead videos, so WebView onError never fires.
+    // - State 0 = ended → show overlay to block related-videos end screen.
+    // - infoDelivery with playerState >= 0 = video is alive (cancel fallback).
+    var gotPlayerEvent = false;
     window.addEventListener('message', function(e) {
       try {
         var data = JSON.parse(e.data);
-        if (data.event === 'infoDelivery' && data.info && data.info.playerState === 0) {
-          document.getElementById('end-overlay').classList.add('visible');
+        if (data.event === 'onError') {
+          notifyUnavailable();
+          return;
+        }
+        if (data.event === 'infoDelivery' && data.info && typeof data.info.playerState === 'number') {
+          gotPlayerEvent = true;
+          if (data.info.playerState === 0) {
+            document.getElementById('end-overlay').classList.add('visible');
+          }
+        }
+        if (data.event === 'onReady') {
+          gotPlayerEvent = true;
         }
       } catch (_) {}
     });

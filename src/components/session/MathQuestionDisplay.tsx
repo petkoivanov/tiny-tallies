@@ -80,33 +80,45 @@ export function MathQuestionDisplay({
 }: MathQuestionDisplayProps) {
   const { colors } = useTheme();
   const fontSize = isLong ? typography.fontSize.xxl : typography.fontSize.display;
-  const segments = parseQuestionText(questionText);
+
+  // Split on newlines to render each line as a separate row
+  const lines = questionText.split('\n');
 
   return (
-    <View style={styles.container}>
-      {segments.map((segment, i) => {
-        if (segment.type === 'text') {
-          return (
-            <Text
-              key={i}
-              style={[
-                styles.text,
-                { fontSize, color: colors.textPrimary },
-              ]}
-            >
-              {segment.value}
-            </Text>
-          );
-        }
-
+    <View style={styles.outerContainer}>
+      {lines.map((line, lineIdx) => {
+        const segments = parseQuestionText(line);
         return (
-          <FractionText
-            key={i}
-            numerator={segment.numerator}
-            denominator={segment.denominator}
-            fontSize={fontSize}
-            color={colors.textPrimary}
-          />
+          <View key={lineIdx} style={styles.container}>
+            {segments.map((segment, i) => {
+              if (segment.type === 'text') {
+                return (
+                  <Text
+                    key={i}
+                    style={[
+                      styles.text,
+                      {
+                        fontSize: lineIdx > 0 ? typography.fontSize.lg : fontSize,
+                        color: colors.textPrimary,
+                      },
+                    ]}
+                  >
+                    {segment.value}
+                  </Text>
+                );
+              }
+
+              return (
+                <FractionText
+                  key={i}
+                  numerator={segment.numerator}
+                  denominator={segment.denominator}
+                  fontSize={lineIdx > 0 ? typography.fontSize.lg : fontSize}
+                  color={colors.textPrimary}
+                />
+              );
+            })}
+          </View>
         );
       })}
     </View>
@@ -114,6 +126,9 @@ export function MathQuestionDisplay({
 }
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    alignItems: 'center',
+  },
   container: {
     flexDirection: 'row',
     flexWrap: 'wrap',

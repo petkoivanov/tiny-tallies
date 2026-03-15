@@ -106,7 +106,6 @@ export default function HomeScreen() {
       justifyContent: 'flex-end',
       alignItems: 'center',
       paddingHorizontal: spacing.md,
-      paddingTop: spacing.xs,
       gap: spacing.xs,
     },
     toolbarButton: {
@@ -178,7 +177,7 @@ export default function HomeScreen() {
     },
     challengeSection: {
       paddingHorizontal: spacing.lg,
-      paddingTop: spacing.lg,
+      paddingTop: spacing.xs,
     },
     buttonSection: {
       paddingHorizontal: spacing.lg,
@@ -261,14 +260,14 @@ export default function HomeScreen() {
   return (
     <>
     <ScrollView
-      style={[styles.container, { paddingTop: insets.top }]}
+      style={styles.container}
       contentContainerStyle={[
         styles.scrollContent,
-        { paddingBottom: insets.bottom },
+        { paddingBottom: insets.bottom + spacing.xl },
       ]}
     >
       {/* Top Toolbar */}
-      <View style={styles.toolbar}>
+      <View style={[styles.toolbar, { paddingTop: Math.max(insets.top, 36) + spacing.md }]}>
         <Pressable
           style={styles.toolbarButton}
           onPress={() => navigation.navigate('BadgeCollection')}

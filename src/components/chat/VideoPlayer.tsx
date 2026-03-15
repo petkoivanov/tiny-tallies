@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import WebView from 'react-native-webview';
 import type { WebViewNavigation } from 'react-native-webview/lib/WebViewTypes';
+import type { WebViewMessageEvent } from 'react-native-webview';
 import { useTheme, spacing, typography } from '@/theme';
 import { buildNocookieHtml } from '@/services/video/youtubeHtml';
 
@@ -26,6 +27,19 @@ export function VideoPlayer({ videoId, isOnline, onDone }: VideoPlayerProps) {
     setError(false);
     setLoading(true);
     setRetryKey((k) => k + 1);
+  }, []);
+
+  /** Handle messages from injected JS (e.g. video-unavailable detection). */
+  const handleMessage = useCallback((event: WebViewMessageEvent) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      if (data.type === 'video-unavailable') {
+        setError(true);
+        setLoading(false);
+      }
+    } catch {
+      // ignore non-JSON messages
+    }
   }, []);
 
   /** Only allow the youtube-nocookie embed URL — block all other navigation. */
@@ -126,6 +140,7 @@ export function VideoPlayer({ videoId, isOnline, onDone }: VideoPlayerProps) {
         mediaPlaybackRequiresUserAction={false}
         mixedContentMode="compatibility"
         onShouldStartLoadWithRequest={handleNavigationRequest}
+        onMessage={handleMessage}
         onLoadEnd={() => setLoading(false)}
         onError={() => { setError(true); setLoading(false); }}
         onHttpError={(e) => {
